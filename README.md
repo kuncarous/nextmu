@@ -24,6 +24,9 @@ Open CMake and select Dependencies/Repositories/SDL and Dependencies/Repositorie
 
 Open the generated solutions (build and build-x64) and compile them.
 
+### bgfx
+Open a command prompt (cmd), go to ./Dependencies/Repositories folder and execute prepare_bgfx.bat file, this will create .build/projects/vs2022/bgfx.sln solution, compile it for 32 and 64 bits.
+
 ### FreeImage
 Decompress in ./Dependencies/Installed/FreeImage (create Installed and FreeImage folders if required) and copy all files from ./Dependencies/Manual/FreeImage into it, you will be able to follow ./Dependencies/Manual/FreeImage/README.md instructions to compile it for Android.
 
@@ -43,6 +46,10 @@ Remember Ultralight is a paid libary, it has a free license option but you have 
 Download and decompress latest SDK in ./Dependencies/Installed/NoesisGUI (create NoesisGUI folder if required) then compile it using Build folder solutions (NoesisGUI-win-x86_64.sln for Windows 64-Bits and NoesisGUI-win-x86.sln for Windows 32-Bits). This UI library will allow you to develop your UI using XAML and C#. It has support for Android and iOS.
 
 Remember NoesisGUI is a paid library, it has a free license option but you have to check if you can apply for it.
+
+## Shaders
+### Setup
+After followed dependencies instructions you are ready to configure your environment to compile the shaders, add BGFX_PATH and make it point to {...}\Dependencies\Repositories\bgfx (use absolute path), now you can execute compile.bat files and will generate the shaders for the compatible APIs and Operating Systems.
 
 # Android
 Tutorial not available yet, however if you know what you do you will be able to compile it.
