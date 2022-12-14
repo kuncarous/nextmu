@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="OS">
+      <UniqueIdentifier>{9881b918-8d5c-48fe-ac05-ecfa2583fee5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Types">
+      <UniqueIdentifier>{39441118-8bab-405d-bf54-500f74a3dc8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Precompiled">
+      <UniqueIdentifier>{4f3c1a51-884b-4679-85f5-b8850cbbc42a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JSON">
+      <UniqueIdentifier>{a1240b35-1486-4739-b324-8f5bad86c6b0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem.h">
+      <Filter>OS</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem_disable.h">
+      <Filter>OS</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_standardtypes.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_precompiled.h">
+      <Filter>Precompiled</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem_io.h">
+      <Filter>OS</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_json.h">
+      <Filter>JSON</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem_backend.h">
+      <Filter>OS</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem_android.h">
+      <Filter>OS</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared_operatingsystem_io.cpp">
+      <Filter>OS</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared_operatingsystem_android.cpp">
+      <Filter>OS</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared_operatingsystem_backend.cpp">
+      <Filter>OS</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,400 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{a4ab6869-5889-4738-87e3-e6230a4d0abd}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>SDL2</RootNamespace>
+    <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../../Dependencies/Repositories/SDL/include;$(VS_NdkRoot)/sources/android/cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GL_GLEXT_PROTOTYPES;</PreprocessorDefinitions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+    </ClCompile>
+    <Link>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <LibraryDependencies>m;dl;GLESv1_CM;GLESv2;OpenSLES;log;android;$(StlLibraryName);%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(VS_NdkRoot)/sources/android/cpufeatures/obj/local/$(TargetArchAbi);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../../Dependencies/Repositories/SDL/include;$(VS_NdkRoot)/sources/android/cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GL_GLEXT_PROTOTYPES;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+    </ClCompile>
+    <Link>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <LibraryDependencies>m;dl;GLESv1_CM;GLESv2;OpenSLES;log;android;$(StlLibraryName);%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(VS_NdkRoot)/sources/android/cpufeatures/obj/local/$(TargetArchAbi);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../../Dependencies/Repositories/SDL/include;$(VS_NdkRoot)/sources/android/cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GL_GLEXT_PROTOTYPES;</PreprocessorDefinitions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+    </ClCompile>
+    <Link>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <LibraryDependencies>m;dl;GLESv1_CM;GLESv2;OpenSLES;log;cpufeatures;android;android_support;$(StlLibraryName);%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(VS_NdkRoot)/sources/android/cpufeatures/obj/local/$(TargetArchAbi);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../../Dependencies/Repositories/SDL/include;$(VS_NdkRoot)/sources/android/cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GL_GLEXT_PROTOTYPES;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+    </ClCompile>
+    <Link>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <LibraryDependencies>m;dl;GLESv1_CM;GLESv2;OpenSLES;log;cpufeatures;android;android_support;$(StlLibraryName);%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(VS_NdkRoot)/sources/android/cpufeatures/obj/local/$(TargetArchAbi);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../../Dependencies/Repositories/SDL/include;$(VS_NdkRoot)/sources/android/cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GL_GLEXT_PROTOTYPES;</PreprocessorDefinitions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+    </ClCompile>
+    <Link />
+    <Link />
+    <Link>
+      <LibraryDependencies>m;dl;GLESv1_CM;GLESv2;OpenSLES;log;android;$(StlLibraryName);%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(VS_NdkRoot)/sources/android/cpufeatures/obj/local/$(TargetArchAbi);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../../Dependencies/Repositories/SDL/include;$(VS_NdkRoot)/sources/android/cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GL_GLEXT_PROTOTYPES;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+    </ClCompile>
+    <Link>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <LibraryDependencies>m;dl;GLESv1_CM;GLESv2;OpenSLES;log;android;$(StlLibraryName);%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(VS_NdkRoot)/sources/android/cpufeatures/obj/local/$(TargetArchAbi);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../../Dependencies/Repositories/SDL/include;$(VS_NdkRoot)/sources/android/cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GL_GLEXT_PROTOTYPES;</PreprocessorDefinitions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+    </ClCompile>
+    <Link>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <LibraryDependencies>m;dl;GLESv1_CM;GLESv2;OpenSLES;log;android;android_support;cpufeatures;$(StlLibraryName);%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(VS_NdkRoot)/sources/android/cpufeatures/obj/local/$(TargetArchAbi);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../../Dependencies/Repositories/SDL/include;$(VS_NdkRoot)/sources/android/cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GL_GLEXT_PROTOTYPES;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+    </ClCompile>
+    <Link>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <LibraryDependencies>m;dl;GLESv1_CM;GLESv2;OpenSLES;log;android;android_support;cpufeatures;$(StlLibraryName);%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(VS_NdkRoot)/sources/android/cpufeatures/obj/local/$(TargetArchAbi);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\atomic\SDL_atomic.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\atomic\SDL_spinlock.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\aaudio\SDL_aaudio.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\android\SDL_androidaudio.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\dummy\SDL_dummyaudio.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\openslES\SDL_openslES.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\SDL_audio.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\SDL_audiocvt.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\SDL_audiodev.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\SDL_audiotypecvt.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\SDL_mixer.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\audio\SDL_wave.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\core\android\SDL_android.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\cpuinfo\SDL_cpuinfo.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\dynapi\SDL_dynapi.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\imKStoUCS.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_clipboardevents.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_displayevents.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_dropevents.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_events.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_gesture.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_keyboard.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_keysym_to_scancode.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_mouse.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_quit.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_scancode_tables.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_touch.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\events\SDL_windowevents.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\filesystem\android\SDL_sysfilesystem.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\file\SDL_rwops.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\haptic\android\SDL_syshaptic.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\haptic\SDL_haptic.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\hidapi\android\hid.cpp" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\hidapi\SDL_hidapi.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\android\SDL_sysjoystick.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\controller_type.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapijoystick.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_combined.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_gamecube.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_luna.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_ps3.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_ps4.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_ps5.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_rumble.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_shield.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_stadia.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_steam.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_switch.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_wii.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_xbox360.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_xbox360w.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\hidapi\SDL_hidapi_xboxone.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\SDL_gamecontroller.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\SDL_joystick.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\joystick\virtual\SDL_virtualjoystick.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\loadso\dlopen\SDL_sysloadso.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\locale\android\SDL_syslocale.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\locale\SDL_locale.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\misc\android\SDL_sysurl.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\misc\SDL_url.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\power\android\SDL_syspower.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\power\SDL_power.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\opengles2\SDL_render_gles2.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\opengles2\SDL_shaders_gles2.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\opengles\SDL_render_gles.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\SDL_d3dmath.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\SDL_render.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\SDL_yuv_sw.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\software\SDL_blendfillrect.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\software\SDL_blendline.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\software\SDL_blendpoint.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\software\SDL_drawline.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\software\SDL_drawpoint.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\software\SDL_render_sw.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\software\SDL_rotate.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\render\software\SDL_triangle.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL_assert.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL_dataqueue.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL_error.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL_guid.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL_hints.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL_list.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL_log.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\SDL_utils.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\sensor\android\SDL_androidsensor.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\sensor\SDL_sensor.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_crc16.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_crc32.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_getenv.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_iconv.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_malloc.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_mslibc.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_qsort.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_stdlib.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_string.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\stdlib\SDL_strtokr.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_assert.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_common.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_compare.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_crc32.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_font.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_fuzzer.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_harness.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_imageBlit.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_imageBlitBlend.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_imageFace.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_imagePrimitives.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_imagePrimitivesBlend.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_log.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_md5.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_memory.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\test\SDL_test_random.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\thread\pthread\SDL_syscond.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\thread\pthread\SDL_sysmutex.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\thread\pthread\SDL_syssem.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\thread\pthread\SDL_systhread.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\thread\pthread\SDL_systls.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\thread\SDL_thread.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\timer\SDL_timer.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\timer\unix\SDL_systimer.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidclipboard.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidevents.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidgl.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidkeyboard.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidmessagebox.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidmouse.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidtouch.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidvideo.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidvulkan.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\android\SDL_androidwindow.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_blit.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_blit_0.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_blit_1.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_blit_A.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_blit_auto.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_blit_copy.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_blit_N.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_blit_slow.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_bmp.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_clipboard.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_egl.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_fillrect.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_pixels.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_rect.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_RLEaccel.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_shape.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_stretch.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_surface.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_video.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_vulkan_utils.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\SDL_yuv.c" />
+    <ClCompile Include="..\..\..\Dependencies\Repositories\SDL\src\video\yuv2rgb\yuv_rgb.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

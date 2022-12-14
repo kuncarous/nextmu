@@ -1,0 +1,25 @@
+{
+	"shaders": [
+		{
+			"id": "ultralight_view",
+			"vertex": "shaders/ultralight/view",
+			"fragment": "shaders/ultralight/view"
+		},
+		{
+			"id": "terrain_normal",
+			"vertex": "shaders/worlds/normal",
+			"fragment": "shaders/worlds/normal"
+		},
+		{
+			"id": "model_texture",
+			"vertex": "shaders/models/texture",
+			"fragment": "shaders/models/texture"
+		}
+	],
+	"models": [
+		{
+			"id": "monster_01",
+			"path": "monsters/monster01"
+		}
+	]
+}

@@ -1,0 +1,280 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3baae1da-b9b4-4bff-81f8-02a8b4466b10}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>NextMU</RootNamespace>
+    <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared">
+    <Import Project="..\..\Game\Game.vcxitems" Label="Shared" />
+    <Import Project="..\..\..\Shared\Shared.vcxitems" Label="Shared" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/SDL/include;../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/NoesisGUI/Include;$(StlIncludeDirectories);$(Sysroot)\usr\include;$(Sysroot)\usr\include\$(AndroidHeaderTriple);$(VS_NdkRoot)\sources\android\support\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-fvisibility=hidden -std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>Default</CppLanguageStandard>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG=1;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../../Dependencies/Installed/FreeImage/obj/local/$(TargetArchAbi);../../../Dependencies/Repositories/bgfx/.build/android-$(Platform.toLower().replace('x64', 'x86_64'))/bin;../../../Dependencies/Installed/NoesisGUI/Bin/android_$(Platform.toLower().replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;EGL;GLESv1_CM;GLESv2;OpenSLES;log;android;FreeImage;bgfxRelease;bimgRelease;bxRelease;SDL2;Noesis;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-static-openmp -fopenmp -Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y ..\..\..\Dependencies\Installed\NoesisGUI\Bin\android_$(Platform.toLower().replace('arm', 'arm7').replace('arm64', 'arm8').replace('x64', 'x86_64'))\libNoesis.so ..\APK\app\src\main\jniLibs\$(TargetArchAbi)\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/SDL/include;../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/NoesisGUI/Include;$(StlIncludeDirectories);$(Sysroot)\usr\include;$(Sysroot)\usr\include\$(AndroidHeaderTriple);$(VS_NdkRoot)\sources\android\support\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-fvisibility=hidden -std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>Default</CppLanguageStandard>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG=0;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../../Dependencies/Installed/FreeImage/obj/local/$(TargetArchAbi);../../../Dependencies/Repositories/bgfx/.build/android-$(Platform.toLower().replace('x64', 'x86_64'))/bin;../../../Dependencies/Installed/NoesisGUI/Bin/android_$(Platform.toLower().replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\x86_64-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;EGL;GLESv1_CM;GLESv2;OpenSLES;log;android;FreeImage;bgfxRelease;bimgRelease;bxRelease;SDL2;Noesis;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-static-openmp -fopenmp -Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y ..\..\..\Dependencies\Installed\NoesisGUI\Bin\android_$(Platform.toLower().replace('arm', 'arm7').replace('arm64', 'arm8').replace('x64', 'x86_64'))\libNoesis.so ..\APK\app\src\main\jniLibs\$(TargetArchAbi)\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/SDL/include;../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/NoesisGUI/Include;$(StlIncludeDirectories);$(Sysroot)\usr\include;$(Sysroot)\usr\include\$(AndroidHeaderTriple);$(VS_NdkRoot)\sources\android\support\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-fvisibility=hidden -std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>Default</CppLanguageStandard>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG=1;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../../Dependencies/Installed/FreeImage/obj/local/$(TargetArchAbi);../../../Dependencies/Repositories/bgfx/.build/android-$(Platform.toLower().replace('x64', 'x86_64'))/bin;../../../Dependencies/Installed/NoesisGUI/Bin/android_$(Platform.toLower().replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\i686-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;EGL;GLESv1_CM;GLESv2;OpenSLES;log;android;FreeImage;bgfxRelease;bimgRelease;bxRelease;SDL2;Noesis;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-static-openmp -fopenmp -Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y ..\..\..\Dependencies\Installed\NoesisGUI\Bin\android_$(Platform.toLower().replace('arm', 'arm7').replace('arm64', 'arm8').replace('x64', 'x86_64'))\libNoesis.so ..\APK\app\src\main\jniLibs\$(TargetArchAbi)\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/SDL/include;../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/NoesisGUI/Include;$(StlIncludeDirectories);$(Sysroot)\usr\include;$(Sysroot)\usr\include\$(AndroidHeaderTriple);$(VS_NdkRoot)\sources\android\support\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-fvisibility=hidden -std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>Default</CppLanguageStandard>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG=0;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../../Dependencies/Installed/FreeImage/obj/local/$(TargetArchAbi);../../../Dependencies/Repositories/bgfx/.build/android-$(Platform.toLower().replace('x64', 'x86_64'))/bin;../../../Dependencies/Installed/NoesisGUI/Bin/android_$(Platform.toLower().replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\i686-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;EGL;GLESv1_CM;GLESv2;OpenSLES;log;android;FreeImage;bgfxRelease;bimgRelease;bxRelease;SDL2;Noesis;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-static-openmp -fopenmp -Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y ..\..\..\Dependencies\Installed\NoesisGUI\Bin\android_$(Platform.toLower().replace('arm', 'arm7').replace('arm64', 'arm8').replace('x64', 'x86_64'))\libNoesis.so ..\APK\app\src\main\jniLibs\$(TargetArchAbi)\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/SDL/include;../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/NoesisGUI/Include;$(StlIncludeDirectories);$(Sysroot)\usr\include;$(Sysroot)\usr\include\$(AndroidHeaderTriple);$(VS_NdkRoot)\sources\android\support\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-fvisibility=hidden -std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>Default</CppLanguageStandard>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG=1;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../../Dependencies/Installed/FreeImage/obj/local/$(TargetArchAbi);../../../Dependencies/Repositories/bgfx/.build/android-$(Platform.toLower().replace('x64', 'x86_64'))/bin;../../../Dependencies/Installed/NoesisGUI/Bin/android_$(Platform.toLower().replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;EGL;GLESv1_CM;GLESv2;OpenSLES;log;android;FreeImage;bgfxRelease;bimgRelease;bxRelease;SDL2;Noesis;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-static-openmp -fopenmp -Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y ..\..\..\Dependencies\Installed\NoesisGUI\Bin\android_$(Platform.toLower().replace('x64', 'x86_64'))\libNoesis.so ..\APK\app\src\main\jniLibs\$(TargetArchAbi)\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/SDL/include;../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/NoesisGUI/Include;$(StlIncludeDirectories);$(Sysroot)\usr\include;$(Sysroot)\usr\include\$(AndroidHeaderTriple);$(VS_NdkRoot)\sources\android\support\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-fvisibility=hidden -std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>Default</CppLanguageStandard>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG=0;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../../Dependencies/Installed/FreeImage/obj/local/$(TargetArchAbi);../../../Dependencies/Repositories/bgfx/.build/android-$(Platform.toLower().replace('x64', 'x86_64'))/bin;../../../Dependencies/Installed/NoesisGUI/Bin/android_$(Platform.toLower().replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;EGL;GLESv1_CM;GLESv2;OpenSLES;log;android;FreeImage;bgfxRelease;bimgRelease;bxRelease;SDL2;Noesis;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-static-openmp -fopenmp -Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y ..\..\..\Dependencies\Installed\NoesisGUI\Bin\android_$(Platform.toLower().replace('x64', 'x86_64'))\libNoesis.so ..\APK\app\src\main\jniLibs\$(TargetArchAbi)\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/SDL/include;../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/NoesisGUI/Include;$(StlIncludeDirectories);$(Sysroot)\usr\include;$(Sysroot)\usr\include\$(AndroidHeaderTriple);$(VS_NdkRoot)\sources\android\support\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-fvisibility=hidden -std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>Default</CppLanguageStandard>
+      <EnableNeonCodegen>true</EnableNeonCodegen>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG=1;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../../Dependencies/Installed/FreeImage/obj/local/$(TargetArchAbi);../../../Dependencies/Repositories/bgfx/.build/android-$(Platform.toLower().replace('x64', 'x86_64'))/bin;../../../Dependencies/Installed/NoesisGUI/Bin/android_$(Platform.toLower().replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName)\$(PlatformShortName);$(StlLibraryPath)</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;EGL;GLESv1_CM;GLESv2;OpenSLES;log;android;FreeImage;bgfxRelease;bimgRelease;bxRelease;SDL2;Noesis;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-static-openmp -fopenmp -Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y ..\..\..\Dependencies\Installed\NoesisGUI\Bin\android_$(Platform.toLower().replace('arm', 'arm7').replace('arm64', 'arm8').replace('x64', 'x86_64'))\libNoesis.so ..\APK\app\src\main\jniLibs\$(TargetArchAbi)\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/SDL/include;../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/NoesisGUI/Include;$(StlIncludeDirectories);$(Sysroot)\usr\include;$(Sysroot)\usr\include\$(AndroidHeaderTriple);$(VS_NdkRoot)\sources\android\support\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-fvisibility=hidden -std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>Default</CppLanguageStandard>
+      <EnableNeonCodegen>true</EnableNeonCodegen>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG=0;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../../Dependencies/Installed/FreeImage/obj/local/$(TargetArchAbi);../../../Dependencies/Repositories/bgfx/.build/android-$(Platform.toLower().replace('x64', 'x86_64'))/bin;../../../Dependencies/Installed/NoesisGUI/Bin/android_$(Platform.toLower().replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName)\$(PlatformShortName);$(StlLibraryPath)</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;EGL;GLESv1_CM;GLESv2;OpenSLES;log;android;FreeImage;bgfxRelease;bimgRelease;bxRelease;SDL2;Noesis;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-static-openmp -fopenmp -Wl,--build-id=sha1 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y ..\..\..\Dependencies\Installed\NoesisGUI\Bin\android_$(Platform.toLower().replace('arm', 'arm7').replace('arm64', 'arm8').replace('x64', 'x86_64'))\libNoesis.so ..\APK\app\src\main\jniLibs\$(TargetArchAbi)\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="mu_main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

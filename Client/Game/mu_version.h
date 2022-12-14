@@ -1,0 +1,14 @@
+#ifndef __MU_VERSION_H__
+#define __MU_VERSION_H__
+
+#pragma once
+
+#define GAME_VERSION_MAJOR		1
+#define GAME_VERSION_MINOR		0
+#define GAME_VERSION_REVISION	100
+#define GAME_VERSION_SERIAL		"UUb335yJPFn7MFfdx6HtTBLrfuAxcDD49nNMQgXZFPbcdHF3sSXrBHqg5stc66bu"
+
+#define GAME_VERSION_PARSER(major, minor, revision) #major "." #minor "." #revision
+#define GAME_VERSION			GAME_VERSION_PARSER(GAME_VERSION_MAJOR, GAME_VERSION_MINOR, GAME_VERSION_REVISION)
+
+#endif

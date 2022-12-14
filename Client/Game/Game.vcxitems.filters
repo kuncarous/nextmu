@@ -1,0 +1,320 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Root">
+      <UniqueIdentifier>{f503c8b4-beb0-460a-9cee-9eaec2de1dd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Precompiled">
+      <UniqueIdentifier>{ad13966d-ea9a-453e-b365-a91d3f97f674}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Version">
+      <UniqueIdentifier>{16042c5d-80c7-4295-86c5-36dd71cd9e2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Window">
+      <UniqueIdentifier>{fd0247ca-e540-4693-80ca-7979dc05e60b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Config">
+      <UniqueIdentifier>{a5d56f68-8f7b-44b0-a2fe-29b491e56b30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{1445b91e-f462-485e-ba10-f01bf5a7a62d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Timer">
+      <UniqueIdentifier>{c7dc8ffa-112b-4f75-98a1-38b2e951d848}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Terrain">
+      <UniqueIdentifier>{d49e4e2c-7ffe-483a-90c6-1c9977953bdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{fb0154d9-2c0d-499f-9278-5d4150af6fca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{54fdfe68-058d-4f0c-b779-9d150bf82c87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Textures">
+      <UniqueIdentifier>{b841628b-979c-45fb-8d71-9d9873fff6dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="State">
+      <UniqueIdentifier>{bf2d47ed-f01b-40fe-bfbe-6b4955d35b3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{6ff101c5-bebe-42b6-9b34-fba312a96054}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{a879dcc4-cfe2-4b58-bc38-a75e25821532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{b587ed21-1dd5-465b-a06b-cb5c77efb49a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skeleton">
+      <UniqueIdentifier>{e25b3a60-64bd-405e-9c6e-74dec1fab531}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{352cc6ae-aafe-4dd8-b5fe-4977382c90d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Ultralight">
+      <UniqueIdentifier>{ad7055ed-04c8-467e-ac9e-14997dd90911}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\ImGui">
+      <UniqueIdentifier>{15409927-3b28-4f9b-9afd-a11c5ef90b99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\ImGui\backends">
+      <UniqueIdentifier>{429f7328-6b53-4559-af4d-f329a132db8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\NoesisGUI">
+      <UniqueIdentifier>{cee7659c-4a05-4459-a920-aa84c3f9a8c7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
+      <Filter>Root</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_window.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_config.cpp">
+      <Filter>Config</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_graphics.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_timer.cpp">
+      <Filter>Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui.cpp">
+      <Filter>UI\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_demo.cpp">
+      <Filter>UI\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_draw.cpp">
+      <Filter>UI\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_tables.cpp">
+      <Filter>UI\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_widgets.cpp">
+      <Filter>UI\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\backends\imgui_impl_sdl.cpp">
+      <Filter>UI\ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)bgfx\imgui_impl_bgfx.cpp">
+      <Filter>UI\ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_terrain.cpp">
+      <Filter>Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_input.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_textures.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_state.cpp">
+      <Filter>State</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_resourcesmanager.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletoninstance.cpp">
+      <Filter>Skeleton</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.cpp">
+      <Filter>Skeleton</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight.cpp">
+      <Filter>UI\Ultralight</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight_sdl.cpp">
+      <Filter>UI\Ultralight</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight_logger.cpp">
+      <Filter>UI\Ultralight</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight_filesystem.cpp">
+      <Filter>UI\Ultralight</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_stream.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_xamlprovider.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_textureprovider.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_fontprovider.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_consts.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_sdl.cpp">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
+      <Filter>Root</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_precompiled.h">
+      <Filter>Precompiled</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_version.h">
+      <Filter>Version</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_window.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_config.h">
+      <Filter>Config</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_graphics.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_timer.h">
+      <Filter>Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imconfig.h">
+      <Filter>UI\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui.h">
+      <Filter>UI\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_internal.h">
+      <Filter>UI\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_rectpack.h">
+      <Filter>UI\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_textedit.h">
+      <Filter>UI\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_truetype.h">
+      <Filter>UI\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\backends\imgui_impl_sdl.h">
+      <Filter>UI\ImGui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)bgfx\imgui_impl_bgfx.h">
+      <Filter>UI\ImGui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_terrain.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_input.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_textures.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_state.h">
+      <Filter>State</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_model.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_resourcesmanager.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_resources.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_mesh.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_skeleton.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_crypt.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_binaryreader.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_skeletoninstance.h">
+      <Filter>Skeleton</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.h">
+      <Filter>Skeleton</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_modelrenderer.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight.h">
+      <Filter>UI\Ultralight</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight_sdl.h">
+      <Filter>UI\Ultralight</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight_logger.h">
+      <Filter>UI\Ultralight</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight_filesystem.h">
+      <Filter>UI\Ultralight</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_license.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_xamlprovider.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_stream.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_textureprovider.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_fontprovider.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_consts.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_sdl.h">
+      <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)ui_ultralight_mimetypes.inl">
+      <Filter>UI\Ultralight</Filter>
+    </None>
+  </ItemGroup>
+</Project>

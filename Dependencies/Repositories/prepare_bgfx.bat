@@ -1,0 +1,3 @@
+set BGFX_CONFIG=RENDERER_OPENGL=31:RENDERER_DIRECT3D11=1:RENDERER_DIRECT3D12=1:RENDERER_VULKAN=1
+cd bgfx
+..\bx\tools\bin\windows\genie --with-tools vs2022

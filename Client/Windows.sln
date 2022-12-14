@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NextMU", "Windows\NextMU.vcxproj", "{7EB260D5-C00D-405A-8DB7-963BD40837DF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxitems", "{C314983B-8B1D-4B76-9A00-BF745815E294}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "..\Shared\Shared.vcxitems", "{9318F858-4DE8-4CDD-BCAA-A31E409E0906}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Debug|Win32.Build.0 = Debug|Win32
+		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Debug|x64.ActiveCfg = Debug|x64
+		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Debug|x64.Build.0 = Debug|x64
+		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Release|Win32.ActiveCfg = Release|Win32
+		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Release|Win32.Build.0 = Release|Win32
+		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Release|x64.ActiveCfg = Release|x64
+		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {870950F6-9205-4DEE-8988-CBBD52D31696}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Game\Game.vcxitems*{7eb260d5-c00d-405a-8db7-963bd40837df}*SharedItemsImports = 4
+		..\Shared\Shared.vcxitems*{7eb260d5-c00d-405a-8db7-963bd40837df}*SharedItemsImports = 4
+		..\Shared\Shared.vcxitems*{9318f858-4de8-4cdd-bcaa-a31e409e0906}*SharedItemsImports = 9
+		Game\Game.vcxitems*{c314983b-8b1d-4b76-9a00-bf745815e294}*SharedItemsImports = 9
+	EndGlobalSection
+EndGlobal

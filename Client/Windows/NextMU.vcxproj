@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{7eb260d5-c00d-405a-8db7-963bd40837df}</ProjectGuid>
+    <RootNamespace>NextMU</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+    <Import Project="..\Game\Game.vcxitems" Label="Shared" />
+    <Import Project="..\..\Shared\Shared.vcxitems" Label="Shared" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Binary\x64\</OutDir>
+    <TargetName>$(ProjectName)_d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Binary\x64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)Binary\x86\</OutDir>
+    <TargetName>$(ProjectName)_d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)Binary\x86\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FREEIMAGE_LIB;WIN32;_DEBUG;_WINDOWS;BX_CONFIG_DEBUG=1;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>./;../../Shared;../Game;../Game/bgfx;../../Dependencies/Repositories/fmt/include;../../Dependencies/Repositories/glm;../../Dependencies/Repositories/SDL/build-x86/include;../../Dependencies/Repositories/SDL/build-x86/include-config-$(Configuration);../../Dependencies/Repositories/bgfx/include;../../Dependencies/Repositories/bx/include;../../Dependencies/Repositories/bx/include/compat/msvc;../../Dependencies/Repositories/bimg/include;../../Dependencies/Repositories/nlohmann/json/include;../../Dependencies/Repositories/imgui;../../Dependencies/Installed/FMOD/core/inc;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/include;../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLibd.lib;SDL2d.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build-x86/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win32_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x86;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
+    </Link>
+    <PreBuildEvent>
+      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Debug\SDL2d.dll ..\Binary\x86\ /Y
+xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x86\ /Y</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FREEIMAGE_LIB;WIN32;NDEBUG;_WINDOWS;BX_CONFIG_DEBUG=0;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>./;../../Shared;../Game;../Game/bgfx;../../Dependencies/Repositories/fmt/include;../../Dependencies/Repositories/glm;../../Dependencies/Repositories/SDL/build-x86/include;../../Dependencies/Repositories/SDL/build-x86/include-config-$(Configuration);../../Dependencies/Repositories/bgfx/include;../../Dependencies/Repositories/bx/include;../../Dependencies/Repositories/bx/include/compat/msvc;../../Dependencies/Repositories/bimg/include;../../Dependencies/Repositories/nlohmann/json/include;../../Dependencies/Repositories/imgui;../../Dependencies/Installed/FMOD/core/inc;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/include;../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLib.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build-x86/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win32_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x86;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
+    </Link>
+    <PreBuildEvent>
+      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Debug\SDL2d.dll ..\Binary\x86\ /Y
+xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x86\ /Y</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FREEIMAGE_LIB;_DEBUG;_WINDOWS;BX_CONFIG_DEBUG=1;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>./;../../Shared;../Game;../Game/bgfx;../../Dependencies/Repositories/fmt/include;../../Dependencies/Repositories/glm;../../Dependencies/Repositories/SDL/build/include;../../Dependencies/Repositories/SDL/build/include-config-$(Configuration);../../Dependencies/Repositories/bgfx/include;../../Dependencies/Repositories/bx/include;../../Dependencies/Repositories/bx/include/compat/msvc;../../Dependencies/Repositories/bimg/include;../../Dependencies/Repositories/nlohmann/json/include;../../Dependencies/Repositories/imgui;../../Dependencies/Installed/FMOD/core/inc;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/include;../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x64;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLibd.lib;SDL2d.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\Binary\x64\ /Y
+xcopy ..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ /Y</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FREEIMAGE_LIB;NDEBUG;_WINDOWS;BX_CONFIG_DEBUG=0;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>./;../../Shared;../Game;../Game/bgfx;../../Dependencies/Repositories/fmt/include;../../Dependencies/Repositories/glm;../../Dependencies/Repositories/SDL/build/include;../../Dependencies/Repositories/SDL/build/include-config-$(Configuration);../../Dependencies/Repositories/bgfx/include;../../Dependencies/Repositories/bx/include;../../Dependencies/Repositories/bx/include/compat/msvc;../../Dependencies/Repositories/bimg/include;../../Dependencies/Repositories/nlohmann/json/include;../../Dependencies/Repositories/imgui;../../Dependencies/Installed/FMOD/core/inc;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/include;../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x64;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLib.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\Binary\x64\ /Y
+xcopy ..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ /Y</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="mu_main.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="mu_main.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
