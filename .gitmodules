@@ -26,6 +26,3 @@
 [submodule "Dependencies/Repositories/stb"]
 	path = Dependencies/Repositories/stb
 	url = https://github.com/nothings/stb.git
-[submodule "UI"]
-	path = UI
-	url = git@github.com:kuncarous/nextmu-ui.git

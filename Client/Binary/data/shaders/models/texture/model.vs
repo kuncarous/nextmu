@@ -7,7 +7,6 @@ SAMPLER2D(s_skeletonTexture, 1);
 SAMPLER2D(s_lightTexture, 2);
 
 uniform vec4 u_settings1; // BoneOffset, NormalScale, Dummy, Dummy
-uniform vec4 u_transform; // BodyOrigin, BodyScale
 
 ivec2 GetBoneIndex(uint baseX, uint baseY, uint index)
 {
@@ -54,8 +53,6 @@ void main()
 	vec3 normal = TransformNormal(a_normal, normalMatrix);
 	
 	position += normal * u_settings1.y;
-	position *= u_transform.w;
-	position += u_transform.xyz;
 	
 	v_color0 = vec4(1.0, 1.0, 1.0, 1.0);
 	v_texcoord0 = a_texcoord0;

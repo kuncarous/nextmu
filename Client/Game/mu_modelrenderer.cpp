@@ -9,7 +9,6 @@
 
 bgfx::UniformHandle MUModelRenderer::TextureSampler = BGFX_INVALID_HANDLE;
 bgfx::UniformHandle MUModelRenderer::Settings1Uniform = BGFX_INVALID_HANDLE;
-bgfx::UniformHandle MUModelRenderer::TransformUniform = BGFX_INVALID_HANDLE;
 bgfx::ProgramHandle MUModelRenderer::RenderProgram = BGFX_INVALID_HANDLE; // Temporary
 const NTerrain *MUModelRenderer::Terrain = nullptr;
 
@@ -23,12 +22,6 @@ const mu_boolean MUModelRenderer::Initialize()
 
 	Settings1Uniform = bgfx::createUniform("u_settings1", bgfx::UniformType::Vec4);
 	if (bgfx::isValid(Settings1Uniform) == false)
-	{
-		return false;
-	}
-
-	TransformUniform = bgfx::createUniform("u_transform", bgfx::UniformType::Vec4);
-	if (bgfx::isValid(TransformUniform) == false)
 	{
 		return false;
 	}
@@ -56,12 +49,6 @@ void MUModelRenderer::Destroy()
 		Settings1Uniform = BGFX_INVALID_HANDLE;
 	}
 
-	if (bgfx::isValid(TransformUniform))
-	{
-		bgfx::destroy(TransformUniform);
-		TransformUniform = BGFX_INVALID_HANDLE;
-	}
-
 	if (bgfx::isValid(RenderProgram))
 	{
 		bgfx::destroy(RenderProgram);
@@ -74,13 +61,15 @@ void MUModelRenderer::AttachTerrain(NTerrain *terrain)
 	Terrain = terrain;
 }
 
-void MUModelRenderer::RenderMesh(const NModel *model, const mu_uint32 bonesOffset, const mu_uint32 meshIndex, const glm::vec3 bodyOrigin, const mu_float bodyScale)
+void MUModelRenderer::RenderMesh(const NModel *model, const mu_uint32 bonesOffset, const mu_uint32 meshIndex, const mu_uint32 transformCache)
 {
 	const auto &mesh = model->Meshes[meshIndex];
 	if (mesh.VertexBuffer.Count == 0) return;
 
 	auto &texture = model->Textures[meshIndex];
 	if (texture.Valid == false) return;
+
+	bgfx::setTransform(transformCache);
 
 	switch (texture.Type)
 	{
@@ -102,18 +91,21 @@ void MUModelRenderer::RenderMesh(const NModel *model, const mu_uint32 bonesOffse
 	glm::vec4 settings(static_cast<mu_float>(bonesOffset), 0.0f, 0.0f, 0.0f);
 	bgfx::setUniform(Settings1Uniform, glm::value_ptr(settings));
 
-	glm::vec4 transform(bodyOrigin, bodyScale);
-	bgfx::setUniform(TransformUniform, glm::value_ptr(transform));
-
 	bgfx::setVertexBuffer(0, model->VertexBuffer, mesh.VertexBuffer.Offset, mesh.VertexBuffer.Count);
 	bgfx::submit(0, RenderProgram);
 }
 
 void MUModelRenderer::RenderBody(const NModel *model, const mu_uint32 bonesOffset, const glm::vec3 bodyOrigin, const mu_float bodyScale)
 {
+	glm::mat4 viewModel = glm::translate(
+		glm::scale(glm::mat4(1.0f), glm::vec3(bodyScale)),
+		bodyOrigin
+	);
+	mu_uint32 transformCache = bgfx::setTransform(glm::value_ptr(viewModel));
+
 	const mu_uint32 numMeshes = static_cast<mu_uint32>(model->Meshes.size());
 	for (mu_uint32 m = 0; m < numMeshes; ++m)
 	{
-		RenderMesh(model, bonesOffset, m, bodyOrigin, bodyScale);
+		RenderMesh(model, bonesOffset, m, transformCache);
 	}
 }

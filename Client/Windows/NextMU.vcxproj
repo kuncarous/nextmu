@@ -129,7 +129,7 @@ xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLib.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLib.lib;SDL2.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build-x86/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win32_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x86;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -183,7 +183,7 @@ xcopy ..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ 
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x64;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLib.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLib.lib;SDL2.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>xcopy ..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\Binary\x64\ /Y

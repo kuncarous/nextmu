@@ -28,7 +28,7 @@ namespace MUGraphics
 
 		bgfx::Init init;
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
-		init.type = bgfx::RendererType::Vulkan;
+		init.type = bgfx::RendererType::Direct3D12;
 #else
 		init.type = bgfx::RendererType::Count;
 #endif

@@ -33,6 +33,7 @@ struct DemoSettings
 	mu_float Z = 1282.0f;
 	mu_float CX = 140.0f;
 	mu_float CY = 137.0f;
+	mu_uint32 MonstersCount = 1u;
 };
 
 const DemoSettings LoadDemoSettings()
@@ -74,6 +75,11 @@ const DemoSettings LoadDemoSettings()
 
 	settings.CX = document["cx"].get<mu_float>();
 	settings.CY = document["cy"].get<mu_float>();
+
+	if (document.contains("monstersCount"))
+	{
+		settings.MonstersCount = document["monstersCount"].get<mu_uint32>();
+	}
 
 	return settings;
 }
@@ -244,7 +250,10 @@ namespace MURoot
 			return;
 		}
 
-		AddMob();
+		for (mu_uint32 n = 0; n < demo.MonstersCount; ++n)
+		{
+			AddMob();
+		}
 
 		const NModel *Model = MUResourcesManager::GetModel("monster_01");
 		if (Model == nullptr)
