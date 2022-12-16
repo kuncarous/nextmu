@@ -2,6 +2,7 @@
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
 #include "mu_model.h"
+#include "mu_texture.h"
 
 template<const EGameDirectoryType dirType>
 NEXTMU_INLINE const bgfx::Memory *mu_readshader(mu_utf8string filename)
@@ -23,11 +24,13 @@ NEXTMU_INLINE const bgfx::Memory *mu_readshader(mu_utf8string filename)
 }
 
 typedef std::unique_ptr<NModel> ModelPointer;
+typedef std::unique_ptr<NTexture> TexturePointer;
 
 namespace MUResourcesManager
 {
 	std::map<mu_utf8string, bgfx::ProgramHandle> Programs;
 	std::map<mu_utf8string, ModelPointer> Models;
+	std::map<mu_utf8string, TexturePointer> Textures;
 
 	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment);
 	const mu_boolean LoadPrograms(const mu_utf8string basePath, const nlohmann::json &programs);

@@ -58,16 +58,21 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_config.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_object.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_graphics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_input.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_resourcesmanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletoninstance.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_state.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_terrain.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_texture.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_textures.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_timer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_window.cpp" />
@@ -99,6 +104,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_crypt.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_structs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_graphics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model.h" />
@@ -106,6 +113,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_mesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_skeleton.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_precompiled.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate_enums.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_resources.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_resourcesmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h" />
@@ -113,6 +122,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_state.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_terrain.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_texture.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_textures.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_timer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_version.h" />

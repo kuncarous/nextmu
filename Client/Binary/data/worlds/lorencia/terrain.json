@@ -1,5 +1,7 @@
 {
+	"id": "lorencia",
 	"program": "terrain_normal",
+	"grass_program": "terrain_grass",
 	"heightmap": "heightmap.ozb",
 	"height_multiplier": 1.5,
 	"lightmap": "lightmap.ozj",
@@ -19,6 +21,12 @@
 		"mod": 720000.0,
 		"mul": 0.002
 	},
+	"grass_textures": [
+		{
+			"id": 0,
+			"path": "tilegrass01.ozt"
+		}
+	],
 	"textures": [
 		{
 			"id": 0,
@@ -76,5 +84,6 @@
 		}
 	],
 	"mappings": "encterrain.map",
-	"attributes": "encterrain.att"
+	"attributes": "encterrain.att",
+	"objects": "encterrain.obj"
 }

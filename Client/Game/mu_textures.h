@@ -3,10 +3,19 @@
 
 #pragma once
 
+class NTexture;
+
+struct TextureInfo
+{
+	mu_uint16 Width = 0u;
+	mu_uint16 Height = 0u;
+	mu_boolean Alpha = false;
+};
+
 namespace MUTextures
 {
-	const mu_boolean LoadRaw(mu_utf8string path, FIBITMAP **texture);
-	const mu_boolean Load(mu_utf8string path, bgfx::TextureHandle *texture, const mu_uint64 samplerFlags);
+	const mu_boolean LoadRaw(mu_utf8string path, FIBITMAP **texture, TextureInfo &info);
+	std::unique_ptr<NTexture> Load(mu_utf8string path, const mu_uint64 samplerFlags);
 
 	const mu_boolean IsValidFilter(const mu_utf8string value);
 	const mu_boolean IsValidWrap(const mu_utf8string value);

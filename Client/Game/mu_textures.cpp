@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "mu_textures.h"
+#include "mu_texture.h"
 
 namespace MUTextures
 {
-	const mu_boolean LoadRaw(mu_utf8string path, FIBITMAP **texture)
+	const mu_boolean LoadRaw(mu_utf8string path, FIBITMAP **texture, TextureInfo &info)
 	{
 		NormalizePath(path);
 
@@ -34,6 +35,8 @@ namespace MUTextures
 		SDL_RWread(fp, buffer.get(), fileLength, 1);
 		SDL_RWclose(fp);
 
+		mu_boolean alpha = false;
+		mu_uint64 fflags = 0;
 		FREE_IMAGE_FORMAT format;
 		if (ext == "ozj" || ext == "jpg" || ext == "jpeg")
 		{
@@ -41,7 +44,13 @@ namespace MUTextures
 		}
 		else if (ext == "ozt" || ext == "tga")
 		{
+			alpha = true;
 			format = FREE_IMAGE_FORMAT::FIF_TARGA;
+		}
+		else if (ext == "png")
+		{
+			fflags = PNG_IGNOREGAMMA;
+			format = FREE_IMAGE_FORMAT::FIF_PNG;
 		}
 		else
 		{
@@ -54,7 +63,7 @@ namespace MUTextures
 			return false;
 		}
 
-		FIBITMAP *bitmap = FreeImage_LoadFromMemory(format, memory, PNG_IGNOREGAMMA);
+		FIBITMAP *bitmap = FreeImage_LoadFromMemory(format, memory, fflags);
 		buffer.reset();
 		FreeImage_CloseMemory(memory);
 
@@ -84,26 +93,30 @@ namespace MUTextures
 			bitmap = newBitmap;
 		}
 
+		info.Width = FreeImage_GetWidth(bitmap);
+		info.Height = FreeImage_GetHeight(bitmap);
+		info.Alpha = alpha;
 		*texture = bitmap;
 
 		return true;
 	}
 
-	const mu_boolean Load(mu_utf8string path, bgfx::TextureHandle *texture, const mu_uint64 samplerFlags)
+	std::unique_ptr<NTexture> Load(mu_utf8string path, const mu_uint64 samplerFlags)
 	{
+		TextureInfo info;
 		FIBITMAP *bitmap = nullptr;
-		if (LoadRaw(path, &bitmap) == false)
+		if (LoadRaw(path, &bitmap, info) == false)
 		{
-			return false;
+			return nullptr;
 		}
 
-		const mu_uint32 width = FreeImage_GetWidth(bitmap);
-		const mu_uint32 height = FreeImage_GetHeight(bitmap);
+		const mu_uint32 width = info.Width;
+		const mu_uint32 height = info.Height;
 		const mu_uint32 bpp = FreeImage_GetBPP(bitmap);
 		const mu_uint32 bitmapSize = width * height * (bpp / 8);
 		const mu_uint8 *bitmapBuffer = FreeImage_GetBits(bitmap);
 		const bgfx::Memory *mem = bgfx::copy(bitmapBuffer, bitmapSize);
-		*texture = bgfx::createTexture2D(
+		bgfx::TextureHandle texture = bgfx::createTexture2D(
 			width,
 			height,
 			false,
@@ -112,10 +125,14 @@ namespace MUTextures
 			samplerFlags,
 			mem
 		);
-
 		FreeImage_Unload(bitmap);
 
-		return true;
+		if (bgfx::isValid(texture) == false)
+		{
+			return nullptr;
+		}
+
+		return std::make_unique<NTexture>(texture, width, height, info.Alpha);
 	}
 
 	struct TextureFlags

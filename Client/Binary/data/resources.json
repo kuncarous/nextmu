@@ -11,12 +11,21 @@
 			"fragment": "shaders/worlds/normal"
 		},
 		{
+			"id": "terrain_grass",
+			"vertex": "shaders/worlds/grass",
+			"fragment": "shaders/worlds/grass"
+		},
+		{
 			"id": "model_texture",
 			"vertex": "shaders/models/texture",
 			"fragment": "shaders/models/texture"
 		}
 	],
 	"models": [
+		{
+			"id": "player_ani",
+			"path": "player"
+		},
 		{
 			"id": "monster_01",
 			"path": "monsters/monster01"

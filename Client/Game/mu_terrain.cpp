@@ -43,26 +43,26 @@ void InitializeTerrainVertices()
 		for (mu_uint32 x = 0; x < TerrainSize; ++x)
 		{
 			TerrainVertex *vert = &TerrainVertices[vertex++];
-			vert->x = x;
-			vert->y = y;
+			vert->x = 0;
+			vert->y = 0;
 			vert->rx = x;
 			vert->ry = y;
 
 			vert = &TerrainVertices[vertex++];
-			vert->x = x + 1;
-			vert->y = y;
+			vert->x = 1;
+			vert->y = 0;
 			vert->rx = x;
 			vert->ry = y;
 
 			vert = &TerrainVertices[vertex++];
-			vert->x = x + 1;
-			vert->y = y + 1;
+			vert->x = 1;
+			vert->y = 1;
 			vert->rx = x;
 			vert->ry = y;
 
 			vert = &TerrainVertices[vertex++];
-			vert->x = x;
-			vert->y = y + 1;
+			vert->x = 0;
+			vert->y = 1;
 			vert->rx = x;
 			vert->ry = y;
 		}
@@ -104,19 +104,6 @@ NTerrain::~NTerrain()
 	Destroy();
 }
 
-const mu_boolean NTerrain::Initialize(mu_utf8string path)
-{
-	NormalizePath<true>(path);
-
-	if (Load(path) == false)
-	{
-		Destroy();
-		return false;
-	}
-
-	return true;
-}
-
 void NTerrain::Destroy()
 {
 #define RELEASE_HANDLER(handler) \
@@ -126,7 +113,6 @@ void NTerrain::Destroy()
 		handler = BGFX_INVALID_HANDLE; \
 	}
 
-	//RELEASE_HANDLER(Program); // Now the program is being handled by the resources manager
 	RELEASE_HANDLER(HeightmapSampler);
 	RELEASE_HANDLER(HeightmapTexture);
 	RELEASE_HANDLER(LightmapSampler);
@@ -139,146 +125,13 @@ void NTerrain::Destroy()
 	RELEASE_HANDLER(AttributesTexture);
 	RELEASE_HANDLER(TexturesSampler);
 	RELEASE_HANDLER(Textures);
+	RELEASE_HANDLER(GrassTextures);
 	RELEASE_HANDLER(UVSampler);
 	RELEASE_HANDLER(UVTexture);
+	RELEASE_HANDLER(GrassUVTexture);
 	RELEASE_HANDLER(VertexBuffer);
 	RELEASE_HANDLER(IndexBuffer);
 	RELEASE_HANDLER(SettingsUniform);
-}
-
-const mu_boolean NTerrain::Load(const mu_utf8string path)
-{
-	const mu_utf8string filename = path + "terrain.json";
-	SDL_RWops *fp = nullptr;
-	if (mu_rwfromfile<EGameDirectoryType::eSupport>(&fp, filename, "rb") == false)
-	{
-		mu_error("terrain.json missing ({})", filename);
-		return false;
-	}
-
-	mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
-	std::unique_ptr<mu_char[]> jsonBuffer(new_nothrow mu_char[fileLength]);
-	SDL_RWread(fp, jsonBuffer.get(), fileLength, 1);
-	SDL_RWclose(fp);
-
-	const mu_utf8string inputBuffer = JsonStripComments(jsonBuffer.get(), static_cast<mu_uint32>(fileLength));
-	jsonBuffer.reset();
-	auto document = nlohmann::json::parse(inputBuffer.c_str());
-	if (document.is_discarded() == true)
-	{
-		mu_error("terrain.json malformed ({})", filename);
-		return false;
-	}
-
-	const auto programId = document["program"].get<mu_utf8string>();
-	Program = MUResourcesManager::GetProgram(programId);
-	if (bgfx::isValid(Program) == false)
-	{
-		mu_error("terrain program not found ({}, {})", filename, programId);
-		return false;
-	}
-
-	HeightMultiplier = document["height_multiplier"].get<mu_float>();
-
-	const auto heightmap = document["heightmap"].get<mu_utf8string>();
-	if (LoadHeightmap(path + heightmap) == false)
-	{
-		mu_error("failed to load heightmap ({})", path + heightmap);
-		return false;
-	}
-
-	if (GenerateNormal() == false)
-	{
-		mu_error("failed to generate normal ({})", filename);
-		return false;
-	}
-
-	const auto lightmap = document["lightmap"].get<mu_utf8string>();
-	if (LoadLightmap(path + lightmap) == false)
-	{
-		mu_error("failed to load lightmap ({})", path + lightmap);
-		return false;
-	}
-
-	const auto light = document["light"];
-	if (light.is_array() == false || light.size() != 3)
-	{
-		mu_error("invalid terrain light ({})", path + lightmap);
-		return false;
-	}
-
-	for (mu_uint32 n = 0; n < 3; ++n)
-	{
-		Light[n] = light[n].get<mu_float>();
-	}
-
-	InitializeVertexLayout();
-	InitializeTerrainVertices();
-	InitializeTerrainIndexes();
-
-	const bgfx::Memory *mem = bgfx::makeRef(TerrainVertices, sizeof(TerrainVertices));
-	VertexBuffer = bgfx::createVertexBuffer(mem, VertexLayout);
-	if (bgfx::isValid(VertexBuffer) == false)
-	{
-		mu_error("failed to create vertex buffer ({})", filename);
-		return false;
-	}
-
-	mem = bgfx::makeRef(TerrainIndexes, sizeof(TerrainIndexes));
-	IndexBuffer = bgfx::createIndexBuffer(mem, BGFX_BUFFER_INDEX32);
-	if (bgfx::isValid(IndexBuffer) == false)
-	{
-		mu_error("failed to create index buffer ({})", filename);
-		return false;
-	}
-
-	const auto uv = document["uv"];
-	if (uv.is_object() == false)
-	{
-		mu_error("terrain.json malformed ({})", filename);
-		return false;
-	}
-
-	const auto uvNormal = uv["normal"].get<mu_float>();
-	const auto uvScaled = uv["scaled"].get<mu_float>();
-
-	const auto filter = document["filter"].get<mu_utf8string>();
-	const auto wrap = document["wrap"].get<mu_utf8string>();
-
-	const auto textures = document["textures"];
-	if (textures.is_array() == false)
-	{
-		mu_error("terrain.json textures missing ({})", filename);
-		return false;
-	}
-
-	std::map<mu_uint32, mu_uint32> texturesMap;
-	if (LoadTextures(path, textures, filter, wrap, uvNormal, uvScaled, texturesMap) == false)
-	{
-		mu_error("failed to load textures ({})", filename);
-		return false;
-	}
-
-	const auto mappings = document["mappings"].get<mu_utf8string>();
-	if (LoadMappings(path + mappings, texturesMap) == false)
-	{
-		mu_error("failed to load mappings ({})", path + mappings);
-		return false;
-	}
-
-	const auto attributes = document["attributes"].get<mu_utf8string>();
-	if (LoadAttributes(path + attributes) == false)
-	{
-		mu_error("failed to load attributes ({})", path + attributes);
-		return false;
-	}
-
-	if (PrepareSettings(path, document) == false)
-	{
-		return false;
-	}
-
-	return true;
 }
 
 const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path)
@@ -565,8 +418,9 @@ const mu_boolean NTerrain::LoadTextures(
 		const auto id = texture["id"].get<mu_uint32>();
 		const auto path = texture["path"].get<mu_utf8string>();
 
+		TextureInfo info;
 		FIBITMAP *bitmap = nullptr;
-		if (MUTextures::LoadRaw(dir + path, &bitmap) == false)
+		if (MUTextures::LoadRaw(dir + path, &bitmap, info) == false)
 		{
 			return false;
 		}
@@ -639,7 +493,107 @@ const mu_boolean NTerrain::LoadTextures(
 	return true;
 }
 
-const mu_boolean NTerrain::LoadMappings(mu_utf8string path, const std::map<mu_uint32, mu_uint32> &texturesMap)
+const mu_boolean NTerrain::LoadGrassTextures(
+	const mu_utf8string dir,
+	const nlohmann::json textures,
+	const mu_utf8string filter,
+	const mu_utf8string wrap,
+	std::map<mu_uint32, mu_uint32> &texturesMap
+)
+{
+	typedef mu_float SettingFormat;
+	mu_uint32 width = 0, height = 0;
+	std::vector<SettingFormat> settings;
+	std::vector<UniqueBitmap> bitmaps;
+
+	for (auto iter = textures.begin(); iter != textures.end(); ++iter)
+	{
+		const auto &texture = *iter;
+		if (texture.is_object() == false)
+		{
+			return false;
+		}
+
+		const auto id = texture["id"].get<mu_uint32>();
+		const auto path = texture["path"].get<mu_utf8string>();
+
+		TextureInfo info;
+		FIBITMAP *bitmap = nullptr;
+		if (MUTextures::LoadRaw(dir + path, &bitmap, info) == false)
+		{
+			return false;
+		}
+
+		mu_uint32 w = FreeImage_GetWidth(bitmap), h = FreeImage_GetHeight(bitmap);
+		if (w > width) width = w;
+		if (h > height) height = h;
+
+		settings.push_back(h * 2.0f);
+		texturesMap.insert(std::pair(id, static_cast<mu_uint32>(bitmaps.size())));
+		bitmaps.push_back(UniqueBitmap(bitmap));
+	}
+
+	width = GetPowerOfTwoSize(width);
+	height = GetPowerOfTwoSize(height);
+
+	for (auto iter = bitmaps.begin(); iter != bitmaps.end(); ++iter)
+	{
+		auto &ubitmap = *iter;
+		FIBITMAP *bitmap = ubitmap.get();
+
+		mu_uint32 w = FreeImage_GetWidth(bitmap), h = FreeImage_GetHeight(bitmap);
+		if (w < width || h < height)
+		{
+			FIBITMAP *newBitmap = FreeImage_Rescale(bitmap, width, height, FREE_IMAGE_FILTER::FILTER_BICUBIC);
+			if (newBitmap == nullptr)
+			{
+				return false;
+			}
+
+			ubitmap.reset(newBitmap);
+			bitmap = newBitmap;
+		}
+	}
+
+	const mu_uint16 numLayers = static_cast<mu_uint16>(bitmaps.size());
+	const mu_uint32 textureSize = width * height * 4;
+	const mu_uint32 memorySize = textureSize * numLayers;
+	const bgfx::Memory *mem = bgfx::alloc(memorySize);
+
+	mu_uint8 *dest = mem->data;
+	for (auto iter = bitmaps.begin(); iter != bitmaps.end(); ++iter)
+	{
+		auto &bitmap = *iter;
+		mu_memcpy(dest, FreeImage_GetBits(bitmap.get()), textureSize);
+		dest += textureSize;
+	}
+
+	GrassTextures = bgfx::createTexture2D(width, height, false, numLayers, bgfx::TextureFormat::RGBA8, MUTextures::CalculateSamplerFlags(filter, wrap), mem);
+
+	const mu_uint32 settingsWidth = GetPowerOfTwoSize(static_cast<mu_uint32>(settings.size()));
+	mem = bgfx::alloc(settingsWidth * sizeof(SettingFormat));
+	mu_zeromem(mem->data, mem->size);
+	mu_memcpy(mem->data, settings.data(), settings.size() * sizeof(SettingFormat));
+	GrassUVTexture = bgfx::createTexture2D(settingsWidth, 1, false, 1, bgfx::TextureFormat::R32F, BGFX_TEXTURE_NONE | BGFX_SAMPLER_POINT, mem);
+
+	return true;
+}
+
+const mu_uint32 GetMapValue(
+	const std::map<mu_uint32, mu_uint32> map,
+	const mu_uint32 value
+)
+{
+	auto iter = map.find(value);
+	if (iter == map.end()) return NInvalidUInt32;
+	return iter->second;
+}
+
+const mu_boolean NTerrain::LoadMappings(
+	mu_utf8string path,
+	const std::map<mu_uint32, mu_uint32> &texturesMap,
+	const std::map<mu_uint32, mu_uint32> &grassTexturesMap
+)
 {
 	NormalizePath(path);
 
@@ -672,15 +626,15 @@ const mu_boolean NTerrain::LoadMappings(mu_utf8string path, const std::map<mu_ui
 
 	for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
 	{
+		mu_uint8 map1 = GetMapValue(texturesMap, mapping1[index]);
+		mu_uint8 map2 = GetMapValue(texturesMap, mapping2[index]);
 		mapping[index] = MappingFormat(
-			mapping1[index],
-			mapping2[index],
-			mapping1[index] == 255
-			? 255
-			: mapping2[index] == 255
+			map1,
+			map2,
+			map1 == NInvalidUInt8 || map2 == NInvalidUInt8
 			? 0
 			: alpha[index],
-			0
+			GetMapValue(grassTexturesMap, mapping1[index])
 		);
 	}
 
@@ -794,6 +748,36 @@ const mu_boolean NTerrain::PrepareSettings(const mu_utf8string path, const nlohm
 	return true;
 }
 
+const mu_boolean NTerrain::GenerateBuffers()
+{
+	/*
+		TODO:
+		Since all terrains are 256x256 we can make the vertex and index buffer static to use it for all terrains.
+		After implement occlussion culling the index buffer should be dynamic.
+	*/
+	InitializeVertexLayout();
+	InitializeTerrainVertices();
+	InitializeTerrainIndexes();
+
+	const bgfx::Memory *mem = bgfx::makeRef(TerrainVertices, sizeof(TerrainVertices));
+	VertexBuffer = bgfx::createVertexBuffer(mem, VertexLayout);
+	if (bgfx::isValid(VertexBuffer) == false)
+	{
+		mu_error("failed to create vertex buffer");
+		return false;
+	}
+
+	mem = bgfx::makeRef(TerrainIndexes, sizeof(TerrainIndexes));
+	IndexBuffer = bgfx::createIndexBuffer(mem, BGFX_BUFFER_INDEX32);
+	if (bgfx::isValid(IndexBuffer) == false)
+	{
+		mu_error("failed to create index buffer");
+		return false;
+	}
+
+	return true;
+}
+
 void NTerrain::Reset()
 {
 	// restore primary light per update frame
@@ -822,6 +806,7 @@ void NTerrain::Update()
 
 void NTerrain::Render()
 {
+	// Render Terrain
 	bgfx::setVertexBuffer(0, VertexBuffer);
 	bgfx::setIndexBuffer(IndexBuffer);
 	bgfx::setTexture(0, HeightmapSampler, HeightmapTexture);
@@ -832,6 +817,22 @@ void NTerrain::Render()
 	bgfx::setTexture(5, UVSampler, UVTexture);
 	bgfx::setTexture(6, AttributesSampler, AttributesTexture);
 	bgfx::submit(0, Program);
+
+	// Render Grass
+	if (bgfx::isValid(GrassUVTexture))
+	{
+		bgfx::setState((BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_ALPHA) ^ (BGFX_STATE_CULL_CW | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z));
+		bgfx::setVertexBuffer(0, VertexBuffer);
+		bgfx::setIndexBuffer(IndexBuffer);
+		bgfx::setTexture(0, HeightmapSampler, HeightmapTexture);
+		bgfx::setTexture(1, LightmapSampler, LightmapTexture);
+		bgfx::setTexture(2, NormalSampler, NormalTexture);
+		bgfx::setTexture(3, MappingSampler, MappingTexture);
+		bgfx::setTexture(4, TexturesSampler, GrassTextures);
+		bgfx::setTexture(5, UVSampler, GrassUVTexture);
+		bgfx::setTexture(6, AttributesSampler, AttributesTexture);
+		bgfx::submit(0, GrassProgram);
+	}
 }
 
 const bgfx::TextureHandle NTerrain::GetLightmapTexture() const

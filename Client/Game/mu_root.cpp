@@ -6,8 +6,9 @@
 #include "mu_timer.h"
 #include "mu_input.h"
 #include "mu_camera.h"
-#include "mu_terrain.h"
+#include "mu_environment.h"
 #include "mu_state.h"
+#include "mu_renderstate.h"
 #include "mu_resourcesmanager.h"
 #include "mu_skeletoninstance.h"
 #include "mu_skeletonmanager.h"
@@ -238,14 +239,14 @@ namespace MURoot
 
 		const DemoSettings demo = LoadDemoSettings();
 
-		NCamera camera;
+		static NCamera camera;
 		camera.SetMode(NCameraMode::Directional);
 		camera.SetEye(glm::vec3(demo.X * TerrainScale, demo.Y * TerrainScale, demo.Z));
 		camera.SetAngle(glm::vec3(glm::radians(demo.CX), glm::radians(demo.CY), glm::radians(0.0f)));
 		camera.SetUp(glm::vec3(0.0f, 0.0f, 1.0f));
 
-		NTerrain terrain;
-		if (terrain.Initialize(demo.Map) == false)
+		static NEnvironment environment;
+		if (environment.LoadTerrain(demo.Map) == false)
 		{
 			return;
 		}
@@ -276,6 +277,7 @@ namespace MURoot
 
 			MUState::SetTime(static_cast<mu_float>(currentTime), static_cast<mu_float>(elapsedTime));
 			MUState::SetUpdate(updateTime, updateCount);
+			MURenderState::Reset();
 			MUSkeletonManager::Reset();
 
 			fpsCounterTime += elapsedTime;
@@ -289,12 +291,8 @@ namespace MURoot
 				fpsCounterTime = 0.0;
 			}
 
-			if (updateCount > 0)
-			{
-				terrain.Reset();
-			}
-
 			camera.Update();
+			environment.Reset();
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_IMGUI
 			ImGui_Implbgfx_NewFrame();
@@ -345,7 +343,7 @@ namespace MURoot
 						.Frame = mobInfo.PriorFrame,
 					},
 					glm::vec3(0.0f, 0.0f, 0.0f)
-					);
+				);
 			}
 
 			const auto windowWidth = MUConfig::GetWindowWidth();
@@ -373,16 +371,9 @@ namespace MURoot
 			);
 
 			bgfx::setViewTransform(0, glm::value_ptr(view), glm::value_ptr(projection));
+			MURenderState::AttachEnvironment(&environment);
 
-			if (updateCount > 0)
-			{
-				terrain.Update();
-			}
-
-			terrain.ConfigureUniforms();
-			terrain.Render();
-
-			MUModelRenderer::AttachTerrain(&terrain);
+			environment.Update();
 
 			for (mu_uint32 n = 0; n < mobsCount; ++n)
 			{
@@ -391,6 +382,8 @@ namespace MURoot
 			}
 
 			MUSkeletonManager::Update();
+
+			environment.Render();
 
 			mu_float mx = 0.0f, my = 0.0f;
 			for (mu_uint32 n = 0; n < mobsCount; ++n)

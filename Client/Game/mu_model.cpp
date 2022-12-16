@@ -3,6 +3,7 @@
 #include "mu_crypt.h"
 #include "mu_binaryreader.h"
 #include "mu_textures.h"
+#include "mu_texture.h"
 #include <glm/gtc/type_ptr.hpp>
 
 #define NEXTMU_COMPRESSED_VERTEX (1)
@@ -44,7 +45,7 @@ struct MeshVertex
 
 NModel::~NModel()
 {
-	if (bgfx::isValid(VertexBuffer) == false)
+	if (bgfx::isValid(VertexBuffer))
 	{
 		bgfx::destroy(VertexBuffer);
 		VertexBuffer = BGFX_INVALID_HANDLE;
@@ -371,22 +372,19 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 		if (filename.starts_with("ski") || filename.starts_with("level"))
 		{
 			Textures[m] = {
-				.Valid = true,
-				.Type = TextureType::Skin,
+				.Type = TextureAttachment::Skin,
 			};
 		}
 		else if (filename.starts_with("hid"))
 		{
 			Textures[m] = {
-				.Valid = true,
-				.Type = TextureType::Hide,
+				.Type = TextureAttachment::Hide,
 			};
 		}
 		else if (filename.starts_with("hair"))
 		{
 			Textures[m] = {
-				.Valid = true,
-				.Type = TextureType::Hair,
+				.Type = TextureAttachment::Hair,
 			};
 		}
 		else
@@ -419,24 +417,19 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 			}
 
 			filename = path + subPath + filename;
-			bgfx::TextureHandle texture;
-			if (
-				MUTextures::Load(
-					filename,
-					&texture,
-					MUTextures::CalculateSamplerFlags(filter, wrap)
-				) == false
-			)
+			std::unique_ptr<NTexture> texture = MUTextures::Load(
+				filename,
+				MUTextures::CalculateSamplerFlags(filter, wrap)
+			);
+			if (!texture)
 			{
 				mu_error("texture not found ({})", filename);
 				return false;
 			}
 
 			Textures[m] = {
-				.Valid = true,
-				.Type = TextureType::Direct,
-				.HasAlpha = hasAlpha,
-				.Texture = texture,
+				.Type = TextureAttachment::Normal,
+				.Texture = std::move(texture),
 			};
 		}
 	}
@@ -455,6 +448,8 @@ const mu_boolean NModel::GenerateBuffers()
 		mesh.VertexBuffer.Count = static_cast<mu_uint32>(mesh.Triangles.size()) * 3u;
 		verticesCount += mesh.VertexBuffer.Count;
 	}
+
+	if (verticesCount == 0) return true;
 
 	const bgfx::Memory *mem = bgfx::alloc(verticesCount * sizeof(MeshVertex));
 	MeshVertex *dest = reinterpret_cast<MeshVertex *>(mem->data);

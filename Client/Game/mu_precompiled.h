@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <FreeImage.h>
+#include <entt/entt.hpp>
 
 #include "shared_precompiled.h"
 #include "mu_version.h"
@@ -37,5 +38,10 @@
 #include "ui_noesisgui_license.h"
 #include <NoesisPCH.h>
 #endif
+
+#include "mu_texture.h"
+#include "mu_model.h"
+#include "mu_terrain.h"
+#include "mu_skeletoninstance.h"
 
 #endif

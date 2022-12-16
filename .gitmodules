@@ -35,3 +35,7 @@
 	path = Dependencies/Repositories/stb
 	url = https://github.com/nothings/stb.git
 	shallow = true
+[submodule "Dependencies/Repositories/entt"]
+	path = Dependencies/Repositories/entt
+	url = https://github.com/skypjack/entt.git
+	shallow = true

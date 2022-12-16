@@ -2,15 +2,13 @@
 #include "mu_modelrenderer.h"
 #include "mu_skeletonmanager.h"
 #include "mu_resourcesmanager.h"
-#include "mu_terrain.h"
-#include "mu_model.h"
 #include "mu_skeletoninstance.h"
+#include "mu_renderstate.h"
 #include <glm/gtc/type_ptr.hpp>
 
 bgfx::UniformHandle MUModelRenderer::TextureSampler = BGFX_INVALID_HANDLE;
 bgfx::UniformHandle MUModelRenderer::Settings1Uniform = BGFX_INVALID_HANDLE;
 bgfx::ProgramHandle MUModelRenderer::RenderProgram = BGFX_INVALID_HANDLE; // Temporary
-const NTerrain *MUModelRenderer::Terrain = nullptr;
 
 const mu_boolean MUModelRenderer::Initialize()
 {
@@ -56,27 +54,26 @@ void MUModelRenderer::Destroy()
 	}
 }
 
-void MUModelRenderer::AttachTerrain(NTerrain *terrain)
-{
-	Terrain = terrain;
-}
-
 void MUModelRenderer::RenderMesh(const NModel *model, const mu_uint32 bonesOffset, const mu_uint32 meshIndex, const mu_uint32 transformCache)
 {
 	const auto &mesh = model->Meshes[meshIndex];
 	if (mesh.VertexBuffer.Count == 0) return;
 
-	auto &texture = model->Textures[meshIndex];
-	if (texture.Valid == false) return;
+	auto terrain = MURenderState::GetTerrain();
+	if (terrain == nullptr) return;
+
+	auto &textureInfo = model->Textures[meshIndex];
+	auto texture = MURenderState::GetTexture(textureInfo.Type);
+	if (texture == nullptr)
+	{
+		texture = textureInfo.Texture.get();
+	}
+	if (texture == nullptr || texture->IsValid() == false) return;
 
 	bgfx::setTransform(transformCache);
+	bgfx::setTexture(0, TextureSampler, texture->GetTexture());
 
-	switch (texture.Type)
-	{
-	case TextureType::Direct: bgfx::setTexture(0, TextureSampler, texture.Texture); break;
-	}
-
-	if (texture.HasAlpha)
+	if (texture->HasAlpha())
 	{
 		bgfx::setState(BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_ALPHA);
 	}
@@ -86,7 +83,7 @@ void MUModelRenderer::RenderMesh(const NModel *model, const mu_uint32 bonesOffse
 	}
 	
 	bgfx::setTexture(1, MUSkeletonManager::GetSampler(), MUSkeletonManager::GetTexture());
-	bgfx::setTexture(2, Terrain->GetLightmapSampler(), Terrain->GetLightmapTexture());
+	bgfx::setTexture(2, terrain->GetLightmapSampler(), terrain->GetLightmapTexture());
 
 	glm::vec4 settings(static_cast<mu_float>(bonesOffset), 0.0f, 0.0f, 0.0f);
 	bgfx::setUniform(Settings1Uniform, glm::value_ptr(settings));
@@ -97,6 +94,9 @@ void MUModelRenderer::RenderMesh(const NModel *model, const mu_uint32 bonesOffse
 
 void MUModelRenderer::RenderBody(const NModel *model, const mu_uint32 bonesOffset, const glm::vec3 bodyOrigin, const mu_float bodyScale)
 {
+	auto terrain = MURenderState::GetTerrain();
+	if (terrain == nullptr) return;
+
 	glm::mat4 viewModel = glm::translate(
 		glm::scale(glm::mat4(1.0f), glm::vec3(bodyScale)),
 		bodyOrigin

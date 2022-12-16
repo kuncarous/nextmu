@@ -51,11 +51,11 @@ class NTerrain
 public:
 	~NTerrain();
 
-	const mu_boolean Initialize(mu_utf8string path);
+private:
 	void Destroy();
 
-private:
-	const mu_boolean Load(const mu_utf8string path);
+protected:
+	friend class NEnvironment;
 	const mu_boolean LoadHeightmap(mu_utf8string path);
 	const mu_boolean GenerateNormal();
 	const mu_boolean LoadLightmap(mu_utf8string path);
@@ -68,9 +68,21 @@ private:
 		const mu_float uvScaled,
 		std::map<mu_uint32, mu_uint32> &texturesMap
 	);
-	const mu_boolean LoadMappings(mu_utf8string path, const std::map<mu_uint32, mu_uint32> &texturesMap);
+	const mu_boolean LoadGrassTextures(
+		const mu_utf8string dir,
+		const nlohmann::json paths,
+		const mu_utf8string filter,
+		const mu_utf8string wrap,
+		std::map<mu_uint32, mu_uint32> &texturesMap
+	);
+	const mu_boolean LoadMappings(
+		mu_utf8string path,
+		const std::map<mu_uint32, mu_uint32> &texturesMap,
+		const std::map<mu_uint32, mu_uint32> &grassTexturesMap
+	);
 	const mu_boolean LoadAttributes(mu_utf8string path);
 	const mu_boolean PrepareSettings(const mu_utf8string path, const nlohmann::json document);
+	const mu_boolean GenerateBuffers();
 
 public:
 	void Reset();
@@ -87,8 +99,17 @@ public:
 	const glm::vec3 GetNormal(const mu_uint32 x, const mu_uint32 y);
 	const TerrainAttribute::Type GetAttribute(const mu_uint32 x, const mu_uint32 y);
 
+public:
+	const mu_utf8string GetId() const
+	{
+		return Id;
+	}
+
 private:
+	mu_utf8string Id;
+
 	bgfx::ProgramHandle Program = BGFX_INVALID_HANDLE;
+	bgfx::ProgramHandle GrassProgram = BGFX_INVALID_HANDLE;
 	bgfx::UniformHandle HeightmapSampler = BGFX_INVALID_HANDLE;
 	bgfx::TextureHandle HeightmapTexture = BGFX_INVALID_HANDLE;
 	std::unique_ptr<mu_uint8[]> LightmapMemory;
@@ -103,8 +124,10 @@ private:
 	bgfx::TextureHandle AttributesTexture = BGFX_INVALID_HANDLE;
 	bgfx::UniformHandle TexturesSampler = BGFX_INVALID_HANDLE;
 	bgfx::TextureHandle Textures = BGFX_INVALID_HANDLE;
+	bgfx::TextureHandle GrassTextures = BGFX_INVALID_HANDLE;
 	bgfx::UniformHandle UVSampler = BGFX_INVALID_HANDLE;
 	bgfx::TextureHandle UVTexture = BGFX_INVALID_HANDLE;
+	bgfx::TextureHandle GrassUVTexture = BGFX_INVALID_HANDLE;
 	bgfx::VertexBufferHandle VertexBuffer = BGFX_INVALID_HANDLE;
 	bgfx::IndexBufferHandle IndexBuffer = BGFX_INVALID_HANDLE;
 	bgfx::UniformHandle SettingsUniform = BGFX_INVALID_HANDLE;

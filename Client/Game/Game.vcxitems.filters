@@ -22,9 +22,6 @@
     <Filter Include="Timer">
       <UniqueIdentifier>{c7dc8ffa-112b-4f75-98a1-38b2e951d848}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Terrain">
-      <UniqueIdentifier>{d49e4e2c-7ffe-483a-90c6-1c9977953bdc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Camera">
       <UniqueIdentifier>{fb0154d9-2c0d-499f-9278-5d4150af6fca}</UniqueIdentifier>
     </Filter>
@@ -63,6 +60,15 @@
     </Filter>
     <Filter Include="UI\NoesisGUI">
       <UniqueIdentifier>{cee7659c-4a05-4459-a920-aa84c3f9a8c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Texture">
+      <UniqueIdentifier>{cbeb6f06-7f5e-453e-8f9e-23b022b1807c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment">
+      <UniqueIdentifier>{38eb499a-3e3a-4369-8e4a-cd7ca81646b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Terrain">
+      <UniqueIdentifier>{d49e4e2c-7ffe-483a-90c6-1c9977953bdc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -103,7 +109,7 @@
       <Filter>UI\ImGui\backends</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_terrain.cpp">
-      <Filter>Terrain</Filter>
+      <Filter>Environment\Terrain</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp">
       <Filter>Camera</Filter>
@@ -174,6 +180,21 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_sdl.cpp">
       <Filter>UI\NoesisGUI</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_texture.cpp">
+      <Filter>Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp">
+      <Filter>State</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_object.cpp">
+      <Filter>Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp">
+      <Filter>Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment.cpp">
+      <Filter>Environment</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
@@ -222,7 +243,7 @@
       <Filter>UI\ImGui\backends</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_terrain.h">
-      <Filter>Terrain</Filter>
+      <Filter>Environment\Terrain</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h">
       <Filter>Camera</Filter>
@@ -310,6 +331,21 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_sdl.h">
       <Filter>UI\NoesisGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_texture.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h">
+      <Filter>State</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate_enums.h">
+      <Filter>State</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h">
+      <Filter>Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_structs.h">
+      <Filter>Environment</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

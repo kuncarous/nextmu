@@ -5,23 +5,16 @@
 
 #include "mu_model_mesh.h"
 #include "mu_model_skeleton.h"
+#include "mu_renderstate_enums.h"
+
+class NTexture;
 
 constexpr mu_uint32 MaxBones = 200;
 
-enum class TextureType : mu_uint8
-{
-	Direct, // It is an allocated texture
-	Skin, // It should use the attached skin texture
-	Hide, // It should use the attached hide texture
-	Hair, // It should use the attached hair texture
-};
-
 struct NModelTexture
 {
-	mu_boolean Valid = false;
-	TextureType Type = TextureType::Direct;
-	mu_boolean HasAlpha = false;
-	bgfx::TextureHandle Texture = BGFX_INVALID_HANDLE;
+	TextureAttachment::Type Type = TextureAttachment::Normal;
+	std::unique_ptr<NTexture> Texture;
 };
 
 class NModel
