@@ -47,10 +47,7 @@ const DemoSettings LoadDemoSettings()
 
 	mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
 	std::unique_ptr<mu_char[]> jsonBuffer(new_nothrow mu_char[fileLength]);
-	if (!!jsonBuffer)
-	{
-		SDL_RWread(fp, jsonBuffer.get(), fileLength, 1);
-	}
+	SDL_RWread(fp, jsonBuffer.get(), fileLength, 1);
 	SDL_RWclose(fp);
 
 	if (!jsonBuffer)
@@ -390,7 +387,14 @@ namespace MURoot
 			{
 				const auto bonesOffset = MobsBonesOffset[n];
 				if (bonesOffset == NInvalidUInt32) continue;
-				MUModelRenderer::RenderBody(Model, bonesOffset, glm::vec3((100.0f + mx) * TerrainScale, (100.0f + my) * TerrainScale, 800.0f), 1.0f);
+				const NModelRenderConfig config = {
+					.BoneOffset = bonesOffset,
+					.BodyOrigin = glm::vec3((100.0f + mx) * TerrainScale, (100.0f + my) * TerrainScale, 800.0f),
+					.BodyScale = 1.0f,
+					.EnableLight = true,
+					.BodyLight = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+				};
+				MUModelRenderer::RenderBody(Model, config);
 				mx += 2.0f;
 				if (mx >= 100.0f)
 				{

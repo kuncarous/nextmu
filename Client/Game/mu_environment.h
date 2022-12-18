@@ -17,6 +17,11 @@ public:
 	void Reset();
 	void Update();
 	void Render();
+	void CalculateLight(
+		const NEntity::Position &position,
+		const NEntity::Light &settings,
+		NEntity::RenderState &renderState
+	);
 
 	const mu_boolean LoadTerrain(mu_utf8string path);
 
@@ -26,11 +31,7 @@ private:
 public:
 	void ClearObjects();
 	const entt::entity AddObject(
-		const NModel *model,
-		const glm::vec3 light,
-		const glm::vec3 position,
-		const glm::vec3 angle,
-		const mu_float scale
+		const MUObject::Settings object
 	);
 	void RemoveObject(const entt::entity entity);
 

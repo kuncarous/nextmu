@@ -58,6 +58,7 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_config.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_crypt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_object.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp" />
@@ -100,7 +101,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_textedit.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_truetype.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)bgfx\imgui_impl_bgfx.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_binaryreader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_crypt.h" />

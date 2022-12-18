@@ -13,6 +13,9 @@
     <Filter Include="JSON">
       <UniqueIdentifier>{a1240b35-1486-4739-b324-8f5bad86c6b0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{52fd0f7a-86d3-4d69-aa7f-8b15af702149}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem.h">
@@ -38,6 +41,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem_android.h">
       <Filter>OS</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_binaryreader.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

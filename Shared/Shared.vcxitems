@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_binaryreader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shared_json.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem_android.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem_backend.h" />

@@ -195,6 +195,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment.cpp">
       <Filter>Environment</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_crypt.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
@@ -273,9 +276,6 @@
       <Filter>Model</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_crypt.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_binaryreader.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_skeletoninstance.h">

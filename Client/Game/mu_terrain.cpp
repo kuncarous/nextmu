@@ -5,7 +5,7 @@
 #include "mu_resourcesmanager.h"
 #include "mu_state.h"
 #include "mu_crypt.h"
-#include "mu_binaryreader.h"
+#include "shared_binaryreader.h"
 #include <glm/gtx/normal.hpp>
 #include <glm/gtc/packing.hpp>
 
@@ -868,4 +868,64 @@ const glm::vec3 NTerrain::GetNormal(const mu_uint32 x, const mu_uint32 y)
 const TerrainAttribute::Type NTerrain::GetAttribute(const mu_uint32 x, const mu_uint32 y)
 {
 	return TerrainAttributes[GetTerrainMaskIndex(x, y)];
+}
+
+const glm::vec3 NTerrain::CalculatePrimaryLight(mu_float x, mu_float y)
+{
+	x *= TerrainScaleInv;
+	y *= TerrainScaleInv;
+
+	const mu_int32 xi = static_cast<mu_int32>(x);
+	const mu_int32 yi = static_cast<mu_int32>(y);
+	if (xi < 0 || xi >= TerrainMask || yi < 0 || yi >= TerrainMask)
+	{
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	const mu_uint32 index1 = GetTerrainIndex(xi, yi);
+	const mu_uint32 index2 = GetTerrainIndex(xi + 1, yi);
+	const mu_uint32 index3 = GetTerrainIndex(xi + 1, yi + 1);
+	const mu_uint32 index4 = GetTerrainIndex(xi, yi + 1);
+
+	mu_float dx = glm::mod(x, 1.0f);
+	mu_float dy = glm::mod(y, 1.0f);
+	glm::vec3 light;
+	for (mu_uint32 i = 0; i < 3; ++i)
+	{
+		mu_float left = TerrainPrimaryLight[index1][i] + (TerrainPrimaryLight[index4][i] - TerrainPrimaryLight[index1][i]) * dy;
+		mu_float right = TerrainPrimaryLight[index2][i] + (TerrainPrimaryLight[index3][i] - TerrainPrimaryLight[index2][i]) * dy;
+		light[i] = (left + (right - left) * dx);
+	}
+
+	return light;
+}
+
+const glm::vec3 NTerrain::CalculateBackLight(mu_float x, mu_float y)
+{
+	x *= TerrainScaleInv;
+	y *= TerrainScaleInv;
+
+	const mu_int32 xi = static_cast<mu_int32>(x);
+	const mu_int32 yi = static_cast<mu_int32>(y);
+	if (xi < 0 || xi >= TerrainMask || yi < 0 || yi >= TerrainMask)
+	{
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	const mu_uint32 index1 = GetTerrainIndex(xi, yi);
+	const mu_uint32 index2 = GetTerrainIndex(xi + 1, yi);
+	const mu_uint32 index3 = GetTerrainIndex(xi + 1, yi + 1);
+	const mu_uint32 index4 = GetTerrainIndex(xi, yi + 1);
+
+	mu_float dx = glm::mod(x, 1.0f);
+	mu_float dy = glm::mod(y, 1.0f);
+	glm::vec3 light;
+	for (mu_uint32 i = 0; i < 3; ++i)
+	{
+		mu_float left = TerrainLight[index1][i] + (TerrainLight[index4][i] - TerrainLight[index1][i]) * dy;
+		mu_float right = TerrainLight[index2][i] + (TerrainLight[index3][i] - TerrainLight[index2][i]) * dy;
+		light[i] = (left + (right - left) * dx);
+	}
+
+	return light;
 }

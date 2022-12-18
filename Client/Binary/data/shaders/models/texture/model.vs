@@ -6,7 +6,9 @@ $output v_color0, v_texcoord0
 SAMPLER2D(s_skeletonTexture, 1);
 SAMPLER2D(s_lightTexture, 2);
 
-uniform vec4 u_settings1; // BoneOffset, NormalScale, Dummy, Dummy
+uniform vec4 u_lightPosition; // Based on shadow angle
+uniform vec4 u_settings1; // BoneOffset, NormalScale, EnableLight, Dummy
+uniform vec4 u_bodyLight;
 
 ivec2 GetBoneIndex(uint baseX, uint baseY, uint index)
 {
@@ -54,7 +56,8 @@ void main()
 	
 	position += normal * u_settings1.y;
 	
-	v_color0 = vec4(1.0, 1.0, 1.0, 1.0);
+	float luminosity = max((dot(normal, u_lightPosition.xyz) * 0.8 + 0.4) * u_settings1.z + (1.0 - u_settings1.z), 0.2);
+	v_color0 = clamp(u_bodyLight * vec4(luminosity, luminosity, luminosity, 1.0), 0.0, 1.0);
 	v_texcoord0 = a_texcoord0;
 	
 	gl_Position = mul(u_modelViewProj, vec4(position, 1.0));

@@ -23,4 +23,6 @@ NEXTMU_INLINE void BuxConvert(mu_uint8 *buffer, mu_uint32 size)
 	}
 }
 
+mu_uint32 CryptoModulusDecrypt(mu_uint8 *inputBuffer, const mu_uint32 inputLength, mu_uint8 *outputBuffer);
+
 #endif

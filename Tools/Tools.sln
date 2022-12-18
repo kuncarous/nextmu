@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConvertObjects", "ConvertObjects\ConvertObjects.vcxproj", "{C7182D0E-CB1B-4695-94F4-6F96BA361A93}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "..\Shared\Shared.vcxitems", "{9318F858-4DE8-4CDD-BCAA-A31E409E0906}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C7182D0E-CB1B-4695-94F4-6F96BA361A93}.Debug|x64.ActiveCfg = Debug|x64
+		{C7182D0E-CB1B-4695-94F4-6F96BA361A93}.Debug|x64.Build.0 = Debug|x64
+		{C7182D0E-CB1B-4695-94F4-6F96BA361A93}.Debug|x86.ActiveCfg = Debug|Win32
+		{C7182D0E-CB1B-4695-94F4-6F96BA361A93}.Debug|x86.Build.0 = Debug|Win32
+		{C7182D0E-CB1B-4695-94F4-6F96BA361A93}.Release|x64.ActiveCfg = Release|x64
+		{C7182D0E-CB1B-4695-94F4-6F96BA361A93}.Release|x64.Build.0 = Release|x64
+		{C7182D0E-CB1B-4695-94F4-6F96BA361A93}.Release|x86.ActiveCfg = Release|Win32
+		{C7182D0E-CB1B-4695-94F4-6F96BA361A93}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2140B195-00E0-48CA-B648-714099BD99A9}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\Shared\Shared.vcxitems*{9318f858-4de8-4cdd-bcaa-a31e409e0906}*SharedItemsImports = 9
+		..\Shared\Shared.vcxitems*{c7182d0e-cb1b-4695-94f4-6f96ba361a93}*SharedItemsImports = 4
+	EndGlobalSection
+EndGlobal

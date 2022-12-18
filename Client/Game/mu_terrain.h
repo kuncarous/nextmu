@@ -4,6 +4,7 @@
 #pragma once
 
 constexpr mu_float TerrainScale = 100.0f;
+constexpr mu_float TerrainScaleInv = 1.0f / TerrainScale;
 constexpr mu_uint32 TerrainSize = 256u; // MU has a fixed terrain size of 256x256
 constexpr mu_uint32 TerrainMask = TerrainSize - 1;
 constexpr mu_float TerrainSizeInv = 1.0f / static_cast<mu_float>(TerrainSize);
@@ -99,10 +100,18 @@ public:
 	const glm::vec3 GetNormal(const mu_uint32 x, const mu_uint32 y);
 	const TerrainAttribute::Type GetAttribute(const mu_uint32 x, const mu_uint32 y);
 
+	const glm::vec3 CalculatePrimaryLight(const mu_float x, const mu_float y);
+	const glm::vec3 CalculateBackLight(const mu_float x, const mu_float y);
+
 public:
 	const mu_utf8string GetId() const
 	{
 		return Id;
+	}
+
+	const glm::vec4 &GetLightPosition() const
+	{
+		return LightPosition;
 	}
 
 private:
@@ -134,6 +143,7 @@ private:
 
 	mu_float HeightMultiplier = 1.0f;
 	glm::vec3 Light = glm::vec3();
+	glm::vec4 LightPosition = glm::vec4(1.3f, 0.0f, 2.0f, 1.0f);
 
 	mu_float WaterModulus = 1.0f;
 	mu_float WaterMultiplier = 1.0f;

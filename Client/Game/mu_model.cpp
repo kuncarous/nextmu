@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "mu_model.h"
 #include "mu_crypt.h"
-#include "mu_binaryreader.h"
+#include "shared_binaryreader.h"
 #include "mu_textures.h"
 #include "mu_texture.h"
 #include <glm/gtc/type_ptr.hpp>
 
-#define NEXTMU_COMPRESSED_VERTEX (1)
+#define NEXTMU_COMPRESSED_VERTEX (0)
 
 static bgfx::VertexLayout VertexLayout;
 
@@ -146,6 +146,15 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 		XorDecrypt(decryptedBuffer.get(), reader.GetPointer(), encryptedSize);
 		buffer.swap(decryptedBuffer);
 		reader.Replace(buffer.get(), encryptedSize);
+	}
+	else if (version == 14)
+	{
+		mu_int32 encryptedSize = reader.Read<mu_int32>();
+		mu_int64 decryptedSize = CryptoModulusDecrypt(reader.GetPointer(), encryptedSize, nullptr);
+		std::unique_ptr<mu_uint8[]> decryptedBuffer(new_nothrow mu_uint8[decryptedSize]);
+		CryptoModulusDecrypt(reader.GetPointer(), encryptedSize, decryptedBuffer.get());
+		buffer.swap(decryptedBuffer);
+		reader.Replace(buffer.get(), static_cast<mu_uint32>(decryptedSize));
 	}
 
 	reader.Skip(32); // Name bytes

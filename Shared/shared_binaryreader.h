@@ -1,18 +1,18 @@
-#ifndef __MU_BINARYREADER_H__
-#define __MU_BINARYREADER_H__
+#ifndef __SHARED_BINARYREADER_H__
+#define __SHARED_BINARYREADER_H__
 
 #pragma once
 
 class NBinaryReader
 {
 public:
-	NBinaryReader(const mu_uint8 *buffer, const mu_uint32 bufferSize) :
+	NBinaryReader(mu_uint8 *buffer, const mu_uint32 bufferSize) :
 		Current(0),
 		Size(bufferSize),
 		Buffer(buffer)
 	{}
 
-	void Replace(const mu_uint8 *buffer, const mu_uint32 size, const mu_uint32 current = 0)
+	void Replace(mu_uint8 *buffer, const mu_uint32 size, const mu_uint32 current = 0)
 	{
 		Current = current;
 		Size = size;
@@ -52,9 +52,9 @@ public:
 	}
 
 	template<typename T = mu_uint8>
-	const T *GetPointer()
+	T *GetPointer()
 	{
-		return reinterpret_cast<const T*>(&Buffer[Current]);
+		return reinterpret_cast<T *>(&Buffer[Current]);
 	}
 
 	const mu_uint32 GetCurrent()
@@ -70,7 +70,7 @@ public:
 private:
 	mu_uint32 Current;
 	mu_uint32 Size;
-	const mu_uint8 *Buffer;
+	mu_uint8 *Buffer;
 };
 
 #endif

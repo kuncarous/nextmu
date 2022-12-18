@@ -56,8 +56,8 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
-    <Import Project="..\Game\Game.vcxitems" Label="Shared" />
-    <Import Project="..\..\Shared\Shared.vcxitems" Label="Shared" />
+    <Import Project="..\..\Game\Game.vcxitems" Label="Shared" />
+    <Import Project="..\..\..\Shared\Shared.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -92,7 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FREEIMAGE_LIB;WIN32;_DEBUG;_WINDOWS;BX_CONFIG_DEBUG=1;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../../Shared;../Game;../Game/bgfx;../../Dependencies/Repositories/fmt/include;../../Dependencies/Repositories/glm;../../Dependencies/Repositories/entt/single_include;../../Dependencies/Repositories/SDL/build-x86/include;../../Dependencies/Repositories/SDL/build-x86/include-config-$(Configuration);../../Dependencies/Repositories/bgfx/include;../../Dependencies/Repositories/bx/include;../../Dependencies/Repositories/bx/include/compat/msvc;../../Dependencies/Repositories/bimg/include;../../Dependencies/Repositories/nlohmann/json/include;../../Dependencies/Repositories/imgui;../../Dependencies/Installed/FMOD/core/inc;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/include;../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/entt/single_include;../../../Dependencies/Repositories/cryptopp;../../../Dependencies/Repositories/SDL/build-x86/include;../../../Dependencies/Repositories/SDL/build-x86/include-config-$(Configuration);../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bx/include/compat/msvc;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x32;../../../Dependencies/Installed/ultralight/include;../../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -103,11 +103,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLibd.lib;SDL2d.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build-x86/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win32_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x86;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../Dependencies/Repositories/SDL/build-x86/$(Configuration);../../../Dependencies/Repositories/bgfx/.build/win32_vs2022/bin;../../../Dependencies/Installed/FMOD/core/lib/x86;../../../Dependencies/Installed/FreeImage/Dist/x32;../../../Dependencies/Installed/ultralight/lib;../../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'));$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Debug\SDL2d.dll ..\Binary\x86\ /Y
-xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x86\ /Y</Command>
+      <Command>xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Debug\SDL2d.dll ..\Binary\x86\ /Y
+xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x86\ /Y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,7 +118,7 @@ xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FREEIMAGE_LIB;WIN32;NDEBUG;_WINDOWS;BX_CONFIG_DEBUG=0;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../../Shared;../Game;../Game/bgfx;../../Dependencies/Repositories/fmt/include;../../Dependencies/Repositories/glm;../../Dependencies/Repositories/entt/single_include;../../Dependencies/Repositories/SDL/build-x86/include;../../Dependencies/Repositories/SDL/build-x86/include-config-$(Configuration);../../Dependencies/Repositories/bgfx/include;../../Dependencies/Repositories/bx/include;../../Dependencies/Repositories/bx/include/compat/msvc;../../Dependencies/Repositories/bimg/include;../../Dependencies/Repositories/nlohmann/json/include;../../Dependencies/Repositories/imgui;../../Dependencies/Installed/FMOD/core/inc;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/include;../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/entt/single_include;../../../Dependencies/Repositories/cryptopp;../../../Dependencies/Repositories/SDL/build-x86/include;../../../Dependencies/Repositories/SDL/build-x86/include-config-$(Configuration);../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bx/include/compat/msvc;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x32;../../../Dependencies/Installed/ultralight/include;../../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -130,11 +130,11 @@ xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLib.lib;SDL2.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build-x86/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win32_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x86;../../Dependencies/Installed/FreeImage/Dist/x32;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../Dependencies/Repositories/SDL/build-x86/$(Configuration);../../../Dependencies/Repositories/bgfx/.build/win32_vs2022/bin;../../../Dependencies/Installed/FMOD/core/lib/x86;../../../Dependencies/Installed/FreeImage/Dist/x32;../../../Dependencies/Installed/ultralight/lib;../../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'));$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Debug\SDL2d.dll ..\Binary\x86\ /Y
-xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x86\ /Y</Command>
+      <Command>xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Debug\SDL2d.dll ..\Binary\x86\ /Y
+xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x86\ /Y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -143,7 +143,7 @@ xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FREEIMAGE_LIB;_DEBUG;_WINDOWS;BX_CONFIG_DEBUG=1;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../../Shared;../Game;../Game/bgfx;../../Dependencies/Repositories/fmt/include;../../Dependencies/Repositories/glm;../../Dependencies/Repositories/entt/single_include;../../Dependencies/Repositories/SDL/build/include;../../Dependencies/Repositories/SDL/build/include-config-$(Configuration);../../Dependencies/Repositories/bgfx/include;../../Dependencies/Repositories/bx/include;../../Dependencies/Repositories/bx/include/compat/msvc;../../Dependencies/Repositories/bimg/include;../../Dependencies/Repositories/nlohmann/json/include;../../Dependencies/Repositories/imgui;../../Dependencies/Installed/FMOD/core/inc;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/include;../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/entt/single_include;../../../Dependencies/Repositories/cryptopp;../../../Dependencies/Repositories/SDL/build/include;../../../Dependencies/Repositories/SDL/build/include-config-$(Configuration);../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bx/include/compat/msvc;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/ultralight/include;../../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -154,12 +154,12 @@ xcopy ..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\Binary\x
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x64;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../Dependencies/Repositories/SDL/build/$(Configuration);../../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../../Dependencies/Installed/FMOD/core/lib/x64;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/ultralight/lib;../../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLibd.lib;SDL2d.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\Binary\x64\ /Y
-xcopy ..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ /Y</Command>
+      <Command>xcopy ..\..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\Binary\x64\ /Y
+xcopy ..\..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ /Y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -170,7 +170,7 @@ xcopy ..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ 
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FREEIMAGE_LIB;NDEBUG;_WINDOWS;BX_CONFIG_DEBUG=0;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../../Shared;../Game;../Game/bgfx;../../Dependencies/Repositories/fmt/include;../../Dependencies/Repositories/glm;../../Dependencies/Repositories/entt/single_include;../../Dependencies/Repositories/SDL/build/include;../../Dependencies/Repositories/SDL/build/include-config-$(Configuration);../../Dependencies/Repositories/bgfx/include;../../Dependencies/Repositories/bx/include;../../Dependencies/Repositories/bx/include/compat/msvc;../../Dependencies/Repositories/bimg/include;../../Dependencies/Repositories/nlohmann/json/include;../../Dependencies/Repositories/imgui;../../Dependencies/Installed/FMOD/core/inc;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/include;../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/bgfx;../../../Dependencies/Repositories/fmt/include;../../../Dependencies/Repositories/glm;../../../Dependencies/Repositories/entt/single_include;../../../Dependencies/Repositories/cryptopp;../../../Dependencies/Repositories/SDL/build/include;../../../Dependencies/Repositories/SDL/build/include-config-$(Configuration);../../../Dependencies/Repositories/bgfx/include;../../../Dependencies/Repositories/bx/include;../../../Dependencies/Repositories/bx/include/compat/msvc;../../../Dependencies/Repositories/bimg/include;../../../Dependencies/Repositories/nlohmann/json/include;../../../Dependencies/Repositories/imgui;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/ultralight/include;../../../Dependencies/Installed/NoesisGUI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -182,12 +182,12 @@ xcopy ..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ 
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../Dependencies/Repositories/SDL/build/$(Configuration);../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../Dependencies/Installed/FMOD/core/lib/x64;../../Dependencies/Installed/FreeImage/Dist/x64;../../Dependencies/Installed/ultralight/lib;../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'))</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../Dependencies/Repositories/SDL/build/$(Configuration);../../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../../Dependencies/Installed/FMOD/core/lib/x64;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/ultralight/lib;../../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLib.lib;SDL2.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\Binary\x64\ /Y
-xcopy ..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ /Y</Command>
+      <Command>xcopy ..\..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\Binary\x64\ /Y
+xcopy ..\..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\Binary\x64\ /Y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

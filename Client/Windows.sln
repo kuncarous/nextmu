@@ -3,11 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NextMU", "Windows\NextMU.vcxproj", "{7EB260D5-C00D-405A-8DB7-963BD40837DF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NextMU", "Windows\NextMU\NextMU.vcxproj", "{7EB260D5-C00D-405A-8DB7-963BD40837DF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD} = {AAD90241-29C8-489E-AEEC-11FB27ABF2DD}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxitems", "{C314983B-8B1D-4B76-9A00-BF745815E294}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "..\Shared\Shared.vcxitems", "{9318F858-4DE8-4CDD-BCAA-A31E409E0906}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{6675BEB7-2890-437C-A79B-344A1E01936E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CryptoPP", "Windows\CryptoPP\CryptoPP.vcxproj", "{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,9 +32,20 @@ Global
 		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Release|Win32.Build.0 = Release|Win32
 		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Release|x64.ActiveCfg = Release|x64
 		{7EB260D5-C00D-405A-8DB7-963BD40837DF}.Release|x64.Build.0 = Release|x64
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}.Debug|Win32.Build.0 = Debug|Win32
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}.Debug|x64.ActiveCfg = Debug|x64
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}.Debug|x64.Build.0 = Debug|x64
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}.Release|Win32.ActiveCfg = Release|Win32
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}.Release|Win32.Build.0 = Release|Win32
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}.Release|x64.ActiveCfg = Release|x64
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AAD90241-29C8-489E-AEEC-11FB27ABF2DD} = {6675BEB7-2890-437C-A79B-344A1E01936E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {870950F6-9205-4DEE-8988-CBBD52D31696}

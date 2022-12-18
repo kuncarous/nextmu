@@ -39,3 +39,7 @@
 	path = Dependencies/Repositories/entt
 	url = https://github.com/skypjack/entt.git
 	shallow = true
+[submodule "Dependencies/Repositories/cryptopp"]
+	path = Dependencies/Repositories/cryptopp
+	url = https://github.com/weidai11/cryptopp.git
+	shallow = true
