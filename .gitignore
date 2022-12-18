@@ -7,9 +7,12 @@
 /Client/ARM64
 /Client/x64
 /Client/x86
-/Client/Windows/x64
-/Client/Windows/Debug
-/Client/Windows/Release
+/Client/Windows/NextMU/x64
+/Client/Windows/NextMU/Debug
+/Client/Windows/NextMU/Release
+/Client/Windows/CryptoPP/x64
+/Client/Windows/CryptoPP/Debug
+/Client/Windows/CryptoPP/Release
 /Client/Android/APK/.gradle
 /Client/Android/APK/ARM
 /Client/Android/APK/ARM64
@@ -32,4 +35,11 @@
 /Client/Android/SDL2/x64
 /Client/Android/SDL2/x86
 /Client/Android/SDL2/SDL2.vcxproj.user
+/Tools/ARM
+/Tools/ARM64
+/Tools/x64
+/Tools/x86
+/Tools/ConvertObjects/x64
+/Tools/ConvertObjects/Debug
+/Tools/ConvertObjects/Release
 /.vs

@@ -113,7 +113,7 @@ void OpenObjectsSettings(const mu_utf8string filename)
 
 		if (object.contains("light_enable"))
 		{
-			settings.LightEnable = object["LightEnable"].get<mu_boolean>();
+			settings.LightEnable = object["light_enable"].get<mu_boolean>();
 		}
 
 		if (object.contains("light"))
