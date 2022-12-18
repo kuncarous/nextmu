@@ -41,7 +41,6 @@ private:
 	static bgfx::UniformHandle LightPositionUniform;
 	static bgfx::UniformHandle Settings1Uniform;
 	static bgfx::UniformHandle BodyLightUniform;
-	static bgfx::ProgramHandle RenderProgram;
 };
 
 #endif

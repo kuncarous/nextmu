@@ -19,6 +19,11 @@
 			"id": "model_texture",
 			"vertex": "shaders/models/texture",
 			"fragment": "shaders/models/texture"
+		},
+		{
+			"id": "model_blend",
+			"vertex": "shaders/models/blend",
+			"fragment": "shaders/models/blend"
 		}
 	],
 	"models": [

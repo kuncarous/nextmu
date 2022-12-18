@@ -45,9 +45,28 @@ struct NTextureInfo
 	mu_utf8string Wrap = "repeat";
 };
 
+namespace ModelRenderMode
+{
+	enum : mu_uint32
+	{
+		Normal,
+		Alpha,
+		Count,
+	};
+};
+
+struct NMeshRenderSettings
+{
+	bgfx::ProgramHandle Program = BGFX_INVALID_HANDLE;
+	const NTexture *Texture = nullptr;
+	mu_uint64 RenderState[ModelRenderMode::Count] = { BGFX_STATE_DEFAULT, BGFX_STATE_DEFAULT };
+	mu_float Light = 1.0f;
+};
+
 class NMesh
 {
 public:
+	NMeshRenderSettings Settings;
 	NRenderInfo VertexBuffer;
 	//NRenderInfo IndexBuffer; // Not required for now, since we will use vertices only for the rendering
 	NTextureInfo Texture;

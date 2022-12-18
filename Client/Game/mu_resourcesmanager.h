@@ -15,6 +15,7 @@ namespace MUResourcesManager
 	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment);
 
 	const bgfx::ProgramHandle GetProgram(const mu_utf8string id);
+	const NTexture *GetTexture(const mu_utf8string id);
 	const NModel *GetModel(const mu_utf8string id);
 };
 

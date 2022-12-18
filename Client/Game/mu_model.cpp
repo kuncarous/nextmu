@@ -4,7 +4,64 @@
 #include "shared_binaryreader.h"
 #include "mu_textures.h"
 #include "mu_texture.h"
+#include "mu_resourcesmanager.h"
 #include <glm/gtc/type_ptr.hpp>
+
+std::map<mu_utf8string, mu_uint64> DepthTestMap = {
+	{ "none", 0u },
+	{ "equal", BGFX_STATE_DEPTH_TEST_EQUAL },
+	{ "not_equal", BGFX_STATE_DEPTH_TEST_NOTEQUAL },
+	{ "less", BGFX_STATE_DEPTH_TEST_LESS },
+	{ "less_equal", BGFX_STATE_DEPTH_TEST_LESS },
+	{ "greater", BGFX_STATE_DEPTH_TEST_GREATER },
+	{ "greater_equal", BGFX_STATE_DEPTH_TEST_GEQUAL },
+	{ "never", BGFX_STATE_DEPTH_TEST_NEVER },
+	{ "always", BGFX_STATE_DEPTH_TEST_ALWAYS },
+};
+
+std::map<mu_utf8string, mu_uint64> BlendFunctionMap = {
+	{ "zero", BGFX_STATE_BLEND_ZERO },
+	{ "one", BGFX_STATE_BLEND_ONE },
+	{ "src_alpha", BGFX_STATE_BLEND_SRC_ALPHA },
+	{ "src_color", BGFX_STATE_BLEND_SRC_COLOR },
+	{ "inv_src_alpha", BGFX_STATE_BLEND_INV_SRC_ALPHA },
+	{ "inv_src_color", BGFX_STATE_BLEND_INV_SRC_COLOR },
+	{ "dst_alpha", BGFX_STATE_BLEND_DST_ALPHA },
+	{ "dst_color", BGFX_STATE_BLEND_DST_COLOR },
+	{ "inv_dst_alpha", BGFX_STATE_BLEND_INV_DST_ALPHA },
+	{ "inv_dst_color", BGFX_STATE_BLEND_INV_DST_COLOR },
+	{ "src_alpha_sat", BGFX_STATE_BLEND_SRC_ALPHA_SAT },
+};
+
+std::map<mu_utf8string, mu_uint64> BlendEquationMap = {
+	{ "add", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD) },
+	{ "sub", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_SUB) },
+	{ "revsub", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD) },
+	{ "min", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_MIN) },
+	{ "max", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_MAX) },
+};
+
+std::map<mu_utf8string, mu_uint64> CullMap = {
+	{ "none", 0 },
+	{ "cw", BGFX_STATE_CULL_CW },
+	{ "ccw", BGFX_STATE_CULL_CCW },
+};
+
+#define BGFX_VALUE_FROM_STRING(name, map, default_value) \
+constexpr mu_uint64 name##Default = default_value; \
+NEXTMU_INLINE const mu_uint64 name##FromString(const mu_utf8string value) \
+{ \
+	auto iter = map.find(value); \
+	if (iter == map.end()) return default_value; \
+	return iter->second; \
+}
+
+BGFX_VALUE_FROM_STRING(DepthTest, DepthTestMap, BGFX_STATE_DEPTH_TEST_LESS)
+BGFX_VALUE_FROM_STRING(BlendFunction, BlendFunctionMap, 0u)
+BGFX_VALUE_FROM_STRING(BlendEquation, BlendEquationMap, BGFX_STATE_BLEND_EQUATION_ADD)
+BGFX_VALUE_FROM_STRING(Cull, CullMap, BGFX_STATE_CULL_CW)
+
+const mu_utf8string ProgramDefault = "model_texture";
 
 #define NEXTMU_COMPRESSED_VERTEX (0)
 
@@ -50,6 +107,78 @@ NModel::~NModel()
 		bgfx::destroy(VertexBuffer);
 		VertexBuffer = BGFX_INVALID_HANDLE;
 	}
+}
+
+const mu_uint64 CalculateStateFromObject(const nlohmann::json &object)
+{
+	mu_uint64 state = 0u;
+
+	// Write
+	{
+		mu_uint64 rgb = BGFX_STATE_WRITE_RGB;
+		mu_uint64 alpha = BGFX_STATE_WRITE_A;
+		mu_uint64 depth = BGFX_STATE_WRITE_Z;
+
+		if (object.contains("write"))
+		{
+			const auto &write = object["write"];
+			if (write.contains("rgb"))
+				rgb = write["rgb"].get<mu_boolean>() ? BGFX_STATE_WRITE_RGB : 0u;
+
+			if (write.contains("alpha"))
+				alpha = write["alpha"].get<mu_boolean>() ? BGFX_STATE_WRITE_A : 0u;
+
+			if (write.contains("depth"))
+				depth = write["depth"].get<mu_boolean>() ? BGFX_STATE_WRITE_Z : 0u;
+		}
+
+		state |= rgb | alpha | depth;
+	}
+
+	// Culling
+	{
+		mu_uint64 cull = CullDefault;
+
+		if (object.contains("cull"))
+			cull = CullFromString(object["cull"].get<mu_utf8string>());
+
+		state |= cull;
+	}
+
+	// Depth Test
+	{
+		mu_uint64 depthTest = DepthTestDefault;
+
+		if (object.contains("depth_test"))
+			depthTest = DepthTestFromString(object["depth_test"].get<mu_utf8string>());
+
+		state |= depthTest;
+	}
+
+	// Blend
+	{
+		mu_uint64 srcFunction = BlendFunctionDefault, dstFunction = BlendFunctionDefault;
+		mu_uint64 equation = BlendEquationDefault;
+
+		if (object.contains("blend"))
+		{
+			const auto &blend = object["blend"];
+
+			if (blend.contains("src"))
+				srcFunction = BlendFunctionFromString(blend["src"].get<mu_utf8string>());
+
+			if (blend.contains("dst"))
+				dstFunction = BlendFunctionFromString(blend["dst"].get<mu_utf8string>());
+
+			if (blend.contains("equation"))
+				equation = BlendEquationFromString(blend["equation"].get<mu_utf8string>());
+		}
+
+		state |= BGFX_STATE_BLEND_FUNC(srcFunction, dstFunction);
+		state |= equation;
+	}
+
+	return state;
 }
 
 const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
@@ -105,6 +234,41 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 	if (document.contains("playSpeed"))
 	{
 		PlaySpeed = document["playSpeed"].get<mu_float>();
+	}
+
+	if (document.contains("settings"))
+	{
+		const auto &settings = document["settings"];
+		if (settings.contains("meshes"))
+		{
+			const auto &meshes = settings["meshes"];
+			for (const auto &mesh : meshes)
+			{
+				const auto id = mesh["id"].get<mu_uint32>();
+				if (id >= Meshes.size()) continue;
+
+				auto &settings = Meshes[id].Settings;
+
+				if (mesh.contains("program"))
+				{
+					const bgfx::ProgramHandle program = MUResourcesManager::GetProgram(mesh["program"].get<mu_utf8string>());
+					if (bgfx::isValid(program))
+						settings.Program = program;
+				}
+
+				if (mesh.contains("texture"))
+					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
+
+				if (mesh.contains("normal"))
+					settings.RenderState[ModelRenderMode::Normal] = CalculateStateFromObject(mesh["normal"]);
+
+				if (mesh.contains("alpha"))
+					settings.RenderState[ModelRenderMode::Alpha] = CalculateStateFromObject(mesh["alpha"]);
+
+				if (mesh.contains("light"))
+					settings.Light = mesh["light"].get<mu_float>();
+			}
+		}
 	}
 
 	if (GenerateBuffers() == false)
@@ -175,10 +339,15 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 	Animations.resize(numActions);
 	BoundingBoxes.resize(numBones);
 
+	const bgfx::ProgramHandle program = MUResourcesManager::GetProgram(ProgramDefault);
+
 	mu_char filename[32 + 1] = {};
 	for (mu_uint32 m = 0; m < numMeshes; ++m)
 	{
 		auto &mesh = Meshes[m];
+
+		mesh.Settings.Program = program;
+
 		const mu_uint32 numVertices = static_cast<mu_uint32>(reader.Read<mu_int16>());
 		const mu_uint32 numNormals = static_cast<mu_uint32>(reader.Read<mu_int16>());
 		const mu_uint32 numTexCoords = static_cast<mu_uint32>(reader.Read<mu_int16>());

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "mu_modelrenderer.h"
 #include "mu_skeletonmanager.h"
-#include "mu_resourcesmanager.h"
 #include "mu_skeletoninstance.h"
 #include "mu_renderstate.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -10,7 +9,6 @@ bgfx::UniformHandle MUModelRenderer::TextureSampler = BGFX_INVALID_HANDLE;
 bgfx::UniformHandle MUModelRenderer::LightPositionUniform = BGFX_INVALID_HANDLE;
 bgfx::UniformHandle MUModelRenderer::Settings1Uniform = BGFX_INVALID_HANDLE;
 bgfx::UniformHandle MUModelRenderer::BodyLightUniform = BGFX_INVALID_HANDLE;
-bgfx::ProgramHandle MUModelRenderer::RenderProgram = BGFX_INVALID_HANDLE; // Temporary
 
 const mu_boolean MUModelRenderer::Initialize()
 {
@@ -34,12 +32,6 @@ const mu_boolean MUModelRenderer::Initialize()
 
 	BodyLightUniform = bgfx::createUniform("u_bodyLight", bgfx::UniformType::Vec4);
 	if (bgfx::isValid(BodyLightUniform) == false)
-	{
-		return false;
-	}
-
-	RenderProgram = MUResourcesManager::GetProgram("model_texture");
-	if (bgfx::isValid(RenderProgram) == false)
 	{
 		return false;
 	}
@@ -87,12 +79,13 @@ void MUModelRenderer::RenderMesh(
 	auto terrain = MURenderState::GetTerrain();
 	if (terrain == nullptr) return;
 
+	const auto &settings = mesh.Settings;
 	auto &textureInfo = model->Textures[meshIndex];
-	auto texture = MURenderState::GetTexture(textureInfo.Type);
+	auto texture = settings.Texture;
 	if (texture == nullptr)
-	{
+		texture = MURenderState::GetTexture(textureInfo.Type);
+	if (texture == nullptr)
 		texture = textureInfo.Texture.get();
-	}
 	if (texture == nullptr || texture->IsValid() == false) return;
 
 	bgfx::setTransform(transformCache);
@@ -100,23 +93,23 @@ void MUModelRenderer::RenderMesh(
 
 	if (texture->HasAlpha() || config.BodyLight[3] < 1.0f)
 	{
-		bgfx::setState(BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_ALPHA);
+		bgfx::setState(settings.RenderState[ModelRenderMode::Alpha]);
 	}
 	else
 	{
-		bgfx::setState(BGFX_STATE_DEFAULT);
+		bgfx::setState(settings.RenderState[ModelRenderMode::Normal]);
 	}
 	
 	bgfx::setTexture(1, MUSkeletonManager::GetSampler(), MUSkeletonManager::GetTexture());
 	bgfx::setTexture(2, terrain->GetLightmapSampler(), terrain->GetLightmapTexture());
 
 	bgfx::setUniform(LightPositionUniform, glm::value_ptr(terrain->GetLightPosition()));
-	glm::vec4 settings(static_cast<mu_float>(config.BoneOffset), 0.0f, static_cast<mu_float>(config.EnableLight), 0.0f);
-	bgfx::setUniform(Settings1Uniform, glm::value_ptr(settings));
+	glm::vec4 usettings(static_cast<mu_float>(config.BoneOffset), 0.0f, static_cast<mu_float>(config.EnableLight), 0.0f);
+	bgfx::setUniform(Settings1Uniform, glm::value_ptr(usettings));
 	bgfx::setUniform(BodyLightUniform, glm::value_ptr(config.BodyLight));
 
 	bgfx::setVertexBuffer(0, model->VertexBuffer, mesh.VertexBuffer.Offset, mesh.VertexBuffer.Count);
-	bgfx::submit(0, RenderProgram);
+	bgfx::submit(0, settings.Program);
 }
 
 void MUModelRenderer::RenderBody(

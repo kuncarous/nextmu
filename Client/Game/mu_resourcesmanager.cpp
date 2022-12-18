@@ -3,6 +3,7 @@
 #include "mu_graphics.h"
 #include "mu_model.h"
 #include "mu_texture.h"
+#include "mu_textures.h"
 
 template<const EGameDirectoryType dirType>
 NEXTMU_INLINE const bgfx::Memory *mu_readshader(mu_utf8string filename)
@@ -29,11 +30,12 @@ typedef std::unique_ptr<NTexture> TexturePointer;
 namespace MUResourcesManager
 {
 	std::map<mu_utf8string, bgfx::ProgramHandle> Programs;
-	std::map<mu_utf8string, ModelPointer> Models;
 	std::map<mu_utf8string, TexturePointer> Textures;
+	std::map<mu_utf8string, ModelPointer> Models;
 
 	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment);
 	const mu_boolean LoadPrograms(const mu_utf8string basePath, const nlohmann::json &programs);
+	const mu_boolean LoadTextures(const mu_utf8string basePath, const nlohmann::json &textures);
 	const mu_boolean LoadModels(const mu_utf8string basePath, const nlohmann::json &models);
 
 	const mu_boolean Load()
@@ -62,16 +64,31 @@ namespace MUResourcesManager
 			return false;
 		}
 
-		const auto shaders = document["shaders"];
-		if (LoadPrograms(path, shaders) == false)
+		if (document.contains("shaders"))
 		{
-			return false;
+			const auto shaders = document["shaders"];
+			if (LoadPrograms(path, shaders) == false)
+			{
+				return false;
+			}
 		}
 
-		const auto models = document["models"];
-		if (LoadModels(path, models) == false)
+		if (document.contains("textures"))
 		{
-			return false;
+			const auto textures = document["textures"];
+			if (LoadTextures(path, textures) == false)
+			{
+				return false;
+			}
+		}
+
+		if (document.contains("models"))
+		{
+			const auto models = document["models"];
+			if (LoadModels(path, models) == false)
+			{
+				return false;
+			}
 		}
 
 		return true;
@@ -85,6 +102,7 @@ namespace MUResourcesManager
 		}
 
 		Programs.clear();
+		Textures.clear();
 		Models.clear();
 	}
 
@@ -139,6 +157,38 @@ namespace MUResourcesManager
 		return true;
 	}
 
+	const mu_boolean LoadTextures(const mu_utf8string basePath, const nlohmann::json &textures)
+	{
+		for (const auto &t : textures)
+		{
+			const mu_utf8string id = t["id"];
+			const mu_utf8string path = t["path"];
+			mu_utf8string filter = "linear";
+			mu_utf8string wrap = "repeat";
+
+			if (t.contains("filter"))
+			{
+				filter = t["filter"].get<mu_utf8string>();
+			}
+
+			if (t.contains("wrap"))
+			{
+				wrap = t["wrap"].get<mu_utf8string>();
+			}
+
+			auto texture = MUTextures::Load(basePath + path, MUTextures::CalculateSamplerFlags(filter, wrap));
+			if (!texture)
+			{
+				mu_error("failed to load texture ({})", path);
+				return false;
+			}
+
+			Textures.insert(std::pair(id, std::move(texture)));
+		}
+
+		return true;
+	}
+
 	const mu_boolean LoadModels(const mu_utf8string basePath, const nlohmann::json &models)
 	{
 		for (const auto &m : models)
@@ -164,6 +214,13 @@ namespace MUResourcesManager
 		auto iter = Programs.find(id);
 		if (iter == Programs.end()) return BGFX_INVALID_HANDLE;
 		return iter->second;
+	}
+
+	const NTexture *GetTexture(const mu_utf8string id)
+	{
+		auto iter = Textures.find(id);
+		if (iter == Textures.end()) return nullptr;
+		return iter->second.get();
 	}
 
 	const NModel *GetModel(const mu_utf8string id)
