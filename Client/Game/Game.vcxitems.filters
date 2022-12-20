@@ -70,6 +70,27 @@
     <Filter Include="Environment\Terrain">
       <UniqueIdentifier>{d49e4e2c-7ffe-483a-90c6-1c9977953bdc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{708273af-4e66-4498-9b69-68d035789674}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Frustum">
+      <UniqueIdentifier>{f674ce35-2860-4304-b734-6fdbbca4e171}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Caps">
+      <UniqueIdentifier>{ef27b566-d744-4558-bde3-8732c3d1f3dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{e5f9bd23-375b-48a2-845c-eb4cabeab753}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Model">
+      <UniqueIdentifier>{b49ad887-3187-437a-a644-b7319d2fe74e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\BoundingBox">
+      <UniqueIdentifier>{c940c91f-b1ee-4586-aa47-3c079a5766eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\AABB">
+      <UniqueIdentifier>{6a486adb-b07c-407c-8602-759ab770c4e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -135,9 +156,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.cpp">
       <Filter>Skeleton</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp">
-      <Filter>Model</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight.cpp">
       <Filter>UI\Ultralight</Filter>
     </ClCompile>
@@ -197,6 +215,18 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_crypt.cpp">
       <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_frustum.cpp">
+      <Filter>Math\Frustum</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_capabilities.cpp">
+      <Filter>Caps</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.cpp">
+      <Filter>Renderer\BoundingBox</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp">
+      <Filter>Renderer\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -284,9 +314,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.h">
       <Filter>Skeleton</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_modelrenderer.h">
-      <Filter>Model</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight.h">
       <Filter>UI\Ultralight</Filter>
     </ClInclude>
@@ -346,6 +373,27 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_structs.h">
       <Filter>Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_frustum.h">
+      <Filter>Math\Frustum</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_capabilities.h">
+      <Filter>Caps</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.h">
+      <Filter>Renderer\BoundingBox</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_modelrenderer.h">
+      <Filter>Renderer\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_rendererconfig.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_aabb.h">
+      <Filter>Math\AABB</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

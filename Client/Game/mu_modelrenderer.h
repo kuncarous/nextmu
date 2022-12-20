@@ -3,18 +3,11 @@
 
 #pragma once
 
+#include "mu_rendererconfig.h"
+
 class NTerrain;
 class NModel;
 class NSkeleton;
-
-struct NModelRenderConfig
-{
-	const mu_uint32 BoneOffset;
-	const glm::vec3 BodyOrigin;
-	const mu_float BodyScale;
-	const mu_boolean EnableLight;
-	const glm::vec4 BodyLight;
-};
 
 class MUModelRenderer
 {
@@ -28,12 +21,13 @@ public:
 	static void RenderMesh(
 		const NModel *model,
 		const mu_uint32 meshIndex,
-		const NModelRenderConfig &config,
+		const NRenderConfig &config,
 		const mu_uint32 transformCache
 	);
 	static void RenderBody(
+		const NSkeletonInstance &skeleton,
 		const NModel *model,
-		const NModelRenderConfig &config
+		const NRenderConfig &config
 	);
 
 private:

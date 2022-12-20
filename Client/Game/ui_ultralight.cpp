@@ -218,7 +218,7 @@ namespace UIUltralight
 		return true;
 	}
 
-	void InitializeVertexLayout()
+	static void InitializeVertexLayout()
 	{
 		static mu_boolean initialized = false;
 		if (initialized) return;

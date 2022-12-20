@@ -3,17 +3,6 @@
 #include "mu_model.h"
 #include "mu_skeletonmanager.h"
 
-void NSkeletonInstance::SetParent(
-	const glm::vec3 Angle,
-	const glm::vec3 Position,
-	const mu_float Scale
-)
-{
-	Parent.Rotation = glm::quat(glm::radians(Angle));
-	Parent.Position = Position;
-	Parent.Scale = Scale;
-}
-
 const mu_boolean NSkeletonInstance::PlayAnimation(
 	const NModel *Model,
 	mu_uint16 &CurrentAction,

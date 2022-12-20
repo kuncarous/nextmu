@@ -5,25 +5,9 @@
 
 class NModel;
 
-/*
-	Instead of use a Matrix (4x4) we will use a simple Position, Scale + Quaternion Rotation structure.
-	This might impact a little the CPU however will benefit a lot the GPU and will provide us the chance
-	to do Skeleton Skinning in the Vertex Shader.
-	THIS IS NOT DUAL QUATERNION. Don't confuse it.
-
-	WARNING!
-	Don't move these variables from their current location, it is being used to update the skeleton texture.
-*/
-struct NCompressedBone
-{
-	glm::quat Rotation;
-	glm::vec3 Position;
-	mu_float Scale;
-};
-
 NEXTMU_INLINE void MixBones(
-	const NCompressedBone &parent,
-	NCompressedBone &out
+	const NCompressedMatrix &parent,
+	NCompressedMatrix &out
 )
 {
 	out.Rotation = parent.Rotation * out.Rotation;
@@ -45,12 +29,6 @@ struct AnimationFrameInfo
 class NSkeletonInstance
 {
 public:
-	void SetParent(
-		const glm::vec3 Angle,
-		const glm::vec3 Position = glm::vec3(),
-		const mu_float Scale = 1.0f
-	);
-
 	/*
 		Return tells if can continue same animation, if false means the animation finished.
 	*/
@@ -72,9 +50,29 @@ public:
 
 	const mu_uint32 Upload();
 
+public:
+	void SetParent(
+		const glm::vec3 Angle,
+		const glm::vec3 Position = glm::vec3(),
+		const mu_float Scale = 1.0f
+	)
+	{
+		Parent.Set(Angle, Position, Scale);
+	}
+
+	const NCompressedMatrix &GetParent() const
+	{
+		return Parent;
+	}
+
+	const NCompressedMatrix &GetBone(const mu_uint32 bone) const
+	{
+		return Bones[bone];
+	}
+
 private:
-	NCompressedBone Parent;
-	std::vector<NCompressedBone> Bones;
+	NCompressedMatrix Parent;
+	std::vector<NCompressedMatrix> Bones;
 	mu_uint32 BonesCount;
 };
 

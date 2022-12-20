@@ -342,13 +342,13 @@ void ConvertObjects(const mu_utf8string filename)
 	nlohmann::ordered_json jdocument;
 	jdocument["objects"] = jobjects;
 
-	auto dotPos = filename.find_last_of('.');
+	auto dotPos = filename.find_last_of('\\');
 	const mu_utf8string outfilename = (
 		(
 			dotPos == mu_utf8string::npos
 			? filename
-			: filename.substr(0, dotPos)
-		) + ".objects.json"
+			: filename.substr(0, dotPos + 1)
+		) + "objects.json"
 	);
 
 	if (mu_rwfromfile<EGameDirectoryType::eSupport>(&fp, outfilename, "wb") == false)

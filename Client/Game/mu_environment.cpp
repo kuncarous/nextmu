@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "mu_environment.h"
 #include "mu_state.h"
+#include "mu_camera.h"
 #include "mu_modelrenderer.h"
+#include "mu_bboxrenderer.h"
+#include "mu_renderstate.h"
+
+#define RENDER_BBOX (0)
 
 void NEnvironment::Reset()
 {
@@ -22,6 +27,41 @@ void NEnvironment::Update()
 		Terrain->Update();
 	}
 
+	const auto frustum = MURenderState::GetCamera()->GetFrustum();
+
+	const auto visibilityView = Objects.view<
+		NEntity::Renderable,
+		NEntity::Attachment,
+		NEntity::RenderState,
+		NEntity::BoundingBox,
+		NEntity::Position
+	>();
+	for (auto [entity, attachment, renderState, boundingBox, position] : visibilityView.each())
+	{
+		NCompressedMatrix viewModel;
+		viewModel.Set(
+			position.Angle,
+			position.Position,
+			position.Scale
+		);
+
+		const auto model = attachment.Model;
+		if (model->HasMeshes() && model->HasGlobalBBox())
+		{
+			const auto &bbox = model->GetGlobalBBox();
+			boundingBox.Min = Transform(bbox.Min, viewModel);
+			boundingBox.Max = Transform(bbox.Max, viewModel);
+		}
+		else
+		{
+			boundingBox.Min = Transform(boundingBox.Min, viewModel);
+			boundingBox.Max = Transform(boundingBox.Max, viewModel);
+		}
+		boundingBox.Order();
+
+		renderState.Flags.Visible = frustum->IsBoxVisible(boundingBox.Min, boundingBox.Max);
+	}
+
 	const auto objectsView = Objects.view<
 		NEntity::Renderable,
 		NEntity::Attachment,
@@ -31,17 +71,18 @@ void NEnvironment::Update()
 		NEntity::Position,
 		NEntity::Animation
 	>();
-
 	for (auto [entity, attachment, light, renderState, skeleton, position, animation] : objectsView.each())
 	{
+		if (!renderState.Flags.Visible) continue;
+
 		CalculateLight(position, light, renderState);
 
-		skeleton.Instance.PlayAnimation(attachment.Model, animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, attachment.Model->GetPlaySpeed() * MUState::GetUpdateTime());
 		skeleton.Instance.SetParent(
 			position.Angle,
 			position.Position,
 			position.Scale
 		);
+		skeleton.Instance.PlayAnimation(attachment.Model, animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, attachment.Model->GetPlaySpeed() * MUState::GetUpdateTime());
 		skeleton.Instance.Animate(
 			attachment.Model,
 			{
@@ -64,19 +105,29 @@ void NEnvironment::Render()
 	Terrain->ConfigureUniforms();
 	Terrain->Render();
 
-	const auto objectsView = Objects.view<NEntity::Renderable, NEntity::Attachment, NEntity::Light, NEntity::RenderState, NEntity::Skeleton>();
-	for (auto [entity, attachment, light, renderState, skeleton] : objectsView.each())
+	const auto objectsView = Objects.view<NEntity::Renderable, NEntity::Attachment, NEntity::RenderState, NEntity::Skeleton>();
+	for (auto [entity, attachment, renderState, skeleton] : objectsView.each())
 	{
+		if (!renderState.Flags.Visible) continue;
 		if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
-		const NModelRenderConfig config = {
+		const NRenderConfig config = {
 			.BoneOffset = skeleton.SkeletonOffset,
 			.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
 			.BodyScale = 1.0f,
-			.EnableLight = renderState.LightEnable,
+			.EnableLight = renderState.Flags.LightEnable,
 			.BodyLight = renderState.BodyLight,
 		};
-		MUModelRenderer::RenderBody(attachment.Model, config);
+		MUModelRenderer::RenderBody(skeleton.Instance, attachment.Model, config);
 	}
+
+#if RENDER_BBOX
+	const auto bboxView = Objects.view<NEntity::Renderable, NEntity::RenderState, NEntity::BoundingBox>();
+	for (auto [entity, renderState, boundingBox] : bboxView.each())
+	{
+		if (!renderState.Flags.Visible) continue;
+		MUBBoxRenderer::Render(boundingBox);
+	}
+#endif
 }
 
 void NEnvironment::CalculateLight(

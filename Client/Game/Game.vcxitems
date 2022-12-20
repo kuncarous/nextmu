@@ -56,7 +56,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_capabilities.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_config.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_crypt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment.cpp" />
@@ -64,6 +66,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_graphics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_input.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_frustum.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp" />
@@ -101,18 +104,24 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_textedit.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_truetype.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)bgfx\imgui_impl_bgfx.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_capabilities.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_crypt.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_structs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_graphics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_input.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_aabb.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_frustum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_modelrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_mesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_skeleton.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_precompiled.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_rendererconfig.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate_enums.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_resources.h" />

@@ -14,7 +14,7 @@ namespace MUSkeletonManager
 
 	bgfx::TextureHandle BonesTexture = BGFX_INVALID_HANDLE;
 	bgfx::UniformHandle BonesSampler = BGFX_INVALID_HANDLE;
-	std::vector<NCompressedBone> BonesBuffer;
+	std::vector<NCompressedMatrix> BonesBuffer;
 	mu_atomic_uint32_t BonesCount = 0;
 
 	const mu_boolean Initialize()
@@ -80,11 +80,11 @@ namespace MUSkeletonManager
 		bgfx::updateTexture2D(BonesTexture, 0, 0, 0, 0, width, height, mem);
 	}
 
-	const mu_uint32 UploadBones(const NCompressedBone *bones, const mu_uint32 bonesCount)
+	const mu_uint32 UploadBones(const NCompressedMatrix *bones, const mu_uint32 bonesCount)
 	{
 		const mu_uint32 index = BonesCount.fetch_add(bonesCount);
 		mu_assert(index + bonesCount <= MaxBonesCount);
-		mu_memcpy(&BonesBuffer[index], bones, sizeof(NCompressedBone) * bonesCount);
+		mu_memcpy(&BonesBuffer[index], bones, sizeof(NCompressedMatrix) * bonesCount);
 		return index;
 	}
 };

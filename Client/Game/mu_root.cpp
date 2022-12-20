@@ -3,6 +3,7 @@
 #include "mu_config.h"
 #include "mu_window.h"
 #include "mu_graphics.h"
+#include "mu_capabilities.h"
 #include "mu_timer.h"
 #include "mu_input.h"
 #include "mu_camera.h"
@@ -12,8 +13,9 @@
 #include "mu_resourcesmanager.h"
 #include "mu_skeletoninstance.h"
 #include "mu_skeletonmanager.h"
-#include "mu_modelrenderer.h"
 #include "mu_model.h"
+#include "mu_modelrenderer.h"
+#include "mu_bboxrenderer.h"
 
 #include "ui_ultralight.h"
 #include "ui_noesisgui.h"
@@ -124,6 +126,12 @@ namespace MURoot
 			return false;
 		}
 
+		if (MUCapabilities::Configure() == false)
+		{
+			mu_error("Failed to configure capabilities.");
+			return false;
+		}
+
 		if (MUSkeletonManager::Initialize() == false)
 		{
 			mu_error("Failed to initialize skeleton manager.");
@@ -158,11 +166,18 @@ namespace MURoot
 			return false;
 		}
 
+		if (MUBBoxRenderer::Initialize() == false)
+		{
+			mu_error("Failed to initialize model renderer.");
+			return false;
+		}
+
 		return true;
 	}
 
 	void Destroy()
 	{
+		MUBBoxRenderer::Destroy();
 		MUModelRenderer::Destroy();
 		MUSkeletonManager::Destroy();
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_ULTRALIGHT
@@ -264,7 +279,7 @@ namespace MURoot
 #endif
 
 		static mu_double accumulatedTime = 0.0;
-		static glm::mat4 view, projection;
+		static cglm::mat4 view, projection, frustumProjection;
 		while (!Quit)
 		{
 			accumulatedTime += elapsedTime;
@@ -354,20 +369,50 @@ namespace MURoot
 			ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
 #endif
 
-			auto caps = bgfx::getCaps();
+			camera.GetView(view);
 
-			view = camera.GetView();
-			projection = glm::perspectiveFov(
-				glm::radians(35.0f),
-				static_cast<mu_float>(windowWidth),
-				static_cast<mu_float>(windowHeight),
-				50.0f,
-				caps->homogeneousDepth
-				? 2000.0f
-				: 100000.0f
-			);
+			constexpr mu_float HomogeneousFar = 5000.0f;
+			constexpr mu_float NonHomogeneousFar = 50000.0f;
+			const mu_float aspect = static_cast<mu_float>(windowWidth) / static_cast<mu_float>(windowHeight);
+			if (MUCapabilities::IsHomogeneousDepth())
+			{
+				cglm::glm_perspective_rh_no(
+					cglm::glm_rad(35.0f),
+					aspect,
+					50.0f,
+					HomogeneousFar,
+					projection
+				);
+				cglm::glm_perspective_rh_no(
+					cglm::glm_rad(35.0f),
+					aspect,
+					50.0f,
+					HomogeneousFar,
+					frustumProjection
+				);
+			}
+			else
+			{
+				cglm::glm_perspective_rh_zo(
+					cglm::glm_rad(35.0f),
+					aspect,
+					50.0f,
+					NonHomogeneousFar,
+					projection
+				);
+				cglm::glm_perspective_rh_no(
+					cglm::glm_rad(35.0f),
+					aspect,
+					50.0f,
+					NonHomogeneousFar,
+					frustumProjection
+				);
+			}
 
-			bgfx::setViewTransform(0, glm::value_ptr(view), glm::value_ptr(projection));
+			camera.GenerateFrustum(view, frustumProjection);
+
+			bgfx::setViewTransform(0, view, projection);
+			MURenderState::AttachCamera(&camera);
 			MURenderState::AttachEnvironment(&environment);
 
 			environment.Update();
@@ -387,14 +432,16 @@ namespace MURoot
 			{
 				const auto bonesOffset = MobsBonesOffset[n];
 				if (bonesOffset == NInvalidUInt32) continue;
-				const NModelRenderConfig config = {
+				const glm::vec3 position = glm::vec3((100.0f + mx) * TerrainScale, (100.0f + my) * TerrainScale, 800.0f);
+				const mu_float scale = 1.0f;
+				const NRenderConfig config = {
 					.BoneOffset = bonesOffset,
-					.BodyOrigin = glm::vec3((100.0f + mx) * TerrainScale, (100.0f + my) * TerrainScale, 800.0f),
-					.BodyScale = 1.0f,
+					.BodyOrigin = position,
+					.BodyScale = scale,
 					.EnableLight = true,
-					.BodyLight = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+					.BodyLight = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 				};
-				MUModelRenderer::RenderBody(Model, config);
+				MUModelRenderer::RenderBody(MobsInstance[n], Model, config);
 				mx += 2.0f;
 				if (mx >= 100.0f)
 				{

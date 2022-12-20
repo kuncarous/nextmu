@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "mu_renderstate.h"
 #include "mu_environment.h"
+#include "mu_camera.h"
 
 namespace MURenderState
 {
+	NCamera *Camera = nullptr;
 	NEnvironment *Environment = nullptr;
 	std::array<NTexture *, TextureAttachment::Count> Textures = { {} };
 
@@ -16,6 +18,16 @@ namespace MURenderState
 		}
 	}
 
+	void AttachCamera(NCamera *camera)
+	{
+		Camera = camera;
+	}
+
+	void DetachCamera()
+	{
+		Camera = nullptr;
+	}
+
 	void AttachEnvironment(NEnvironment *environment)
 	{
 		Environment = environment;
@@ -24,6 +36,11 @@ namespace MURenderState
 	void DetachEnvironment()
 	{
 		Environment = nullptr;
+	}
+
+	const NCamera *GetCamera()
+	{
+		return Camera;
 	}
 
 	const NEnvironment *GetEnvironment()

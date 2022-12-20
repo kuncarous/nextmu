@@ -162,7 +162,7 @@
       <AdditionalDependencies>SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build\Debug\SDL2.dll $(OutDir) /Y</Command>
+      <Command>xcopy ..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll $(OutDir) /Y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

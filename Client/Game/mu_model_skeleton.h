@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "mu_math_aabb.h"
+
 class NBone
 {
 public:
@@ -32,13 +34,18 @@ public:
 	mu_int16 Parent = NInvalidInt16;
 };
 
-// Should change the bounding box to use a center and extent instead?, which one would benefit more at future?
-constexpr mu_float InvalidBox = 50000.0f;
-class NBoneBoundingBox
+class NBoundingBoxWithValidation : public NBoundingBoxWithDefault
 {
 public:
-	glm::vec3 Min = glm::vec3(InvalidBox, InvalidBox, InvalidBox);
-	glm::vec3 Max = glm::vec3(-InvalidBox, -InvalidBox, -InvalidBox);
+	mu_boolean Valid = false;
+};
+
+class NModelBoundingBoxes
+{
+public:
+	mu_boolean Valid = false;
+	NBoundingBox Global;
+	std::vector<NBoundingBox> PerAnimation;
 };
 
 #endif

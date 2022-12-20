@@ -3,7 +3,7 @@
 
 #pragma once
 
-struct NCompressedBone;
+struct NCompressedMatrix;
 
 namespace MUSkeletonManager
 {
@@ -16,7 +16,7 @@ namespace MUSkeletonManager
 	void Reset();
 	void Update();
 
-	const mu_uint32 UploadBones(const NCompressedBone *bones, const mu_uint32 bonesCount);
+	const mu_uint32 UploadBones(const NCompressedMatrix *bones, const mu_uint32 bonesCount);
 }
 
 #endif

@@ -3,6 +3,7 @@
 #include "mu_skeletonmanager.h"
 #include "mu_skeletoninstance.h"
 #include "mu_renderstate.h"
+#include "mu_resourcesmanager.h"
 #include <glm/gtc/type_ptr.hpp>
 
 bgfx::UniformHandle MUModelRenderer::TextureSampler = BGFX_INVALID_HANDLE;
@@ -69,7 +70,7 @@ void MUModelRenderer::Destroy()
 void MUModelRenderer::RenderMesh(
 	const NModel *model,
 	const mu_uint32 meshIndex,
-	const NModelRenderConfig &config,
+	const NRenderConfig &config,
 	const mu_uint32 transformCache
 )
 {
@@ -113,8 +114,9 @@ void MUModelRenderer::RenderMesh(
 }
 
 void MUModelRenderer::RenderBody(
+	const NSkeletonInstance &skeleton,
 	const NModel *model,
-	const NModelRenderConfig &config
+	const NRenderConfig &config
 )
 {
 	auto terrain = MURenderState::GetTerrain();

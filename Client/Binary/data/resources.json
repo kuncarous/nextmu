@@ -24,6 +24,11 @@
 			"id": "model_blend",
 			"vertex": "shaders/models/blend",
 			"fragment": "shaders/models/blend"
+		},
+		{
+			"id": "boundingbox",
+			"vertex": "shaders/bbox",
+			"fragment": "shaders/bbox"
 		}
 	],
 	"models": [

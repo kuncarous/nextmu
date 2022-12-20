@@ -63,7 +63,10 @@ const entt::entity NEnvironment::AddObject(
 
 	registry.emplace<RenderState>(
 		entity,
-		object.LightEnable,
+		RenderFlags {
+			.Visible = false,
+			.LightEnable = object.LightEnable,
+		},
 		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
 	);
 	
@@ -78,6 +81,12 @@ const entt::entity NEnvironment::AddObject(
 		entity,
 		NInvalidUInt32,
 		instance
+	);
+
+	registry.emplace<BoundingBox>(
+		entity,
+		object.BBoxMin,
+		object.BBoxMax
 	);
 
 	registry.emplace<Position>(

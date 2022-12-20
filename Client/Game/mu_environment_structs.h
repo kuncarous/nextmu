@@ -95,9 +95,15 @@ namespace NEntity
 		LightSettings Settings;
 	};
 
+	struct RenderFlags
+	{
+		mu_boolean Visible : 1;
+		mu_boolean LightEnable : 1; // true : calculate light using normals, false : apply body light directly
+	};
+
 	struct RenderState
 	{
-		mu_boolean LightEnable; // true : calculate light using normals, false : apply body light directly
+		RenderFlags Flags;
 		glm::vec4 BodyLight;
 	};
 
@@ -105,6 +111,25 @@ namespace NEntity
 	{
 		mu_uint32 SkeletonOffset;
 		NSkeletonInstance Instance;
+	};
+
+	template<typename T>
+	NEXTMU_INLINE void Swap(T &a, T &b)
+	{
+		T tmp = a;
+		a = b;
+		b = tmp;
+	}
+
+	class BoundingBox : public NBoundingBox
+	{
+	public:
+		void Order()
+		{
+			if (Min.x > Max.x) Swap(Min.x, Max.x);
+			if (Min.y > Max.y) Swap(Min.y, Max.y);
+			if (Min.z > Max.z) Swap(Min.z, Max.z);
+		}
 	};
 
 	struct Position // Rename

@@ -5,6 +5,7 @@
 
 #include "mu_renderstate_enums.h"
 
+class NCamera;
 class NEnvironment;
 class NTerrain;
 class NTexture;
@@ -13,8 +14,12 @@ namespace MURenderState
 {
 	void Reset();
 
+	void AttachCamera(NCamera *camera);
+	void DetachCamera();
 	void AttachEnvironment(NEnvironment *environment);
 	void DetachEnvironment();
+
+	const NCamera *GetCamera();
 	const NEnvironment *GetEnvironment();
 	const NTerrain *GetTerrain();
 

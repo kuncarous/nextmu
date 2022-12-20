@@ -215,6 +215,8 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 		return false;
 	}
 
+	LoadBoundingBoxes(path + model);
+
 	if (LoadTextures(path, document) == false)
 	{
 		mu_error("failed to load model textures ({})", filename);
@@ -487,6 +489,71 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 	return true;
 }
 
+void NModel::LoadBoundingBoxes(mu_utf8string path)
+{
+	const auto dotPos = path.find_last_of('.');
+	if (dotPos != mu_utf8string::npos)
+	{
+		path = path.substr(0, dotPos);
+	}
+	path += ".bbox.json";
+
+	SDL_RWops *fp = nullptr;
+	if (mu_rwfromfile<EGameDirectoryType::eSupport>(&fp, path, "rb") == false)
+	{
+		return;
+	}
+
+	mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
+	std::unique_ptr<mu_char[]> jsonBuffer(new_nothrow mu_char[fileLength]);
+	SDL_RWread(fp, jsonBuffer.get(), fileLength, 1);
+	SDL_RWclose(fp);
+
+	const mu_utf8string inputBuffer = JsonStripComments(jsonBuffer.get(), static_cast<mu_uint32>(fileLength));
+	jsonBuffer.reset();
+	auto document = nlohmann::json::parse(inputBuffer.c_str());
+	if (document.is_discarded() == true)
+	{
+		return;
+	}
+
+	// Global
+	{
+		const auto &bbox = document["bbox"];
+		const auto &min = bbox["min"];
+		BBoxes.Global.Min[0] = min[0].get<mu_float>();
+		BBoxes.Global.Min[1] = min[1].get<mu_float>();
+		BBoxes.Global.Min[2] = min[2].get<mu_float>();
+
+		const auto &max = bbox["max"];
+		BBoxes.Global.Max[0] = max[0].get<mu_float>();
+		BBoxes.Global.Max[1] = max[1].get<mu_float>();
+		BBoxes.Global.Max[2] = max[2].get<mu_float>();
+	}
+
+	if (document.contains("animations"))
+	{
+		NBoundingBox box;
+		const auto &animations = document["animations"];
+		for (const auto &bbox : animations)
+		{
+			const auto &min = bbox["min"];
+			box.Min[0] = min[0].get<mu_float>();
+			box.Min[1] = min[1].get<mu_float>();
+			box.Min[2] = min[2].get<mu_float>();
+
+			const auto &max = bbox["max"];
+			box.Max[0] = max[0].get<mu_float>();
+			box.Max[1] = max[1].get<mu_float>();
+			box.Max[2] = max[2].get<mu_float>();
+
+			BBoxes.PerAnimation.push_back(box);
+		}
+	}
+
+	BBoxes.Valid = true;
+}
+
 const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::json &document)
 {
 	mu_utf8string subPath = "textures/";
@@ -695,6 +762,8 @@ void NModel::CalculateBoundingBoxes()
 				if (vertex.Position[n] < boundingBox.Min[n]) boundingBox.Min[n] = vertex.Position[n];
 				if (vertex.Position[n] > boundingBox.Max[n]) boundingBox.Max[n] = vertex.Position[n];
 			}
+
+			boundingBox.Valid = true;
 		}
 	}
 }

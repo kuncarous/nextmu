@@ -6,10 +6,20 @@
 // This doesn't change only the layout of glm::quat so shouldn't be used
 //#define GLM_FORCE_QUAT_DATA_XYZW 1
 
-#include <SDL.h>
-#include <bgfx/bgfx.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+namespace cglm
+{
+#include <cglm/types.h>
+#include <cglm/cam.h>
+#include <cglm/frustum.h>
+#include <cglm/box.h>
+#include <cglm/sphere.h>
+#include <cglm/clipspace/persp_rh_zo.h>
+}
+
+#include <SDL.h>
+#include <bgfx/bgfx.h>
 #include <FreeImage.h>
 #include <entt/entt.hpp>
 
@@ -39,6 +49,7 @@
 #include <NoesisPCH.h>
 #endif
 
+#include "mu_math.h"
 #include "mu_texture.h"
 #include "mu_model.h"
 #include "mu_terrain.h"
