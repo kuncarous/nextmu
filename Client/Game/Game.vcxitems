@@ -109,8 +109,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_capabilities.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_crypt.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_entity.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_entity_light.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_structs.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_character.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_character.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_object.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_graphics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h" />

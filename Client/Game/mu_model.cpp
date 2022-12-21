@@ -12,7 +12,7 @@ std::map<mu_utf8string, mu_uint64> DepthTestMap = {
 	{ "equal", BGFX_STATE_DEPTH_TEST_EQUAL },
 	{ "not_equal", BGFX_STATE_DEPTH_TEST_NOTEQUAL },
 	{ "less", BGFX_STATE_DEPTH_TEST_LESS },
-	{ "less_equal", BGFX_STATE_DEPTH_TEST_LESS },
+	{ "less_equal", BGFX_STATE_DEPTH_TEST_LEQUAL },
 	{ "greater", BGFX_STATE_DEPTH_TEST_GREATER },
 	{ "greater_equal", BGFX_STATE_DEPTH_TEST_GEQUAL },
 	{ "never", BGFX_STATE_DEPTH_TEST_NEVER },
@@ -271,6 +271,47 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 					settings.Light = mesh["light"].get<mu_float>();
 			}
 		}
+
+		if (settings.contains("virtual_meshes"))
+		{
+			const bgfx::ProgramHandle program = MUResourcesManager::GetProgram(ProgramDefault);
+			const auto &virtualMeshes = settings["virtual_meshes"];
+			for (const auto &mesh : virtualMeshes)
+			{
+				const auto id = mesh["id"].get<mu_uint32>();
+				if (id >= Meshes.size()) continue;
+
+				NVirtualMesh virtualMesh;
+				virtualMesh.Mesh = id;
+				auto &settings = virtualMesh.Settings;
+
+				if (mesh.contains("program"))
+				{
+					const bgfx::ProgramHandle program = MUResourcesManager::GetProgram(mesh["program"].get<mu_utf8string>());
+					if (bgfx::isValid(program))
+						settings.Program = program;
+				}
+
+				if (!bgfx::isValid(settings.Program))
+				{
+					settings.Program = program;
+				}
+
+				if (mesh.contains("texture"))
+					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
+
+				if (mesh.contains("normal"))
+					settings.RenderState[ModelRenderMode::Normal] = CalculateStateFromObject(mesh["normal"]);
+
+				if (mesh.contains("alpha"))
+					settings.RenderState[ModelRenderMode::Alpha] = CalculateStateFromObject(mesh["alpha"]);
+
+				if (mesh.contains("light"))
+					settings.Light = mesh["light"].get<mu_float>();
+
+				VirtualMeshes.push_back(virtualMesh);
+			}
+		}
 	}
 
 	if (GenerateBuffers() == false)
@@ -316,7 +357,7 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 	else if (version == 14)
 	{
 		mu_int32 encryptedSize = reader.Read<mu_int32>();
-		mu_int64 decryptedSize = CryptoModulusDecrypt(reader.GetPointer(), encryptedSize, nullptr);
+		mu_uint32 decryptedSize = CryptoModulusDecrypt(reader.GetPointer(), encryptedSize, nullptr);
 		std::unique_ptr<mu_uint8[]> decryptedBuffer(new_nothrow mu_uint8[decryptedSize]);
 		CryptoModulusDecrypt(reader.GetPointer(), encryptedSize, decryptedBuffer.get());
 		buffer.swap(decryptedBuffer);

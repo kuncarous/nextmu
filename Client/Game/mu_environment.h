@@ -3,10 +3,11 @@
 
 #pragma once
 
-#include "mu_environment_structs.h"
+#include "mu_environment_object.h"
+#include "mu_environment_character.h"
+#include "mu_entity.h"
 
 class NTerrain;
-class NModel;
 
 typedef std::unique_ptr<NTerrain> NTerrainPtr;
 typedef std::unique_ptr<NModel> NModelPtr;
@@ -25,15 +26,22 @@ public:
 
 	const mu_boolean LoadTerrain(mu_utf8string path);
 
-private:
+private: // Objects
 	const mu_boolean LoadObjects(mu_utf8string filename, const std::map<mu_uint32, NModel *> models);
 
-public:
+public: // Objects
 	void ClearObjects();
 	const entt::entity AddObject(
 		const MUObject::Settings object
 	);
 	void RemoveObject(const entt::entity entity);
+
+public: // Characters
+	void ClearCharacters();
+	const entt::entity AddOrFindCharacter(
+		const MUCharacter::Settings character
+	);
+	void RemoveCharacter(const entt::entity entity);
 
 public:
 	const NTerrain *GetTerrain() const
@@ -45,6 +53,8 @@ private:
 	NTerrainPtr Terrain;
 	std::vector<NModelPtr> Models;
 	entt::registry Objects;
+	entt::registry Characters;
+	std::map<mu_key, entt::entity> CharactersMap;
 };
 
 #endif

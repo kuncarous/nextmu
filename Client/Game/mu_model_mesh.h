@@ -76,4 +76,11 @@ public:
 	std::vector<NTriangle> Triangles;
 };
 
+class NVirtualMesh
+{
+public:
+	mu_uint32 Mesh;
+	NMeshRenderSettings Settings;
+};
+
 #endif

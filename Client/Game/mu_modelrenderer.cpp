@@ -128,9 +128,19 @@ void MUModelRenderer::RenderBody(
 	);
 	mu_uint32 transformCache = bgfx::setTransform(glm::value_ptr(viewModel));
 
-	const mu_uint32 numMeshes = static_cast<mu_uint32>(model->Meshes.size());
-	for (mu_uint32 m = 0; m < numMeshes; ++m)
+	if (model->VirtualMeshes.size() > 0)
 	{
-		RenderMesh(model, m, config, transformCache);
+		for (const auto &virtualMesh : model->VirtualMeshes)
+		{
+			RenderMesh(model, virtualMesh.Mesh, config, transformCache);
+		}
+	}
+	else
+	{
+		const mu_uint32 numMeshes = static_cast<mu_uint32>(model->Meshes.size());
+		for (mu_uint32 m = 0; m < numMeshes; ++m)
+		{
+			RenderMesh(model, m, config, transformCache);
+		}
 	}
 }

@@ -91,6 +91,9 @@
     <Filter Include="Math\AABB">
       <UniqueIdentifier>{6a486adb-b07c-407c-8602-759ab770c4e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Environment\Entity">
+      <UniqueIdentifier>{620d5ecf-0098-465a-9a2f-6b95dbbfebf1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -371,7 +374,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h">
       <Filter>Environment</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_structs.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_object.h">
       <Filter>Environment</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_frustum.h">
@@ -394,6 +397,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_aabb.h">
       <Filter>Math\AABB</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_entity.h">
+      <Filter>Environment\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_entity_light.h">
+      <Filter>Environment\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_character.cpp">
+      <Filter>Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_character.h">
+      <Filter>Environment</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,6 +10,7 @@ Some dependencies will be cloned from their repositories as part of NextMU repos
  
 ## From External Links
 Some dependencies are required to be downloaded and installed from their websites, follow is the list of dependencies:
+ - CGLM (https://github.com/recp/cglm/tags)
  - FMOD (https://www.fmod.com/download#fmodengine)
  - FreeImage (https://freeimage.sourceforge.io/download.html)
  - Ultralight (https://ultralig.ht/#pricing)
@@ -27,10 +28,32 @@ Open the generated solutions (build and build-x64) and compile them.
 ### bgfx
 Open a command prompt (cmd), go to ./Dependencies/Repositories folder and execute prepare_bgfx.bat file, this will create .build/projects/vs2022/bgfx.sln solution, compile it for 32 and 64 bits.
 
+### CGLM
+Download the latest version and decompress it in ./Dependencies/Installed, rename the folder to cglm.
+
 ### FreeImage
 Decompress in ./Dependencies/Installed/FreeImage (create Installed and FreeImage folders if required) and copy all files from ./Dependencies/Manual/FreeImage into it, you will be able to follow ./Dependencies/Manual/FreeImage/README.md instructions to compile it for Android.
 
 To compile it for Windows open ./Dependencies/Installed/FreeImage/FreeImage.2017.sln (if has newer, use it) and upgrade it for Visual Studio 2022 and compile FreeImageLib project.
+
+Before compile you have to configure FreeImage endianness, search for the next block of code in FreeImage.h:
+
+```
+#define FREEIMAGE_COLORORDER_BGR    0
+#define FREEIMAGE_COLORORDER_RGB    1
+#if (!defined(FREEIMAGE_COLORORDER)) || ((FREEIMAGE_COLORORDER != FREEIMAGE_COLORORDER_BGR) && (FREEIMAGE_COLORORDER != FREEIMAGE_COLORORDER_RGB))
+    #if defined(FREEIMAGE_BIGENDIAN)
+        #define FREEIMAGE_COLORORDER FREEIMAGE_COLORORDER_RGB
+    #else
+        #define FREEIMAGE_COLORORDER FREEIMAGE_COLORORDER_BGR
+    #endif // FREEIMAGE_BIGENDIAN
+#endif // FREEIMAGE_COLORORDER
+```
+
+and add the next line before the if:
+```
+#define FREEIMAGE_COLORORDER        FREEIMAGE_COLORORDER_RGB
+```
 
 ### FMOD
 Download and install FMOD Studio API, copy all folders from the api folder that is inside the installation folder into ./Dependencies/Installed/FMOD folder (create FMOD folder if required).

@@ -60,6 +60,7 @@ protected:
 	bgfx::VertexBufferHandle VertexBuffer = BGFX_INVALID_HANDLE;
 	std::vector<NModelTexture> Textures;
 
+	std::vector<NVirtualMesh> VirtualMeshes;
 	std::vector<NMesh> Meshes;
 	std::vector<mu_utf8string> BoneName; // Per Bone (separated for better cache ratio)
 	std::vector<NBoneInfo> BoneInfo; // Per Bone (separated for better cache ratio)

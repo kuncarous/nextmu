@@ -91,6 +91,8 @@ typedef std::atomic_int64_t		mu_atomic_int64_t;
 typedef std::atomic_uint64_t	mu_atomic_uint64_t;
 #endif
 
+typedef mu_int32 mu_key;
+
 constexpr mu_int8 NInvalidInt8 = -1;
 constexpr mu_int16 NInvalidInt16 = -1;
 constexpr mu_int32 NInvalidInt32 = -1;
