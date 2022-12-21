@@ -71,7 +71,8 @@ void MUModelRenderer::RenderMesh(
 	const NModel *model,
 	const mu_uint32 meshIndex,
 	const NRenderConfig &config,
-	const mu_uint32 transformCache
+	const mu_uint32 transformCache,
+	const NMeshRenderSettings *settings
 )
 {
 	const auto &mesh = model->Meshes[meshIndex];
@@ -80,9 +81,9 @@ void MUModelRenderer::RenderMesh(
 	auto terrain = MURenderState::GetTerrain();
 	if (terrain == nullptr) return;
 
-	const auto &settings = mesh.Settings;
+	if (!settings) settings = &mesh.Settings;
 	auto &textureInfo = model->Textures[meshIndex];
-	auto texture = settings.Texture;
+	auto texture = settings->Texture;
 	if (texture == nullptr)
 		texture = MURenderState::GetTexture(textureInfo.Type);
 	if (texture == nullptr)
@@ -94,11 +95,11 @@ void MUModelRenderer::RenderMesh(
 
 	if (texture->HasAlpha() || config.BodyLight[3] < 1.0f)
 	{
-		bgfx::setState(settings.RenderState[ModelRenderMode::Alpha]);
+		bgfx::setState(settings->RenderState[ModelRenderMode::Alpha]);
 	}
 	else
 	{
-		bgfx::setState(settings.RenderState[ModelRenderMode::Normal]);
+		bgfx::setState(settings->RenderState[ModelRenderMode::Normal]);
 	}
 	
 	bgfx::setTexture(1, MUSkeletonManager::GetSampler(), MUSkeletonManager::GetTexture());
@@ -110,7 +111,7 @@ void MUModelRenderer::RenderMesh(
 	bgfx::setUniform(BodyLightUniform, glm::value_ptr(config.BodyLight));
 
 	bgfx::setVertexBuffer(0, model->VertexBuffer, mesh.VertexBuffer.Offset, mesh.VertexBuffer.Count);
-	bgfx::submit(0, settings.Program);
+	bgfx::submit(0, settings->Program);
 }
 
 void MUModelRenderer::RenderBody(
@@ -132,7 +133,7 @@ void MUModelRenderer::RenderBody(
 	{
 		for (const auto &virtualMesh : model->VirtualMeshes)
 		{
-			RenderMesh(model, virtualMesh.Mesh, config, transformCache);
+			RenderMesh(model, virtualMesh.Mesh, config, transformCache, &virtualMesh.Settings);
 		}
 	}
 	else

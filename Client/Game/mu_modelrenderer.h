@@ -22,7 +22,8 @@ public:
 		const NModel *model,
 		const mu_uint32 meshIndex,
 		const NRenderConfig &config,
-		const mu_uint32 transformCache
+		const mu_uint32 transformCache,
+		const NMeshRenderSettings *settings = nullptr
 	);
 	static void RenderBody(
 		const NSkeletonInstance &skeleton,
