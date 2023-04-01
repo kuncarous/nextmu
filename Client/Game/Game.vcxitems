@@ -14,6 +14,30 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptarray\scriptarray.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptmath\scriptmath.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring_utils.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\backends\imgui_impl_sdl.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -56,6 +80,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_angelscript.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_capabilities.cpp" />
@@ -96,6 +121,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight_sdl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptarray\scriptarray.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptmath\scriptmath.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\backends\imgui_impl_sdl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imconfig.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui.h" />
@@ -104,6 +132,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_textedit.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_truetype.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)bgfx\imgui_impl_bgfx.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_capabilities.h" />

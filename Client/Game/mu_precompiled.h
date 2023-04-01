@@ -22,6 +22,7 @@ namespace cglm
 #include <bgfx/bgfx.h>
 #include <FreeImage.h>
 #include <entt/entt.hpp>
+#include <angelscript.h>
 
 #include "shared_precompiled.h"
 #include "mu_version.h"

@@ -94,6 +94,21 @@
     <Filter Include="Environment\Entity">
       <UniqueIdentifier>{620d5ecf-0098-465a-9a2f-6b95dbbfebf1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scripting">
+      <UniqueIdentifier>{616891ac-c30e-4f6f-920e-54da65798208}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Addons">
+      <UniqueIdentifier>{b780b256-5343-44fd-9640-3578d6205739}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Addons\String">
+      <UniqueIdentifier>{69ac2712-d25a-4f13-a6d7-1a7005bc9719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Addons\Math">
+      <UniqueIdentifier>{044988bc-f217-4328-96cd-065fd5a42ef6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Addons\Array">
+      <UniqueIdentifier>{6703a656-67ec-44ea-aca8-c900fe78bd4d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -230,6 +245,21 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp">
       <Filter>Renderer\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_angelscript.cpp">
+      <Filter>Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring.cpp">
+      <Filter>Scripting\Addons\String</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring_utils.cpp">
+      <Filter>Scripting\Addons\String</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptmath\scriptmath.cpp">
+      <Filter>Scripting\Addons\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptarray\scriptarray.cpp">
+      <Filter>Scripting\Addons\Array</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -409,6 +439,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_character.h">
       <Filter>Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h">
+      <Filter>Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring.h">
+      <Filter>Scripting\Addons\String</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptmath\scriptmath.h">
+      <Filter>Scripting\Addons\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptarray\scriptarray.h">
+      <Filter>Scripting\Addons\Array</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

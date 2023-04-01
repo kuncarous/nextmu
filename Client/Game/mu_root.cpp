@@ -2,6 +2,7 @@
 #include "mu_root.h"
 #include "mu_config.h"
 #include "mu_window.h"
+#include "mu_angelscript.h"
 #include "mu_graphics.h"
 #include "mu_capabilities.h"
 #include "mu_timer.h"
@@ -120,6 +121,12 @@ namespace MURoot
 			return false;
 		}
 
+		if (MUAngelScript::Initialize() == false)
+		{
+			mu_error("Failed to initialize angelscript.");
+			return false;
+		}
+
 		if (MUGraphics::Initialize() == false)
 		{
 			mu_error("Failed to initialize graphics.");
@@ -188,6 +195,7 @@ namespace MURoot
 #endif
 		MUResourcesManager::Destroy();
 		MUGraphics::Destroy();
+		MUAngelScript::Destroy();
 		MUWindow::Destroy();
 		MUConfig::Destroy();
 
