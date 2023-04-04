@@ -86,6 +86,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Binary\x86\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -157,7 +160,7 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\..\Bi
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../../../Dependencies/Installed/AngelScript/angelscript/lib;../../../Dependencies/Repositories/SDL/build/$(Configuration);../../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../../Dependencies/Installed/FMOD/core/lib/x64;../../../Dependencies/Installed/FreeImage/Dist/x64;../../../Dependencies/Installed/ultralight/lib;../../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>angelscript64.lib;Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLibd.lib;SDL2d.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>angelscript64d.lib;Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;FreeImageLibd.lib;SDL2d.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>xcopy ..\..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\..\Binary\x64\ /Y

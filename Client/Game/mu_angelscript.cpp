@@ -28,6 +28,7 @@ namespace MUAngelScript
 		}
 
 		AngelScript::RegisterStdString(Engine);
+		AngelScript::RegisterScriptArray(Engine, false);
 		AngelScript::RegisterStdStringUtils(Engine);
 		AngelScript::RegisterScriptMath(Engine);
 
