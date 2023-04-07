@@ -8,6 +8,26 @@
 
 #define RENDER_BBOX (0)
 
+const mu_boolean NEnvironment::Initialize()
+{
+	Particles.reset(new (std::nothrow) NParticles());
+	if (!Particles || Particles->Initialize() == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void NEnvironment::Destroy()
+{
+	if (Particles)
+	{
+		Particles->Destroy();
+		Particles.reset();
+	}
+}
+
 void NEnvironment::Reset()
 {
 	const auto updateCount = MUState::GetUpdateCount();
@@ -29,74 +49,95 @@ void NEnvironment::Update()
 
 	const auto frustum = MURenderState::GetCamera()->GetFrustum();
 
-	const auto visibilityView = Objects.view<
-		NEntity::Renderable,
-		NEntity::Attachment,
-		NEntity::RenderState,
-		NEntity::BoundingBox,
-		NEntity::Position
-	>();
-	for (auto [entity, attachment, renderState, boundingBox, position] : visibilityView.each())
+	// Animate
 	{
-		NCompressedMatrix viewModel;
-		viewModel.Set(
-			position.Angle,
-			position.Position,
-			position.Scale
-		);
-
-		const auto model = attachment.Model;
-		if (model->HasMeshes() && model->HasGlobalBBox())
+		const auto objectsView = Objects.view<
+			NEntity::Renderable,
+			NEntity::Attachment,
+			NEntity::Skeleton,
+			NEntity::Position,
+			NEntity::Animation
+		>();
+		for (auto [entity, attachment, skeleton, position, animation] : objectsView.each())
 		{
-			const auto &bbox = model->GetGlobalBBox();
-			boundingBox.Min = Transform(bbox.Min, viewModel);
-			boundingBox.Max = Transform(bbox.Max, viewModel);
+			skeleton.Instance.SetParent(
+				position.Angle,
+				position.Position,
+				position.Scale
+			);
+			skeleton.Instance.PlayAnimation(attachment.Model, animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, attachment.Model->GetPlaySpeed() * MUState::GetUpdateTime());
 		}
-		else
-		{
-			boundingBox.Min = Transform(boundingBox.Min, viewModel);
-			boundingBox.Max = Transform(boundingBox.Max, viewModel);
-		}
-		boundingBox.Order();
-
-		renderState.Flags.Visible = frustum->IsBoxVisible(boundingBox.Min, boundingBox.Max);
 	}
 
-	const auto objectsView = Objects.view<
-		NEntity::Renderable,
-		NEntity::Attachment,
-		NEntity::Light,
-		NEntity::RenderState,
-		NEntity::Skeleton,
-		NEntity::Position,
-		NEntity::Animation
-	>();
-	for (auto [entity, attachment, light, renderState, skeleton, position, animation] : objectsView.each())
+	Particles->Update(updateCount);
+	Particles->Propagate();
+
+	// Culling
 	{
-		if (!renderState.Flags.Visible) continue;
+		const auto objectsView = Objects.view<
+			NEntity::Renderable,
+			NEntity::Attachment,
+			NEntity::RenderState,
+			NEntity::BoundingBox,
+			NEntity::Position
+		>();
+		for (auto [entity, attachment, renderState, boundingBox, position] : objectsView.each())
+		{
+			NCompressedMatrix viewModel;
+			viewModel.Set(
+				position.Angle,
+				position.Position,
+				position.Scale
+			);
 
-		CalculateLight(position, light, renderState);
-
-		skeleton.Instance.SetParent(
-			position.Angle,
-			position.Position,
-			position.Scale
-		);
-		skeleton.Instance.PlayAnimation(attachment.Model, animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, attachment.Model->GetPlaySpeed() * MUState::GetUpdateTime());
-		skeleton.Instance.Animate(
-			attachment.Model,
+			const auto model = attachment.Model;
+			if (model->HasMeshes() && model->HasGlobalBBox())
 			{
-				.Action = animation.CurrentAction,
-				.Frame = animation.CurrentFrame,
-			},
+				const auto &bbox = model->GetGlobalBBox();
+				boundingBox.Min = Transform(bbox.Min, viewModel);
+				boundingBox.Max = Transform(bbox.Max, viewModel);
+			}
+			else
 			{
-				.Action = animation.PriorAction,
-				.Frame = animation.PriorFrame,
-			},
-			glm::vec3(0.0f, 0.0f, 0.0f)
-		);
+				boundingBox.Min = Transform(boundingBox.Min, viewModel);
+				boundingBox.Max = Transform(boundingBox.Max, viewModel);
+			}
+			boundingBox.Order();
 
-		skeleton.SkeletonOffset = skeleton.Instance.Upload();
+			renderState.Flags.Visible = frustum->IsBoxVisible(boundingBox.Min, boundingBox.Max);
+		}
+	}
+
+	// Prepare to Render
+	{
+		const auto objectsView = Objects.view<
+			NEntity::Renderable,
+			NEntity::Attachment,
+			NEntity::Light,
+			NEntity::RenderState,
+			NEntity::Skeleton,
+			NEntity::Position,
+			NEntity::Animation
+		>();
+		for (auto [entity, attachment, light, renderState, skeleton, position, animation] : objectsView.each())
+		{
+			if (!renderState.Flags.Visible) continue;
+
+			CalculateLight(position, light, renderState);
+			skeleton.Instance.Animate(
+				attachment.Model,
+				{
+					.Action = animation.CurrentAction,
+					.Frame = animation.CurrentFrame,
+				},
+				{
+					.Action = animation.PriorAction,
+					.Frame = animation.PriorFrame,
+				},
+				glm::vec3(0.0f, 0.0f, 0.0f)
+			);
+			skeleton.SkeletonOffset = skeleton.Instance.Upload();
+		}
 	}
 }
 
@@ -128,6 +169,8 @@ void NEnvironment::Render()
 		MUBBoxRenderer::Render(boundingBox);
 	}
 #endif
+
+	Particles->Render();
 }
 
 void NEnvironment::CalculateLight(

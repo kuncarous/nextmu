@@ -64,14 +64,14 @@ namespace UINoesis
 
 	void Destroy()
 	{
-		if (Device && Device->Release() == 0)
-		{
-			Device = nullptr;
-		}
-
 		if (View && View->Release() == 0)
 		{
 			View = nullptr;
+		}
+
+		if (Device && Device->Release() == 0)
+		{
+			Device = nullptr;
 		}
 	}
 

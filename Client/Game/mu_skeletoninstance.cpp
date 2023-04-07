@@ -81,7 +81,7 @@ void NSkeletonInstance::Animate(
 	const auto &currentAnimation = Model->Animations[Current.Action];
 	const auto &priorAnimation = Model->Animations[Prior.Action];
 	const auto &currentFramesCount = static_cast<mu_uint32>(currentAnimation.Keys.size());
-	const auto &priorFramesCount = static_cast<mu_uint32>(currentAnimation.Keys.size());
+	const auto &priorFramesCount = static_cast<mu_uint32>(priorAnimation.Keys.size());
 
 	if (currentAnimation.Loop)
 	{

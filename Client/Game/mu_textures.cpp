@@ -4,6 +4,12 @@
 
 namespace MUTextures
 {
+	template <class T> void SwapValue(T& a, T& b) {
+		T tmp = a;
+		a = b;
+		b = tmp;
+	}
+
 	const mu_boolean LoadRaw(mu_utf8string path, FIBITMAP **texture, TextureInfo &info)
 	{
 		NormalizePath(path);
@@ -36,7 +42,7 @@ namespace MUTextures
 		SDL_RWclose(fp);
 
 		mu_boolean alpha = false;
-		mu_uint64 fflags = 0;
+		mu_int32 fflags = 0;
 		FREE_IMAGE_FORMAT format;
 		if (ext == "ozj" || ext == "jpg" || ext == "jpeg")
 		{
@@ -92,6 +98,21 @@ namespace MUTextures
 
 			bitmap = newBitmap;
 		}
+
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
+		const auto bit_count = FreeImage_GetBPP(bitmap);
+		if (bit_count == 24 || bit_count == 32) {
+			const unsigned width = FreeImage_GetWidth(bitmap);
+			const unsigned height = FreeImage_GetHeight(bitmap);
+			for (unsigned y = 0; y < height; y++) {
+				BYTE* pixel = FreeImage_GetScanLine(bitmap, y);
+				for (unsigned x = 0; x < width; x++) {
+					SwapValue(pixel[0], pixel[2]);
+					pixel += (bit_count >> 3);
+				}
+			}
+		}
+#endif
 
 		info.Width = FreeImage_GetWidth(bitmap);
 		info.Height = FreeImage_GetHeight(bitmap);

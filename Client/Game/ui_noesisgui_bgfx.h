@@ -48,67 +48,6 @@ namespace UINoesis
 		bgfx::VertexLayout Layout;
 		bgfx::VertexLayoutHandle Handle;
 	};
-
-	class BGFXVertexBuffer
-	{
-	public:
-		~BGFXVertexBuffer()
-		{
-			if (bgfx::isValid(Handle))
-			{
-				bgfx::destroy(Handle);
-				Handle = BGFX_INVALID_HANDLE;
-			}
-		}
-
-	public:
-		bgfx::DynamicVertexBufferHandle Handle = BGFX_INVALID_HANDLE;
-		mu_uint32 Offset = 0u;
-	};
-
-	class BGFXIndexBuffer
-	{
-	public:
-		~BGFXIndexBuffer()
-		{
-			if (bgfx::isValid(Handle))
-			{
-				bgfx::destroy(Handle);
-				Handle = BGFX_INVALID_HANDLE;
-			}
-		}
-
-	public:
-		bgfx::DynamicIndexBufferHandle Handle = BGFX_INVALID_HANDLE;
-		mu_uint32 Offset = 0u;
-	};
-
-	class BGFXCPUVertexBuffer
-	{
-	public:
-		std::unique_ptr<mu_uint8[]> Buffer = std::unique_ptr<mu_uint8[]>(new_nothrow mu_uint8[DYNAMIC_VB_SIZE]);
-		mu_uint32 Offset = 0u;
-		mu_uint32 AllocateSize = 0u;
-	};
-
-	class BGFXCPUIndexBuffer
-	{
-	public:
-		std::unique_ptr<mu_uint8[]> Buffer = std::unique_ptr<mu_uint8[]>(new_nothrow mu_uint8[DYNAMIC_IB_SIZE]);
-		mu_uint32 Offset = 0u;
-		mu_uint32 AllocateSize = 0u;
-	};
-
-	class BGFXUpdateBuffer
-	{
-	public:
-		BGFXUpdateBuffer(mu_uint32 offset, const bgfx::Memory *memory) :
-			Offset(offset), Memory(memory)
-		{}
-
-		const mu_uint32 Offset;
-		const bgfx::Memory *Memory;
-	};
 	
 	class BGFXTextureSampler
 	{
@@ -192,7 +131,15 @@ namespace UINoesis
 
 		/// Binds render target and sets viewport to cover the entire surface. The existing contents of
 		/// the surface are discarded and replaced with arbitrary data. Surface is not cleared
-		virtual void SetRenderTarget(Noesis::RenderTarget *surface) override;
+		virtual void SetRenderTarget(Noesis::RenderTarget* surface) override;
+
+		/// Indicates that until the next call to EndTile(), all drawing commands will only update the
+		/// contents of the render target defined by the extension of the given tile. This is a good
+		/// place to enable scissoring and apply optimizations for tile-based GPU architectures.
+		virtual void BeginTile(Noesis::RenderTarget* surface, const Noesis::Tile& tile) override;
+
+		/// Completes rendering to the tile specified by BeginTile()
+		virtual void EndTile(Noesis::RenderTarget* surface) override;
 
 		/// Resolves multisample render target. Transient surfaces (stencil, colorAA) are discarded.
 		/// Only the specified list of surface regions are resolved
@@ -218,25 +165,18 @@ namespace UINoesis
 		virtual void DrawBatch(const Noesis::Batch &batch) override;
 
 	private:
+		uint16_t Scissor = bgfx::kInvalidHandle;
 		std::vector<bgfx::ProgramHandle> Programs = std::vector<bgfx::ProgramHandle>(static_cast<size_t>(Noesis::Shader::Count), BGFX_INVALID_HANDLE);
 		Noesis::DeviceCaps Caps;
 		BGFXRenderTarget *RenderTarget = nullptr;
 		BGFXViewport RenderViewport;
-		bgfx::VertexLayout DummyLayout;
 		std::array<BGFXVertexLayout, Noesis::Shader::Vertex::Format::Count> VertexLayouts;
-		BGFXVertexBuffer VertexBuffer;
-		BGFXIndexBuffer IndexBuffer;
 		BGFXTextureSampler TextureSamplers[TextureUnit::Count];
 		BGFXUniform VertexUniforms[2];
 		BGFXUniform FragmentUniforms[2];
 
-		BGFXCPUVertexBuffer CPUVertexBuffer;
-		BGFXCPUIndexBuffer CPUIndexBuffer;
-
-		mu_uint32 VertexUpdatesIndex = 0u;
-		std::vector<BGFXUpdateBuffer> VertexUpdates;
-		mu_uint32 IndexUpdatesIndex = 0u;
-		std::vector<BGFXUpdateBuffer> IndexUpdates;
+		std::array<mu_uint8, DYNAMIC_VB_SIZE> VertexBuffer;
+		std::array<mu_uint8, DYNAMIC_IB_SIZE> IndexBuffer;
 	};
 };
 #endif

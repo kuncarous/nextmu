@@ -4,7 +4,7 @@
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
-	Noesis::Ptr<Stream> Stream::Load(const mu_utf8string filename)
+	Noesis::Ptr<Stream> Stream::Load(const mu_utf8string filename, const mu_boolean loadMemory)
 	{
 		SDL_RWops *file = nullptr;
 		if (mu_rwfromfile<EGameDirectoryType::eSupport>(&file, filename, "rb") == false)
@@ -12,11 +12,13 @@ namespace UINoesis
 			return nullptr;
 		}
 
-		return Noesis::Ptr<Stream>(new Stream(file));
+		return Noesis::Ptr<Stream>(new Stream(file, loadMemory));
 	}
 
-	Stream::Stream(SDL_RWops *file) : File(file)
-	{}
+	Stream::Stream(SDL_RWops *file, const mu_boolean loadMemory) : File(file)
+	{
+		if (loadMemory) ReadToMemory();
+	}
 
 	Stream::~Stream()
 	{
@@ -47,11 +49,32 @@ namespace UINoesis
 		return static_cast<uint32_t>(SDL_RWread(File, buffer, 1, size));
 	}
 
+	void Stream::ReadToMemory()
+	{
+		const auto offset = SDL_RWtell(File);
+		if (offset == -1) return;
+		const auto fileSize = SDL_RWsize(File);
+		if (fileSize == -1) return;
+		std::unique_ptr<mu_uint8[]> data(new (std::nothrow) mu_uint8[fileSize]);
+		if (!data) return;
+		SDL_RWseek(File, 0, RW_SEEK_SET);
+		const auto readSize = SDL_RWread(File, data.get(), 1, fileSize);
+		SDL_RWseek(File, offset, RW_SEEK_SET);
+		if (readSize != fileSize) return;
+		Memory.swap(data);
+	}
+
+	const void* Stream::GetMemoryBase() const
+	{
+		return Memory.get();
+	}
+
 	void Stream::Close()
 	{
 		if (File == nullptr) return;
 		SDL_RWclose(File);
 		File = nullptr;
+		Memory.reset();
 	}
 };
 #endif

@@ -14,6 +14,10 @@ namespace MURenderState
 {
 	void Reset();
 
+	void SetViewTransform(cglm::mat4 view, cglm::mat4 projection);
+	void GetProjection(cglm::mat4 dest);
+	void GetView(cglm::mat4 dest);
+
 	void AttachCamera(NCamera *camera);
 	void DetachCamera();
 	void AttachEnvironment(NEnvironment *environment);

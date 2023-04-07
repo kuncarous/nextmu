@@ -30,6 +30,16 @@ public:
 		return Texture;
 	}
 
+	const mu_uint16 GetWidth() const
+	{
+		return Width;
+	}
+
+	const mu_uint16 GetHeight() const
+	{
+		return Height;
+	}
+
 private:
 	bgfx::TextureHandle Texture = BGFX_INVALID_HANDLE;
 	mu_uint16 Width;

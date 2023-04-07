@@ -5,6 +5,7 @@
 
 // This doesn't change only the layout of glm::quat so shouldn't be used
 //#define GLM_FORCE_QUAT_DATA_XYZW 1
+#define GLM_FORCE_QUAT_DATA_WXYZ 1 // vcpkg glm requires this to work as before
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -24,21 +25,18 @@ namespace cglm
 #include <entt/entt.hpp>
 #include <angelscript.h>
 
+#if PHYSICS_ENABLED == 1
+#include <PxPhysicsAPI.h>
+#endif
+
 #include "shared_precompiled.h"
 #include "mu_version.h"
 
 #define NEXTMU_TITLE "NextMU Project"
 
-#define NEXTMU_UI_IMGUI (0) // Windows only
-#define NEXTMU_UI_ULTRALIGHT (1) // Desktop only
-#define NEXTMU_UI_NOESISGUI (2)
-
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
-#define NEXTMU_UI_LIBRARY NEXTMU_UI_NOESISGUI
-#else
-#define NEXTMU_UI_LIBRARY NEXTMU_UI_IMGUI
-//#define NEXTMU_UI_LIBRARY NEXTMU_UI_NOESISGUI
-#endif
+#define NEXTMU_UI_DUMMY (1)
+#define NEXTMU_UI_NOESISGUI (0)
+#define NEXTMU_UI_LIBRARY NEXTMU_UI_DUMMY
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 /*

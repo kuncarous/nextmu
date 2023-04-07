@@ -75,6 +75,8 @@ void MUModelRenderer::RenderMesh(
 	const NMeshRenderSettings *settings
 )
 {
+	// REMOVE
+	return;
 	const auto &mesh = model->Meshes[meshIndex];
 	if (mesh.VertexBuffer.Count == 0) return;
 

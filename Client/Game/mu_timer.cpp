@@ -25,7 +25,7 @@ namespace MUGlobalTimer
 	std::chrono::steady_clock::time_point LastTime = std::chrono::steady_clock::now();
 	mu_double ElapsedTime = 0.0;
 	mu_double WorkTime = 0.0;
-	mu_boolean LimitFPS = true;
+	mu_boolean LimitFPS = false;
 
 	void Wait()
 	{

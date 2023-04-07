@@ -87,6 +87,7 @@ static void InitializeVertexLayout()
 		.end();
 }
 
+#pragma pack(4)
 struct MeshVertex
 {
 	glm::vec3 Position;
@@ -99,6 +100,7 @@ struct MeshVertex
 #endif
 	mu_uint8 Bone[2];
 };
+#pragma pack()
 
 NModel::~NModel()
 {

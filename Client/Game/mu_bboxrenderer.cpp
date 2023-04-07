@@ -13,10 +13,12 @@ namespace MUBBoxRenderer
 	bgfx::VertexLayout VertexLayout;
 	bgfx::IndexBufferHandle IndexBuffer = BGFX_INVALID_HANDLE;
 
+#pragma pack(4)
 	struct Vertex
 	{
 		glm::vec3 Position;
 	};
+#pragma pack()
 
 	void InitializeVertexLayout()
 	{

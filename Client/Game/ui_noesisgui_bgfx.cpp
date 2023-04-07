@@ -124,11 +124,6 @@ namespace UINoesis
 
 	void BGFXRenderDevice::CreateShaders()
 	{
-		DummyLayout
-			.begin()
-			.add(bgfx::Attrib::Position, 1, bgfx::AttribType::Float)
-			.end();
-
 		for (mu_uint32 n = 0; n < Noesis::Shader::Vertex::Format::Count; ++n)
 		{
 			auto &layout = VertexLayouts[n];
@@ -205,9 +200,9 @@ namespace UINoesis
 
 	void BGFXRenderDevice::CreateBuffers()
 	{
-		auto &vertexLayout = DummyLayout;
-		VertexBuffer.Handle = bgfx::createDynamicVertexBuffer(static_cast<uint32_t>(DYNAMIC_VB_SIZE) / vertexLayout.getStride(), vertexLayout);
-		IndexBuffer.Handle = bgfx::createDynamicIndexBuffer(static_cast<uint32_t>(DYNAMIC_IB_SIZE) / sizeof(mu_uint16));
+		//auto &vertexLayout = DummyLayout;
+		//VertexBuffer.Handle = bgfx::createDynamicVertexBuffer(static_cast<uint32_t>(DYNAMIC_VB_SIZE) / vertexLayout.getStride(), vertexLayout);
+		//IndexBuffer.Handle = bgfx::createDynamicIndexBuffer(static_cast<uint32_t>(DYNAMIC_IB_SIZE) / sizeof(mu_uint16));
 	}
 
 	const mu_char *ShaderIDs[Noesis::Shader::Count] = {
@@ -633,6 +628,20 @@ namespace UINoesis
 		RenderViewport.height = bgfxTexture->GetHeight();
 	}
 
+	/// Indicates that until the next call to EndTile(), all drawing commands will only update the
+	/// contents of the render target defined by the extension of the given tile. This is a good
+	/// place to enable scissoring and apply optimizations for tile-based GPU architectures.
+	void BGFXRenderDevice::BeginTile(Noesis::RenderTarget* surface, const Noesis::Tile& tile)
+	{
+		Scissor = bgfx::setScissor(tile.x, tile.y, tile.width, tile.height);
+	}
+
+	/// Completes rendering to the tile specified by BeginTile()
+	void BGFXRenderDevice::EndTile(Noesis::RenderTarget* surface)
+	{
+		Scissor = bgfx::kInvalidHandle;
+	}
+
 	/// Resolves multisample render target. Transient surfaces (stencil, colorAA) are discarded.
 	/// Only the specified list of surface regions are resolved
 	void BGFXRenderDevice::ResolveRenderTarget(Noesis::RenderTarget *surface, const Noesis::Tile *tiles, uint32_t numTiles)
@@ -663,52 +672,26 @@ namespace UINoesis
 	void *BGFXRenderDevice::MapVertices(uint32_t bytes)
 	{
 		mu_info("[MapVertices] {}", bytes);
-		if (CPUVertexBuffer.Offset + bytes > DYNAMIC_VB_SIZE)
-			CPUVertexBuffer.Offset = 0;
-		CPUVertexBuffer.AllocateSize = bytes;
-		return CPUVertexBuffer.Buffer.get() + CPUVertexBuffer.Offset;
+		return VertexBuffer.data();
 	}
 
 	/// Invalidates the pointer previously mapped
 	void BGFXRenderDevice::UnmapVertices()
 	{
 		mu_info("[UnmapVertices]");
-		VertexUpdates.push_back(
-			BGFXUpdateBuffer(
-				CPUVertexBuffer.Offset,
-				bgfx::copy(
-					CPUVertexBuffer.Buffer.get() + CPUVertexBuffer.Offset,
-					CPUVertexBuffer.AllocateSize
-				)
-			)
-		);
-		CPUVertexBuffer.Offset += CPUVertexBuffer.AllocateSize;
 	}
 
 	/// Gets a pointer to stream 16-bit indices (bytes <= DYNAMIC_IB_SIZE)
 	void *BGFXRenderDevice::MapIndices(uint32_t bytes)
 	{
 		mu_info("[MapIndices] {}", bytes);
-		if (CPUIndexBuffer.Offset + bytes > DYNAMIC_IB_SIZE)
-			CPUIndexBuffer.Offset = 0;
-		CPUIndexBuffer.AllocateSize = bytes;
-		return CPUIndexBuffer.Buffer.get() + CPUIndexBuffer.Offset;
+		return IndexBuffer.data();
 	}
 
 	/// Invalidates the pointer previously mapped
 	void BGFXRenderDevice::UnmapIndices()
 	{
 		mu_info("[UnmapIndices]");
-		IndexUpdates.push_back(
-			BGFXUpdateBuffer(
-				CPUIndexBuffer.Offset,
-				bgfx::copy(
-					CPUIndexBuffer.Buffer.get() + CPUIndexBuffer.Offset,
-					CPUIndexBuffer.AllocateSize
-				)
-			)
-		);
-		CPUIndexBuffer.Offset += CPUIndexBuffer.AllocateSize;
 	}
 
 	void BGFXRenderDevice::SetTexture(const mu_uint8 stage, BGFXTexture *texture, Noesis::SamplerState sampler)
@@ -854,32 +837,20 @@ namespace UINoesis
 		auto format = Noesis::FormatForVertex[vertexShader];
 		auto stride = Noesis::SizeForFormat[format];
 		auto &vertexBuffer = VertexBuffer;
-		if (VertexUpdates.size() > 0)
-		{
-			auto &vertexUpdate = VertexUpdates[VertexUpdatesIndex++];
-
-			bgfx::update(
-				vertexBuffer.Handle,
-				vertexUpdate.Offset / stride,
-				vertexUpdate.Memory
-			);
-		}
-
 		auto &indexBuffer = IndexBuffer;
-		if (IndexUpdates.size() > 0)
-		{
-			auto &indexUpdate = IndexUpdates[IndexUpdatesIndex++];
 
-			bgfx::update(
-				indexBuffer.Handle,
-				indexUpdate.Offset / sizeof(mu_uint16),
-				indexUpdate.Memory
-			);
-		}
+		const auto &layout = VertexLayouts[format];
+		bgfx::TransientVertexBuffer vb{};
+		bgfx::allocTransientVertexBuffer(&vb, batch.numVertices, layout.Layout);
+		mu_memcpy(vb.data, VertexBuffer.data() + batch.vertexOffset, batch.numVertices * layout.Layout.getStride());
+
+		bgfx::TransientIndexBuffer ib{};
+		bgfx::allocTransientIndexBuffer(&ib, batch.numIndices);
+		mu_memcpy(ib.data, IndexBuffer.data() + batch.startIndex * sizeof(mu_uint16), batch.numIndices * sizeof(mu_uint16));
 
 		SetRenderState(batch.renderState, batch.stencilRef);
-		bgfx::setVertexBuffer(0, vertexBuffer.Handle, batch.vertexOffset / stride, batch.numVertices, VertexLayouts[format].Handle);
-		bgfx::setIndexBuffer(indexBuffer.Handle, batch.startIndex, batch.numIndices);
+		bgfx::setVertexBuffer(0, &vb, 0, batch.numVertices, layout.Handle);
+		bgfx::setIndexBuffer(&ib, 0, batch.numIndices);
 		SetTextures(batch);
 
 		static mu_float buffer[128];
@@ -907,17 +878,12 @@ namespace UINoesis
 			bgfx::setUniform(FragmentUniforms[1].Handle, buffer);
 		}
 
+		if (Scissor != bgfx::kInvalidHandle)
+		{
+			bgfx::setScissor(Scissor);
+		}
+
 		bgfx::submit(RenderView, program);
-
-		if (VertexUpdatesIndex >= VertexUpdates.size()) {
-			VertexUpdates.clear();
-			VertexUpdatesIndex = 0;
-		}
-
-		if (IndexUpdatesIndex >= IndexUpdates.size()) {
-			IndexUpdates.clear();
-			IndexUpdatesIndex = 0;
-		}
 	}
 };
 #endif

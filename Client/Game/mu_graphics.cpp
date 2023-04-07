@@ -2,9 +2,6 @@
 #include "mu_graphics.h"
 #include "mu_window.h"
 #include "mu_config.h"
-#include "imgui.h"
-#include "imgui_impl_bgfx.h"
-#include "backends/imgui_impl_sdl.h"
 
 #include <bgfx/platform.h>
 #include <SDL_syswm.h>
@@ -55,12 +52,6 @@ namespace MUGraphics
 		bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
 #endif
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_IMGUI
-		ImGui::CreateContext();
-		ImGui_Implbgfx_Init(255);
-		ImGui_ImplSDL2_InitForD3D(window);
-#endif
-
 		FreeImage_Initialise(true);
 
 		return true;
@@ -69,11 +60,6 @@ namespace MUGraphics
 	void Destroy()
 	{
 		if (!Initialized) return;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_IMGUI
-		ImGui_ImplSDL2_Shutdown();
-		ImGui_Implbgfx_Shutdown();
-		ImGui::DestroyContext();
-#endif
 		bgfx::shutdown();
 		FreeImage_DeInitialise();
 	}

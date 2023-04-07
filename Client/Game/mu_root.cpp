@@ -5,6 +5,7 @@
 #include "mu_angelscript.h"
 #include "mu_graphics.h"
 #include "mu_capabilities.h"
+#include "mu_physics.h"
 #include "mu_timer.h"
 #include "mu_input.h"
 #include "mu_camera.h"
@@ -17,15 +18,13 @@
 #include "mu_model.h"
 #include "mu_modelrenderer.h"
 #include "mu_bboxrenderer.h"
+#include "t_particles.h"
 
-#include "ui_ultralight.h"
 #include "ui_noesisgui.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "imgui.h"
-#include "imgui_impl_bgfx.h"
-#include "backends/imgui_impl_sdl.h"
+#include <glm/gtc/random.hpp>
 
 constexpr mu_double GameCycleTime = 1000.0 / 25.0; // 25 FPS
 
@@ -139,6 +138,14 @@ namespace MURoot
 			return false;
 		}
 
+#if PHYSICS_ENABLED == 1
+		if (MUPhysics::Initialize() == false)
+		{
+			mu_error("Failed to initialize physics.");
+			return false;
+		}
+#endif
+
 		if (MUSkeletonManager::Initialize() == false)
 		{
 			mu_error("Failed to initialize skeleton manager.");
@@ -150,14 +157,6 @@ namespace MURoot
 			mu_error("Failed to load resources.");
 			return false;
 		}
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_ULTRALIGHT
-		if (UIUltralight::Initialize() == false)
-		{
-			mu_error("Failed to initialize ultralight.");
-			return false;
-		}
-#endif
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		if (UINoesis::Initialize() == false)
@@ -179,6 +178,8 @@ namespace MURoot
 			return false;
 		}
 
+		TParticles::Register();
+
 		return true;
 	}
 
@@ -187,13 +188,13 @@ namespace MURoot
 		MUBBoxRenderer::Destroy();
 		MUModelRenderer::Destroy();
 		MUSkeletonManager::Destroy();
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_ULTRALIGHT
-		UIUltralight::Destroy();
-#endif
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		UINoesis::Destroy();
 #endif
 		MUResourcesManager::Destroy();
+#if PHYSICS_ENABLED == 1
+		MUPhysics::Destroy();
+#endif
 		MUGraphics::Destroy();
 		MUAngelScript::Destroy();
 		MUWindow::Destroy();
@@ -265,8 +266,8 @@ namespace MURoot
 		camera.SetAngle(glm::vec3(glm::radians(demo.CX), glm::radians(demo.CY), glm::radians(0.0f)));
 		camera.SetUp(glm::vec3(0.0f, 0.0f, 1.0f));
 
-		static NEnvironment environment;
-		if (environment.LoadTerrain(demo.Map) == false)
+		std::unique_ptr<NEnvironment> environment(new NEnvironment());
+		if (environment->Initialize() == false || environment->LoadTerrain(demo.Map) == false)
 		{
 			return;
 		}
@@ -282,16 +283,12 @@ namespace MURoot
 			return;
 		}
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_IMGUI
-		ImGuiIO &io = ImGui::GetIO();
-#endif
-
 		static mu_double accumulatedTime = 0.0;
 		static cglm::mat4 view, projection, frustumProjection;
 		while (!Quit)
 		{
 			accumulatedTime += elapsedTime;
-			const mu_float updateTime = static_cast<mu_float>(elapsedTime / GameCycleTime);
+			const mu_float updateTime = static_cast<mu_float>(accumulatedTime / GameCycleTime);
 			const mu_uint32 updateCount = static_cast<mu_uint32>(updateTime); // Calculate update count using fixed update time from MU (25 FPS)
 			accumulatedTime -= static_cast<mu_double>(updateCount) * GameCycleTime; // Remove acummulated time
 
@@ -311,40 +308,21 @@ namespace MURoot
 				fpsCounterTime = 0.0;
 			}
 
-			camera.Update();
-			environment.Reset();
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_IMGUI
-			ImGui_Implbgfx_NewFrame();
-			ImGui_ImplSDL2_NewFrame();
-
-			ImGui::NewFrame();
-
-			//ImGui::ShowDemoWindow(); // your drawing here
-
-			ImGui::Begin("Debug");
+			if (updateCount > 0)
 			{
-				ImGui::SetWindowSize(ImVec2(180, 160));
-				ImGui::Text(fmt::format("FPS : {} ({}ms)", fpsCounterLastCount, static_cast<mu_uint32>(fpsCounterLastValue)).c_str());
-				ImGui::Text(fmt::format("Mobs : {}", GetMobsCount()).c_str());
-				mu_boolean isFpsLimited = MUGlobalTimer::IsFpsLimited();
-				if (ImGui::Checkbox("FPS Limit", &isFpsLimited))
+				auto *particles = environment->GetParticles();
+				for (mu_uint32 n = 0; n < 4000; ++n)
 				{
-					MUGlobalTimer::ToggleLimitFPS();
+					particles->Create(0, ParticleType::Smoke_V0, glm::vec3((123.0f + glm::linearRand(-30.0f, 3.0f)) * TerrainScale, (123.0f + glm::linearRand(-30.0f, 3.0f)) * TerrainScale, 400.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
 				}
-				if (ImGui::Button("Increase Mobs"))
+				for (mu_uint32 n = 0; n < 4000; ++n)
 				{
-					AddMob();
-				}
-				if (ImGui::Button("Decrease Mobs"))
-				{
-					RemoveMob();
+					particles->Create(0, ParticleType::TrueFire_V5, glm::vec3((123.0f + glm::linearRand(-30.0f, 3.0f)) * TerrainScale, (123.0f + glm::linearRand(-30.0f, 3.0f)) * TerrainScale, 800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.8f);
 				}
 			}
-			ImGui::End();
 
-			ImGui::Render();
-#endif
+			camera.Update();
+			environment->Reset();
 
 			const mu_uint32 mobsCount = GetMobsCount();
 			for (mu_uint32 n = 0; n < mobsCount; ++n)
@@ -372,10 +350,6 @@ namespace MURoot
 			// Set view 0 default viewport.
 			bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(windowWidth), static_cast<uint16_t>(windowHeight));
 			bgfx::touch(0);
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_IMGUI
-			ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
-#endif
 
 			camera.GetView(view);
 
@@ -420,10 +394,11 @@ namespace MURoot
 			camera.GenerateFrustum(view, frustumProjection);
 
 			bgfx::setViewTransform(0, view, projection);
+			MURenderState::SetViewTransform(view, projection);
 			MURenderState::AttachCamera(&camera);
-			MURenderState::AttachEnvironment(&environment);
+			MURenderState::AttachEnvironment(environment.get());
 
-			environment.Update();
+			environment->Update();
 
 			for (mu_uint32 n = 0; n < mobsCount; ++n)
 			{
@@ -433,7 +408,7 @@ namespace MURoot
 
 			MUSkeletonManager::Update();
 
-			environment.Render();
+			environment->Render();
 
 			mu_float mx = 0.0f, my = 0.0f;
 			for (mu_uint32 n = 0; n < mobsCount; ++n)
@@ -458,12 +433,6 @@ namespace MURoot
 				}
 			}
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_ULTRALIGHT
-			UIUltralight::UpdateLogic();
-			UIUltralight::RenderOneFrame();
-			UIUltralight::Present();
-#endif
-
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 			UINoesis::Update();
 			UINoesis::Render();
@@ -479,12 +448,6 @@ namespace MURoot
 			while (SDL_PollEvent(&event))
 			{
 				MURoot::OnEvent(&event);
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_IMGUI
-				ImGui_ImplSDL2_ProcessEvent(&event);
-#endif
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_ULTRALIGHT
-				if (UIUltralight::OnEvent(&event) == true) continue;
-#endif
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 				if (UINoesis::OnEvent(&event) == true) continue;
 #endif
@@ -494,6 +457,8 @@ namespace MURoot
 			elapsedTime = MUGlobalTimer::GetElapsedFrametime();
 			currentTime = MUGlobalTimer::GetFrametime();
 		}
+
+		environment->Destroy();
 
 		mu_trace_info("Destroying game");
 	}

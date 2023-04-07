@@ -5,6 +5,7 @@
 
 namespace MURenderState
 {
+	cglm::mat4 Projection, View;
 	NCamera *Camera = nullptr;
 	NEnvironment *Environment = nullptr;
 	std::array<NTexture *, TextureAttachment::Count> Textures = { {} };
@@ -16,6 +17,22 @@ namespace MURenderState
 		{
 			Textures[n] = nullptr;
 		}
+	}
+
+	void SetViewTransform(cglm::mat4 view, cglm::mat4 projection)
+	{
+		cglm::glm_mat4_copy(projection, Projection);
+		cglm::glm_mat4_copy(view, View);
+	}
+
+	void GetProjection(cglm::mat4 dest)
+	{
+		cglm::glm_mat4_copy(Projection, dest);
+	}
+
+	void GetView(cglm::mat4 dest)
+	{
+		cglm::glm_mat4_copy(View, dest);
 	}
 
 	void AttachCamera(NCamera *camera)

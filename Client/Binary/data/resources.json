@@ -26,6 +26,11 @@
 			"fragment": "shaders/models/blend"
 		},
 		{
+			"id": "particle",
+			"vertex": "shaders/particle",
+			"fragment": "shaders/particle"
+		},
+		{
 			"id": "boundingbox",
 			"vertex": "shaders/bbox",
 			"fragment": "shaders/bbox"
@@ -39,6 +44,16 @@
 		{
 			"id": "monster_01",
 			"path": "monsters/monster01"
+		}
+	],
+	"textures": [
+		{
+			"id": "smoke_v0",
+			"path": "textures/effects/smoke01.ozj"
+		},
+		{
+			"id": "truefire_v5",
+			"path": "textures/effects/fantaf.ozj"
 		}
 	]
 }

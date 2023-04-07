@@ -5,16 +5,21 @@
 
 #include "mu_environment_object.h"
 #include "mu_environment_character.h"
+#include "mu_environment_particles.h"
 #include "mu_entity.h"
 
 class NTerrain;
 
 typedef std::unique_ptr<NTerrain> NTerrainPtr;
 typedef std::unique_ptr<NModel> NModelPtr;
+typedef std::unique_ptr<NParticles> NParticlesPtr;
 
 class NEnvironment
 {
 public:
+	const mu_boolean Initialize();
+	void Destroy();
+
 	void Reset();
 	void Update();
 	void Render();
@@ -44,6 +49,11 @@ public: // Characters
 	void RemoveCharacter(const entt::entity entity);
 
 public:
+	NParticles *GetParticles() const
+	{
+		return Particles.get();
+	}
+
 	const NTerrain *GetTerrain() const
 	{
 		return Terrain.get();
@@ -52,6 +62,7 @@ public:
 private:
 	NTerrainPtr Terrain;
 	std::vector<NModelPtr> Models;
+	NParticlesPtr Particles;
 	entt::registry Objects;
 	entt::registry Characters;
 	std::map<mu_key, entt::entity> CharactersMap;

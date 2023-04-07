@@ -23,11 +23,13 @@ static void InitializeVertexLayout()
 		.end();
 }
 
+#pragma pack(4)
 struct TerrainVertex
 {
 	mu_uint8 x, y;
 	mu_uint8 rx, ry;
 };
+#pragma pack()
 
 TerrainVertex TerrainVertices[4 * TerrainSize * TerrainSize] = {};
 

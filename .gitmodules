@@ -19,27 +19,3 @@
 	path = Dependencies/Repositories/bgfx
 	url = https://github.com/bkaradzic/bgfx.git
 	shallow = true
-[submodule "Dependencies/Repositories/fmt"]
-	path = Dependencies/Repositories/fmt
-	url = https://github.com/fmtlib/fmt.git
-	shallow = true
-[submodule "Dependencies/Repositories/nlohmann/json"]
-	path = Dependencies/Repositories/nlohmann/json
-	url = https://github.com/nlohmann/json.git
-	shallow = true
-[submodule "Dependencies/Repositories/imgui"]
-	path = Dependencies/Repositories/imgui
-	url = https://github.com/ocornut/imgui.git
-	shallow = true
-[submodule "Dependencies/Repositories/stb"]
-	path = Dependencies/Repositories/stb
-	url = https://github.com/nothings/stb.git
-	shallow = true
-[submodule "Dependencies/Repositories/entt"]
-	path = Dependencies/Repositories/entt
-	url = https://github.com/skypjack/entt.git
-	shallow = true
-[submodule "Dependencies/Repositories/cryptopp"]
-	path = Dependencies/Repositories/cryptopp
-	url = https://github.com/weidai11/cryptopp.git
-	shallow = true

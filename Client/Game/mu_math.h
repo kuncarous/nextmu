@@ -40,4 +40,14 @@ NEXTMU_INLINE const glm::vec3 TransformNormal(const glm::vec3 v, const NCompress
 	return matrix.Rotation * (v * matrix.Scale);
 }
 
+NEXTMU_INLINE const glm::vec3 MovePosition(
+	const glm::vec3 &position,
+	const glm::vec3 &angle,
+	const glm::vec3 &velocity
+)
+{
+	const glm::quat rotation = glm::quat(glm::radians(angle));
+	return position + rotation * velocity;
+}
+
 #endif

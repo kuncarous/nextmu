@@ -38,48 +38,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\backends\imgui_impl_sdl.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_demo.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_draw.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_tables.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_widgets.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)bgfx\imgui_impl_bgfx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_angelscript.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp" />
@@ -94,6 +52,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_frustum.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_particles.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_resourcesmanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp" />
@@ -105,6 +64,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_textures.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_timer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_window.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_physics.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particles.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.cpp" />
@@ -115,23 +78,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_stream.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_textureprovider.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_xamlprovider.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight_filesystem.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight_logger.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_ultralight_sdl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptarray\scriptarray.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptmath\scriptmath.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\backends\imgui_impl_sdl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imconfig.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imgui_internal.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_rectpack.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_textedit.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Repositories\imgui\imstb_truetype.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)bgfx\imgui_impl_bgfx.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
@@ -153,6 +104,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_modelrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_mesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_skeleton.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_particles.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_entity.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_enum.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_physics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_precompiled.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_rendererconfig.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h" />
@@ -169,6 +124,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_timer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_version.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_window.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particles.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_base.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_macros.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_render.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.h" />
@@ -180,12 +141,5 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_stream.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_textureprovider.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_xamlprovider.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight_filesystem.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight_logger.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_ultralight_sdl.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)ui_ultralight_mimetypes.inl" />
   </ItemGroup>
 </Project>
