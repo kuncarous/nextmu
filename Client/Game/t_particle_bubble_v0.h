@@ -1,11 +1,11 @@
-#ifndef __T_PARTICLE_TRUEFIRE_V5_H__
-#define __T_PARTICLE_TRUEFIRE_V5_H__
+#ifndef __T_PARTICLE_BUBBLE_V0_H__
+#define __T_PARTICLE_BUBBLE_V0_H__
 
 #pragma once
 
 #include "t_particle_base.h"
 
-namespace TrueFireV5
+namespace BubbleV0
 {
 	using namespace TParticle;
 	void Register(NInvokes &invokes);

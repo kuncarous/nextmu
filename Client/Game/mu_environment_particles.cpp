@@ -4,21 +4,32 @@
 #include "t_particles.h"
 #include "t_particle_entity.h"
 
+using namespace TParticle;
+
 const mu_boolean NParticles::Initialize()
 {
+#if NEXTMU_COMPRESSED_PARTICLES == 1
 	RenderBuffer.Layout
 		.begin()
 		.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
 		.add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Int16, true, true)
 		.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Int16, true, true)
 		.end();
-	RenderBuffer.VertexBuffer = bgfx::createDynamicVertexBuffer(MaxRenderCount * 4, RenderBuffer.Layout);
+#else
+	RenderBuffer.Layout
+		.begin()
+		.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+		.add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
+		.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+		.end();
+#endif
+	RenderBuffer.VertexBuffer = bgfx::createDynamicVertexBuffer(TParticle::MaxRenderCount * 4, RenderBuffer.Layout);
 	if (bgfx::isValid(RenderBuffer.VertexBuffer) == false)
 	{
 		return false;
 	}
 
-	RenderBuffer.IndexBuffer = bgfx::createDynamicIndexBuffer(MaxRenderCount * 6, BGFX_BUFFER_INDEX32);
+	RenderBuffer.IndexBuffer = bgfx::createDynamicIndexBuffer(TParticle::MaxRenderCount * 6, BGFX_BUFFER_INDEX32);
 	if (bgfx::isValid(RenderBuffer.IndexBuffer) == false)
 	{
 		return false;
@@ -72,78 +83,78 @@ void NParticles::Destroy()
 	}
 }
 
-void NParticles::Create(
-	const mu_uint8 layer,
-	const ParticleType type,
-	const glm::vec3 position,
-	const glm::vec3 angle,
-	const glm::vec3 light,
-	const mu_float scale
-)
+void NParticles::Create(const NParticleData &data)
 {
-	NCreateData data = {
-		.Layer = layer,
-		.Type = type,
-		.Position = position,
-		.Angle = angle,
-		.Light = light,
-		.Scale = scale,
-	};
 	PendingToCreate.push_back(data);
 }
 
 void NParticles::Update(const mu_uint32 updateCount)
 {
-	using namespace TParticle;
-	const auto view = Registry.view<
-		Entity::Info
-	>();
-
-	// Move
-	if (updateCount > 0)
+	for (mu_uint32 n = 0; n < updateCount; ++n)
 	{
-		ParticleType type = ParticleType::Invalid;
-		NMoveFunc func = nullptr;
+		using namespace TParticle;
 
-		for (auto iter = view.begin(), last = view.end(); iter != last;)
+		// Life Time check
 		{
-			const auto &entity = *iter;
-			const auto &info = Registry.get<Entity::Info>(entity);
-			if (info.Type != type)
-			{
-				type = info.Type;
-				func = TParticles::GetMove(type);
-			}
-			if (func == nullptr) {
-				++iter;
-				continue;
-			}
+			const auto view = Registry.view<
+				Entity::LifeTime
+			>();
 
-			iter = func(Registry, iter, last);
+			for (auto [entity, lifetime] : view.each())
+			{
+				if (--lifetime > 0) continue;
+				Registry.destroy(entity);
+			}
 		}
-	}
 
-	// Action
-	if (updateCount > 0)
-	{
-		ParticleType type = ParticleType::Invalid;
-		NActionFunc func = nullptr;
+		const auto view = Registry.view<
+			Entity::Info
+		>();
 
-		for (auto iter = view.begin(), last = view.end(); iter != last;)
+		// Move
 		{
-			const auto &entity = *iter;
-			const auto &info = Registry.get<Entity::Info>(entity);
-			if (info.Type != type)
-			{
-				type = info.Type;
-				func = TParticles::GetAction(type);
-			}
-			if (func == nullptr) {
-				++iter;
-				continue;
-			}
+			ParticleType type = ParticleType::Invalid;
+			NMoveFunc func = nullptr;
 
-			iter = func(Registry, iter, last);
+			for (auto iter = view.begin(), last = view.end(); iter != last;)
+			{
+				const auto &entity = *iter;
+				const auto &info = Registry.get<Entity::Info>(entity);
+				if (info.Type != type)
+				{
+					type = info.Type;
+					func = TParticles::GetMove(type);
+				}
+				if (func == nullptr) {
+					++iter;
+					continue;
+				}
+
+				iter = func(Registry, iter, last);
+			}
+		}
+
+		// Action
+		{
+			ParticleType type = ParticleType::Invalid;
+			NActionFunc func = nullptr;
+
+			for (auto iter = view.begin(), last = view.end(); iter != last;)
+			{
+				const auto &entity = *iter;
+				const auto &info = Registry.get<Entity::Info>(entity);
+				if (info.Type != type)
+				{
+					type = info.Type;
+					func = TParticles::GetAction(type);
+				}
+				if (func == nullptr) {
+					++iter;
+					continue;
+				}
+
+				iter = func(Registry, iter, last);
+			}
 		}
 	}
 }
@@ -156,7 +167,7 @@ void NParticles::Propagate()
 	std::sort(
 		PendingToCreate.begin(),
 		PendingToCreate.end(),
-		[](const NCreateData &lhs, const NCreateData &rhs) -> bool { return lhs.Type < rhs.Type; }
+		[](const NParticleData &lhs, const NParticleData &rhs) -> bool { return lhs.Type < rhs.Type; }
 	);
 
 	for (const auto &data : PendingToCreate)

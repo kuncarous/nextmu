@@ -6,13 +6,16 @@
 #include "mu_environment_object.h"
 #include "mu_environment_character.h"
 #include "mu_environment_particles.h"
+#include "mu_environment_joints.h"
 #include "mu_entity.h"
+#include "t_threading_helper.h"
 
 class NTerrain;
 
 typedef std::unique_ptr<NTerrain> NTerrainPtr;
 typedef std::unique_ptr<NModel> NModelPtr;
 typedef std::unique_ptr<NParticles> NParticlesPtr;
+typedef std::unique_ptr<NJoints> NJointsPtr;
 
 class NEnvironment
 {
@@ -54,6 +57,11 @@ public:
 		return Particles.get();
 	}
 
+	NJoints *GetJoints() const
+	{
+		return Joints.get();
+	}
+
 	const NTerrain *GetTerrain() const
 	{
 		return Terrain.get();
@@ -63,9 +71,12 @@ private:
 	NTerrainPtr Terrain;
 	std::vector<NModelPtr> Models;
 	NParticlesPtr Particles;
+	NJointsPtr Joints;
 	entt::registry Objects;
 	entt::registry Characters;
 	std::map<mu_key, entt::entity> CharactersMap;
+
+	std::vector<TThreadRange> ObjectsRange;
 };
 
 #endif

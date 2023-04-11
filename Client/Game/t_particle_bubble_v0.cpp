@@ -1,17 +1,21 @@
 #include "stdafx.h"
-#include "t_particle_smoke_v0.h"
+#include "t_particle_bubble_v0.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
 #include "mu_renderstate.h"
 #include "mu_state.h"
 
-namespace SmokeV0
+namespace BubbleV0
 {
 	using namespace TParticle;
-	constexpr auto Type = ParticleType::Smoke_V0;
-	constexpr auto LifeTime = 16;
+	constexpr auto Type = ParticleType::Bubble_V0;
 	constexpr auto LightDivisor = 1.0f / 8.0f;
-	const mu_char *TextureID = "smoke_v0";
+	const mu_char *TextureID = "bubble_v0";
+	constexpr mu_float FrameDivisor = 3;
+	constexpr mu_float UVMultiplier = 0.25f;
+	constexpr mu_float UVOffset = 0.005f;
+	constexpr mu_float USize = 0.25f - 0.01f;
+	constexpr mu_float VSize = 0.25f - 0.01f;
 
 	constexpr mu_uint64 RenderState = (
 		BGFX_STATE_WRITE_RGB |
@@ -43,31 +47,25 @@ namespace SmokeV0
 			}
 		);
 
-		registry.emplace<Entity::LifeTime>(entity, LifeTime);
+		registry.emplace<Entity::LifeTime>(entity, glm::linearRand(30, 40));
 
 		registry.emplace<Entity::Position>(
 			entity,
-			Entity::Position {
+			Entity::Position{
 				.StartPosition = data.Position,
 				.Position = data.Position,
-				.Scale = glm::linearRand(4.8f, 8.0f),
+				.Scale = glm::linearRand(0.12f, 0.3f),
 			}
 		);
 
-		const mu_float luminosity = static_cast<mu_float>(LifeTime) * LightDivisor;
 		registry.emplace<Entity::Light>(
 			entity,
-			glm::vec4(luminosity, luminosity, luminosity, 1.0f)
+			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
 		);
 
-		registry.emplace<Entity::Rotation>(
+		registry.emplace<Entity::Frame>(
 			entity,
-			glm::mod(MUState::GetWorldTime(), 360.0f)
-		);
-
-		registry.emplace<Entity::Gravity>(
-			entity,
-			0.0f
+			0
 		);
 	}
 
@@ -81,17 +79,11 @@ namespace SmokeV0
 			auto &info = registry.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
-			auto &gravity = registry.get<Entity::Gravity>(entity);
-			gravity += 0.2f;
-
 			auto &position = registry.get<Entity::Position>(entity);
-			position.Position.z += gravity;
-			position.Scale += 0.05f;
+			position.Position += glm::linearRand(glm::vec3(-25.0f, -25.0f, 25.0f), glm::vec3(25.0f, 25.0f, 75.0f)) * position.Scale;
 
-			const auto lifetime = registry.get<Entity::LifeTime>(entity);
-			const mu_float luminosity = static_cast<mu_float>(lifetime) * LightDivisor;
-			auto &light = registry.get<Entity::Light>(entity);
-			light = glm::vec4(luminosity, luminosity, luminosity, 1.0f);
+			auto &frame = registry.get<Entity::Frame>(entity);
+			frame = (frame + 1) % 9;
 		}
 
 		return iter;
@@ -140,12 +132,14 @@ namespace SmokeV0
 
 			const auto &position = registry.get<Entity::Position>(entity);
 			const auto &light = registry.get<Entity::Light>(entity);
-			const auto rotation = registry.get<Entity::Rotation>(entity);
+			const auto frame = registry.get<Entity::Frame>(entity);
+			const auto uoffset = static_cast<mu_float>(frame % 3) * UVMultiplier + UVOffset;
+			const auto voffset = static_cast<mu_float>(frame / 3) * UVMultiplier + UVOffset;
 
 			const mu_float width = textureWidth * position.Scale * 0.5f;
 			const mu_float height = textureHeight * position.Scale * 0.5f;
 
-			RenderBillboardSpriteWithRotation(renderBuffer, vertex, view, position.Position, rotation, width, height, light);
+			RenderBillboardSprite(renderBuffer, vertex, view, position.Position, width, height, light, glm::vec4(uoffset, voffset, uoffset + USize, voffset + VSize));
 
 			if (renderBuffer.Count >= MaxRenderCount) {
 				iter = last;

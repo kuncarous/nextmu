@@ -6,6 +6,7 @@
 
 namespace TrueFireV5
 {
+	using namespace TParticle;
 	constexpr auto Type = ParticleType::TrueFire_V5;
 	constexpr auto LifeTime = 20;
 	constexpr auto LightDivisor = 1.0f / 25.0f;
@@ -28,7 +29,7 @@ namespace TrueFireV5
 		REGISTER_INVOKE(Render);
 	}
 
-	void Create(entt::registry &registry, const NCreateData &data)
+	void Create(entt::registry &registry, const NParticleData &data)
 	{
 		using namespace TParticle;
 		const auto entity = registry.create();
@@ -37,10 +38,11 @@ namespace TrueFireV5
 			entity,
 			Entity::Info{
 				.Layer = data.Layer,
-				.LifeTime = LifeTime,
 				.Type = Type,
 			}
 		);
+
+		registry.emplace<Entity::LifeTime>(entity, LifeTime);
 
 		registry.emplace<Entity::Position>(
 			entity,
@@ -72,10 +74,6 @@ namespace TrueFireV5
 			const auto entity = *iter;
 			auto &info = registry.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
-			if (--info.LifeTime == 0) {
-				registry.destroy(entity);
-				continue;
-			}
 
 			auto &position = registry.get<Entity::Position>(entity);
 			position.Position = MovePosition(position.Position, position.Angle, position.Velocity);
@@ -83,8 +81,9 @@ namespace TrueFireV5
 			position.Velocity.x *= 0.95f;
 			position.Scale = glm::max(position.Scale - 0.02f, 0.0f);
 
+			const auto lifetime = registry.get<Entity::LifeTime>(entity);
 			auto &light = registry.get<Entity::Light>(entity);
-			light = glm::vec4(info.LifeTime * LightDivisor, light.x, light.x, 1.0f);
+			light = glm::vec4(lifetime * LightDivisor, light.x, light.x, 1.0f);
 		}
 
 		return iter;
@@ -106,7 +105,7 @@ namespace TrueFireV5
 		return iter;
 	}
 
-	EnttIterator Render(entt::registry &registry, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
+	EnttIterator Render(entt::registry &registry, EnttIterator iter, EnttIterator last, TParticle::NRenderBuffer &renderBuffer)
 	{
 		using namespace TParticle;
 

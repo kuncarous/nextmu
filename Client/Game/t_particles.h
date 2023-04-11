@@ -7,6 +7,7 @@
 
 namespace TParticles
 {
+	using namespace TParticle;
 	void Register();
 	NCreateFunc GetCreate(const ParticleType type);
 	NMoveFunc GetMove(const ParticleType type);

@@ -1,8 +1,0 @@
-#include <bgfx_shader.sh>
-
-#define SKELETON_TEXTURE_WIDTH 2048u
-#define SKELETON_TEXTURE_HEIGHT 512u
-
-#if BGFX_SHADER_LANGUAGE_HLSL || BGFX_SHADER_LANGUAGE_SPIRV
-#define mat2x4 float2x4
-#endif

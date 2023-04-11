@@ -126,6 +126,7 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\..\Bi
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,6 +134,7 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\..\Bi
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>angelscript.lib;Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;SDL2.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../../Dependencies/Installed/AngelScript/angelscript/lib;../../../Dependencies/Repositories/SDL/build-x86/$(Configuration);../../../Dependencies/Repositories/bgfx/.build/win32_vs2022/bin;../../../Dependencies/Installed/FMOD/core/lib/x86;../../../Dependencies/Installed/ultralight/lib;../../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'));$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
       <Command>xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Debug\SDL2d.dll ..\..\Binary\x86\ /Y
@@ -179,6 +181,7 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\..\Binary
       <PrecompiledHeader>Use</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -186,6 +189,7 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\..\Binary
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../../../Dependencies/Installed/PhysX/physx/bin/win.x86_64.vc143.mt/$(Configuration);../../../Dependencies/Installed/AngelScript/angelscript/lib;../../../Dependencies/Repositories/SDL/build/$(Configuration);../../../Dependencies/Repositories/bgfx/.build/win64_vs2022/bin;../../../Dependencies/Installed/FMOD/core/lib/x64;../../../Dependencies/Installed/ultralight/lib;../../../Dependencies/Installed/NoesisGUI/Lib/windows_$(Platform.Replace('Win32', 'x86').Replace('x64', 'x86_64'));$(SolutionDir)$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>angelscript64.lib;Noesis.lib;bgfx$(Configuration).lib;bimg$(Configuration).lib;bx$(Configuration).lib;fmod_vc.lib;SDL2.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
       <Command>xcopy ..\..\..\Dependencies\Repositories\SDL\build\Debug\SDL2d.dll ..\..\Binary\x64\ /Y

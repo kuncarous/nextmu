@@ -12,6 +12,7 @@
 #include "mu_environment.h"
 #include "mu_state.h"
 #include "mu_renderstate.h"
+#include "mu_threadsmanager.h"
 #include "mu_resourcesmanager.h"
 #include "mu_skeletoninstance.h"
 #include "mu_skeletonmanager.h"
@@ -19,6 +20,7 @@
 #include "mu_modelrenderer.h"
 #include "mu_bboxrenderer.h"
 #include "t_particles.h"
+#include "t_joints.h"
 
 #include "ui_noesisgui.h"
 
@@ -114,6 +116,12 @@ namespace MURoot
 			return false;
 		}
 
+		if (MUThreadsManager::Initialize() == false)
+		{
+			mu_error("Failed to initialize threads.");
+			return false;
+		}
+
 		if (MUWindow::Initialize() == false)
 		{
 			mu_error("Failed to initialize window.");
@@ -179,6 +187,7 @@ namespace MURoot
 		}
 
 		TParticles::Register();
+		TJoints::Register();
 
 		return true;
 	}
@@ -198,6 +207,7 @@ namespace MURoot
 		MUGraphics::Destroy();
 		MUAngelScript::Destroy();
 		MUWindow::Destroy();
+		MUThreadsManager::Destroy();
 		MUConfig::Destroy();
 
 		SDL_Quit();
@@ -293,7 +303,7 @@ namespace MURoot
 			accumulatedTime -= static_cast<mu_double>(updateCount) * GameCycleTime; // Remove acummulated time
 
 			MUState::SetTime(static_cast<mu_float>(currentTime), static_cast<mu_float>(elapsedTime));
-			MUState::SetUpdate(updateTime, updateCount);
+			MUState::SetUpdate(glm::floor(updateTime), updateCount);
 			MURenderState::Reset();
 			MUSkeletonManager::Reset();
 
@@ -310,15 +320,73 @@ namespace MURoot
 
 			if (updateCount > 0)
 			{
+				auto *joints = environment->GetJoints();
+				for (mu_uint32 n = 0; n < 20; ++n)
+				{
+					const glm::vec3 position = glm::vec3(
+						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+						400.0f
+					);
+					joints->Create(
+						NJointData {
+							.Layer = 0,
+							.Type = JointType::Thunder1_V7,
+							.Position = position,
+							.TargetPosition = position + glm::vec3(
+								glm::linearRand(-80.0f, 80.0f),
+								glm::linearRand(-80.0f, 80.0f),
+								0.0f
+							),
+							.Scale = glm::linearRand(60.0f, 70.0f),
+						}
+					);
+				}/**/
+
 				auto *particles = environment->GetParticles();
-				for (mu_uint32 n = 0; n < 4000; ++n)
+				/*for (mu_uint32 n = 0; n < 200; ++n)
 				{
-					particles->Create(0, ParticleType::Smoke_V0, glm::vec3((123.0f + glm::linearRand(-30.0f, 3.0f)) * TerrainScale, (123.0f + glm::linearRand(-30.0f, 3.0f)) * TerrainScale, 400.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+					particles->Create(
+						NParticleData {
+							.Layer = 0,
+							.Type = ParticleType::Bubble_V0,
+							.Position = glm::vec3(
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								400.0f
+							)
+						}
+					);
 				}
-				for (mu_uint32 n = 0; n < 4000; ++n)
+				for (mu_uint32 n = 0; n < 200; ++n)
 				{
-					particles->Create(0, ParticleType::TrueFire_V5, glm::vec3((123.0f + glm::linearRand(-30.0f, 3.0f)) * TerrainScale, (123.0f + glm::linearRand(-30.0f, 3.0f)) * TerrainScale, 800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.8f);
+					particles->Create(
+						NParticleData {
+							.Layer = 0,
+							.Type = ParticleType::Smoke_V0,
+							.Position = glm::vec3(
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								400.0f
+							)
+						}
+					);
 				}
+				for (mu_uint32 n = 0; n < 200; ++n)
+				{
+					particles->Create(
+						NParticleData {
+							.Layer = 0,
+							.Type = ParticleType::TrueFire_V5,
+							.Position = glm::vec3(
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								400.0f
+							),
+							.Scale = 2.8f
+						}
+					);
+				}*/
 			}
 
 			camera.Update();

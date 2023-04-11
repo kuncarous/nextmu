@@ -124,6 +124,33 @@
     <Filter Include="Environment\Particles\Templates\Types\Smoke\V0">
       <UniqueIdentifier>{01264895-67cf-4972-81a5-2cf15b2efe4a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Bubble">
+      <UniqueIdentifier>{ae6e97a9-f582-47cd-84d9-f20c29668fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Bubble\V0">
+      <UniqueIdentifier>{7bf05969-7dc1-419a-bbab-2960ce64f107}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Joints">
+      <UniqueIdentifier>{f7d3f4b4-9814-48a7-81ca-2ecf13ad954b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Joints\Templates">
+      <UniqueIdentifier>{619e09ea-906a-4e30-8af9-ea79b7ccdcd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Joints\Templates\Entity">
+      <UniqueIdentifier>{f01c4e11-9c0e-45d0-b1a9-ccdfa429eee8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Joints\Templates\Types">
+      <UniqueIdentifier>{8f318ba7-777c-4455-bad9-d0a373b45c53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Joints\Templates\Types\Thunder1">
+      <UniqueIdentifier>{0911e42f-2699-4579-ae02-86d6c64c34ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Joints\Templates\Types\Thunder1\V7">
+      <UniqueIdentifier>{acf76f1e-008b-4eba-a91f-f0e6879377c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Threading">
+      <UniqueIdentifier>{903d2deb-9bb7-4b9f-a0e3-f7af6f9d6d72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -257,6 +284,24 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.cpp">
       <Filter>Environment\Particles\Templates\Types\Smoke\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\Bubble\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_joints.cpp">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_joints.cpp">
+      <Filter>Environment\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_thunder1_v7.cpp">
+      <Filter>Environment\Joints\Templates\Types\Thunder1\V7</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_threadsmanager.cpp">
+      <Filter>Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_threading_helper.cpp">
+      <Filter>Threading</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -442,6 +487,48 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.h">
       <Filter>Environment\Particles\Templates\Types\Smoke\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.h">
+      <Filter>Environment\Particles\Templates\Types\Bubble\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_create.h">
+      <Filter>Environment\Particles\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_entity.h">
+      <Filter>Environment\Joints\Templates\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_base.h">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_enum.h">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_create.h">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_macros.h">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_render.h">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joints.h">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_joints.h">
+      <Filter>Environment\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_thunder1_v7.h">
+      <Filter>Environment\Joints\Templates\Types\Thunder1\V7</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_tails.h">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_threadsmanager.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_threading_helper.h">
+      <Filter>Threading</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
