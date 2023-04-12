@@ -69,34 +69,32 @@ namespace BubbleV0
 		);
 	}
 
-	EnttIterator Move(entt::registry &registry, EnttIterator iter, EnttIterator last)
+	EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 	{
 		using namespace TParticle;
 
 		for (; iter != last; ++iter)
 		{
 			const auto entity = *iter;
-			auto &info = registry.get<Entity::Info>(entity);
+			auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
-			auto &position = registry.get<Entity::Position>(entity);
+			auto [position, frame] = registry.get<Entity::Position, Entity::Frame>(entity);
 			position.Position += glm::linearRand(glm::vec3(-25.0f, -25.0f, 25.0f), glm::vec3(25.0f, 25.0f, 75.0f)) * position.Scale;
-
-			auto &frame = registry.get<Entity::Frame>(entity);
 			frame = (frame + 1) % 9;
 		}
 
 		return iter;
 	}
 
-	EnttIterator Action(entt::registry &registry, EnttIterator iter, EnttIterator last)
+	EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 	{
 		using namespace TParticle;
 
 		for (; iter != last; ++iter)
 		{
 			const auto entity = *iter;
-			const auto &info = registry.get<Entity::Info>(entity);
+			const auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
 			// ACTION HERE
@@ -105,7 +103,7 @@ namespace BubbleV0
 		return iter;
 	}
 
-	EnttIterator Render(entt::registry &registry, EnttIterator iter, EnttIterator last, TParticle::NRenderBuffer &renderBuffer)
+	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, TParticle::NRenderBuffer &renderBuffer)
 	{
 		using namespace TParticle;
 
@@ -118,28 +116,26 @@ namespace BubbleV0
 		const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 		const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
 
-		cglm::mat4 projection, view;
+		cglm::mat4 projection, gview;
 		MURenderState::GetProjection(projection);
-		MURenderState::GetView(view);
+		MURenderState::GetView(gview);
 
 		const auto startIndex = renderBuffer.Count;
 		mu_uint32 vertex = 0;
 		for (; iter != last; ++iter)
 		{
 			const auto entity = *iter;
-			const auto &info = registry.get<Entity::Info>(entity);
+			const auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
-			const auto &position = registry.get<Entity::Position>(entity);
-			const auto &light = registry.get<Entity::Light>(entity);
-			const auto frame = registry.get<Entity::Frame>(entity);
+			const auto [position, light, frame] = registry.get<Entity::Position, Entity::Light, Entity::Frame>(entity);
 			const auto uoffset = static_cast<mu_float>(frame % 3) * UVMultiplier + UVOffset;
 			const auto voffset = static_cast<mu_float>(frame / 3) * UVMultiplier + UVOffset;
 
 			const mu_float width = textureWidth * position.Scale * 0.5f;
 			const mu_float height = textureHeight * position.Scale * 0.5f;
 
-			RenderBillboardSprite(renderBuffer, vertex, view, position.Position, width, height, light, glm::vec4(uoffset, voffset, uoffset + USize, voffset + VSize));
+			RenderBillboardSprite(renderBuffer, vertex, gview, position.Position, width, height, light, glm::vec4(uoffset, voffset, uoffset + USize, voffset + VSize));
 
 			if (renderBuffer.Count >= MaxRenderCount) {
 				iter = last;

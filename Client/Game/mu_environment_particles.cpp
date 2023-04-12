@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "mu_environment_particles.h"
 #include "mu_resourcesmanager.h"
+#include "mu_threadsmanager.h"
 #include "t_particles.h"
 #include "t_particle_entity.h"
 
 using namespace TParticle;
+constexpr mu_boolean UseMultithread = true;
 
 const mu_boolean NParticles::Initialize()
 {
@@ -90,72 +92,135 @@ void NParticles::Create(const NParticleData &data)
 
 void NParticles::Update(const mu_uint32 updateCount)
 {
+	auto &registry = Registry;
 	for (mu_uint32 n = 0; n < updateCount; ++n)
 	{
 		using namespace TParticle;
 
 		// Life Time check
 		{
-			const auto view = Registry.view<
+			const auto view = registry.view<
 				Entity::LifeTime
 			>();
 
 			for (auto [entity, lifetime] : view.each())
 			{
 				if (--lifetime > 0) continue;
-				Registry.destroy(entity);
+				registry.destroy(entity);
 			}
 		}
 
-		const auto view = Registry.view<
-			Entity::Info
-		>();
-
-		// Move
+		auto view = registry.view<TParticle::Entity::Info>();
+		//auto startTimer = std::chrono::high_resolution_clock::now();
+		if constexpr (UseMultithread)
 		{
-			ParticleType type = ParticleType::Invalid;
-			NMoveFunc func = nullptr;
+			MUThreadsManager::Run(
+				std::unique_ptr<NThreadExecutorBase>(
+					new (std::nothrow) NThreadExecutorRangeIterator(
+						view.begin(), view.end(),
+						[&registry, &view](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
+							ParticleType type = ParticleType::Invalid;
+							NMoveFunc func = nullptr;
+							for (auto iter = begin; iter != end;)
+							{
+								const auto &entity = *iter;
+								const auto &info = view.get<Entity::Info>(entity);
+								if (info.Type != type)
+								{
+									type = info.Type;
+									func = TParticles::GetMove(type);
+								}
+								if (func == nullptr) {
+									++iter;
+									continue;
+								}
 
-			for (auto iter = view.begin(), last = view.end(); iter != last;)
-			{
-				const auto &entity = *iter;
-				const auto &info = Registry.get<Entity::Info>(entity);
-				if (info.Type != type)
-				{
-					type = info.Type;
-					func = TParticles::GetMove(type);
-				}
-				if (func == nullptr) {
-					++iter;
-					continue;
-				}
+								iter = func(registry, view, iter, end);
+							}
+						}
+					)
+				)
+			);
 
-				iter = func(Registry, iter, last);
-			}
+			MUThreadsManager::Run(
+				std::unique_ptr<NThreadExecutorBase>(
+					new (std::nothrow) NThreadExecutorRangeIterator(
+						view.begin(), view.end(),
+						[&registry, &view](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
+							ParticleType type = ParticleType::Invalid;
+							NMoveFunc func = nullptr;
+							for (auto iter = begin; iter != end;)
+							{
+								const auto entity = *iter;
+								const auto &info = view.get<Entity::Info>(entity);
+								if (info.Type != type)
+								{
+									type = info.Type;
+									func = TParticles::GetAction(type);
+								}
+								if (func == nullptr) {
+									++iter;
+									continue;
+								}
+
+								iter = func(registry, view, iter, end);
+							}
+						}
+					)
+				)
+			);
 		}
-
-		// Action
+		else
 		{
-			ParticleType type = ParticleType::Invalid;
-			NActionFunc func = nullptr;
-
-			for (auto iter = view.begin(), last = view.end(); iter != last;)
+			// Move
 			{
-				const auto &entity = *iter;
-				const auto &info = Registry.get<Entity::Info>(entity);
-				if (info.Type != type)
-				{
-					type = info.Type;
-					func = TParticles::GetAction(type);
-				}
-				if (func == nullptr) {
-					++iter;
-					continue;
-				}
+				ParticleType type = ParticleType::Invalid;
+				NMoveFunc func = nullptr;
 
-				iter = func(Registry, iter, last);
+				for (auto iter = view.begin(), last = view.end(); iter != last;)
+				{
+					const auto &entity = *iter;
+					const auto &info = view.get<Entity::Info>(entity);
+					if (info.Type != type)
+					{
+						type = info.Type;
+						func = TParticles::GetMove(type);
+					}
+					if (func == nullptr) {
+						++iter;
+						continue;
+					}
+
+					iter = func(registry, view, iter, last);
+				}
+			}
+
+			// Action
+			{
+				ParticleType type = ParticleType::Invalid;
+				NActionFunc func = nullptr;
+
+				for (auto iter = view.begin(), last = view.end(); iter != last;)
+				{
+					const auto &entity = *iter;
+					const auto &info = view.get<Entity::Info>(entity);
+					if (info.Type != type)
+					{
+						type = info.Type;
+						func = TParticles::GetAction(type);
+					}
+					if (func == nullptr) {
+						++iter;
+						continue;
+					}
+
+					iter = func(registry, view, iter, last);
+				}
 			}
 		}
+		//auto endTimer = std::chrono::high_resolution_clock::now();
+		//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);
+		//mu_info("[DEBUG] Particles Move : {}ms with {} elements", diff.count(), registry.size());
 	}
 }
 
@@ -196,10 +261,9 @@ void NParticles::Propagate()
 
 void NParticles::Render()
 {
+	return;
 	using namespace TParticle;
-	const auto view = Registry.view<
-		Entity::Info
-	>();
+	auto view = Registry.view<TParticle::Entity::Info>();
 
 	// Render
 	{
@@ -209,7 +273,7 @@ void NParticles::Render()
 		for (auto iter = view.begin(), last = view.end(); iter != last;)
 		{
 			const auto &entity = *iter;
-			const auto &info = Registry.get<Entity::Info>(entity);
+			const auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != type)
 			{
 				type = info.Type;
@@ -220,7 +284,7 @@ void NParticles::Render()
 				continue;
 			}
 
-			iter = func(Registry, iter, last, RenderBuffer);
+			iter = func(Registry, view, iter, last, RenderBuffer);
 		}
 	}
 

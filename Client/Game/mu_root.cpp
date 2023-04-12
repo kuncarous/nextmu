@@ -321,7 +321,7 @@ namespace MURoot
 			if (updateCount > 0)
 			{
 				auto *joints = environment->GetJoints();
-				for (mu_uint32 n = 0; n < 20; ++n)
+				for (mu_uint32 n = 0; n < 60; ++n)
 				{
 					const glm::vec3 position = glm::vec3(
 						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,

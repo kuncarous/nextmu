@@ -79,7 +79,7 @@ namespace Thunder1V7
 		//CreateTail(tails, data.Position, glm::quat(glm::radians(data.Angle)), data.Scale);
 	}
 
-	EnttIterator Move(const EnttView &view, EnttIterator iter, EnttIterator last)
+	EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 	{
 		using namespace TJoint;
 
@@ -89,7 +89,7 @@ namespace Thunder1V7
 			auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
-			auto [lifetime, position, light, tails] = view.get<Entity::LifeTime, Entity::Position, Entity::Light, Entity::Tails>(entity);
+			auto [lifetime, position, light, tails] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light, Entity::Tails>(entity);
 
 			const auto rotation = glm::quat(glm::radians(position.Angle));
 			position.Position = position.StartPosition;
@@ -125,7 +125,7 @@ namespace Thunder1V7
 		return iter;
 	}
 
-	EnttIterator Action(const EnttView &view, EnttIterator iter, EnttIterator last)
+	EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 	{
 		using namespace TJoint;
 
@@ -141,7 +141,7 @@ namespace Thunder1V7
 		return iter;
 	}
 
-	EnttIterator Render(const EnttView &view, EnttIterator iter, EnttIterator last, TJoint::NRenderBuffer &renderBuffer)
+	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, TJoint::NRenderBuffer &renderBuffer)
 	{
 		using namespace TJoint;
 
@@ -160,7 +160,7 @@ namespace Thunder1V7
 			const auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
-			const auto [position, light, tails] = view.get<Entity::Position, Entity::Light, Entity::Tails>(entity);
+			const auto [position, light, tails] = registry.get<Entity::Position, Entity::Light, Entity::Tails>(entity);
 
 			// TO DO : Remove this and check why they decided to generate a beam with 5 tails
 			constexpr mu_int16 tailOffset = 5;

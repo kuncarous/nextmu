@@ -6,7 +6,7 @@
 #include "t_joint_entity.h"
 
 using namespace TJoint;
-constexpr mu_boolean UseMultithread = false;
+constexpr mu_boolean UseMultithread = true;
 
 const mu_boolean NJoints::Initialize()
 {
@@ -100,16 +100,15 @@ void NJoints::Update(const mu_uint32 updateCount)
 			}
 		}
 
-		// Move
+		auto view = registry.view<Entity::Info>();
+		//auto startTimer = std::chrono::high_resolution_clock::now();
 		if constexpr (UseMultithread)
 		{
-			const auto view = registry.view<JOINT_VIEW>();
-
 			MUThreadsManager::Run(
 				std::unique_ptr<NThreadExecutorBase>(
 					new (std::nothrow) NThreadExecutorRangeIterator(
 						view.begin(), view.end(),
-						[&view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
+						[&registry, &view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
 							JointType type = JointType::Invalid;
 							NMoveFunc func = nullptr;
 							for (auto iter = begin; iter != end;)
@@ -126,7 +125,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 									continue;
 								}
 
-								iter = func(view, iter, end);
+								iter = func(registry, view, iter, end);
 							}
 						}
 					)
@@ -137,7 +136,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 				std::unique_ptr<NThreadExecutorBase>(
 					new (std::nothrow) NThreadExecutorRangeIterator(
 						view.begin(), view.end(),
-						[&view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
+						[&registry, &view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
 							JointType type = JointType::Invalid;
 							NMoveFunc func = nullptr;
 							for (auto iter = begin; iter != end;)
@@ -154,7 +153,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 									continue;
 								}
 
-								iter = func(view, iter, end);
+								iter = func(registry, view, iter, end);
 							}
 						}
 					)
@@ -163,8 +162,6 @@ void NJoints::Update(const mu_uint32 updateCount)
 		}
 		else
 		{
-			const auto view = registry.view<JOINT_VIEW>();
-
 			// Move
 			{
 				JointType type = JointType::Invalid;
@@ -173,7 +170,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 				for (auto iter = view.begin(), last = view.end(); iter != last;)
 				{
 					const auto &entity = *iter;
-					const auto &info = Registry.get<Entity::Info>(entity);
+					const auto &info = view.get<Entity::Info>(entity);
 					if (info.Type != type)
 					{
 						type = info.Type;
@@ -184,7 +181,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 						continue;
 					}
 
-					iter = func(view, iter, last);
+					iter = func(registry, view, iter, last);
 				}
 			}
 
@@ -196,7 +193,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 				for (auto iter = view.begin(), last = view.end(); iter != last;)
 				{
 					const auto &entity = *iter;
-					const auto &info = Registry.get<Entity::Info>(entity);
+					const auto &info = view.get<Entity::Info>(entity);
 					if (info.Type != type)
 					{
 						type = info.Type;
@@ -207,10 +204,13 @@ void NJoints::Update(const mu_uint32 updateCount)
 						continue;
 					}
 
-					iter = func(view, iter, last);
+					iter = func(registry, view, iter, last);
 				}
 			}
 		}
+		//auto endTimer = std::chrono::high_resolution_clock::now();
+		//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);
+		//mu_info("[DEBUG] Joints Move : {}ms with {} elements", diff.count(), registry.size());
 	}
 }
 
@@ -252,7 +252,7 @@ void NJoints::Propagate()
 void NJoints::Render()
 {
 	using namespace TJoint;
-	const auto view = Registry.view<JOINT_VIEW>();
+	auto view = Registry.view<Entity::Info>();
 
 	// Render
 	{
@@ -262,7 +262,7 @@ void NJoints::Render()
 		for (auto iter = view.begin(), last = view.end(); iter != last;)
 		{
 			const auto &entity = *iter;
-			const auto &info = Registry.get<Entity::Info>(entity);
+			const auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != type)
 			{
 				type = info.Type;
@@ -273,7 +273,7 @@ void NJoints::Render()
 				continue;
 			}
 
-			iter = func(view, iter, last, RenderBuffer);
+			iter = func(Registry, view, iter, last, RenderBuffer);
 		}
 	}
 

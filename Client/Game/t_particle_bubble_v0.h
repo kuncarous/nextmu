@@ -10,9 +10,9 @@ namespace BubbleV0
 	using namespace TParticle;
 	void Register(NInvokes &invokes);
 	void Create(entt::registry &registry, const NParticleData &data);
-	EnttIterator Move(entt::registry &registry, EnttIterator iter, EnttIterator last);
-	EnttIterator Action(entt::registry &registry, EnttIterator iter, EnttIterator last);
-	EnttIterator Render(entt::registry &registry, EnttIterator iter, EnttIterator last, TParticle::NRenderBuffer &renderBuffer);
+	EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last);
+	EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last);
+	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, TParticle::NRenderBuffer &renderBuffer);
 }
 
 #endif

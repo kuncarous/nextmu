@@ -61,7 +61,7 @@ private:
 	virtual void Prepare(const mu_uint32 count) override
 	{
 		_Ranges.resize(count);
-		auto elementsCount = std::distance(_First, _Last);
+		const mu_uint32 elementsCount = static_cast<mu_uint32>(std::distance(_First, _Last));
 		auto iter = _First, last = _Last;
 		for (mu_uint32 n = 0; n < count; ++n)
 		{
@@ -107,7 +107,7 @@ private:
 	virtual void Prepare(const mu_uint32 count) override
 	{
 		_Ranges.resize(count);
-		auto elementsCount = std::distance(_First, _Last);
+		const mu_uint32 elementsCount = static_cast<mu_uint32>(std::distance(_First, _Last));
 		auto iter = _First, last = _Last;
 		for (mu_uint32 n = 0; n < count; ++n)
 		{
@@ -124,10 +124,7 @@ private:
 	void Execute(const mu_uint32 index, const mu_uint32 count) override
 	{
 		auto &range = _Ranges[index];
-		for (; range.begin != range.end; ++range.begin)
-		{
-			_Func(range.begin, range.end);
-		}
+		_Func(range.begin, range.end);
 	}
 
 private:

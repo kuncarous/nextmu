@@ -10,11 +10,16 @@
 
 namespace TParticle
 {
-	typedef entt::internal::sparse_set_iterator<std::vector<entt::entity>> EnttIterator;
-	typedef std::function<void(entt::registry &, const NParticleData &)> NCreateFunc;
-	typedef std::function<EnttIterator(entt::registry &, EnttIterator, EnttIterator)> NMoveFunc;
-	typedef std::function<EnttIterator(entt::registry &, EnttIterator, EnttIterator)> NActionFunc;
-	typedef std::function<EnttIterator(entt::registry &, EnttIterator, EnttIterator, TParticle::NRenderBuffer &renderBuffer)> NRenderFunc;
+	template<typename... Other>
+	using EnttViewType = entt::view<entt::get_t<Other...>>;
+
+	typedef entt::registry EnttRegistry;
+	typedef EnttViewType<TParticle::Entity::Info> EnttView;
+	typedef EnttView::iterator EnttIterator;
+	typedef std::function<void(EnttRegistry &, const NParticleData &)> NCreateFunc;
+	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator)> NMoveFunc;
+	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator)> NActionFunc;
+	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator, TParticle::NRenderBuffer &renderBuffer)> NRenderFunc;
 
 	struct NInvokes
 	{
