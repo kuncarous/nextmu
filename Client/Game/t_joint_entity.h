@@ -46,4 +46,11 @@ namespace TJoint::Entity
 	};
 }
 
+#define JOINT_VIEW					\
+	TJoint::Entity::Info,			\
+	TJoint::Entity::LifeTime,		\
+	TJoint::Entity::Position,		\
+	TJoint::Entity::Light,			\
+	TJoint::Entity::Tails			\
+
 #endif

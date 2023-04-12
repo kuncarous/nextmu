@@ -7,14 +7,19 @@
 #include "t_joint_entity.h"
 #include "t_joint_render.h"
 #include "t_joint_create.h"
+#include <type_traits>
 
 namespace TJoint
 {
-	typedef entt::internal::sparse_set_iterator<std::vector<entt::entity>> EnttIterator;
+	template<typename... Other>
+	using EnttViewType = entt::view<entt::get_t<Other...>>;
+
+	typedef EnttViewType<JOINT_VIEW> EnttView;
+	typedef EnttView::iterator EnttIterator;
 	typedef std::function<void(entt::registry &, const NJointData &)> NCreateFunc;
-	typedef std::function<EnttIterator(entt::registry &, EnttIterator, EnttIterator)> NMoveFunc;
-	typedef std::function<EnttIterator(entt::registry &, EnttIterator, EnttIterator)> NActionFunc;
-	typedef std::function<EnttIterator(entt::registry &, EnttIterator, EnttIterator, TJoint::NRenderBuffer &renderBuffer)> NRenderFunc;
+	typedef std::function<EnttIterator(const EnttView &, EnttIterator, EnttIterator)> NMoveFunc;
+	typedef std::function<EnttIterator(const EnttView &, EnttIterator, EnttIterator)> NActionFunc;
+	typedef std::function<EnttIterator(const EnttView &, EnttIterator, EnttIterator, TJoint::NRenderBuffer &renderBuffer)> NRenderFunc;
 
 	struct NInvokes
 	{

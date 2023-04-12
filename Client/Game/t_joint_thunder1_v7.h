@@ -10,9 +10,9 @@ namespace Thunder1V7
 	using namespace TJoint;
 	void Register(NInvokes &invokes);
 	void Create(entt::registry &registry, const NJointData &data);
-	EnttIterator Move(entt::registry &registry, EnttIterator iter, EnttIterator last);
-	EnttIterator Action(entt::registry &registry, EnttIterator iter, EnttIterator last);
-	EnttIterator Render(entt::registry &registry, EnttIterator iter, EnttIterator last, TJoint::NRenderBuffer &renderBuffer);
+	EnttIterator Move(const EnttView &view, EnttIterator iter, EnttIterator last);
+	EnttIterator Action(const EnttView &view, EnttIterator iter, EnttIterator last);
+	EnttIterator Render(const EnttView &view, EnttIterator iter, EnttIterator last, TJoint::NRenderBuffer &renderBuffer);
 }
 
 #endif

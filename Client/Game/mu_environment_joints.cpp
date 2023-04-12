@@ -82,87 +82,89 @@ void NJoints::Create(const NJointData &data)
 
 void NJoints::Update(const mu_uint32 updateCount)
 {
+	auto &registry = Registry;
 	for (mu_uint32 n = 0; n < updateCount; ++n)
 	{
 		using namespace TJoint;
 
 		// Life Time check
 		{
-			const auto view = Registry.view<
+			const auto view = registry.view<
 				Entity::LifeTime
 			>();
 
 			for (auto [entity, lifetime] : view.each())
 			{
 				if (--lifetime > 0) continue;
-				Registry.destroy(entity);
+				registry.destroy(entity);
 			}
 		}
-
-		const auto view = Registry.view<
-			Entity::Info
-		>();
-		const mu_uint32 entitiesCount = static_cast<mu_uint32>(view.size());
 
 		// Move
 		if constexpr (UseMultithread)
 		{
-			if (entitiesCount > 0)
-			{
-				auto &registry = Registry;
-				auto &threadsRange = ThreadsRange;
-				TThreading::SplitLoopIndex(entitiesCount, threadsRange);
-				MUThreadsManager::Run(
-					[&registry, &view, &threadsRange](const mu_uint32 threadIndex) -> void {
-						const auto &range = threadsRange[threadIndex];
-						JointType type = JointType::Invalid;
-						NMoveFunc func = nullptr;
-						for (auto iter = view.begin() + range.start, last = view.begin() + range.end; iter != last;)
-						{
-							const auto &entity = *iter;
-							const auto &info = view.get<Entity::Info>(entity);
-							if (info.Type != type)
+			const auto view = registry.view<JOINT_VIEW>();
+
+			MUThreadsManager::Run(
+				std::unique_ptr<NThreadExecutorBase>(
+					new (std::nothrow) NThreadExecutorRangeIterator(
+						view.begin(), view.end(),
+						[&view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
+							JointType type = JointType::Invalid;
+							NMoveFunc func = nullptr;
+							for (auto iter = begin; iter != end;)
 							{
-								type = info.Type;
-								func = TJoints::GetMove(type);
-							}
-							if (func == nullptr) {
-								++iter;
-								continue;
-							}
+								const auto &entity = *iter;
+								const auto &info = view.get<Entity::Info>(entity);
+								if (info.Type != type)
+								{
+									type = info.Type;
+									func = TJoints::GetMove(type);
+								}
+								if (func == nullptr) {
+									++iter;
+									continue;
+								}
 
-							iter = func(registry, iter, last);
+								iter = func(view, iter, end);
+							}
 						}
-					}
-				);
+					)
+				)
+			);
 
-				MUThreadsManager::Run(
-					[&registry, &view, &threadsRange](const mu_uint32 threadIndex) -> void {
-						const auto &range = threadsRange[threadIndex];
-						JointType type = JointType::Invalid;
-						NActionFunc func = nullptr;
-						for (auto iter = view.begin() + range.start, last = view.begin() + range.end; iter != last;)
-						{
-							const auto &entity = *iter;
-							const auto &info = view.get<Entity::Info>(entity);
-							if (info.Type != type)
+			MUThreadsManager::Run(
+				std::unique_ptr<NThreadExecutorBase>(
+					new (std::nothrow) NThreadExecutorRangeIterator(
+						view.begin(), view.end(),
+						[&view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
+							JointType type = JointType::Invalid;
+							NMoveFunc func = nullptr;
+							for (auto iter = begin; iter != end;)
 							{
-								type = info.Type;
-								func = TJoints::GetAction(type);
-							}
-							if (func == nullptr) {
-								++iter;
-								continue;
-							}
+								const auto entity = *iter;
+								const auto &info = view.get<Entity::Info>(entity);
+								if (info.Type != type)
+								{
+									type = info.Type;
+									func = TJoints::GetAction(type);
+								}
+								if (func == nullptr) {
+									++iter;
+									continue;
+								}
 
-							iter = func(registry, iter, last);
+								iter = func(view, iter, end);
+							}
 						}
-					}
-				);
-			}
+					)
+				)
+			);
 		}
 		else
 		{
+			const auto view = registry.view<JOINT_VIEW>();
+
 			// Move
 			{
 				JointType type = JointType::Invalid;
@@ -182,7 +184,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 						continue;
 					}
 
-					iter = func(Registry, iter, last);
+					iter = func(view, iter, last);
 				}
 			}
 
@@ -205,7 +207,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 						continue;
 					}
 
-					iter = func(Registry, iter, last);
+					iter = func(view, iter, last);
 				}
 			}
 		}
@@ -250,9 +252,7 @@ void NJoints::Propagate()
 void NJoints::Render()
 {
 	using namespace TJoint;
-	const auto view = Registry.view<
-		Entity::Info
-	>();
+	const auto view = Registry.view<JOINT_VIEW>();
 
 	// Render
 	{
@@ -273,7 +273,7 @@ void NJoints::Render()
 				continue;
 			}
 
-			iter = func(Registry, iter, last, RenderBuffer);
+			iter = func(view, iter, last, RenderBuffer);
 		}
 	}
 

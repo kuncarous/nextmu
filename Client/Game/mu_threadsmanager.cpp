@@ -10,13 +10,13 @@ namespace MUThreadsManager
 	std::vector<std::jthread> Threads;
 	std::unique_ptr<std::barrier<>> WakeBarrier;
 	std::unique_ptr<std::barrier<>> RunBarrier;
-	RunFunction Function;
+	std::unique_ptr<NThreadExecutorBase> Executor;
 
 	void Worker(const mu_uint32 index);
 
 	const mu_boolean Initialize()
 	{
-		const auto threadsCount = glm::min(std::jthread::hardware_concurrency(), 8u);
+		const auto threadsCount = glm::min(std::jthread::hardware_concurrency(), 16u);
 
 		WakeBarrier.reset(new std::barrier(threadsCount + 1));
 		RunBarrier.reset(new std::barrier(threadsCount + 1));
@@ -44,20 +44,23 @@ namespace MUThreadsManager
 		return static_cast<mu_uint32>(Threads.size());
 	}
 
-	void Run(RunFunction func)
+	void Run(std::unique_ptr<NThreadExecutorBase> executor)
 	{
-		Function = std::move(func);
+		Executor = std::move(executor);
+		Executor->Prepare(GetThreadsCount());
 		WakeBarrier->arrive_and_wait();
 		RunBarrier->arrive_and_wait();
+		Executor.reset();
 	}
 
 	void Worker(const mu_uint32 index)
 	{
+		const mu_uint32 count = GetThreadsCount();
 		while (true)
 		{
 			WakeBarrier->arrive_and_wait();
 			if (Terminated) break;
-			Function(index);
+			if (Executor) Executor->Execute(index, count);
 			RunBarrier->arrive_and_wait();
 		}
 	}
