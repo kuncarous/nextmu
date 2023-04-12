@@ -35,6 +35,10 @@ namespace TParticle::Entity
 	BOOST_STRONG_TYPEDEF(mu_float, Rotation);
 	BOOST_STRONG_TYPEDEF(mu_float, Gravity);
 	BOOST_STRONG_TYPEDEF(mu_uint8, Frame);
+
+	BOOST_STRONG_TYPEDEF(mu_uint32, RenderGroup);
+	BOOST_STRONG_TYPEDEF(mu_uint32, RenderIndex);
+	BOOST_STRONG_TYPEDEF(mu_uint32, RenderCount);
 }
 
 #endif

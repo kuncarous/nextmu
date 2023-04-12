@@ -24,11 +24,19 @@ namespace TJoint
 	};
 #pragma pack()
 
+	struct NRenderGroup
+	{
+		JointType Type;
+		mu_uint32 Index;
+		mu_uint32 Count;
+	};
+
 	struct NRenderBuffer
 	{
-		mu_uint32 Count = 0;
 		std::array<NRenderVertex, MaxRenderCount * 4> Vertices;
 		std::array<mu_uint32, MaxRenderCount * 6> Indices;
+
+		std::vector<NRenderGroup> Groups;
 
 		bgfx::VertexLayout Layout;
 		bgfx::DynamicVertexBufferHandle VertexBuffer = BGFX_INVALID_HANDLE;
@@ -37,11 +45,18 @@ namespace TJoint
 		bgfx::ProgramHandle Program = BGFX_INVALID_HANDLE;
 	};
 
-	NEXTMU_INLINE void RenderTail(NRenderBuffer &renderBuffer, mu_uint32 &vertex, const glm::vec3 position[4], const glm::vec4 &light, const glm::vec4 &uv)
+	NEXTMU_INLINE void RenderTail(
+		NRenderBuffer &renderBuffer,
+		const mu_uint32 renderGroup,
+		const mu_uint32 renderIndex,
+		const glm::vec3 position[4],
+		const glm::vec4 &light,
+		const glm::vec4 &uv
+	)
 	{
-		const auto index = renderBuffer.Count++;
-		auto *vertices = renderBuffer.Vertices.data() + index * 4;
-		auto *indices = renderBuffer.Indices.data() + index * 6;
+		auto &group = renderBuffer.Groups[renderGroup];
+		auto *vertices = renderBuffer.Vertices.data() + renderIndex * 4;
+		auto *indices = renderBuffer.Indices.data() + renderIndex * 6;
 
 #if NEXTMU_COMPRESSED_JOINTS == 1
 		const auto packedLight = glm::packSnorm4x16(light);
@@ -87,13 +102,13 @@ namespace TJoint
 #endif
 		++vertices;
 
+		const mu_uint32 vertex = (renderIndex - group.Index) * 4;
 		*indices = vertex + 0; ++indices;
 		*indices = vertex + 1; ++indices;
 		*indices = vertex + 2; ++indices;
 		*indices = vertex + 0; ++indices;
 		*indices = vertex + 2; ++indices;
 		*indices = vertex + 3; ++indices;
-		vertex += 4;
 	}
 }
 

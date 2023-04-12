@@ -321,7 +321,7 @@ namespace MURoot
 			if (updateCount > 0)
 			{
 				auto *joints = environment->GetJoints();
-				for (mu_uint32 n = 0; n < 60; ++n)
+				/*for (mu_uint32 n = 0; n < 60; ++n)
 				{
 					const glm::vec3 position = glm::vec3(
 						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
@@ -341,10 +341,10 @@ namespace MURoot
 							.Scale = glm::linearRand(60.0f, 70.0f),
 						}
 					);
-				}/**/
+				}*/
 
 				auto *particles = environment->GetParticles();
-				/*for (mu_uint32 n = 0; n < 200; ++n)
+				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {
@@ -358,7 +358,7 @@ namespace MURoot
 						}
 					);
 				}
-				for (mu_uint32 n = 0; n < 200; ++n)
+				/*for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {

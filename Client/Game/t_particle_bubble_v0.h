@@ -12,7 +12,8 @@ namespace BubbleV0
 	void Create(entt::registry &registry, const NParticleData &data);
 	EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last);
 	EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last);
-	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, TParticle::NRenderBuffer &renderBuffer);
+	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer);
+	void RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer);
 }
 
 #endif

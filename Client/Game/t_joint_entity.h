@@ -44,6 +44,10 @@ namespace TJoint::Entity
 		mu_int32 MaxCount;
 		std::array<Tail, MaxTails> Tails;
 	};
+
+	BOOST_STRONG_TYPEDEF(mu_uint32, RenderGroup);
+	BOOST_STRONG_TYPEDEF(mu_uint32, RenderIndex);
+	BOOST_STRONG_TYPEDEF(mu_uint32, RenderCount);
 }
 
 #endif

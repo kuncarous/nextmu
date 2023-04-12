@@ -24,11 +24,19 @@ namespace TParticle
 	};
 #pragma pack()
 
+	struct NRenderGroup
+	{
+		ParticleType Type;
+		mu_uint32 Index;
+		mu_uint32 Count;
+	};
+
 	struct NRenderBuffer
 	{
-		mu_uint32 Count = 0;
 		std::array<NRenderVertex, MaxRenderCount * 4> Vertices;
 		std::array<mu_uint32, MaxRenderCount * 6> Indices;
+
+		std::vector<NRenderGroup> Groups;
 
 		bgfx::VertexLayout Layout;
 		bgfx::DynamicVertexBufferHandle VertexBuffer = BGFX_INVALID_HANDLE;
@@ -38,11 +46,11 @@ namespace TParticle
 		bgfx::ProgramHandle Program = BGFX_INVALID_HANDLE;
 	};
 
-	NEXTMU_INLINE void RenderSprite(NRenderBuffer &renderBuffer, mu_uint32 &vertex, const glm::vec3 position[4], const glm::vec4 &light, const glm::vec4 &uv)
+	NEXTMU_INLINE void RenderSprite(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, const glm::vec3 position[4], const glm::vec4 &light, const glm::vec4 &uv)
 	{
-		const auto index = renderBuffer.Count++;
-		auto *vertices = renderBuffer.Vertices.data() + index * 4;
-		auto *indices = renderBuffer.Indices.data() + index * 6;
+		auto &group = renderBuffer.Groups[renderGroup];
+		auto *vertices = renderBuffer.Vertices.data() + renderIndex * 4;
+		auto *indices = renderBuffer.Indices.data() + renderIndex * 6;
 
 #if NEXTMU_COMPRESSED_PARTICLES == 1
 		const auto packedLight = glm::packSnorm4x16(light);
@@ -88,16 +96,16 @@ namespace TParticle
 #endif
 		++vertices;
 
+		const mu_uint32 vertex = (renderIndex - group.Index) * 4;
 		*indices = vertex + 0; ++indices;
 		*indices = vertex + 1; ++indices;
 		*indices = vertex + 2; ++indices;
 		*indices = vertex + 0; ++indices;
 		*indices = vertex + 2; ++indices;
 		*indices = vertex + 3; ++indices;
-		vertex += 4;
 	}
 
-	NEXTMU_INLINE void RenderBillboardSprite(NRenderBuffer &renderBuffer, mu_uint32 &vertex, cglm::mat4 view, const glm::vec3 &position, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
+	NEXTMU_INLINE void RenderBillboardSprite(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, cglm::mat4 view, const glm::vec3 &position, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
 	{
 		cglm::vec3 cposition;
 		cglm::glm_mat4_mulv3(view, (mu_float *)glm::value_ptr(position), 1.0f, cposition);
@@ -109,10 +117,10 @@ namespace TParticle
 			{ cposition[0] - width, cposition[1] + height, cposition[2] }
 		};
 
-		RenderSprite(renderBuffer, vertex, rposition, light, uv);
+		RenderSprite(renderBuffer, renderGroup, renderIndex, rposition, light, uv);
 	}
 
-	NEXTMU_INLINE void RenderBillboardSpriteWithRotation(NRenderBuffer &renderBuffer, mu_uint32 &vertex, cglm::mat4 view, const glm::vec3 &position, const mu_float rotation, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
+	NEXTMU_INLINE void RenderBillboardSpriteWithRotation(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, cglm::mat4 view, const glm::vec3 &position, const mu_float rotation, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
 	{
 		cglm::vec3 cposition;
 		cglm::glm_mat4_mulv3(view, (mu_float *)glm::value_ptr(position), 1.0f, cposition);
@@ -135,7 +143,7 @@ namespace TParticle
 		rposition[2].x += cposition[0]; rposition[2].y += cposition[1];
 		rposition[3].x += cposition[0]; rposition[3].y += cposition[1];
 
-		RenderSprite(renderBuffer, vertex, rposition, light, uv);
+		RenderSprite(renderBuffer, renderGroup, renderIndex, rposition, light, uv);
 	}
 }
 

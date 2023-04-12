@@ -32,6 +32,7 @@ namespace BubbleV0
 		REGISTER_INVOKE(Move);
 		REGISTER_INVOKE(Action);
 		REGISTER_INVOKE(Render);
+		REGISTER_INVOKE(RenderGroup);
 	}
 
 	void Create(entt::registry &registry, const NParticleData &data)
@@ -67,6 +68,10 @@ namespace BubbleV0
 			entity,
 			0
 		);
+
+		registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
+		registry.emplace<Entity::RenderIndex>(entity, 0);
+		registry.emplace<Entity::RenderCount>(entity, 1);
 	}
 
 	EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
@@ -103,59 +108,54 @@ namespace BubbleV0
 		return iter;
 	}
 
-	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, TParticle::NRenderBuffer &renderBuffer)
+	static const NTexture *texture = nullptr;
+	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 	{
 		using namespace TParticle;
 
-		static const NTexture *texture = nullptr;
-		if (texture == nullptr)
-		{
-			texture = MUResourcesManager::GetTexture(TextureID);
-		}
+		if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 
 		const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 		const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
 
-		cglm::mat4 projection, gview;
-		MURenderState::GetProjection(projection);
+		cglm::mat4 gview;
 		MURenderState::GetView(gview);
 
-		const auto startIndex = renderBuffer.Count;
-		mu_uint32 vertex = 0;
 		for (; iter != last; ++iter)
 		{
 			const auto entity = *iter;
 			const auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
-			const auto [position, light, frame] = registry.get<Entity::Position, Entity::Light, Entity::Frame>(entity);
+			const auto [position, light, frame, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::Frame, Entity::RenderGroup, Entity::RenderIndex>(entity);
+			if (renderGroup.t == NInvalidUInt32) continue;
+
 			const auto uoffset = static_cast<mu_float>(frame % 3) * UVMultiplier + UVOffset;
 			const auto voffset = static_cast<mu_float>(frame / 3) * UVMultiplier + UVOffset;
 
 			const mu_float width = textureWidth * position.Scale * 0.5f;
 			const mu_float height = textureHeight * position.Scale * 0.5f;
 
-			RenderBillboardSprite(renderBuffer, vertex, gview, position.Position, width, height, light, glm::vec4(uoffset, voffset, uoffset + USize, voffset + VSize));
-
-			if (renderBuffer.Count >= MaxRenderCount) {
-				iter = last;
-				break;
-			}
-		}
-
-		const auto renderCount = renderBuffer.Count - startIndex;
-		if (renderCount > 0)
-		{
-			bgfx::update(renderBuffer.VertexBuffer, startIndex * 4, bgfx::copy(renderBuffer.Vertices.data() + startIndex * 4, sizeof(NRenderVertex) * renderCount * 4));
-			bgfx::update(renderBuffer.IndexBuffer, startIndex * 6, bgfx::copy(renderBuffer.Indices.data() + startIndex * 6, sizeof(mu_uint32) * renderCount * 6));
-			bgfx::setState(RenderState);
-			bgfx::setUniform(renderBuffer.Projection, projection);
-			bgfx::setTexture(0, renderBuffer.TextureSampler, texture->GetTexture());
-			bgfx::setVertexBuffer(0, renderBuffer.VertexBuffer, startIndex * 4, renderCount * 4);
-			bgfx::setIndexBuffer(renderBuffer.IndexBuffer, startIndex * 6, renderCount * 6);
-			bgfx::submit(0, renderBuffer.Program);
+			RenderBillboardSprite(renderBuffer, renderGroup, renderIndex, gview, position.Position, width, height, light, glm::vec4(uoffset, voffset, uoffset + USize, voffset + VSize));
 		}
 
 		return iter;
+	}
+
+	void RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer)
+	{
+		if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
+		if (texture == nullptr) return;
+
+		cglm::mat4 projection;
+		MURenderState::GetProjection(projection);
+		bgfx::update(renderBuffer.VertexBuffer, renderGroup.Index * 4, bgfx::makeRef(renderBuffer.Vertices.data() + renderGroup.Index * 4, sizeof(NRenderVertex) * renderGroup.Count * 4));
+		bgfx::update(renderBuffer.IndexBuffer, renderGroup.Index * 6, bgfx::makeRef(renderBuffer.Indices.data() + renderGroup.Index * 6, sizeof(mu_uint32) * renderGroup.Count * 6));
+		bgfx::setState(RenderState);
+		bgfx::setUniform(renderBuffer.Projection, projection);
+		bgfx::setTexture(0, renderBuffer.TextureSampler, texture->GetTexture());
+		bgfx::setVertexBuffer(0, renderBuffer.VertexBuffer, renderGroup.Index * 4, renderGroup.Count * 4);
+		bgfx::setIndexBuffer(renderBuffer.IndexBuffer, renderGroup.Index * 6, renderGroup.Count * 6);
+		bgfx::submit(0, renderBuffer.Program);
 	}
 }

@@ -1,0 +1,9 @@
+#ifndef __T_PARTICLE_CONFIG_H__
+#define __T_PARTICLE_CONFIG_H__
+
+#pragma once
+
+#define ENABLE_PARTICLE_UPDATE_MULTITHREAD (1)
+#define ENABLE_PARTICLE_RENDER_MULTITHREAD (1)
+
+#endif

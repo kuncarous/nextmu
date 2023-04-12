@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "t_joint_config.h"
 #include "t_joint_enum.h"
 #include "t_joint_entity.h"
 #include "t_joint_render.h"
@@ -20,7 +21,8 @@ namespace TJoint
 	typedef std::function<void(EnttRegistry &, const NJointData &)> NCreateFunc;
 	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator)> NMoveFunc;
 	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator)> NActionFunc;
-	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator, TJoint::NRenderBuffer &renderBuffer)> NRenderFunc;
+	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator, NRenderBuffer &renderBuffer)> NRenderFunc;
+	typedef std::function<void(const NRenderGroup &, const NRenderBuffer &)> NRenderGroupFunc;
 
 	struct NInvokes
 	{
@@ -28,6 +30,7 @@ namespace TJoint
 		std::map<JointType, NMoveFunc> Move;
 		std::map<JointType, NActionFunc> Action;
 		std::map<JointType, NRenderFunc> Render;
+		std::map<JointType, NRenderGroupFunc> RenderGroup;
 	};
 }
 

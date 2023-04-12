@@ -14,6 +14,9 @@ namespace Thunder1V7
 	constexpr auto LightDivisor = 1.0f / 1.2f;
 	const mu_char *TextureID = "thunder_v0";
 
+	// TO DO : Remove this and check why they decided to generate a beam with 5 tails
+	constexpr mu_int32 tailOffset = 5;
+
 	constexpr mu_uint64 RenderState = (
 		BGFX_STATE_WRITE_RGB |
 		BGFX_STATE_WRITE_A |
@@ -29,6 +32,9 @@ namespace Thunder1V7
 		REGISTER_INVOKE(Move);
 		REGISTER_INVOKE(Action);
 		REGISTER_INVOKE(Render);
+#if ENABLE_JOINT_RENDER_MULTITHREAD == 1
+		REGISTER_INVOKE(RenderGroup);
+#endif
 	}
 
 	void Create(entt::registry &registry, const NJointData &data)
@@ -74,9 +80,9 @@ namespace Thunder1V7
 			}
 		);
 
-		//auto &position = registry.get<Entity::Position>(entity);
-		//auto &tails = registry.get<Entity::Tails>(entity);
-		//CreateTail(tails, data.Position, glm::quat(glm::radians(data.Angle)), data.Scale);
+		registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
+		registry.emplace<Entity::RenderIndex>(entity, 0);
+		registry.emplace<Entity::RenderCount>(entity, 0);
 	}
 
 	EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
@@ -89,7 +95,19 @@ namespace Thunder1V7
 			auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
-			auto [lifetime, position, light, tails] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light, Entity::Tails>(entity);
+			auto [
+				lifetime,
+				position,
+				light,
+				tails,
+				renderCount
+			] = registry.get<
+				Entity::LifeTime,
+				Entity::Position,
+				Entity::Light,
+				Entity::Tails,
+				Entity::RenderCount
+			>(entity);
 
 			const auto rotation = glm::quat(glm::radians(position.Angle));
 			position.Position = position.StartPosition;
@@ -120,6 +138,8 @@ namespace Thunder1V7
 			CreateTail(tails, position.Position, rotation, position.Scale);
 
 			if (lifetime < 4) light *= LightDivisor;
+
+			renderCount = (tails.Count - tailOffset) * 2;
 		}
 
 		return iter;
@@ -141,29 +161,22 @@ namespace Thunder1V7
 		return iter;
 	}
 
-	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, TJoint::NRenderBuffer &renderBuffer)
+	static const NTexture *texture = nullptr;
+	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 	{
 		using namespace TJoint;
 
-		static const NTexture *texture = nullptr;
-		if (texture == nullptr)
-		{
-			texture = MUResourcesManager::GetTexture(TextureID);
-		}
-
 		const mu_float scroll = glm::mod(MUState::GetWorldTime(), 1000.0f) * 0.002f;
-		const auto startIndex = renderBuffer.Count;
-		mu_uint32 vertex = 0;
 		for (; iter != last; ++iter)
 		{
 			const auto entity = *iter;
 			const auto &info = view.get<Entity::Info>(entity);
 			if (info.Type != Type) break;
 
-			const auto [position, light, tails] = registry.get<Entity::Position, Entity::Light, Entity::Tails>(entity);
+			const auto [position, light, tails, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::Tails, Entity::RenderGroup, Entity::RenderIndex>(entity);
+			if (renderGroup.t == NInvalidUInt32) continue;
 
-			// TO DO : Remove this and check why they decided to generate a beam with 5 tails
-			constexpr mu_int16 tailOffset = 5;
+			mu_uint32 rindex = renderIndex;
 			const auto maxTails = static_cast<mu_float>(tails.MaxCount - 1);
 			for (mu_int32 j1 = tails.Begin + tailOffset, j2 = (j1 + 1) % tails.MaxCount, n = tailOffset, count = tails.Count; n < count; j1 = j2, j2 = (j2 + 1) % tails.MaxCount, ++n)
 			{
@@ -183,7 +196,8 @@ namespace Thunder1V7
 				};
 				RenderTail(
 					renderBuffer,
-					vertex,
+					renderGroup,
+					rindex++,
 					tp1,
 					light,
 					glm::vec4(
@@ -205,7 +219,8 @@ namespace Thunder1V7
 				};
 				RenderTail(
 					renderBuffer,
-					vertex,
+					renderGroup,
+					rindex++,
 					tp2,
 					light,
 					glm::vec4(
@@ -216,25 +231,22 @@ namespace Thunder1V7
 					)
 				);
 			}
-
-			if (renderBuffer.Count >= MaxRenderCount) {
-				iter = last;
-				break;
-			}
-		}
-
-		const auto renderCount = renderBuffer.Count - startIndex;
-		if (renderCount > 0)
-		{
-			bgfx::update(renderBuffer.VertexBuffer, startIndex * 4, bgfx::makeRef(renderBuffer.Vertices.data() + startIndex * 4, sizeof(NRenderVertex) * renderCount * 4));
-			bgfx::update(renderBuffer.IndexBuffer, startIndex * 6, bgfx::makeRef(renderBuffer.Indices.data() + startIndex * 6, sizeof(mu_uint32) * renderCount * 6));
-			bgfx::setState(RenderState);
-			bgfx::setTexture(0, renderBuffer.TextureSampler, texture->GetTexture());
-			bgfx::setVertexBuffer(0, renderBuffer.VertexBuffer, startIndex * 4, renderCount * 4);
-			bgfx::setIndexBuffer(renderBuffer.IndexBuffer, startIndex * 6, renderCount * 6);
-			bgfx::submit(0, renderBuffer.Program);
 		}
 
 		return iter;
+	}
+
+	void RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer)
+	{
+		if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
+		if (texture == nullptr) return;
+
+		bgfx::update(renderBuffer.VertexBuffer, renderGroup.Index * 4, bgfx::makeRef(renderBuffer.Vertices.data() + renderGroup.Index * 4, sizeof(NRenderVertex) * renderGroup.Count * 4));
+		bgfx::update(renderBuffer.IndexBuffer, renderGroup.Index * 6, bgfx::makeRef(renderBuffer.Indices.data() + renderGroup.Index * 6, sizeof(mu_uint32) * renderGroup.Count * 6));
+		bgfx::setState(RenderState);
+		bgfx::setTexture(0, renderBuffer.TextureSampler, texture->GetTexture());
+		bgfx::setVertexBuffer(0, renderBuffer.VertexBuffer, renderGroup.Index * 4, renderGroup.Count * 4);
+		bgfx::setIndexBuffer(renderBuffer.IndexBuffer, renderGroup.Index * 6, renderGroup.Count * 6);
+		bgfx::submit(0, renderBuffer.Program);
 	}
 }

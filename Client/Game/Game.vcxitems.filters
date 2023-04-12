@@ -530,5 +530,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_threading_helper.h">
       <Filter>Threading</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_config.h">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_config.h">
+      <Filter>Environment\Particles\Templates</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

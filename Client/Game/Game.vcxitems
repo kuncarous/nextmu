@@ -115,6 +115,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_threadsmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joints.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_base.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_create.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_entity.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_enum.h" />
@@ -123,6 +124,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_tails.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_thunder1_v7.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_create.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_entity.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_enum.h" />

@@ -112,7 +112,8 @@ void NParticles::Update(const mu_uint32 updateCount)
 
 		auto view = registry.view<TParticle::Entity::Info>();
 		//auto startTimer = std::chrono::high_resolution_clock::now();
-		if constexpr (UseMultithread)
+
+#if ENABLE_PARTICLE_UPDATE_MULTITHREAD == 1
 		{
 			MUThreadsManager::Run(
 				std::unique_ptr<NThreadExecutorBase>(
@@ -170,7 +171,7 @@ void NParticles::Update(const mu_uint32 updateCount)
 				)
 			);
 		}
-		else
+#else
 		{
 			// Move
 			{
@@ -218,6 +219,8 @@ void NParticles::Update(const mu_uint32 updateCount)
 				}
 			}
 		}
+#endif
+
 		//auto endTimer = std::chrono::high_resolution_clock::now();
 		//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);
 		//mu_info("[DEBUG] Particles Move : {}ms with {} elements", diff.count(), registry.size());
@@ -261,12 +264,97 @@ void NParticles::Propagate()
 
 void NParticles::Render()
 {
-	return;
 	using namespace TParticle;
-	auto view = Registry.view<TParticle::Entity::Info>();
 
-	// Render
+	//auto startTimer = std::chrono::high_resolution_clock::now();
+	auto &groups = RenderBuffer.Groups;
+
+	// Calculate
 	{
+		ParticleType type = ParticleType::Invalid;
+		mu_int32 group = -1;
+
+		mu_uint32 index = 0;
+		auto view = Registry.view<Entity::Info, Entity::RenderGroup, Entity::RenderIndex, Entity::RenderCount>();
+		for (auto iter = view.begin(); iter != view.end(); ++iter)
+		{
+			const auto entity = *iter;
+			auto [
+				info,
+				renderGroup,
+				renderIndex,
+				renderCount
+			] = view.get<
+				Entity::Info,
+				Entity::RenderGroup,
+				Entity::RenderIndex,
+				Entity::RenderCount
+			>(entity);
+
+			if (index + renderCount > MaxRenderCount) {
+				renderGroup = NInvalidUInt32;
+				continue;
+			}
+
+			if (type != info.Type)
+			{
+				groups.push_back(
+					NRenderGroup{
+						.Type = info.Type,
+						.Index = index,
+						.Count = 0,
+					}
+				);
+				++group;
+				type = info.Type;
+			}
+
+			auto &rgroup = groups[group];
+			rgroup.Count += renderCount;
+
+			renderGroup = group;
+			renderIndex = index;
+			index += renderCount;
+		}
+	}
+
+#if ENABLE_PARTICLE_RENDER_MULTITHREAD == 1
+	{
+		auto &registry = Registry;
+		auto view = registry.view<Entity::Info>();
+		auto &renderBuffer = RenderBuffer;
+
+		MUThreadsManager::Run(
+			std::unique_ptr<NThreadExecutorBase>(
+				new (std::nothrow) NThreadExecutorRangeIterator(
+					view.begin(), view.end(),
+					[&registry, &view, &renderBuffer](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
+						ParticleType type = ParticleType::Invalid;
+						NRenderFunc func = nullptr;
+						for (auto iter = begin; iter != end;)
+						{
+							const auto entity = *iter;
+							const auto &info = view.get<Entity::Info>(entity);
+							if (info.Type != type)
+							{
+								type = info.Type;
+								func = TParticles::GetRender(type);
+							}
+							if (func == nullptr) {
+								++iter;
+								continue;
+							}
+
+							iter = func(registry, view, iter, end, renderBuffer);
+						}
+					}
+				)
+			)
+		);
+	}
+#else
+	{
+		auto view = Registry.view<Entity::Info>();
 		ParticleType type = ParticleType::Invalid;
 		NRenderFunc func = nullptr;
 
@@ -287,6 +375,30 @@ void NParticles::Render()
 			iter = func(Registry, view, iter, last, RenderBuffer);
 		}
 	}
+#endif
 
-	RenderBuffer.Count = 0;
+	// Render Groups
+	{
+		ParticleType type = ParticleType::Invalid;
+		NRenderGroupFunc func = nullptr;
+		for (const auto renderGroup : RenderBuffer.Groups)
+		{
+			if (renderGroup.Count == 0) continue;
+			if (renderGroup.Type != type)
+			{
+				type = renderGroup.Type;
+				func = TParticles::GetRenderGroup(type);
+			}
+			if (func == nullptr) {
+				continue;
+			}
+			func(renderGroup, RenderBuffer);
+		}
+	}
+
+	//auto endTimer = std::chrono::high_resolution_clock::now();
+	//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);
+	//mu_info("[DEBUG] Particles Render : {}ms with {} elements", diff.count(), Registry.size());
+
+	RenderBuffer.Groups.clear();
 }

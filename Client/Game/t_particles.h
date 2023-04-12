@@ -13,6 +13,7 @@ namespace TParticles
 	NMoveFunc GetMove(const ParticleType type);
 	NActionFunc GetAction(const ParticleType type);
 	NRenderFunc GetRender(const ParticleType type);
+	NRenderGroupFunc GetRenderGroup(const ParticleType type);
 }
 
 #endif

@@ -43,4 +43,11 @@ namespace TParticles
 		if (iter == Invokes.Render.end()) return nullptr;
 		return iter->second;
 	}
+
+	NRenderGroupFunc GetRenderGroup(const ParticleType type)
+	{
+		auto iter = Invokes.RenderGroup.find(type);
+		if (iter == Invokes.RenderGroup.end()) return nullptr;
+		return iter->second;
+	}
 }

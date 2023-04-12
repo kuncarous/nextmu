@@ -6,7 +6,6 @@
 #include "t_joint_entity.h"
 
 using namespace TJoint;
-constexpr mu_boolean UseMultithread = true;
 
 const mu_boolean NJoints::Initialize()
 {
@@ -50,6 +49,7 @@ const mu_boolean NJoints::Initialize()
 	}
 
 	ThreadsRange.resize(MUThreadsManager::GetThreadsCount());
+	RenderBuffer.Groups.reserve(100);
 
 	return true;
 }
@@ -102,7 +102,8 @@ void NJoints::Update(const mu_uint32 updateCount)
 
 		auto view = registry.view<Entity::Info>();
 		//auto startTimer = std::chrono::high_resolution_clock::now();
-		if constexpr (UseMultithread)
+
+#if ENABLE_JOINT_UPDATE_MULTITHREAD == 1
 		{
 			MUThreadsManager::Run(
 				std::unique_ptr<NThreadExecutorBase>(
@@ -160,7 +161,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 				)
 			);
 		}
-		else
+#else
 		{
 			// Move
 			{
@@ -208,6 +209,8 @@ void NJoints::Update(const mu_uint32 updateCount)
 				}
 			}
 		}
+#endif
+
 		//auto endTimer = std::chrono::high_resolution_clock::now();
 		//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);
 		//mu_info("[DEBUG] Joints Move : {}ms with {} elements", diff.count(), registry.size());
@@ -252,10 +255,96 @@ void NJoints::Propagate()
 void NJoints::Render()
 {
 	using namespace TJoint;
-	auto view = Registry.view<Entity::Info>();
 
-	// Render
+	//auto startTimer = std::chrono::high_resolution_clock::now();
+	auto &groups = RenderBuffer.Groups;
+
+	// Calculate
 	{
+		JointType type = JointType::Invalid;
+		mu_int32 group = -1;
+
+		mu_uint32 index = 0;
+		auto view = Registry.view<Entity::Info, Entity::RenderGroup, Entity::RenderIndex, Entity::RenderCount>();
+		for (auto iter = view.begin(); iter != view.end(); ++iter)
+		{
+			const auto entity = *iter;
+			auto [
+				info,
+				renderGroup,
+				renderIndex,
+				renderCount
+			] = view.get<
+				Entity::Info,
+				Entity::RenderGroup,
+				Entity::RenderIndex,
+				Entity::RenderCount
+			>(entity);
+
+			if (index + renderCount > MaxRenderCount) {
+				renderGroup = NInvalidUInt32;
+				continue;
+			}
+
+			if (type != info.Type)
+			{
+				groups.push_back(
+					NRenderGroup{
+						.Type = info.Type,
+						.Index = index,
+						.Count = 0,
+					}
+				);
+				++group;
+				type = info.Type;
+			}
+
+			auto &rgroup = groups[group];
+			rgroup.Count += renderCount;
+
+			renderGroup = group;
+			renderIndex = index;
+			index += renderCount;
+		}
+	}
+
+#if ENABLE_JOINT_RENDER_MULTITHREAD == 1
+	{
+		auto &registry = Registry;
+		auto view = registry.view<Entity::Info>();
+		auto &renderBuffer = RenderBuffer;
+
+		MUThreadsManager::Run(
+			std::unique_ptr<NThreadExecutorBase>(
+				new (std::nothrow) NThreadExecutorRangeIterator(
+					view.begin(), view.end(),
+					[&registry, &view, &renderBuffer](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
+						JointType type = JointType::Invalid;
+						NRenderFunc func = nullptr;
+						for (auto iter = begin; iter != end;)
+						{
+							const auto entity = *iter;
+							const auto &info = view.get<Entity::Info>(entity);
+							if (info.Type != type)
+							{
+								type = info.Type;
+								func = TJoints::GetRender(type);
+							}
+							if (func == nullptr) {
+								++iter;
+								continue;
+							}
+
+							iter = func(registry, view, iter, end, renderBuffer);
+						}
+					}
+				)
+			)
+		);
+	}
+#else
+	{
+		auto view = Registry.view<Entity::Info>();
 		JointType type = JointType::Invalid;
 		NRenderFunc func = nullptr;
 
@@ -276,6 +365,30 @@ void NJoints::Render()
 			iter = func(Registry, view, iter, last, RenderBuffer);
 		}
 	}
+#endif
 
-	RenderBuffer.Count = 0;
+	// Render Groups
+	{
+		JointType type = JointType::Invalid;
+		NRenderGroupFunc func = nullptr;
+		for (const auto renderGroup : RenderBuffer.Groups)
+		{
+			if (renderGroup.Count == 0) continue;
+			if (renderGroup.Type != type)
+			{
+				type = renderGroup.Type;
+				func = TJoints::GetRenderGroup(type);
+			}
+			if (func == nullptr) {
+				continue;
+			}
+			func(renderGroup, RenderBuffer);
+			}
+		}
+
+	//auto endTimer = std::chrono::high_resolution_clock::now();
+	//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);
+	//mu_info("[DEBUG] Joints Render : {}ms with {} elements", diff.count(), Registry.size());
+
+	RenderBuffer.Groups.clear();
 }

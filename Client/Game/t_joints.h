@@ -13,6 +13,7 @@ namespace TJoints
 	NMoveFunc GetMove(const JointType type);
 	NActionFunc GetAction(const JointType type);
 	NRenderFunc GetRender(const JointType type);
+	NRenderGroupFunc GetRenderGroup(const JointType type);
 }
 
 #endif
