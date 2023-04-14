@@ -19,8 +19,6 @@
 #include "mu_model.h"
 #include "mu_modelrenderer.h"
 #include "mu_bboxrenderer.h"
-#include "t_particles.h"
-#include "t_joints.h"
 
 #include "ui_noesisgui.h"
 
@@ -186,9 +184,6 @@ namespace MURoot
 			return false;
 		}
 
-		TParticles::Register();
-		TJoints::Register();
-
 		return true;
 	}
 
@@ -326,7 +321,7 @@ namespace MURoot
 					const glm::vec3 position = glm::vec3(
 						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
 						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
-						400.0f
+						800.0f
 					);
 					joints->Create(
 						NJointData {
@@ -358,7 +353,7 @@ namespace MURoot
 						}
 					);
 				}
-				/*for (mu_uint32 n = 0; n < 200; ++n)
+				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {
@@ -372,7 +367,7 @@ namespace MURoot
 						}
 					);
 				}
-				for (mu_uint32 n = 0; n < 200; ++n)
+				/*for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {

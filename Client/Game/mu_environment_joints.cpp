@@ -2,8 +2,9 @@
 #include "mu_environment_joints.h"
 #include "mu_resourcesmanager.h"
 #include "mu_threadsmanager.h"
-#include "t_joints.h"
+#include "t_joint_base.h"
 #include "t_joint_entity.h"
+#include "mu_state.h"
 
 using namespace TJoint;
 
@@ -48,7 +49,6 @@ const mu_boolean NJoints::Initialize()
 		return false;
 	}
 
-	ThreadsRange.resize(MUThreadsManager::GetThreadsCount());
 	RenderBuffer.Groups.reserve(100);
 
 	return true;
@@ -80,8 +80,10 @@ void NJoints::Create(const NJointData &data)
 	PendingToCreate.push_back(data);
 }
 
-void NJoints::Update(const mu_uint32 updateCount)
+void NJoints::Update()
 {
+	const auto updateCount = MUState::GetUpdateCount();
+
 	auto &registry = Registry;
 	for (mu_uint32 n = 0; n < updateCount; ++n)
 	{
@@ -111,7 +113,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 						view.begin(), view.end(),
 						[&registry, &view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
 							JointType type = JointType::Invalid;
-							NMoveFunc func = nullptr;
+							TJoint::Template *_template = nullptr;
 							for (auto iter = begin; iter != end;)
 							{
 								const auto &entity = *iter;
@@ -119,14 +121,14 @@ void NJoints::Update(const mu_uint32 updateCount)
 								if (info.Type != type)
 								{
 									type = info.Type;
-									func = TJoints::GetMove(type);
+									_template = TJoint::GetTemplate(type);
 								}
-								if (func == nullptr) {
+								if (_template == nullptr) {
 									++iter;
 									continue;
 								}
 
-								iter = func(registry, view, iter, end);
+								iter = _template->Move(registry, view, iter, end);
 							}
 						}
 					)
@@ -139,7 +141,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 						view.begin(), view.end(),
 						[&registry, &view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
 							JointType type = JointType::Invalid;
-							NMoveFunc func = nullptr;
+							TJoint::Template *_template = nullptr;
 							for (auto iter = begin; iter != end;)
 							{
 								const auto entity = *iter;
@@ -147,14 +149,14 @@ void NJoints::Update(const mu_uint32 updateCount)
 								if (info.Type != type)
 								{
 									type = info.Type;
-									func = TJoints::GetAction(type);
+									_template = TJoint::GetTemplate(type);
 								}
-								if (func == nullptr) {
+								if (_template == nullptr) {
 									++iter;
 									continue;
 								}
 
-								iter = func(registry, view, iter, end);
+								iter = _template->Action(registry, view, iter, end);
 							}
 						}
 					)
@@ -166,7 +168,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 			// Move
 			{
 				JointType type = JointType::Invalid;
-				NMoveFunc func = nullptr;
+				TJoint::Template *_template = nullptr;
 
 				for (auto iter = view.begin(), last = view.end(); iter != last;)
 				{
@@ -175,21 +177,21 @@ void NJoints::Update(const mu_uint32 updateCount)
 					if (info.Type != type)
 					{
 						type = info.Type;
-						func = TJoints::GetMove(type);
+						_template = TJoint::GetTemplate(type);
 					}
-					if (func == nullptr) {
+					if (_template == nullptr) {
 						++iter;
 						continue;
 					}
 
-					iter = func(registry, view, iter, last);
+					iter = _template->Move(registry, view, iter, last);
 				}
 			}
 
 			// Action
 			{
 				JointType type = JointType::Invalid;
-				NActionFunc func = nullptr;
+				TJoint::Template *_template = nullptr;
 
 				for (auto iter = view.begin(), last = view.end(); iter != last;)
 				{
@@ -198,14 +200,14 @@ void NJoints::Update(const mu_uint32 updateCount)
 					if (info.Type != type)
 					{
 						type = info.Type;
-						func = TJoints::GetAction(type);
+						_template = TJoint::GetTemplate(type);
 					}
-					if (func == nullptr) {
+					if (_template == nullptr) {
 						++iter;
 						continue;
 					}
 
-					iter = func(registry, view, iter, last);
+					iter = _template->Action(registry, view, iter, last);
 				}
 			}
 		}
@@ -220,7 +222,7 @@ void NJoints::Update(const mu_uint32 updateCount)
 void NJoints::Propagate()
 {
 	JointType type = JointType::Invalid;
-	NCreateFunc create = nullptr;
+	TJoint::Template *_template = nullptr;
 
 	std::sort(
 		PendingToCreate.begin(),
@@ -233,10 +235,11 @@ void NJoints::Propagate()
 		if (data.Type != type)
 		{
 			type = data.Type;
-			create = TJoints::GetCreate(type);
+			_template = TJoint::GetTemplate(type);
 		}
+		if (_template == nullptr) continue;
 
-		create(Registry, data);
+		_template->Create(Registry, data);
 	}
 
 	if (PendingToCreate.size() > 0)
@@ -320,7 +323,7 @@ void NJoints::Render()
 					view.begin(), view.end(),
 					[&registry, &view, &renderBuffer](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
 						JointType type = JointType::Invalid;
-						NRenderFunc func = nullptr;
+						TJoint::Template *_template = nullptr;
 						for (auto iter = begin; iter != end;)
 						{
 							const auto entity = *iter;
@@ -328,14 +331,14 @@ void NJoints::Render()
 							if (info.Type != type)
 							{
 								type = info.Type;
-								func = TJoints::GetRender(type);
+								_template = TJoint::GetTemplate(type);
 							}
-							if (func == nullptr) {
+							if (_template == nullptr) {
 								++iter;
 								continue;
 							}
 
-							iter = func(registry, view, iter, end, renderBuffer);
+							iter = _template->Render(registry, view, iter, end, renderBuffer);
 						}
 					}
 				)
@@ -346,7 +349,7 @@ void NJoints::Render()
 	{
 		auto view = Registry.view<Entity::Info>();
 		JointType type = JointType::Invalid;
-		NRenderFunc func = nullptr;
+		TJoint::Template *_template = nullptr;
 
 		for (auto iter = view.begin(), last = view.end(); iter != last;)
 		{
@@ -355,14 +358,14 @@ void NJoints::Render()
 			if (info.Type != type)
 			{
 				type = info.Type;
-				func = TJoints::GetRender(type);
+				_template = TJoint::GetTemplate(type);
 			}
 			if (func == nullptr) {
 				++iter;
 				continue;
 			}
 
-			iter = func(Registry, view, iter, last, RenderBuffer);
+			iter = _template->Render(Registry, view, iter, last, RenderBuffer);
 		}
 	}
 #endif
@@ -370,21 +373,21 @@ void NJoints::Render()
 	// Render Groups
 	{
 		JointType type = JointType::Invalid;
-		NRenderGroupFunc func = nullptr;
+		TJoint::Template *_template = nullptr;
 		for (const auto renderGroup : RenderBuffer.Groups)
 		{
 			if (renderGroup.Count == 0) continue;
 			if (renderGroup.Type != type)
 			{
 				type = renderGroup.Type;
-				func = TJoints::GetRenderGroup(type);
+				_template = TJoint::GetTemplate(type);
 			}
-			if (func == nullptr) {
+			if (_template == nullptr) {
 				continue;
 			}
-			func(renderGroup, RenderBuffer);
-			}
+			_template->RenderGroup(renderGroup, RenderBuffer);
 		}
+	}
 
 	//auto endTimer = std::chrono::high_resolution_clock::now();
 	//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);

@@ -151,6 +151,12 @@
     <Filter Include="Threading">
       <UniqueIdentifier>{903d2deb-9bb7-4b9f-a0e3-f7af6f9d6d72}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Environment\Objects">
+      <UniqueIdentifier>{e038458f-b599-41e7-8c6c-86ecbc46b16b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Characters">
+      <UniqueIdentifier>{199d463c-3b01-4453-995a-43b9ffee1819}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -200,9 +206,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp">
       <Filter>State</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_object.cpp">
-      <Filter>Environment</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp">
       <Filter>Environment</Filter>
@@ -279,17 +282,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.cpp">
       <Filter>Environment\Particles\Templates\Types\TrueFire\V5</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_particles.cpp">
-      <Filter>Environment\Particles\Templates</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.cpp">
       <Filter>Environment\Particles\Templates\Types\Smoke\V0</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.cpp">
       <Filter>Environment\Particles\Templates\Types\Bubble\V0</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_joints.cpp">
-      <Filter>Environment\Joints\Templates</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_joints.cpp">
       <Filter>Environment\Joints</Filter>
@@ -302,6 +299,18 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_threading_helper.cpp">
       <Filter>Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_objects.cpp">
+      <Filter>Environment\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_characters.cpp">
+      <Filter>Environment\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_base.cpp">
+      <Filter>Environment\Joints\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_base.cpp">
+      <Filter>Environment\Particles\Templates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -377,9 +386,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h">
       <Filter>Environment</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_object.h">
-      <Filter>Environment</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_frustum.h">
       <Filter>Math\Frustum</Filter>
     </ClInclude>
@@ -406,12 +412,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_entity_light.h">
       <Filter>Environment\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_character.cpp">
-      <Filter>Environment</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_character.h">
-      <Filter>Environment</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h">
       <Filter>Scripting</Filter>
@@ -470,9 +470,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_base.h">
       <Filter>Environment\Particles\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_particles.h">
-      <Filter>Environment\Particles\Templates</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_macros.h">
       <Filter>Environment\Particles\Templates</Filter>
     </ClInclude>
@@ -506,13 +503,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_create.h">
       <Filter>Environment\Joints\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_macros.h">
-      <Filter>Environment\Joints\Templates</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_render.h">
-      <Filter>Environment\Joints\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_joints.h">
       <Filter>Environment\Joints\Templates</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_joints.h">
@@ -535,6 +526,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_config.h">
       <Filter>Environment\Particles\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_objects.h">
+      <Filter>Environment\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_object_structs.h">
+      <Filter>Environment\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_characters.h">
+      <Filter>Environment\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_character_structs.h">
+      <Filter>Environment\Characters</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

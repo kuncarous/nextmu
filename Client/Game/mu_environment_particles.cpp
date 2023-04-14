@@ -2,11 +2,11 @@
 #include "mu_environment_particles.h"
 #include "mu_resourcesmanager.h"
 #include "mu_threadsmanager.h"
-#include "t_particles.h"
+#include "t_particle_base.h"
 #include "t_particle_entity.h"
+#include "mu_state.h"
 
 using namespace TParticle;
-constexpr mu_boolean UseMultithread = true;
 
 const mu_boolean NParticles::Initialize()
 {
@@ -90,8 +90,10 @@ void NParticles::Create(const NParticleData &data)
 	PendingToCreate.push_back(data);
 }
 
-void NParticles::Update(const mu_uint32 updateCount)
+void NParticles::Update()
 {
+	const auto updateCount = MUState::GetUpdateCount();
+
 	auto &registry = Registry;
 	for (mu_uint32 n = 0; n < updateCount; ++n)
 	{
@@ -121,7 +123,7 @@ void NParticles::Update(const mu_uint32 updateCount)
 						view.begin(), view.end(),
 						[&registry, &view](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
 							ParticleType type = ParticleType::Invalid;
-							NMoveFunc func = nullptr;
+							TParticle::Template *_template = nullptr;
 							for (auto iter = begin; iter != end;)
 							{
 								const auto &entity = *iter;
@@ -129,14 +131,14 @@ void NParticles::Update(const mu_uint32 updateCount)
 								if (info.Type != type)
 								{
 									type = info.Type;
-									func = TParticles::GetMove(type);
+									_template = TParticle::GetTemplate(type);
 								}
-								if (func == nullptr) {
+								if (_template == nullptr) {
 									++iter;
 									continue;
 								}
 
-								iter = func(registry, view, iter, end);
+								iter = _template->Move(registry, view, iter, end);
 							}
 						}
 					)
@@ -149,7 +151,7 @@ void NParticles::Update(const mu_uint32 updateCount)
 						view.begin(), view.end(),
 						[&registry, &view](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
 							ParticleType type = ParticleType::Invalid;
-							NMoveFunc func = nullptr;
+							TParticle::Template *_template = nullptr;
 							for (auto iter = begin; iter != end;)
 							{
 								const auto entity = *iter;
@@ -157,14 +159,14 @@ void NParticles::Update(const mu_uint32 updateCount)
 								if (info.Type != type)
 								{
 									type = info.Type;
-									func = TParticles::GetAction(type);
+									_template = TParticle::GetTemplate(type);
 								}
-								if (func == nullptr) {
+								if (_template == nullptr) {
 									++iter;
 									continue;
 								}
 
-								iter = func(registry, view, iter, end);
+								iter = _template->Action(registry, view, iter, end);
 							}
 						}
 					)
@@ -176,7 +178,7 @@ void NParticles::Update(const mu_uint32 updateCount)
 			// Move
 			{
 				ParticleType type = ParticleType::Invalid;
-				NMoveFunc func = nullptr;
+				TParticle::Template *_template = nullptr;
 
 				for (auto iter = view.begin(), last = view.end(); iter != last;)
 				{
@@ -185,21 +187,21 @@ void NParticles::Update(const mu_uint32 updateCount)
 					if (info.Type != type)
 					{
 						type = info.Type;
-						func = TParticles::GetMove(type);
+						_template = TParticle::GetTemplate(type);
 					}
-					if (func == nullptr) {
+					if (_template == nullptr) {
 						++iter;
 						continue;
 					}
 
-					iter = func(registry, view, iter, last);
+					iter = _template->Move(registry, view, iter, last);
 				}
 			}
 
 			// Action
 			{
 				ParticleType type = ParticleType::Invalid;
-				NActionFunc func = nullptr;
+				TParticle::Template *_template = nullptr;
 
 				for (auto iter = view.begin(), last = view.end(); iter != last;)
 				{
@@ -208,14 +210,14 @@ void NParticles::Update(const mu_uint32 updateCount)
 					if (info.Type != type)
 					{
 						type = info.Type;
-						func = TParticles::GetAction(type);
+						_template = TParticle::GetTemplate(type);
 					}
-					if (func == nullptr) {
+					if (_template == nullptr) {
 						++iter;
 						continue;
 					}
 
-					iter = func(registry, view, iter, last);
+					iter = _template->Action(registry, view, iter, last);
 				}
 			}
 		}
@@ -230,7 +232,7 @@ void NParticles::Update(const mu_uint32 updateCount)
 void NParticles::Propagate()
 {
 	ParticleType type = ParticleType::Invalid;
-	NCreateFunc create = nullptr;
+	TParticle::Template *_template = nullptr;
 
 	std::sort(
 		PendingToCreate.begin(),
@@ -243,10 +245,11 @@ void NParticles::Propagate()
 		if (data.Type != type)
 		{
 			type = data.Type;
-			create = TParticles::GetCreate(type);
+			_template = TParticle::GetTemplate(type);
 		}
+		if (_template == nullptr) continue;
 
-		create(Registry, data);
+		_template->Create(Registry, data);
 	}
 
 	if (PendingToCreate.size() > 0)
@@ -330,7 +333,7 @@ void NParticles::Render()
 					view.begin(), view.end(),
 					[&registry, &view, &renderBuffer](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
 						ParticleType type = ParticleType::Invalid;
-						NRenderFunc func = nullptr;
+						TParticle::Template *_template = nullptr;
 						for (auto iter = begin; iter != end;)
 						{
 							const auto entity = *iter;
@@ -338,14 +341,14 @@ void NParticles::Render()
 							if (info.Type != type)
 							{
 								type = info.Type;
-								func = TParticles::GetRender(type);
+								_template = TParticle::GetTemplate(type);
 							}
-							if (func == nullptr) {
+							if (_template == nullptr) {
 								++iter;
 								continue;
 							}
 
-							iter = func(registry, view, iter, end, renderBuffer);
+							iter = _template->Render(registry, view, iter, end, renderBuffer);
 						}
 					}
 				)
@@ -356,7 +359,7 @@ void NParticles::Render()
 	{
 		auto view = Registry.view<Entity::Info>();
 		ParticleType type = ParticleType::Invalid;
-		NRenderFunc func = nullptr;
+		TParticle::Template *_template = nullptr;
 
 		for (auto iter = view.begin(), last = view.end(); iter != last;)
 		{
@@ -365,14 +368,14 @@ void NParticles::Render()
 			if (info.Type != type)
 			{
 				type = info.Type;
-				func = TParticles::GetRender(type);
+				_template = TParticle::GetTemplate(type);
 			}
-			if (func == nullptr) {
+			if (_template == nullptr) {
 				++iter;
 				continue;
 			}
 
-			iter = func(Registry, view, iter, last, RenderBuffer);
+			iter = _template->Render(Registry, view, iter, last, RenderBuffer);
 		}
 	}
 #endif
@@ -380,19 +383,19 @@ void NParticles::Render()
 	// Render Groups
 	{
 		ParticleType type = ParticleType::Invalid;
-		NRenderGroupFunc func = nullptr;
+		TParticle::Template *_template = nullptr;
 		for (const auto renderGroup : RenderBuffer.Groups)
 		{
 			if (renderGroup.Count == 0) continue;
 			if (renderGroup.Type != type)
 			{
 				type = renderGroup.Type;
-				func = TParticles::GetRenderGroup(type);
+				_template = TParticle::GetTemplate(type);
 			}
-			if (func == nullptr) {
+			if (_template == nullptr) {
 				continue;
 			}
-			func(renderGroup, RenderBuffer);
+			_template->RenderGroup(renderGroup, RenderBuffer);
 		}
 	}
 

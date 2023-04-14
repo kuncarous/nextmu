@@ -13,23 +13,25 @@ namespace TParticle
 {
 	template<typename... Other>
 	using EnttViewType = entt::view<entt::get_t<Other...>>;
-
 	typedef entt::registry EnttRegistry;
 	typedef EnttViewType<TParticle::Entity::Info> EnttView;
 	typedef EnttView::iterator EnttIterator;
-	typedef std::function<void(EnttRegistry &, const NParticleData &)> NCreateFunc;
-	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator)> NMoveFunc;
-	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator)> NActionFunc;
-	typedef std::function<EnttIterator(EnttRegistry &, EnttView &, EnttIterator, EnttIterator, NRenderBuffer &renderBuffer)> NRenderFunc;
-	typedef std::function<void(const NRenderGroup &, const NRenderBuffer &)> NRenderGroupFunc;
 
-	struct NInvokes
+	class Template;
+	Template *GetTemplate(ParticleType type);
+
+	class Template
 	{
-		std::map<ParticleType, NCreateFunc> Create;
-		std::map<ParticleType, NMoveFunc> Move;
-		std::map<ParticleType, NActionFunc> Action;
-		std::map<ParticleType, NRenderFunc> Render;
-		std::map<ParticleType, NRenderGroupFunc> RenderGroup;
+	public:
+		virtual void Create(EnttRegistry &registry, const NParticleData &data) = 0;
+		virtual EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last) = 0;
+		virtual EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last) = 0;
+		virtual EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer) = 0;
+		virtual void RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer) = 0;
+
+	protected:
+		friend Template *GetTemplate(ParticleType type);
+		static std::map<ParticleType, Template *> Templates;
 	};
 }
 

@@ -5,15 +5,16 @@
 
 #include "t_joint_base.h"
 
-namespace Thunder1V7
+class TJointThunder1V7 : public TJoint::Template
 {
-	using namespace TJoint;
-	void Register(NInvokes &invokes);
-	void Create(entt::registry &registry, const NJointData &data);
-	EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last);
-	EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last);
-	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer);
-	void RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer);
-}
+public:
+	TJointThunder1V7();
+public:
+	virtual void Create(TJoint::EnttRegistry &registry, const NJointData &data) override;
+	virtual TJoint::EnttIterator Move(TJoint::EnttRegistry &registry, TJoint::EnttView &view, TJoint::EnttIterator iter, TJoint::EnttIterator last) override;
+	virtual TJoint::EnttIterator Action(TJoint::EnttRegistry &registry, TJoint::EnttView &view, TJoint::EnttIterator iter, TJoint::EnttIterator last) override;
+	virtual TJoint::EnttIterator Render(TJoint::EnttRegistry &registry, TJoint::EnttView &view, TJoint::EnttIterator iter, TJoint::EnttIterator last, TJoint::NRenderBuffer &renderBuffer) override;
+	virtual void RenderGroup(const TJoint::NRenderGroup &renderGroup, const TJoint::NRenderBuffer &renderBuffer) override;
+};
 
 #endif

@@ -13,7 +13,7 @@ public:
 	void Destroy();
 
 	void Create(const NParticleData &data);
-	void Update(const mu_uint32 updateCount);
+	void Update();
 	void Propagate();
 	void Render();
 

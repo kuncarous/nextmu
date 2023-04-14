@@ -7,7 +7,6 @@
 
 class NTerrain;
 class NModel;
-class NSkeleton;
 
 class MUModelRenderer
 {

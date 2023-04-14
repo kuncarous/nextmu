@@ -14,7 +14,7 @@ public:
 	void Destroy();
 
 	void Create(const NJointData &data);
-	void Update(const mu_uint32 updateCount);
+	void Update();
 	void Propagate();
 	void Render();
 
@@ -22,7 +22,6 @@ private:
 	entt::registry Registry;
 	TJoint::NRenderBuffer RenderBuffer;
 	std::vector<NJointData> PendingToCreate;
-	std::vector<TThreadRange> ThreadsRange;
 };
 
 #endif

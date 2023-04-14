@@ -1,5 +1,5 @@
-#ifndef __MU_ENVIRONMENT_CHARACTER_H__
-#define __MU_ENVIRONMENT_CHARACTER_H__
+#ifndef __T_CHARACTER_STRUCTS_H__
+#define __T_CHARACTER_STRUCTS_H__
 
 #pragma once
 
@@ -9,7 +9,7 @@ enum class CharacterType
 	Monster,
 };
 
-namespace MUCharacter
+namespace TCharacter
 {
 	struct Settings
 	{

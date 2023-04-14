@@ -20,6 +20,18 @@ constexpr NThreadMode ThreadMode = NThreadMode::Multi;
 
 const mu_boolean NEnvironment::Initialize()
 {
+	Objects.reset(new (std::nothrow) NObjects());
+	if (!Objects || Objects->Initialize() == false)
+	{
+		return false;
+	}
+
+	Characters.reset(new (std::nothrow) NCharacters());
+	if (!Characters || Characters->Initialize() == false)
+	{
+		return false;
+	}
+
 	Particles.reset(new (std::nothrow) NParticles());
 	if (!Particles || Particles->Initialize() == false)
 	{
@@ -31,8 +43,6 @@ const mu_boolean NEnvironment::Initialize()
 	{
 		return false;
 	}
-
-	ObjectsRange.resize(MUThreadsManager::GetThreadsCount());
 
 	return true;
 }
@@ -72,260 +82,13 @@ void NEnvironment::Update()
 		Terrain->Update();
 	}
 
-	const auto frustum = MURenderState::GetCamera()->GetFrustum();
+	Objects->Update();
+	Characters->Update();
 
-	// Animate
-	if constexpr (ThreadMode == NThreadMode::MultiSTL)
-	{
-		const auto environment = this;
-		const auto view = Objects.view<
-			NEntity::Renderable,
-			NEntity::Attachment,
-			NEntity::Light,
-			NEntity::RenderState,
-			NEntity::Skeleton,
-			NEntity::Position,
-			NEntity::Animation,
-			NEntity::BoundingBox
-		>();
-		std::for_each(
-			std::execution::par_unseq,
-			view.begin(), view.end(),
-			[&view, environment, frustum, updateTime](const entt::entity entity) {
-				auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
-					NEntity::Attachment,
-					NEntity::Light,
-					NEntity::RenderState,
-					NEntity::Skeleton,
-					NEntity::Position,
-					NEntity::Animation,
-					NEntity::BoundingBox
-				>(entity);
-
-				skeleton.Instance.SetParent(
-					position.Angle,
-					position.Position,
-					position.Scale
-				);
-				skeleton.Instance.PlayAnimation(attachment.Model, animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, attachment.Model->GetPlaySpeed() * updateTime);
-
-				NCompressedMatrix viewModel;
-				viewModel.Set(
-					position.Angle,
-					position.Position,
-					position.Scale
-				);
-
-				const auto model = attachment.Model;
-				if (model->HasMeshes() && model->HasGlobalBBox())
-				{
-					const auto &bbox = model->GetGlobalBBox();
-					boundingBox.Min = Transform(bbox.Min, viewModel);
-					boundingBox.Max = Transform(bbox.Max, viewModel);
-				}
-				else
-				{
-					boundingBox.Min = Transform(boundingBox.Min, viewModel);
-					boundingBox.Max = Transform(boundingBox.Max, viewModel);
-				}
-				boundingBox.Order();
-
-				renderState.Flags.Visible = frustum->IsBoxVisible(boundingBox.Min, boundingBox.Max);
-
-				if (!renderState.Flags.Visible) return;
-
-				environment->CalculateLight(position, light, renderState);
-				skeleton.Instance.Animate(
-					attachment.Model,
-					{
-						.Action = animation.CurrentAction,
-						.Frame = animation.CurrentFrame,
-					},
-					{
-						.Action = animation.PriorAction,
-						.Frame = animation.PriorFrame,
-					},
-					glm::vec3(0.0f, 0.0f, 0.0f)
-					);
-				skeleton.SkeletonOffset = skeleton.Instance.Upload();
-			}
-		);
-	}
-	else if constexpr (ThreadMode == NThreadMode::Multi)
-	{
-		const auto environment = this;
-		const auto view = Objects.view<
-			NEntity::Renderable,
-			NEntity::Attachment,
-			NEntity::Light,
-			NEntity::RenderState,
-			NEntity::Skeleton,
-			NEntity::Position,
-			NEntity::Animation,
-			NEntity::BoundingBox
-		>();
-
-		MUThreadsManager::Run(
-			std::unique_ptr<NThreadExecutorBase>(
-				new (std::nothrow) NThreadExecutorIterator(
-					view.begin(), view.end(),
-					[&view, environment, frustum, updateTime](const entt::entity entity) -> void {
-						auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
-							NEntity::Attachment,
-							NEntity::Light,
-							NEntity::RenderState,
-							NEntity::Skeleton,
-							NEntity::Position,
-							NEntity::Animation,
-							NEntity::BoundingBox
-						>(entity);
-
-						skeleton.Instance.SetParent(
-							position.Angle,
-							position.Position,
-							position.Scale
-						);
-						skeleton.Instance.PlayAnimation(attachment.Model, animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, attachment.Model->GetPlaySpeed() * updateTime);
-
-						NCompressedMatrix viewModel;
-						viewModel.Set(
-							position.Angle,
-							position.Position,
-							position.Scale
-						);
-
-						const auto model = attachment.Model;
-						if (model->HasMeshes() && model->HasGlobalBBox())
-						{
-							const auto &bbox = model->GetGlobalBBox();
-							boundingBox.Min = Transform(bbox.Min, viewModel);
-							boundingBox.Max = Transform(bbox.Max, viewModel);
-						}
-						else
-						{
-							boundingBox.Min = Transform(boundingBox.Min, viewModel);
-							boundingBox.Max = Transform(boundingBox.Max, viewModel);
-						}
-						boundingBox.Order();
-
-						renderState.Flags.Visible = frustum->IsBoxVisible(boundingBox.Min, boundingBox.Max);
-
-						if (!renderState.Flags.Visible) return;
-
-						environment->CalculateLight(position, light, renderState);
-						skeleton.Instance.Animate(
-							attachment.Model,
-							{
-								.Action = animation.CurrentAction,
-								.Frame = animation.CurrentFrame,
-							},
-					{
-						.Action = animation.PriorAction,
-						.Frame = animation.PriorFrame,
-					},
-					glm::vec3(0.0f, 0.0f, 0.0f)
-					);
-						skeleton.SkeletonOffset = skeleton.Instance.Upload();
-					}
-				)
-			)
-		);
-	}
-	else
-	{
-		// Animate
-		{
-			const auto view = Objects.view<
-				NEntity::Renderable,
-				NEntity::Attachment,
-				NEntity::Skeleton,
-				NEntity::Position,
-				NEntity::Animation
-			>();
-			for (auto [entity, attachment, skeleton, position, animation] : view.each())
-			{
-				skeleton.Instance.SetParent(
-					position.Angle,
-					position.Position,
-					position.Scale
-				);
-				skeleton.Instance.PlayAnimation(attachment.Model, animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, attachment.Model->GetPlaySpeed() * updateTime);
-			}
-		}
-
-		// Culling
-		{
-			const auto view = Objects.view<
-				NEntity::Renderable,
-				NEntity::Attachment,
-				NEntity::RenderState,
-				NEntity::BoundingBox,
-				NEntity::Position
-			>();
-			for (auto [entity, attachment, renderState, boundingBox, position] : view.each())
-			{
-				NCompressedMatrix viewModel;
-				viewModel.Set(
-					position.Angle,
-					position.Position,
-					position.Scale
-				);
-
-				const auto model = attachment.Model;
-				if (model->HasMeshes() && model->HasGlobalBBox())
-				{
-					const auto &bbox = model->GetGlobalBBox();
-					boundingBox.Min = Transform(bbox.Min, viewModel);
-					boundingBox.Max = Transform(bbox.Max, viewModel);
-				}
-				else
-				{
-					boundingBox.Min = Transform(boundingBox.Min, viewModel);
-					boundingBox.Max = Transform(boundingBox.Max, viewModel);
-				}
-				boundingBox.Order();
-
-				renderState.Flags.Visible = frustum->IsBoxVisible(boundingBox.Min, boundingBox.Max);
-			}
-		}
-
-		// Prepare to Render
-		{
-			const auto view = Objects.view<
-				NEntity::Renderable,
-				NEntity::Attachment,
-				NEntity::Light,
-				NEntity::RenderState,
-				NEntity::Skeleton,
-				NEntity::Position,
-				NEntity::Animation
-			>();
-			for (auto [entity, attachment, light, renderState, skeleton, position, animation] : view.each())
-			{
-				if (!renderState.Flags.Visible) continue;
-
-				CalculateLight(position, light, renderState);
-				skeleton.Instance.Animate(
-					attachment.Model,
-					{
-						.Action = animation.CurrentAction,
-						.Frame = animation.CurrentFrame,
-					},
-				{
-					.Action = animation.PriorAction,
-					.Frame = animation.PriorFrame,
-				},
-				glm::vec3(0.0f, 0.0f, 0.0f)
-				);
-				skeleton.SkeletonOffset = skeleton.Instance.Upload();
-			}
-		}
-	}
-
-	Particles->Update(updateCount);
+	Particles->Update();
 	Particles->Propagate();
 
-	Joints->Update(updateCount);
+	Joints->Update();
 	Joints->Propagate();
 }
 
@@ -333,40 +96,19 @@ void NEnvironment::Render()
 {
 	Terrain->ConfigureUniforms();
 	Terrain->Render();
-
-	const auto objectsView = Objects.view<NEntity::Renderable, NEntity::Attachment, NEntity::RenderState, NEntity::Skeleton>();
-	for (auto [entity, attachment, renderState, skeleton] : objectsView.each())
-	{
-		if (!renderState.Flags.Visible) continue;
-		if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
-		const NRenderConfig config = {
-			.BoneOffset = skeleton.SkeletonOffset,
-			.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
-			.BodyScale = 1.0f,
-			.EnableLight = renderState.Flags.LightEnable,
-			.BodyLight = renderState.BodyLight,
-		};
-		MUModelRenderer::RenderBody(skeleton.Instance, attachment.Model, config);
-	}
-
-#if RENDER_BBOX
-	const auto bboxView = Objects.view<NEntity::Renderable, NEntity::RenderState, NEntity::BoundingBox>();
-	for (auto [entity, renderState, boundingBox] : bboxView.each())
-	{
-		if (!renderState.Flags.Visible) continue;
-		MUBBoxRenderer::Render(boundingBox);
-	}
-#endif
+	
+	Objects->Render();
+	Characters->Render();
 
 	Particles->Render();
 	Joints->Render();
 }
 
 void NEnvironment::CalculateLight(
-	const NEntity::Position &position,
-	const NEntity::Light &light,
-	NEntity::RenderState &renderState
-)
+	const NEntity::NPosition &position,
+	const NEntity::NLight &light,
+	NEntity::NRenderState &renderState
+) const
 {
 	switch (light.Mode)
 	{

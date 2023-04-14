@@ -5,15 +5,16 @@
 
 #include "t_particle_base.h"
 
-namespace SmokeV0
+class TParticleSmokeV0 : public TParticle::Template
 {
-	using namespace TParticle;
-	void Register(NInvokes &invokes);
-	void Create(entt::registry &registry, const NParticleData &data);
-	EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last);
-	EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last);
-	EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer);
-	void RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer);
-}
+public:
+	TParticleSmokeV0();
+public:
+	virtual void Create(TParticle::EnttRegistry &registry, const NParticleData &data) override;
+	virtual TParticle::EnttIterator Move(TParticle::EnttRegistry &registry, TParticle::EnttView &view, TParticle::EnttIterator iter, TParticle::EnttIterator last) override;
+	virtual TParticle::EnttIterator Action(TParticle::EnttRegistry &registry, TParticle::EnttView &view, TParticle::EnttIterator iter, TParticle::EnttIterator last) override;
+	virtual TParticle::EnttIterator Render(TParticle::EnttRegistry &registry, TParticle::EnttView &view, TParticle::EnttIterator iter, TParticle::EnttIterator last, TParticle::NRenderBuffer &renderBuffer) override;
+	virtual void RenderGroup(const TParticle::NRenderGroup &renderGroup, const TParticle::NRenderBuffer &renderBuffer) override;
+};
 
 #endif

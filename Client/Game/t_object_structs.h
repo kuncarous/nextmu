@@ -1,11 +1,11 @@
-#ifndef __MU_ENVIRONMENT_STRUCTS_H__
-#define __MU_ENVIRONMENT_STRUCTS_H__
+#ifndef __T_OBJECT_STRUCTS_H__
+#define __T_OBJECT_STRUCTS_H__
 
 #pragma once
 
 #include "mu_entity_light.h"
 
-namespace MUObject
+namespace TObject
 {
 	struct LightSettings
 	{

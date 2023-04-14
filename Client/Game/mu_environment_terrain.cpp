@@ -235,7 +235,7 @@ const mu_boolean NEnvironment::LoadObjects(mu_utf8string filename, const std::ma
 	const auto &objects = document["objects"];
 	for (const auto &jobject : objects)
 	{
-		MUObject::Settings object;
+		TObject::Settings object;
 		object.Type = jobject["type"].get<mu_uint16>();
 		object.Renderable = jobject["renderable"].get<mu_boolean>();
 		object.Interactive = jobject["interactive"].get<mu_boolean>();
@@ -309,7 +309,7 @@ const mu_boolean NEnvironment::LoadObjects(mu_utf8string filename, const std::ma
 			object.Model = modelIter->second;
 		}
 
-		AddObject(
+		Objects->Add(
 			object
 		);
 	}
