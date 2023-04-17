@@ -27,9 +27,9 @@ namespace MURenderState
 	const NEnvironment *GetEnvironment();
 	const NTerrain *GetTerrain();
 
-	void AttachTexture(TextureAttachment::Type type, NTexture *texture);
+	void AttachTexture(TextureAttachment::Type type, const NTexture *texture);
 	void DetachTexture(TextureAttachment::Type type);
-	NTexture *GetTexture(TextureAttachment::Type type);
+	const NTexture *GetTexture(TextureAttachment::Type type);
 };
 
 #endif

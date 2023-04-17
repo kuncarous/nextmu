@@ -316,6 +316,31 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 		}
 	}
 
+	if (document.contains("bones"))
+	{
+		const auto &jbones = document["bones"];
+		for (const auto &jbone : jbones)
+		{
+			const auto id = jbone["id"].get<mu_utf8string>();
+			const auto bone = jbone["bone"].get<mu_uint32>();
+
+			BonesById.insert(std::make_pair(id, bone));
+		}
+	}
+
+	if (document.contains("animations"))
+	{
+		const auto &janimations = document["animations"];
+		for (const auto &janimation : janimations)
+		{
+			const auto id = janimation["id"].get<mu_utf8string>();
+			const auto index = janimation["index"].get<mu_uint32>();
+
+			Animations[index].Id = id;
+			AnimationsById.insert(std::make_pair(id, index));
+		}
+	}
+
 	if (GenerateBuffers() == false)
 	{
 		mu_error("failed to generate model buffers ({})", filename);
@@ -599,7 +624,11 @@ void NModel::LoadBoundingBoxes(mu_utf8string path)
 
 const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::json &document)
 {
-	mu_utf8string subPath = "textures/";
+	mu_utf8string subPath = (
+		document.contains("textures_dir")
+		? document["textures_dir"].get<mu_utf8string>()
+		: "textures/"
+	);
 
 	if (document.contains("textures"))
 	{
@@ -809,4 +838,53 @@ void NModel::CalculateBoundingBoxes()
 			boundingBox.Valid = true;
 		}
 	}
+}
+
+const mu_boolean NModel::PlayAnimation(
+	mu_uint16 &CurrentAction,
+	mu_uint16 &PriorAction,
+	mu_float &CurrentFrame,
+	mu_float &PriorFrame,
+	const mu_float PlaySpeed
+) const
+{
+	const mu_uint32 numAnimations = static_cast<mu_uint32>(this->Animations.size());
+
+	// Return true to keep original logic
+	if (CurrentAction >= numAnimations) return true;
+
+	const auto &currentAnimation = this->Animations[CurrentAction];
+	const auto &currentFramesCount = static_cast<mu_uint32>(currentAnimation.Keys.size());
+	if (currentFramesCount <= 1) return true;
+
+	const mu_uint32 lastFrame = static_cast<mu_uint32>(CurrentFrame);
+	CurrentFrame += PlaySpeed;
+	const mu_uint32 newFrame = static_cast<mu_uint32>(CurrentFrame);
+
+	if (lastFrame != newFrame)
+	{
+		PriorAction = CurrentAction;
+		PriorFrame = static_cast<mu_float>(lastFrame);
+	}
+
+	mu_boolean loop = true;
+	if (currentAnimation.Loop)
+	{
+		if (newFrame >= currentFramesCount)
+		{
+			CurrentFrame = static_cast<mu_float>(currentFramesCount) - 0.01f;
+			loop = false;
+		}
+	}
+	else
+	{
+		const auto maxFrames = currentFramesCount - static_cast<mu_uint32>(currentAnimation.LockPositions);
+		if (newFrame >= maxFrames)
+		{
+			CurrentFrame = glm::mod(CurrentFrame, static_cast<mu_float>(maxFrames));
+			loop = false;
+		}
+	}
+
+	return loop;
 }

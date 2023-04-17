@@ -33,6 +33,15 @@ private:
 	void CalculateBoundingBoxes();
 
 public:
+	const mu_boolean PlayAnimation(
+		mu_uint16 &CurrentAction,
+		mu_uint16 &PriorAction,
+		mu_float &CurrentFrame,
+		mu_float &PriorFrame,
+		const mu_float PlaySpeed
+	) const;
+
+public:
 	NEXTMU_INLINE const mu_boolean HasMeshes() const
 	{
 		return !Meshes.empty();
@@ -53,6 +62,25 @@ public:
 		return PlaySpeed;
 	}
 
+	NEXTMU_INLINE const mu_uint32 GetBoneById(const mu_utf8string id) const
+	{
+		auto iter = BonesById.find(id);
+		if (iter == BonesById.end()) return NInvalidUInt32;
+		return iter->second;
+	}
+
+	NEXTMU_INLINE const mu_utf8string GetAnimationId(const mu_uint32 index) const
+	{
+		return Animations[index].Id;
+	}
+
+	NEXTMU_INLINE const mu_uint32 GetAnimationById(const mu_utf8string id) const
+	{
+		auto iter = AnimationsById.find(id);
+		if (iter == AnimationsById.end()) return NInvalidUInt32;
+		return iter->second;
+	}
+
 protected:
 	friend class NSkeletonInstance;
 	friend class MUModelRenderer;
@@ -67,6 +95,9 @@ protected:
 	std::vector<NAnimation> Animations; // Per Animation (Action) (structured like this to get a better cache ratio)
 	std::vector<NBoundingBoxWithValidation> BoundingBoxes; // Per Bone
 	NModelBoundingBoxes BBoxes;
+
+	std::map<mu_utf8string, mu_uint32> BonesById;
+	std::map<mu_utf8string, mu_uint32> AnimationsById;
 
 	mu_utf8string Id;
 	mu_int16 BoneHead = NInvalidInt16;

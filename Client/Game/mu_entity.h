@@ -4,9 +4,12 @@
 #pragma once
 
 #include "mu_entity_light.h"
+#include "res_render.h"
 
 class NModel;
 class NSkeletonInstance;
+struct NRender;
+
 namespace NEntity
 {
 	struct NIdentifier
@@ -18,6 +21,9 @@ namespace NEntity
 	{};
 
 	struct NInteractive
+	{};
+
+	struct NVisible
 	{};
 
 	struct NTerrainLight
@@ -70,7 +76,11 @@ namespace NEntity
 		NSkeletonInstance Instance;
 	};
 
-	using NBoundingBox = NBoundingBox;
+	struct NBoundingBoxes
+	{
+		NBoundingBox Configured;
+		NBoundingBox Calculated;
+	};
 
 	struct NPosition // Rename
 	{
@@ -87,7 +97,7 @@ namespace NEntity
 		mu_float PriorFrame = 0.0f;
 	};
 
-	enum class PartType
+	enum class PartType : mu_uint32
 	{
 		CompleteBody,
 		Head,
@@ -100,20 +110,39 @@ namespace NEntity
 		ItemRight,
 		Wings,
 		Helper,
+		Max,
+	};
+	constexpr mu_uint32 MaxPartType = static_cast<mu_uint32>(PartType::Max);
+
+	extern std::array<mu_utf8string, MaxPartType> PartTypeIds;
+	NEXTMU_INLINE const mu_utf8string GetPartTypeId(const PartType type)
+	{
+		return PartTypeIds[static_cast<mu_uint32>(type)];
+	}
+
+	struct NRenderLink
+	{
+		const NRender *Render = nullptr;
+		NRenderAnimation RenderAnimation;
+		NAnimation Animation;
+		NSkeletonInstance Skeleton;
+		mu_uint32 Bone = NInvalidUInt32;
+		mu_uint32 SkeletonOffset = NInvalidUInt32;
 	};
 
 	struct NRenderPart
 	{
 		PartType Type;
-		NModel *Model;
-		mu_uint32 Bone;
-		NAnimation Animation;
+		const NModel *Model;
+		mu_boolean IsLinked;
+		NRenderLink Link;
 	};
 
 	struct NAttachment
 	{
-		NModel *Base;
-		std::vector<NRenderPart> Parts;
+		const NTexture *Skin = nullptr;
+		const NModel *Base;
+		std::map<PartType, NRenderPart> Parts;
 	};
 };
 

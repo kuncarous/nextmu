@@ -4,6 +4,8 @@
 #include "mu_model.h"
 #include "mu_texture.h"
 #include "mu_textures.h"
+#include "res_renders.h"
+#include "res_items.h"
 
 template<const EGameDirectoryType dirType>
 NEXTMU_INLINE const bgfx::Memory *mu_readshader(mu_utf8string filename)
@@ -89,6 +91,16 @@ namespace MUResourcesManager
 			{
 				return false;
 			}
+		}
+
+		if (MURendersManager::Initialize() == false)
+		{
+			return false;
+		}
+
+		if (MUItemsManager::Initialize() == false)
+		{
+			return false;
 		}
 
 		return true;

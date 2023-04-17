@@ -8,7 +8,7 @@ namespace MURenderState
 	cglm::mat4 Projection, View;
 	NCamera *Camera = nullptr;
 	NEnvironment *Environment = nullptr;
-	std::array<NTexture *, TextureAttachment::Count> Textures = { {} };
+	std::array<const NTexture *, TextureAttachment::Count> Textures = { {} };
 
 	void Reset()
 	{
@@ -71,7 +71,7 @@ namespace MURenderState
 		return Environment->GetTerrain();
 	}
 
-	void AttachTexture(TextureAttachment::Type type, NTexture *texture)
+	void AttachTexture(TextureAttachment::Type type, const NTexture *texture)
 	{
 		Textures[type] = texture;
 	}
@@ -81,7 +81,7 @@ namespace MURenderState
 		Textures[type] = nullptr;
 	}
 
-	NTexture *GetTexture(TextureAttachment::Type type)
+	const NTexture *GetTexture(TextureAttachment::Type type)
 	{
 		return Textures[type];
 	}

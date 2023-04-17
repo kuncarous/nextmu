@@ -8,6 +8,7 @@
 #include "mu_state.h"
 #include "mu_renderstate.h"
 #include "mu_threadsmanager.h"
+#include "res_renders.h"
 
 const mu_boolean NObjects::Initialize()
 {
@@ -33,7 +34,7 @@ void NObjects::Update()
 		NEntity::NSkeleton,
 		NEntity::NPosition,
 		NEntity::NAnimation,
-		NEntity::NBoundingBox
+		NEntity::NBoundingBoxes
 	>();
 
 	MUThreadsManager::Run(
@@ -48,7 +49,7 @@ void NObjects::Update()
 						NEntity::NSkeleton,
 						NEntity::NPosition,
 						NEntity::NAnimation,
-						NEntity::NBoundingBox
+						NEntity::NBoundingBoxes
 					>(entity);
 
 					skeleton.Instance.SetParent(
@@ -56,7 +57,6 @@ void NObjects::Update()
 						position.Position,
 						position.Scale
 					);
-					skeleton.Instance.PlayAnimation(attachment.Base, animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, attachment.Base->GetPlaySpeed() * updateTime);
 
 					NCompressedMatrix viewModel;
 					viewModel.Set(
@@ -66,37 +66,122 @@ void NObjects::Update()
 					);
 
 					const auto model = attachment.Base;
+					model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed() * updateTime);
+
+					auto &bbox = boundingBox.Calculated;
 					if (model->HasMeshes() && model->HasGlobalBBox())
 					{
-						const auto &bbox = model->GetGlobalBBox();
-						boundingBox.Min = Transform(bbox.Min, viewModel);
-						boundingBox.Max = Transform(bbox.Max, viewModel);
+						const auto &globalBBox = model->GetGlobalBBox();
+						bbox.Min = Transform(globalBBox.Min, viewModel);
+						bbox.Max = Transform(globalBBox.Max, viewModel);
 					}
 					else
 					{
-						boundingBox.Min = Transform(boundingBox.Min, viewModel);
-						boundingBox.Max = Transform(boundingBox.Max, viewModel);
+						bbox.Min = Transform(boundingBox.Configured.Min, viewModel);
+						bbox.Max = Transform(boundingBox.Configured.Max, viewModel);
 					}
-					boundingBox.Order();
+					bbox.Order();
+					
+					/* If we have parts to be processed then we animate the skeleton before checking if the object is visible */
+					if (attachment.Parts.size() > 0)
+					{
+						skeleton.Instance.Animate(
+							model,
+							{
+								.Action = animation.CurrentAction,
+								.Frame = animation.CurrentFrame,
+							},
+							{
+								.Action = animation.PriorAction,
+								.Frame = animation.PriorFrame,
+							},
+							glm::vec3(0.0f, 0.0f, 0.0f)
+						);
+					}
 
-					renderState.Flags.Visible = frustum->IsBoxVisible(boundingBox.Min, boundingBox.Max);
+					for (auto &[type, part] : attachment.Parts)
+					{
+						const auto model = part.Model;
+						const auto bone = part.IsLinked ? part.Link.Bone : 0;
+
+						if (part.IsLinked == true)
+						{
+							auto &link = part.Link;
+							auto &animation = link.Animation;
+							model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed() * updateTime);
+						}
+
+						if (model->HasMeshes() && model->HasGlobalBBox())
+						{
+							const auto viewModel = skeleton.Instance.GetBone(bone);
+
+							NBoundingBox tmpBBox;
+							const auto &globalBBox = model->GetGlobalBBox();
+							tmpBBox.Min = Transform(globalBBox.Min, viewModel);
+							tmpBBox.Max = Transform(globalBBox.Max, viewModel);
+							tmpBBox.Order();
+
+							bbox.Min = glm::min(bbox.Min, tmpBBox.Min);
+							bbox.Max = glm::max(bbox.Max, tmpBBox.Max);
+						}
+					}
+
+					renderState.Flags.Visible = frustum->IsBoxVisible(bbox.Min, bbox.Max);
 
 					if (!renderState.Flags.Visible) return;
 
 					environment->CalculateLight(position, light, renderState);
-					skeleton.Instance.Animate(
-						attachment.Base,
-						{
-							.Action = animation.CurrentAction,
-							.Frame = animation.CurrentFrame,
-						},
+
+					/* If we have parts to be processed then we animate the skeleton before checking if the object is visible */
+					if (attachment.Parts.size() == 0)
 					{
-						.Action = animation.PriorAction,
-						.Frame = animation.PriorFrame,
-					},
-					glm::vec3(0.0f, 0.0f, 0.0f)
-					);
+						skeleton.Instance.Animate(
+							model,
+							{
+								.Action = animation.CurrentAction,
+								.Frame = animation.CurrentFrame,
+							},
+							{
+								.Action = animation.PriorAction,
+								.Frame = animation.PriorFrame,
+							},
+							glm::vec3(0.0f, 0.0f, 0.0f)
+						);
+					}
 					skeleton.SkeletonOffset = skeleton.Instance.Upload();
+
+					for (auto &[type, part] : attachment.Parts)
+					{
+						if (part.IsLinked == false) continue;
+						const auto model = part.Model;
+						auto &link = part.Link;
+						auto &animation = link.Animation;
+						auto &partSkeleton = link.Skeleton;
+						const auto &renderAnimation = link.RenderAnimation;
+
+						const auto boneMatrix = skeleton.Instance.GetBone(link.Bone);
+						NCompressedMatrix transformMatrix{
+							.Rotation = glm::quat(glm::radians(renderAnimation.Angle)),
+							.Position = renderAnimation.Position,
+							.Scale = renderAnimation.Scale
+						};
+						MixBones(boneMatrix, transformMatrix);
+
+						partSkeleton.SetParent(transformMatrix);
+						partSkeleton.Animate(
+							model,
+							{
+								.Action = animation.CurrentAction,
+								.Frame = animation.CurrentFrame,
+							},
+							{
+								.Action = animation.PriorAction,
+								.Frame = animation.PriorFrame,
+							},
+							glm::vec3(0.0f, 0.0f, 0.0f)
+						);
+						link.SkeletonOffset = partSkeleton.Upload();
+					}
 				}
 			)
 		)
@@ -110,6 +195,9 @@ void NObjects::Render()
 	{
 		if (!renderState.Flags.Visible) continue;
 		if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
+
+		MURenderState::AttachTexture(TextureAttachment::Skin, attachment.Skin);
+
 		const NRenderConfig config = {
 			.BoneOffset = skeleton.SkeletonOffset,
 			.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -118,6 +206,23 @@ void NObjects::Render()
 			.BodyLight = renderState.BodyLight,
 		};
 		MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
+
+		for (auto &[type, part] : attachment.Parts)
+		{
+			const auto model = part.Model;
+			auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
+
+			const NRenderConfig config = {
+				.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
+				.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+				.BodyScale = 1.0f,
+				.EnableLight = renderState.Flags.LightEnable,
+				.BodyLight = renderState.BodyLight,
+			};
+			MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
+		}
+
+		MURenderState::DetachTexture(TextureAttachment::Skin);
 	}
 
 #if RENDER_BBOX
@@ -125,7 +230,7 @@ void NObjects::Render()
 	for (auto [entity, renderState, boundingBox] : bboxView.each())
 	{
 		if (!renderState.Flags.Visible) continue;
-		MUBBoxRenderer::Render(boundingBox);
+		MUBBoxRenderer::Render(boundingBox.Calculated);
 	}
 #endif
 }
@@ -214,10 +319,14 @@ const entt::entity NObjects::Add(
 		}
 	);
 
-	registry.emplace<NEntity::NBoundingBox>(
+	registry.emplace<NEntity::NBoundingBoxes>(
 		entity,
-		object.BBoxMin,
-		object.BBoxMax
+		NEntity::NBoundingBoxes{
+			.Configured = NBoundingBox{
+				.Min = object.BBoxMin,
+				.Max = object.BBoxMax,
+			}
+		}
 	);
 
 	registry.emplace<NEntity::NPosition>(

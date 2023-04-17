@@ -29,18 +29,6 @@ struct AnimationFrameInfo
 class NSkeletonInstance
 {
 public:
-	/*
-		Return tells if can continue same animation, if false means the animation finished.
-	*/
-	const mu_boolean PlayAnimation(
-		const NModel *Model,
-		mu_uint16 &CurrentAction,
-		mu_uint16 &PriorAction,
-		mu_float &CurrentFrame,
-		mu_float &PriorFrame,
-		const mu_float PlaySpeed
-	);
-
 	void Animate(
 		const NModel *Model,
 		AnimationFrameInfo Current,
@@ -58,6 +46,11 @@ public:
 	)
 	{
 		Parent.Set(Angle, Position, Scale);
+	}
+
+	void SetParent(NCompressedMatrix matrix)
+	{
+		Parent = matrix;
 	}
 
 	const NCompressedMatrix &GetParent() const

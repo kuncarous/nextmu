@@ -21,6 +21,9 @@ namespace MUThreadsManager
 
 class NThreadExecutorBase
 {
+public:
+	virtual ~NThreadExecutorBase() {}
+
 private:
 	friend void MUThreadsManager::Run(std::unique_ptr<NThreadExecutorBase> executor);
 	friend void MUThreadsManager::Worker(const mu_uint32 index);
@@ -33,6 +36,7 @@ class NThreadExecutor : public NThreadExecutorBase
 public:
 	typedef std::function<void(const mu_uint32)> Func;
 	NThreadExecutor(Func func) : _Func(std::move(func)) {}
+	virtual ~NThreadExecutor() override {}
 
 private:
 	void Execute(const mu_uint32 index, const mu_uint32 count) override
@@ -56,6 +60,7 @@ class NThreadExecutorIterator : public NThreadExecutorBase
 
 public:
 	NThreadExecutorIterator(Iter first, Iter last, Func func) : _First(first), _Last(last), _Func(std::move(func)) {}
+	virtual ~NThreadExecutorIterator() override {}
 
 private:
 	virtual void Prepare(const mu_uint32 count) override
@@ -102,6 +107,7 @@ class NThreadExecutorRangeIterator : public NThreadExecutorBase
 
 public:
 	NThreadExecutorRangeIterator(Iter first, Iter last, Func func) : _First(first), _Last(last), _Func(std::move(func)) {}
+	virtual ~NThreadExecutorRangeIterator() override {}
 
 private:
 	virtual void Prepare(const mu_uint32 count) override

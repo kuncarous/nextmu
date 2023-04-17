@@ -4,6 +4,8 @@
 #pragma once
 
 #include "t_character_structs.h"
+#include "res_item.h"
+#include "mu_entity.h"
 
 class NCharacters
 {
@@ -19,6 +21,11 @@ public:
 		const TCharacter::Settings object
 	);
 	void Remove(const entt::entity entity);
+
+	void ClearAttachmentParts(const entt::entity entity);
+	void AddAttachmentPartFromItem(const entt::entity entity, const NEntity::PartType partType, const NItemCategory category, const mu_uint16 index);
+	void AddAttachmentPart(const entt::entity entity, const NEntity::PartType partType, const NRender *render);
+	void RemoveAttachmentPart(const entt::entity entity, const NEntity::PartType partType);
 
 private:
 	entt::registry Registry;

@@ -120,6 +120,8 @@ void MUModelRenderer::RenderBody(
 	const NRenderConfig &config
 )
 {
+	if (model->HasMeshes() == false) return;
+
 	auto terrain = MURenderState::GetTerrain();
 	if (terrain == nullptr) return;
 

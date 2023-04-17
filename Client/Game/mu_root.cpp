@@ -288,6 +288,17 @@ namespace MURoot
 			return;
 		}
 
+		auto characters = environment->GetCharacters();
+		characters->AddOrFind(
+			TCharacter::Settings{
+				.Key = 0,
+				.Type = CharacterType::Character,
+				.X = 160,
+				.Y = 123,
+				.Rotation = 0.0f,
+			}
+		);
+
 		static mu_double accumulatedTime = 0.0;
 		static cglm::mat4 view, projection, frustumProjection;
 		while (!Quit)
@@ -339,7 +350,7 @@ namespace MURoot
 				}*/
 
 				auto *particles = environment->GetParticles();
-				for (mu_uint32 n = 0; n < 200; ++n)
+				/*for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {
@@ -367,7 +378,7 @@ namespace MURoot
 						}
 					);
 				}
-				/*for (mu_uint32 n = 0; n < 200; ++n)
+				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {
@@ -392,7 +403,7 @@ namespace MURoot
 			{
 				auto &mobInfo = MobsInfo[n];
 				auto &skeleton = MobsInstance[n];
-				skeleton.PlayAnimation(Model, mobInfo.CurrentAction, mobInfo.PriorAction, mobInfo.CurrentFrame, mobInfo.PriorFrame, Model->GetPlaySpeed() * MUState::GetUpdateTime());
+				Model->PlayAnimation(mobInfo.CurrentAction, mobInfo.PriorAction, mobInfo.CurrentFrame, mobInfo.PriorFrame, Model->GetPlaySpeed() * MUState::GetUpdateTime());
 				skeleton.Animate(
 					Model,
 					{

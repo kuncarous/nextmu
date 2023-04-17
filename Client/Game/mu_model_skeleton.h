@@ -21,6 +21,7 @@ public:
 class NAnimation
 {
 public:
+	mu_utf8string Id;
 	mu_boolean Loop = false;
 	mu_boolean LockPositions = false;
 	mu_float PlaySpeed = 1.0f;
