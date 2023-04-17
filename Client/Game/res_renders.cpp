@@ -43,26 +43,6 @@ namespace MURendersManager
 			render.Model = MUResourcesManager::GetModel(model);
 			render.IsLinked = jrender["is_linked"].get<mu_boolean>();
 
-			if (jrender.contains("attachments"))
-			{
-				for (const auto &jattachment : jrender["attachments"])
-				{
-					const auto id = jattachment["id"].get<mu_utf8string>();
-
-					NRenderAttachment attachment;
-					attachment.Bone = jattachment["bone"].get<mu_utf8string>();
-
-					if (id.compare("default") == 0)
-					{
-						render.Attachments.Default = attachment;
-					}
-					else
-					{
-						render.Attachments.Customs.insert(std::make_pair(id, attachment));
-					}
-				}
-			}
-
 			if (jrender.contains("animations"))
 			{
 				for (const auto &janimation : jrender["animations"])
@@ -77,6 +57,26 @@ namespace MURendersManager
 					const auto &jangle = janimation["angle"];
 					animation.Angle = glm::vec3(jangle[0].get<mu_float>(), jangle[1].get<mu_float>(), jangle[2].get<mu_float>());
 					animation.Scale = janimation["scale"].get<mu_float>();
+
+					if (janimation.contains("attachments"))
+					{
+						for (const auto &jattachment : janimation["attachments"])
+						{
+							const auto id = jattachment["id"].get<mu_utf8string>();
+
+							NRenderAttachment attachment;
+							attachment.Bone = jattachment["bone"].get<mu_utf8string>();
+
+							if (id.compare("default") == 0)
+							{
+								animation.Attachments.Default = attachment;
+							}
+							else
+							{
+								animation.Attachments.Customs.insert(std::make_pair(id, attachment));
+							}
+						}
+					}
 
 					for (const auto &jid : ids)
 					{

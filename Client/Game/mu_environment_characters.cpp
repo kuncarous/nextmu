@@ -375,7 +375,7 @@ void NCharacters::AddAttachmentPart(const entt::entity entity, const NEntity::Pa
 		const auto animationId = model->GetAnimationId(animation.CurrentAction);
 		const auto partTypeId = NEntity::GetPartTypeId(partType);
 		const auto renderAnimation = render->GetAnimationById(animationId);
-		const auto renderAttachment = render->GetAttachmentById(partTypeId);
+		const auto renderAttachment = renderAnimation->GetAttachmentById(partTypeId);
 
 		auto &link = part.Link;
 		link.Render = render;
