@@ -8,6 +8,8 @@ namespace MUState
 	mu_float UpdateTime;
 	mu_uint32 UpdateCount;
 
+	entt::entity HeroEntity = entt::null;
+
 	void SetTime(const mu_float worldTime, const mu_float elapsedTime)
 	{
 		WorldTime = worldTime;
@@ -38,5 +40,15 @@ namespace MUState
 	const mu_uint32 GetUpdateCount()
 	{
 		return UpdateCount;
+	}
+
+	void SetHero(const entt::entity entity)
+	{
+		HeroEntity = entity;
+	}
+
+	const entt::entity GetHero()
+	{
+		return HeroEntity;
 	}
 };

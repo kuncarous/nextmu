@@ -12,7 +12,7 @@ namespace UINoesis
 		static Noesis::Ptr<Stream> Load(const mu_utf8string filename, const mu_boolean loadMemory = false);
 
 	private:
-		Stream(SDL_RWops *file, const mu_boolean loadMemory);
+		Stream(const mu_utf8string filename, SDL_RWops *file, const mu_boolean loadMemory);
 		virtual ~Stream();
 
 	public:
@@ -39,6 +39,7 @@ namespace UINoesis
 		virtual void Close() override;
 
 	private:
+		const mu_utf8string Filename;
 		SDL_RWops *File = nullptr;
 		std::unique_ptr<mu_uint8[]> Memory;
 	};

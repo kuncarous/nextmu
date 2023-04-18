@@ -101,7 +101,7 @@ namespace MURendersManager
 
 	void Destroy()
 	{
-
+		Renders.clear();
 	}
 
 	const NRender *GetRender(const mu_utf8string id)

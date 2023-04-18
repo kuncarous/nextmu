@@ -299,8 +299,8 @@ const entt::entity NCharacters::AddOrFind(
 	registry.emplace<NEntity::NAnimation>(
 		entity,
 		NEntity::NAnimation{
-			.CurrentAction = 4,
-			.PriorAction = 4,
+			.CurrentAction = 11,
+			.PriorAction = 11,
 		}
 	);
 
@@ -331,8 +331,8 @@ const entt::entity NCharacters::AddOrFind(
 	AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 0);
 	AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 0);
 	AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 0);
-	AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Axes, 0);
-	AddAttachmentPartFromItem(entity, NEntity::PartType::ItemRight, NItemCategory::Axes, 0);
+	AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Maces, 5);
+	AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 5);
 
 	return entity;
 }

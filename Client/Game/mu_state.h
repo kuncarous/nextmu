@@ -12,6 +12,9 @@ namespace MUState
 	const mu_float GetElapsedTime();
 	const mu_float GetUpdateTime();
 	const mu_uint32 GetUpdateCount();
+
+	void SetHero(const entt::entity entity);
+	const entt::entity GetHero();
 };
 
 #endif

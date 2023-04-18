@@ -4,6 +4,7 @@
 #include "ui_noesisgui_bgfxtexture.h"
 #include "ui_noesisgui_consts.h"
 #include "mu_resourcesmanager.h"
+#include "mu_config.h"
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
@@ -119,6 +120,10 @@ namespace UINoesis
 			renderer == bgfx::RendererType::Direct3D12 ||
 			renderer == bgfx::RendererType::Vulkan ||
 			renderer == bgfx::RendererType::Metal
+		);
+		Caps.depthRangeZeroToOne = (
+			renderer != bgfx::RendererType::OpenGL &&
+			renderer != bgfx::RendererType::OpenGLES
 		);
 	}
 
@@ -572,7 +577,7 @@ namespace UINoesis
 					   uint32_t width, uint32_t height, const void *data)
 	{
 		const auto bgfxTexture = static_cast<BGFXTexture *>(texture);
-		const bgfx::Memory *memory = bgfx::copy(data, width * height * static_cast<mu_uint32>(CalculateTextureSize(bgfxTexture->Format, width, height, 1)));
+		const bgfx::Memory *memory = bgfx::copy(data, static_cast<mu_uint32>(CalculateTextureSize(bgfxTexture->Format, width, height, 1)));
 		if (!memory) return;
 
 		bgfx::updateTexture2D(
@@ -592,12 +597,15 @@ namespace UINoesis
 	{
 		// Nothing to do
 		// Begin to render on a framebuffer
+		bgfx::setViewMode(RenderView, bgfx::ViewMode::Sequential);
 	}
 
 	/// Ends rendering offscreen commands
 	void BGFXRenderDevice::EndOffscreenRender()
 	{
 		// Nothing to do
+		bgfx::setViewFrameBuffer(RenderView, BGFX_INVALID_HANDLE);
+		bgfx::setViewMode(RenderView, bgfx::ViewMode::Default);
 	}
 
 	/// Begins rendering onscreen commands
@@ -605,12 +613,15 @@ namespace UINoesis
 	{
 		// Nothing to do
 		// Begin to render on screen
+		bgfx::setViewRect(RenderView, 0, 0, MUConfig::GetWindowWidth(), MUConfig::GetWindowHeight());
+		bgfx::setViewMode(RenderView, bgfx::ViewMode::Sequential);
 	}
 
 	/// Ends rendering onscreen commands
 	void BGFXRenderDevice::EndOnscreenRender()
 	{
 		// Nothing to do
+		bgfx::setViewMode(RenderView, bgfx::ViewMode::Default);
 	}
 
 	/// Binds render target and sets viewport to cover the entire surface. The existing contents of
@@ -626,6 +637,9 @@ namespace UINoesis
 		RenderViewport.y = 0u;
 		RenderViewport.width = bgfxTexture->GetWidth();
 		RenderViewport.height = bgfxTexture->GetHeight();
+
+		bgfx::setViewFrameBuffer(RenderView, bgfxSurface->Framebuffer);
+		bgfx::setViewRect(RenderView, 0, 0, RenderViewport.width, RenderViewport.height);
 	}
 
 	/// Indicates that until the next call to EndTile(), all drawing commands will only update the
@@ -752,12 +766,7 @@ namespace UINoesis
 
 	void BGFXRenderDevice::SetRenderState(Noesis::RenderState state, uint8_t stencilRef)
 	{
-		uint64_t bgfxState = (
-			BGFX_STATE_WRITE_Z
-			| BGFX_STATE_DEPTH_TEST_LESS
-			| BGFX_STATE_CULL_CW
-			| BGFX_STATE_MSAA
-		);
+		uint64_t bgfxState = BGFX_STATE_MSAA;
 
 		if (state.f.colorEnable > 0)
 			bgfxState |= BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A;
@@ -771,10 +780,6 @@ namespace UINoesis
 		case Noesis::BlendMode::SrcOver_Additive: bgfxState |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_INV_SRC_ALPHA); break;
 		}
 
-		bgfx::setState(
-			bgfxState
-		);
-
 		switch (state.f.stencilMode)
 		{
 		case Noesis::StencilMode::Disabled: break;
@@ -785,7 +790,8 @@ namespace UINoesis
 				BGFX_STENCIL_OP_PASS_Z_KEEP |
 				BGFX_STENCIL_TEST_EQUAL |
 				BGFX_STENCIL_FUNC_REF(stencilRef) |
-				BGFX_STENCIL_FUNC_RMASK(255)
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
 			);
 			break;
 		case Noesis::StencilMode::Equal_Incr:
@@ -795,7 +801,8 @@ namespace UINoesis
 				BGFX_STENCIL_OP_PASS_Z_INCR |
 				BGFX_STENCIL_TEST_EQUAL |
 				BGFX_STENCIL_FUNC_REF(stencilRef) |
-				BGFX_STENCIL_FUNC_RMASK(255)
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
 			);
 			break;
 		case Noesis::StencilMode::Equal_Decr:
@@ -805,7 +812,8 @@ namespace UINoesis
 				BGFX_STENCIL_OP_PASS_Z_DECR |
 				BGFX_STENCIL_TEST_EQUAL |
 				BGFX_STENCIL_FUNC_REF(stencilRef) |
-				BGFX_STENCIL_FUNC_RMASK(255)
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
 			);
 			break;
 		case Noesis::StencilMode::Clear:
@@ -815,10 +823,30 @@ namespace UINoesis
 				BGFX_STENCIL_OP_PASS_Z_ZERO |
 				BGFX_STENCIL_TEST_ALWAYS |
 				BGFX_STENCIL_FUNC_REF(0) |
-				BGFX_STENCIL_FUNC_RMASK(255)
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
+			);
+			break;
+		case Noesis::StencilMode::Disabled_ZTest:
+			bgfxState |= BGFX_STATE_DEPTH_TEST_LEQUAL;
+			break;
+		case Noesis::StencilMode::Equal_Keep_ZTest:
+			bgfxState |= BGFX_STATE_DEPTH_TEST_LEQUAL;
+			bgfx::setStencil(
+				BGFX_STENCIL_OP_FAIL_S_KEEP |
+				BGFX_STENCIL_OP_FAIL_Z_KEEP |
+				BGFX_STENCIL_OP_PASS_Z_KEEP |
+				BGFX_STENCIL_TEST_EQUAL |
+				BGFX_STENCIL_FUNC_REF(stencilRef) |
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
 			);
 			break;
 		}
+
+		bgfx::setState(
+			bgfxState
+		);
 	}
 
 	/// Draws primitives for the given batch
@@ -830,8 +858,8 @@ namespace UINoesis
 		auto shader = static_cast<Noesis::Shader::Enum>(batch.shader.v);
 		auto vertexShader = Noesis::VertexForShader[shader];
 
-		EnsureProgram(static_cast<Noesis::Shader::Enum>(batch.shader.v));
-		const bgfx::ProgramHandle program = Programs[batch.shader.v];
+		EnsureProgram(shader);
+		const bgfx::ProgramHandle program = Programs[shader];
 		if (bgfx::isValid(program) == false) return;
 
 		auto format = Noesis::FormatForVertex[vertexShader];

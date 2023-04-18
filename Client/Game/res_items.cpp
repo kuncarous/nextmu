@@ -56,7 +56,7 @@ namespace MUItemsManager
 
 	void Destroy()
 	{
-
+		Items.clear();
 	}
 
 	const NItem *GetItem(const mu_uint16 category, const mu_uint16 index)

@@ -8,11 +8,13 @@ struct NRender;
 enum class NItemCategory : mu_uint16
 {
 	Axes = 1,
+	Maces = 2,
 	Helm = 7,
 	Armor = 8,
 	Pants = 9,
 	Gloves = 10,
 	Boots = 11,
+	Wings = 12,
 };
 
 struct NItem

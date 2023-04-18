@@ -19,6 +19,8 @@
 #include "mu_model.h"
 #include "mu_modelrenderer.h"
 #include "mu_bboxrenderer.h"
+#include "res_renders.h"
+#include "res_items.h"
 
 #include "ui_noesisgui.h"
 
@@ -184,11 +186,23 @@ namespace MURoot
 			return false;
 		}
 
+		if (MURendersManager::Initialize() == false)
+		{
+			return false;
+		}
+
+		if (MUItemsManager::Initialize() == false)
+		{
+			return false;
+		}
+
 		return true;
 	}
 
 	void Destroy()
 	{
+		MUItemsManager::Destroy();
+		MURendersManager::Destroy();
 		MUBBoxRenderer::Destroy();
 		MUModelRenderer::Destroy();
 		MUSkeletonManager::Destroy();

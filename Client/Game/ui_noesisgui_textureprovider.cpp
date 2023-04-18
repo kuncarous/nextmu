@@ -7,11 +7,17 @@
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
+	template <class T> void SwapValue(T &a, T &b) {
+		T tmp = a;
+		a = b;
+		b = tmp;
+	}
+
 	/// Returns metadata for the texture at the given URI or empty rectangle if texture is not found
 	Noesis::TextureInfo TextureProvider::GetTextureInfo(const Noesis::Uri &uri)
 	{
 		Noesis::TextureInfo info;
-		const mu_utf8string filename = GetResourcesPath() + uri.Str();
+		const mu_utf8string filename = SupportPathUTF8 + GetResourcesPath() + uri.Str();
 		Noesis::Ptr<Noesis::Stream> stream = Stream::Load(filename);
 		if (!stream)
 		{
@@ -45,6 +51,21 @@ namespace UINoesis
 			return info;
 		}
 
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
+		const auto bit_count = FreeImage_GetBPP(bitmap);
+		if (bit_count == 24 || bit_count == 32) {
+			const unsigned width = FreeImage_GetWidth(bitmap);
+			const unsigned height = FreeImage_GetHeight(bitmap);
+			for (unsigned y = 0; y < height; y++) {
+				BYTE *pixel = FreeImage_GetScanLine(bitmap, y);
+				for (unsigned x = 0; x < width; x++) {
+					SwapValue(pixel[0], pixel[2]);
+					pixel += (bit_count >> 3);
+				}
+			}
+		}
+#endif
+
 		info.x = 0;
 		info.y = 0;
 		info.width = FreeImage_GetWidth(bitmap);
@@ -58,7 +79,7 @@ namespace UINoesis
 	/// Returns a texture compatible with the given device or null if texture is not found
 	Noesis::Ptr<Noesis::Texture> TextureProvider::LoadTexture(const Noesis::Uri &uri, Noesis::RenderDevice *device)
 	{
-		const mu_utf8string filename = GetResourcesPath() + uri.Str();
+		const mu_utf8string filename = SupportPathUTF8 + GetResourcesPath() + uri.Str();
 		Noesis::Ptr<Noesis::Stream> stream = Stream::Load(filename);
 		if (!stream)
 		{
@@ -93,6 +114,21 @@ namespace UINoesis
 		{
 			return nullptr;
 		}
+
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
+		const auto bit_count = FreeImage_GetBPP(bitmap);
+		if (bit_count == 24 || bit_count == 32) {
+			const unsigned width = FreeImage_GetWidth(bitmap);
+			const unsigned height = FreeImage_GetHeight(bitmap);
+			for (unsigned y = 0; y < height; y++) {
+				BYTE *pixel = FreeImage_GetScanLine(bitmap, y);
+				for (unsigned x = 0; x < width; x++) {
+					SwapValue(pixel[0], pixel[2]);
+					pixel += (bit_count >> 3);
+				}
+			}
+		}
+#endif
 
 		const auto width = FreeImage_GetWidth(bitmap);
 		const auto height = FreeImage_GetHeight(bitmap);

@@ -157,10 +157,10 @@
     <Filter Include="Environment\Characters">
       <UniqueIdentifier>{199d463c-3b01-4453-995a-43b9ffee1819}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resources\Items">
+    <Filter Include="Items">
       <UniqueIdentifier>{0aa1f818-87d2-4d74-a89e-0dbe785b85b2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resources\Renders">
+    <Filter Include="Renders">
       <UniqueIdentifier>{de0b807a-8c10-4b6f-a943-30c727cfc12a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -319,10 +319,10 @@
       <Filter>Environment\Particles\Templates</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)res_items.cpp">
-      <Filter>Resources\Items</Filter>
+      <Filter>Items</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)res_renders.cpp">
-      <Filter>Resources\Renders</Filter>
+      <Filter>Renders</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_entity.cpp">
       <Filter>Environment\Entity</Filter>
@@ -555,16 +555,16 @@
       <Filter>Environment\Characters</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)res_items.h">
-      <Filter>Resources\Items</Filter>
+      <Filter>Items</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)res_renders.h">
-      <Filter>Resources\Renders</Filter>
+      <Filter>Renders</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)res_item.h">
-      <Filter>Resources\Items</Filter>
+      <Filter>Items</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)res_render.h">
-      <Filter>Resources\Renders</Filter>
+      <Filter>Renders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

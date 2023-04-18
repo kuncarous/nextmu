@@ -12,10 +12,10 @@ namespace UINoesis
 			return nullptr;
 		}
 
-		return Noesis::Ptr<Stream>(new Stream(file, loadMemory));
+		return Noesis::Ptr<Stream>(new Stream(filename, file, loadMemory));
 	}
 
-	Stream::Stream(SDL_RWops *file, const mu_boolean loadMemory) : File(file)
+	Stream::Stream(const mu_utf8string filename, SDL_RWops *file, const mu_boolean loadMemory) : Filename(filename), File(file)
 	{
 		if (loadMemory) ReadToMemory();
 	}

@@ -46,7 +46,7 @@ namespace MUGraphics
 		bgfx::renderFrame();
 		bgfx::init(init);
 
-		bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, MU::MakeRGBA(0, 0, 0, 255), 1.0f, 0);
+		bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH | BGFX_CLEAR_STENCIL, MU::MakeRGBA(0, 0, 0, 255), 1.0f, 0);
 
 #if NEXTMU_COMPILE_DEBUG == 1
 		bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);

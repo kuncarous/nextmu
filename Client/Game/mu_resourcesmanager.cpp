@@ -93,16 +93,6 @@ namespace MUResourcesManager
 			}
 		}
 
-		if (MURendersManager::Initialize() == false)
-		{
-			return false;
-		}
-
-		if (MUItemsManager::Initialize() == false)
-		{
-			return false;
-		}
-
 		return true;
 	}
 

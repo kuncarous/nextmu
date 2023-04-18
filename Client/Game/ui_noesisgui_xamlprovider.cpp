@@ -8,7 +8,7 @@ namespace UINoesis
 {
 	Noesis::Ptr<Noesis::Stream> XamlProvider::LoadXaml(const Noesis::Uri &uri)
 	{
-		const mu_utf8string filename = GetResourcesPath() + uri.Str();
+		const mu_utf8string filename = SupportPathUTF8 + GetResourcesPath() + uri.Str();
 		return Stream::Load(filename);
 	}
 };
