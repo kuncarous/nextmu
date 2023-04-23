@@ -2,6 +2,7 @@
 #include "mu_environment_particles.h"
 #include "mu_resourcesmanager.h"
 #include "mu_threadsmanager.h"
+#include "mu_graphics.h"
 #include "t_particle_base.h"
 #include "t_particle_entity.h"
 #include "mu_state.h"
@@ -10,79 +11,82 @@ using namespace TParticle;
 
 const mu_boolean NParticles::Initialize()
 {
-#if NEXTMU_COMPRESSED_PARTICLES == 1
-	RenderBuffer.Layout
-		.begin()
-		.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-		.add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Int16, true, true)
-		.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Int16, true, true)
-		.end();
-#else
-	RenderBuffer.Layout
-		.begin()
-		.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-		.add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
-		.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-		.end();
-#endif
-	RenderBuffer.VertexBuffer = bgfx::createDynamicVertexBuffer(TParticle::MaxRenderCount * 4, RenderBuffer.Layout);
-	if (bgfx::isValid(RenderBuffer.VertexBuffer) == false)
-	{
-		return false;
-	}
-
-	RenderBuffer.IndexBuffer = bgfx::createDynamicIndexBuffer(TParticle::MaxRenderCount * 6, BGFX_BUFFER_INDEX32);
-	if (bgfx::isValid(RenderBuffer.IndexBuffer) == false)
-	{
-		return false;
-	}
-
-	RenderBuffer.Projection = bgfx::createUniform("u_projection", bgfx::UniformType::Mat4);
-	if (bgfx::isValid(RenderBuffer.Projection) == false)
-	{
-		return false;
-	}
-
-	RenderBuffer.TextureSampler = bgfx::createUniform("s_texture", bgfx::UniformType::Sampler);
-	if (bgfx::isValid(RenderBuffer.TextureSampler) == false)
-	{
-		return false;
-	}
+	const auto device = MUGraphics::GetDevice();
 
 	RenderBuffer.Program = MUResourcesManager::GetProgram("particle");
-	if (bgfx::isValid(RenderBuffer.Program) == false)
+	if (RenderBuffer.Program == NInvalidShader)
 	{
 		return false;
 	}
+
+	const auto &swapchainDesc = MUGraphics::GetSwapChain()->GetDesc();
+	RenderBuffer.FixedPipelineState.CombinedShader = RenderBuffer.Program;
+	RenderBuffer.FixedPipelineState.RTVFormat = swapchainDesc.ColorBufferFormat;
+	RenderBuffer.FixedPipelineState.DSVFormat = swapchainDesc.DepthBufferFormat;
+
+	// Vertex Buffer
+	{
+		Diligent::BufferDesc bufferDesc;
+		bufferDesc.Usage = Diligent::USAGE_DEFAULT;
+		bufferDesc.BindFlags = Diligent::BIND_VERTEX_BUFFER;
+		bufferDesc.Size = sizeof(NParticleVertex) * TParticle::MaxRenderCount * 4;
+
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
+		device->CreateBuffer(bufferDesc, nullptr, &buffer);
+		if (buffer == nullptr)
+		{
+			return false;
+		}
+
+		RenderBuffer.VertexBuffer = buffer;
+	}
+
+	// Index Buffer
+	{
+		Diligent::BufferDesc bufferDesc;
+		bufferDesc.Usage = Diligent::USAGE_DEFAULT;
+		bufferDesc.BindFlags = Diligent::BIND_INDEX_BUFFER;
+		bufferDesc.Size = sizeof(mu_uint32) * TParticle::MaxRenderCount * 6;
+
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
+		device->CreateBuffer(bufferDesc, nullptr, &buffer);
+		if (buffer == nullptr)
+		{
+			return false;
+		}
+
+		RenderBuffer.IndexBuffer = buffer;
+	}
+
+	// Model View Uniform
+	{
+		Diligent::BufferDesc bufferDesc;
+		bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
+		bufferDesc.BindFlags = Diligent::BIND_UNIFORM_BUFFER;
+		bufferDesc.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
+		bufferDesc.Size = sizeof(glm::mat4);
+
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
+		device->CreateBuffer(bufferDesc, nullptr, &buffer);
+		if (buffer == nullptr)
+		{
+			return false;
+		}
+
+		RenderBuffer.ModelViewUniform = buffer;
+	}
+
+	RenderBuffer.Groups.reserve(100);
 
 	return true;
 }
 
 void NParticles::Destroy()
 {
-	if (bgfx::isValid(RenderBuffer.VertexBuffer))
-	{
-		bgfx::destroy(RenderBuffer.VertexBuffer);
-		RenderBuffer.VertexBuffer = BGFX_INVALID_HANDLE;
-	}
-
-	if (bgfx::isValid(RenderBuffer.IndexBuffer))
-	{
-		bgfx::destroy(RenderBuffer.IndexBuffer);
-		RenderBuffer.IndexBuffer = BGFX_INVALID_HANDLE;
-	}
-
-	if (bgfx::isValid(RenderBuffer.Projection))
-	{
-		bgfx::destroy(RenderBuffer.Projection);
-		RenderBuffer.Projection = BGFX_INVALID_HANDLE;
-	}
-
-	if (bgfx::isValid(RenderBuffer.TextureSampler))
-	{
-		bgfx::destroy(RenderBuffer.TextureSampler);
-		RenderBuffer.TextureSampler = BGFX_INVALID_HANDLE;
-	}
+	RenderBuffer.Program = NInvalidShader;
+	RenderBuffer.VertexBuffer.Release();
+	RenderBuffer.IndexBuffer.Release();
+	RenderBuffer.ModelViewUniform.Release();
 }
 
 void NParticles::Create(const NParticleData &data)

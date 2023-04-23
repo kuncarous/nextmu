@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "mu_capabilities.h"
+#include "mu_graphics.h"
 
 namespace MUCapabilities
 {
@@ -7,8 +8,10 @@ namespace MUCapabilities
 
 	const mu_boolean Configure()
 	{
-		auto caps = bgfx::getCaps();
-		HomogeneousDepth = caps->homogeneousDepth;
+		const auto device = MUGraphics::GetDevice();
+		const auto &deviceInfo = device->GetDeviceInfo();
+		//auto caps = bgfx::getCaps();
+		//HomogeneousDepth = caps->homogeneousDepth;
 
 		return true;
 	}

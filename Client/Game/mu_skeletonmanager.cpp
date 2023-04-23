@@ -1,36 +1,35 @@
 #include "stdafx.h"
 #include "mu_skeletonmanager.h"
 #include "mu_skeletoninstance.h"
+#include "mu_graphics.h"
+#include "mu_renderstate.h"
 
 namespace MUSkeletonManager
 {
-	/*
-		2048x512 can handle around ~2600 characters with 200 bones per character.
-		This texture will consume 16MB of video memory, not much but enough.
-	*/
-	constexpr mu_uint32 BonesTextureWidth = 2048;
-	constexpr mu_uint32 BonesTextureHeight = 512;
-	constexpr mu_uint32 MaxBonesCount = (BonesTextureWidth * BonesTextureHeight) / 2u;
-
-	bgfx::TextureHandle BonesTexture = BGFX_INVALID_HANDLE;
-	bgfx::UniformHandle BonesSampler = BGFX_INVALID_HANDLE;
+	Diligent::RefCntAutoPtr<Diligent::ITexture> BonesTexture;
 	std::vector<NCompressedMatrix> BonesBuffer;
 	mu_atomic_uint32_t BonesCount = 0;
 
 	const mu_boolean Initialize()
 	{
-		BonesTexture = bgfx::createTexture2D(BonesTextureWidth, BonesTextureHeight, false, 1, bgfx::TextureFormat::RGBA32F, BGFX_TEXTURE_NONE | BGFX_SAMPLER_POINT);
-		if (bgfx::isValid(BonesTexture) == false)
+		const auto device = MUGraphics::GetDevice();
+
+		Diligent::TextureDesc textureDesc;
+		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+		textureDesc.Width = BonesTextureWidth;
+		textureDesc.Height = BonesTextureHeight;
+		textureDesc.Format = Diligent::TEX_FORMAT_RGBA32_FLOAT;
+		textureDesc.Usage = Diligent::USAGE_DEFAULT;
+		textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+		Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+		device->CreateTexture(textureDesc, nullptr, &texture);
+		if (texture == nullptr)
 		{
 			return false;
 		}
 
-		BonesSampler = bgfx::createUniform("s_skeletonTexture", bgfx::UniformType::Sampler);
-		if (bgfx::isValid(BonesSampler) == false)
-		{
-			return false;
-		}
-
+		BonesTexture = texture;
 		BonesBuffer.resize(MaxBonesCount);
 
 		return true;
@@ -38,27 +37,12 @@ namespace MUSkeletonManager
 
 	void Destroy()
 	{
-		if (bgfx::isValid(BonesTexture))
-		{
-			bgfx::destroy(BonesTexture);
-			BonesTexture = BGFX_INVALID_HANDLE;
-		}
-
-		if (bgfx::isValid(BonesSampler))
-		{
-			bgfx::destroy(BonesSampler);
-			BonesSampler = BGFX_INVALID_HANDLE;
-		}
+		BonesTexture.Release();
 	}
 
-	const bgfx::TextureHandle GetTexture()
+	Diligent::ITexture *GetTexture()
 	{
-		return BonesTexture;
-	}
-
-	const bgfx::UniformHandle GetSampler()
-	{
-		return BonesSampler;
+		return BonesTexture.RawPtr();
 	}
 
 	void Reset()
@@ -76,8 +60,15 @@ namespace MUSkeletonManager
 		const mu_uint32 width = glm::clamp(pixelsCount, 1u, BonesTextureWidth);
 		const mu_uint32 height = glm::clamp((pixelsCount / BonesTextureWidth) + extraHeight, 1u, BonesTextureHeight);
 
-		const bgfx::Memory *mem = bgfx::makeRef(BonesBuffer.data(), sizeof(glm::vec4) * width * height);
-		bgfx::updateTexture2D(BonesTexture, 0, 0, 0, 0, width, height, mem);
+		const auto immediateContext = MURenderState::GetImmediateContext();
+		immediateContext->UpdateTexture(
+			BonesTexture,
+			0, 0,
+			Diligent::Box(0, width, 0, height),
+			Diligent::TextureSubResData(BonesBuffer.data(), sizeof(glm::vec4) * width),
+			Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+			Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+		);
 	}
 
 	const mu_uint32 UploadBones(const NCompressedMatrix *bones, const mu_uint32 bonesCount)

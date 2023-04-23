@@ -4,34 +4,14 @@
 #include "mu_textures.h"
 #include "mu_resourcesmanager.h"
 #include "mu_state.h"
+#include "mu_renderstate.h"
 #include "mu_crypt.h"
 #include "shared_binaryreader.h"
 #include <glm/gtx/normal.hpp>
 #include <glm/gtc/packing.hpp>
+#include <MapHelper.hpp>
 
-static bgfx::VertexLayout VertexLayout;
-
-static void InitializeVertexLayout()
-{
-	static mu_boolean initialized = false;
-	if (initialized) return;
-	initialized = true;
-	VertexLayout
-		.begin()
-		.add(bgfx::Attrib::Position, 2, bgfx::AttribType::Uint8)
-		.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Uint8)
-		.end();
-}
-
-#pragma pack(4)
-struct TerrainVertex
-{
-	mu_uint8 x, y;
-	mu_uint8 rx, ry;
-};
-#pragma pack()
-
-TerrainVertex TerrainVertices[4 * TerrainSize * TerrainSize] = {};
+NTerrainVertex TerrainVertices[4 * TerrainSize * TerrainSize] = {};
 
 void InitializeTerrainVertices()
 {
@@ -44,7 +24,7 @@ void InitializeTerrainVertices()
 	{
 		for (mu_uint32 x = 0; x < TerrainSize; ++x)
 		{
-			TerrainVertex *vert = &TerrainVertices[vertex++];
+			NTerrainVertex *vert = &TerrainVertices[vertex++];
 			vert->x = 0;
 			vert->y = 0;
 			vert->rx = x;
@@ -71,7 +51,8 @@ void InitializeTerrainVertices()
 	}
 }
 
-mu_uint32 TerrainIndexes[(TerrainSize - 1) * (TerrainSize - 1) * 6] = {};
+constexpr mu_uint32 NumTerrainIndexes = (TerrainSize - 1) * (TerrainSize - 1) * 6;
+mu_uint32 TerrainIndexes[NumTerrainIndexes] = {};
 
 void InitializeTerrainIndexes()
 {
@@ -108,27 +89,17 @@ NTerrain::~NTerrain()
 
 void NTerrain::Destroy()
 {
-#define RELEASE_HANDLER(handler) \
-	if (bgfx::isValid(handler)) \
-	{ \
-		bgfx::destroy(handler); \
-		handler = BGFX_INVALID_HANDLE; \
-	}
+#define RELEASE_HANDLER(handler) handler.Release();
 
-	RELEASE_HANDLER(HeightmapSampler);
+	RELEASE_HANDLER(TerrainBinding);
+	RELEASE_HANDLER(GrassBinding);
 	RELEASE_HANDLER(HeightmapTexture);
-	RELEASE_HANDLER(LightmapSampler);
 	RELEASE_HANDLER(LightmapTexture);
-	RELEASE_HANDLER(NormalSampler);
 	RELEASE_HANDLER(NormalTexture);
-	RELEASE_HANDLER(MappingSampler);
 	RELEASE_HANDLER(MappingTexture);
-	RELEASE_HANDLER(AttributesSampler);
 	RELEASE_HANDLER(AttributesTexture);
-	RELEASE_HANDLER(TexturesSampler);
 	RELEASE_HANDLER(Textures);
 	RELEASE_HANDLER(GrassTextures);
-	RELEASE_HANDLER(UVSampler);
 	RELEASE_HANDLER(UVTexture);
 	RELEASE_HANDLER(GrassUVTexture);
 	RELEASE_HANDLER(VertexBuffer);
@@ -227,9 +198,31 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path)
 		TerrainHeight[index] = static_cast<mu_float>(buffer[index]) * HeightMultiplier;
 	}
 
-	const bgfx::Memory *mem = bgfx::copy(buffer.get(), TerrainSize * TerrainSize);
-	HeightmapTexture = bgfx::createTexture2D(TerrainSize, TerrainSize, false, 1, bgfx::TextureFormat::R8U, BGFX_TEXTURE_NONE | BGFX_SAMPLER_POINT, mem);
-	HeightmapSampler = bgfx::createUniform("s_heightTexture", bgfx::UniformType::Sampler);
+	const auto device = MUGraphics::GetDevice();
+
+	std::vector<Diligent::TextureSubResData> subresources;
+	Diligent::TextureSubResData subresource;
+	subresource.pData = buffer.get();
+	subresource.Stride = TerrainSize;
+	subresources.push_back(subresource);
+
+	Diligent::TextureDesc textureDesc;
+	textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+	textureDesc.Width = TerrainSize;
+	textureDesc.Height = TerrainSize;
+	textureDesc.Format = Diligent::TEX_FORMAT_R8_UINT;
+	textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
+	textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+	Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+	Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+	device->CreateTexture(textureDesc, &textureData, &texture);
+	if (texture == nullptr)
+	{
+		return false;
+	}
+
+	HeightmapTexture = texture;
 
 	return true;
 }
@@ -272,11 +265,31 @@ const mu_boolean NTerrain::GenerateNormal()
 		}
 	}
 
-	NormalTexture = bgfx::createTexture2D(TerrainSize, TerrainSize, false, 1, bgfx::TextureFormat::RGBA16, BGFX_TEXTURE_NONE | BGFX_SAMPLER_POINT);
-	NormalSampler = bgfx::createUniform("s_normalTexture", bgfx::UniformType::Sampler);
+	const auto device = MUGraphics::GetDevice();
 
-	const bgfx::Memory *mem = bgfx::makeRef(NormalMemory.get(), sizeof(mu_uint16) * 4 * TerrainSize * TerrainSize);
-	bgfx::updateTexture2D(NormalTexture, 0, 0, 0, 0, TerrainSize, TerrainSize, mem);
+	std::vector<Diligent::TextureSubResData> subresources;
+	Diligent::TextureSubResData subresource;
+	subresource.pData = NormalMemory.get();
+	subresource.Stride = TerrainSize * sizeof(mu_uint16) * 4;
+	subresources.push_back(subresource);
+
+	Diligent::TextureDesc textureDesc;
+	textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+	textureDesc.Width = TerrainSize;
+	textureDesc.Height = TerrainSize;
+	textureDesc.Format = Diligent::TEX_FORMAT_RGBA16_UNORM;
+	textureDesc.Usage = Diligent::USAGE_DEFAULT;
+	textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+	Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+	Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+	device->CreateTexture(textureDesc, &textureData, &texture);
+	if (texture == nullptr)
+	{
+		return false;
+	}
+
+	NormalTexture = texture;
 
 	return true;
 }
@@ -367,11 +380,31 @@ const mu_boolean NTerrain::LoadLightmap(mu_utf8string path)
 		TerrainLight[index] = light * glm::clamp(glm::dot(*normalBuffer, Light) + 0.5f, 0.0f, 1.0f);
 	}
 
-	LightmapTexture = bgfx::createTexture2D(TerrainSize, TerrainSize, false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_NONE | BGFX_SAMPLER_POINT);
-	LightmapSampler = bgfx::createUniform("s_lightTexture", bgfx::UniformType::Sampler);
+	const auto device = MUGraphics::GetDevice();
 
-	const bgfx::Memory *mem = bgfx::makeRef(LightmapMemory.get(), sizeof(uint8_t) * 4 * TerrainSize * TerrainSize);
-	bgfx::updateTexture2D(LightmapTexture, 0, 0, 0, 0, TerrainSize, TerrainSize, mem);
+	std::vector<Diligent::TextureSubResData> subresources;
+	Diligent::TextureSubResData subresource;
+	subresource.pData = LightmapMemory.get();
+	subresource.Stride = TerrainSize * sizeof(mu_uint8) * 4;
+	subresources.push_back(subresource);
+
+	Diligent::TextureDesc textureDesc;
+	textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+	textureDesc.Width = TerrainSize;
+	textureDesc.Height = TerrainSize;
+	textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM;
+	textureDesc.Usage = Diligent::USAGE_DEFAULT;
+	textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+	Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+	Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+	device->CreateTexture(textureDesc, &textureData, &texture);
+	if (texture == nullptr)
+	{
+		return false;
+	}
+
+	LightmapTexture = texture;
 
 	return true;
 }
@@ -470,27 +503,74 @@ const mu_boolean NTerrain::LoadTextures(
 	}
 
 	const mu_uint16 numLayers = static_cast<mu_uint16>(bitmaps.size());
-	const mu_uint32 textureSize = width * height * 4;
-	const mu_uint32 memorySize = textureSize * numLayers;
-	const bgfx::Memory *mem = bgfx::alloc(memorySize);
+	const auto device = MUGraphics::GetDevice();
 
-	mu_uint8 *dest = mem->data;
-	for (auto iter = bitmaps.begin(); iter != bitmaps.end(); ++iter)
+	// Textures
 	{
-		auto &bitmap = *iter;
-		mu_memcpy(dest, FreeImage_GetBits(bitmap.get()), textureSize);
-		dest += textureSize;
+		std::vector<Diligent::TextureSubResData> subresources;
+		for (auto iter = bitmaps.begin(); iter != bitmaps.end(); ++iter)
+		{
+			auto &bitmap = *iter;
+			Diligent::TextureSubResData subresource;
+			subresource.pData = FreeImage_GetBits(bitmap.get());
+			subresource.Stride = width * sizeof(mu_uint8) * 4;
+			subresources.push_back(subresource);
+		}
+
+		Diligent::TextureDesc textureDesc;
+		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D_ARRAY;
+		textureDesc.Width = width;
+		textureDesc.Height = height;
+		textureDesc.ArraySize = numLayers;
+		textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM;
+		textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
+		textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+		Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+		Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+		device->CreateTexture(textureDesc, &textureData, &texture);
+		if (texture == nullptr)
+		{
+			return false;
+		}
+
+		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(MUTextures::CalculateSamplerFlags(filter, wrap)));
+		Textures = texture;
 	}
 
-	Textures = bgfx::createTexture2D(width, height, false, numLayers, bgfx::TextureFormat::RGBA8, MUTextures::CalculateSamplerFlags(filter, wrap), mem);
-	TexturesSampler = bgfx::createUniform("s_textures", bgfx::UniformType::Sampler);
+	// UV Textures
+	{
+		const mu_uint32 settingsWidth = GetPowerOfTwoSize(static_cast<mu_uint32>(settings.size()));
+		const mu_size memorySize = settingsWidth * sizeof(SettingFormat);
+		std::unique_ptr<mu_uint8[]> memory(new (std::nothrow) mu_uint8[memorySize]);
+		mu_zeromem(memory.get(), memorySize);
+		mu_memcpy(memory.get(), settings.data(), settings.size() * sizeof(SettingFormat));
 
-	const mu_uint32 settingsWidth = GetPowerOfTwoSize(static_cast<mu_uint32>(settings.size()));
-	mem = bgfx::alloc(settingsWidth * sizeof(SettingFormat));
-	mu_zeromem(mem->data, mem->size);
-	mu_memcpy(mem->data, settings.data(), settings.size() * sizeof(SettingFormat));
-	UVTexture = bgfx::createTexture2D(settingsWidth, 1, false, 1, bgfx::TextureFormat::RGBA32F, BGFX_TEXTURE_NONE | BGFX_SAMPLER_POINT, mem);
-	UVSampler = bgfx::createUniform("s_uvTexture", bgfx::UniformType::Sampler);
+		std::vector<Diligent::TextureSubResData> subresources;
+		Diligent::TextureSubResData subresource;
+		subresource.pData = memory.get();
+		subresource.Stride = settingsWidth * sizeof(SettingFormat);
+		subresources.push_back(subresource);
+
+		Diligent::TextureDesc textureDesc;
+		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+		textureDesc.Width = settingsWidth;
+		textureDesc.Height = 1;
+		textureDesc.ArraySize = 1;
+		textureDesc.Format = Diligent::TEX_FORMAT_RGBA32_FLOAT;
+		textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
+		textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+		Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+		Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+		device->CreateTexture(textureDesc, &textureData, &texture);
+		if (texture == nullptr)
+		{
+			return false;
+		}
+
+		UVTexture = texture;
+	}
 
 	return true;
 }
@@ -558,25 +638,74 @@ const mu_boolean NTerrain::LoadGrassTextures(
 	}
 
 	const mu_uint16 numLayers = static_cast<mu_uint16>(bitmaps.size());
-	const mu_uint32 textureSize = width * height * 4;
-	const mu_uint32 memorySize = textureSize * numLayers;
-	const bgfx::Memory *mem = bgfx::alloc(memorySize);
+	const auto device = MUGraphics::GetDevice();
 
-	mu_uint8 *dest = mem->data;
-	for (auto iter = bitmaps.begin(); iter != bitmaps.end(); ++iter)
+	// Textures
 	{
-		auto &bitmap = *iter;
-		mu_memcpy(dest, FreeImage_GetBits(bitmap.get()), textureSize);
-		dest += textureSize;
+		std::vector<Diligent::TextureSubResData> subresources;
+		for (auto iter = bitmaps.begin(); iter != bitmaps.end(); ++iter)
+		{
+			auto &bitmap = *iter;
+			Diligent::TextureSubResData subresource;
+			subresource.pData = FreeImage_GetBits(bitmap.get());
+			subresource.Stride = width * sizeof(mu_uint8) * 4;
+			subresources.push_back(subresource);
+		}
+
+		Diligent::TextureDesc textureDesc;
+		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D_ARRAY;
+		textureDesc.Width = width;
+		textureDesc.Height = height;
+		textureDesc.ArraySize = numLayers;
+		textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM;
+		textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
+		textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+		Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+		Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+		device->CreateTexture(textureDesc, &textureData, &texture);
+		if (texture == nullptr)
+		{
+			return false;
+		}
+
+		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(MUTextures::CalculateSamplerFlags(filter, wrap)));
+		GrassTextures = texture;
 	}
 
-	GrassTextures = bgfx::createTexture2D(width, height, false, numLayers, bgfx::TextureFormat::RGBA8, MUTextures::CalculateSamplerFlags(filter, wrap), mem);
+	// UV Textures
+	{
+		const mu_uint32 settingsWidth = GetPowerOfTwoSize(static_cast<mu_uint32>(settings.size()));
+		const mu_size memorySize = settingsWidth * sizeof(SettingFormat);
+		std::unique_ptr<mu_uint8[]> memory(new (std::nothrow) mu_uint8[memorySize]);
+		mu_zeromem(memory.get(), memorySize);
+		mu_memcpy(memory.get(), settings.data(), settings.size() * sizeof(SettingFormat));
 
-	const mu_uint32 settingsWidth = GetPowerOfTwoSize(static_cast<mu_uint32>(settings.size()));
-	mem = bgfx::alloc(settingsWidth * sizeof(SettingFormat));
-	mu_zeromem(mem->data, mem->size);
-	mu_memcpy(mem->data, settings.data(), settings.size() * sizeof(SettingFormat));
-	GrassUVTexture = bgfx::createTexture2D(settingsWidth, 1, false, 1, bgfx::TextureFormat::R32F, BGFX_TEXTURE_NONE | BGFX_SAMPLER_POINT, mem);
+		std::vector<Diligent::TextureSubResData> subresources;
+		Diligent::TextureSubResData subresource;
+		subresource.pData = memory.get();
+		subresource.Stride = settingsWidth * sizeof(SettingFormat);
+		subresources.push_back(subresource);
+
+		Diligent::TextureDesc textureDesc;
+		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+		textureDesc.Width = settingsWidth;
+		textureDesc.Height = 1;
+		textureDesc.ArraySize = 1;
+		textureDesc.Format = Diligent::TEX_FORMAT_R32_FLOAT;
+		textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
+		textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+		Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+		Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+		device->CreateTexture(textureDesc, &textureData, &texture);
+		if (texture == nullptr)
+		{
+			return false;
+		}
+
+		GrassUVTexture = texture;
+	}
 
 	return true;
 }
@@ -623,8 +752,8 @@ const mu_boolean NTerrain::LoadMappings(
 	const mu_uint8 *mapping2 = reader.GetPointer(); reader.Skip(TerrainSize * TerrainSize);
 	const mu_uint8 *alpha = reader.GetPointer(); reader.Skip(TerrainSize * TerrainSize);
 
-	const bgfx::Memory *mem = bgfx::alloc(TerrainSize * TerrainSize * sizeof(MappingFormat));
-	MappingFormat *mapping = reinterpret_cast<MappingFormat *>(mem->data);
+	std::unique_ptr<mu_uint8[]> memory(new (std::nothrow) mu_uint8[TerrainSize * TerrainSize * sizeof(MappingFormat)]);
+	MappingFormat *mapping = reinterpret_cast<MappingFormat *>(memory.get());
 
 	for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
 	{
@@ -640,8 +769,31 @@ const mu_boolean NTerrain::LoadMappings(
 		);
 	}
 
-	MappingTexture = bgfx::createTexture2D(TerrainSize, TerrainSize, false, 1, bgfx::TextureFormat::RGBA8U, BGFX_TEXTURE_NONE | BGFX_SAMPLER_NONE, mem);
-	MappingSampler = bgfx::createUniform("s_mappingTexture", bgfx::UniformType::Sampler);
+	const auto device = MUGraphics::GetDevice();
+
+	std::vector<Diligent::TextureSubResData> subresources;
+	Diligent::TextureSubResData subresource;
+	subresource.pData = memory.get();
+	subresource.Stride = TerrainSize * sizeof(mu_uint8) * 4;
+	subresources.push_back(subresource);
+
+	Diligent::TextureDesc textureDesc;
+	textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+	textureDesc.Width = TerrainSize;
+	textureDesc.Height = TerrainSize;
+	textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UINT;
+	textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
+	textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+	Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+	Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+	device->CreateTexture(textureDesc, &textureData, &texture);
+	if (texture == nullptr)
+	{
+		return false;
+	}
+
+	MappingTexture = texture;
 
 	return true;
 }
@@ -713,11 +865,31 @@ const mu_boolean NTerrain::LoadAttributes(mu_utf8string path)
 		}
 	}
 
-	AttributesTexture = bgfx::createTexture2D(TerrainSize, TerrainSize, false, 1, TerrainAttribute::Format, BGFX_TEXTURE_NONE | BGFX_SAMPLER_POINT);
-	AttributesSampler = bgfx::createUniform("s_attributesTexture", bgfx::UniformType::Sampler);
+	const auto device = MUGraphics::GetDevice();
 
-	const bgfx::Memory *mem = bgfx::makeRef(TerrainAttributes.get(), TerrainSize * TerrainSize * sizeof(TerrainAttribute::Type));
-	bgfx::updateTexture2D(AttributesTexture, 0, 0, 0, 0, TerrainSize, TerrainSize, mem);
+	std::vector<Diligent::TextureSubResData> subresources;
+	Diligent::TextureSubResData subresource;
+	subresource.pData = TerrainAttributes.get();
+	subresource.Stride = TerrainAttribute::Stride;
+	subresources.push_back(subresource);
+
+	Diligent::TextureDesc textureDesc;
+	textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+	textureDesc.Width = TerrainSize;
+	textureDesc.Height = TerrainSize;
+	textureDesc.Format = TerrainAttribute::Format;
+	textureDesc.Usage = Diligent::USAGE_DEFAULT;
+	textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+	Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+	Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+	device->CreateTexture(textureDesc, &textureData, &texture);
+	if (texture == nullptr)
+	{
+		return false;
+	}
+
+	AttributesTexture = texture;
 
 	return true;
 }
@@ -745,7 +917,22 @@ const mu_boolean NTerrain::PrepareSettings(const mu_utf8string path, const nlohm
 	WindModulus = wind["mod"].get<mu_float>();
 	WindMultiplier = wind["mul"].get<mu_float>();
 
-	SettingsUniform = bgfx::createUniform("u_terrainSettings", bgfx::UniformType::Vec4, 1);
+	const auto device = MUGraphics::GetDevice();
+
+	Diligent::BufferDesc bufferDesc;
+	bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
+	bufferDesc.BindFlags = Diligent::BIND_UNIFORM_BUFFER;
+	bufferDesc.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
+	bufferDesc.Size = sizeof(TerrainSettings);
+
+	Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
+	device->CreateBuffer(bufferDesc, nullptr, &buffer);
+	if (buffer == nullptr)
+	{
+		return false;
+	}
+
+	SettingsUniform = buffer;
 
 	return true;
 }
@@ -757,24 +944,112 @@ const mu_boolean NTerrain::GenerateBuffers()
 		Since all terrains are 256x256 we can make the vertex and index buffer static to use it for all terrains.
 		After implement occlussion culling the index buffer should be dynamic.
 	*/
-	InitializeVertexLayout();
 	InitializeTerrainVertices();
 	InitializeTerrainIndexes();
 
-	const bgfx::Memory *mem = bgfx::makeRef(TerrainVertices, sizeof(TerrainVertices));
-	VertexBuffer = bgfx::createVertexBuffer(mem, VertexLayout);
-	if (bgfx::isValid(VertexBuffer) == false)
+	const auto device = MUGraphics::GetDevice();
+
+	// Vertex Buffer
 	{
-		mu_error("failed to create vertex buffer");
-		return false;
+		Diligent::BufferDesc bufferDesc;
+		bufferDesc.Usage = Diligent::USAGE_DEFAULT;
+		bufferDesc.BindFlags = Diligent::BIND_VERTEX_BUFFER; // We do not really bind the buffer, but D3D11 wants at least one bind flag bit
+		bufferDesc.Size = sizeof(TerrainVertices);
+
+		Diligent::BufferData bufferData;
+		bufferData.pData = TerrainVertices;
+		bufferData.DataSize = sizeof(TerrainVertices);
+
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
+		device->CreateBuffer(bufferDesc, &bufferData, &buffer);
+		if (buffer == nullptr)
+		{
+			return false;
+		}
+
+		VertexBuffer = buffer;
 	}
 
-	mem = bgfx::makeRef(TerrainIndexes, sizeof(TerrainIndexes));
-	IndexBuffer = bgfx::createIndexBuffer(mem, BGFX_BUFFER_INDEX32);
-	if (bgfx::isValid(IndexBuffer) == false)
+	// Index Buffer
 	{
-		mu_error("failed to create index buffer");
-		return false;
+		Diligent::BufferDesc bufferDesc;
+		bufferDesc.Usage = Diligent::USAGE_DEFAULT;
+		bufferDesc.BindFlags = Diligent::BIND_INDEX_BUFFER; // We do not really bind the buffer, but D3D11 wants at least one bind flag bit
+		bufferDesc.Size = sizeof(TerrainIndexes);
+
+		Diligent::BufferData bufferData;
+		bufferData.pData = TerrainIndexes;
+		bufferData.DataSize = sizeof(TerrainIndexes);
+
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
+		device->CreateBuffer(bufferDesc, &bufferData, &buffer);
+		if (buffer == nullptr)
+		{
+			return false;
+		}
+
+		IndexBuffer = buffer;
+	}
+
+	return true;
+}
+
+const mu_boolean NTerrain::PreparePipelines()
+{
+	// Terrain
+	{
+		const auto swapchain = MUGraphics::GetSwapChain();
+		const auto &swapchainDesc = swapchain->GetDesc();
+
+		NFixedPipelineState fixedState;
+		fixedState.CombinedShader = Program;
+		fixedState.RTVFormat = swapchainDesc.ColorBufferFormat;
+		fixedState.DSVFormat = swapchainDesc.DepthBufferFormat;
+
+		NDynamicPipelineState dynamicState;
+
+		TerrainPipeline = GetPipelineState(fixedState, dynamicState);
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture")->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture")->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture")->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture")->Set(UVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture")->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings")->Set(SettingsUniform);
+		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures")->Set(Textures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		TerrainPipeline->Pipeline->CreateShaderResourceBinding(&TerrainBinding, true);
+	}
+
+	// Grass
+	{
+		const auto swapchain = MUGraphics::GetSwapChain();
+		const auto &swapchainDesc = swapchain->GetDesc();
+
+		NFixedPipelineState fixedState;
+		fixedState.CombinedShader = GrassProgram;
+		fixedState.RTVFormat = swapchainDesc.ColorBufferFormat;
+		fixedState.DSVFormat = swapchainDesc.DepthBufferFormat;
+
+		NDynamicPipelineState dynamicState;
+		dynamicState.CullMode = Diligent::CULL_MODE_NONE;
+		dynamicState.AlphaWrite = false;
+		dynamicState.DepthWrite = false;
+		dynamicState.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA;
+		dynamicState.DestBlend = Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
+		dynamicState.BlendOp = Diligent::BLEND_OPERATION_ADD;
+
+		GrassPipeline = GetPipelineState(fixedState, dynamicState);
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture")->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture")->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture")->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture")->Set(GrassUVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture")->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings")->Set(SettingsUniform);
+		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures")->Set(GrassTextures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		GrassPipeline->Pipeline->CreateShaderResourceBinding(&GrassBinding, true);
 	}
 
 	return true;
@@ -788,63 +1063,130 @@ void NTerrain::Reset()
 
 void NTerrain::ConfigureUniforms()
 {
+	const auto immediateContext = MURenderState::GetImmediateContext();
+
 	Settings.WaterMove = glm::mod(MUState::GetWorldTime(), WaterModulus) * WaterMultiplier;
 	Settings.WindScale = 10.0f;
 	Settings.WindSpeed = glm::mod(MUState::GetWorldTime(), WindModulus) * WindMultiplier;
 	Settings.Dummy = 0.0f;
 
-	bgfx::setUniform(SettingsUniform, &Settings);
+	// Update Settings Uniform
+	{
+		Diligent::MapHelper<TerrainSettings> terrainSettings(immediateContext, SettingsUniform, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
+		TerrainSettings *buffer = terrainSettings;
+		mu_memcpy(buffer, &Settings, sizeof(TerrainSettings));
+	}
 }
 
 void NTerrain::Update()
 {
-	const bgfx::Memory *mem = bgfx::makeRef(LightmapMemory.get(), sizeof(uint8_t) * 4 * TerrainSize * TerrainSize);
-	bgfx::updateTexture2D(LightmapTexture, 0, 0, 0, 0, TerrainSize, TerrainSize, mem);
-	mem = bgfx::makeRef(NormalMemory.get(), sizeof(mu_uint16) * 4 * TerrainSize * TerrainSize);
-	bgfx::updateTexture2D(NormalTexture, 0, 0, 0, 0, TerrainSize, TerrainSize, mem);
-	mem = bgfx::makeRef(TerrainAttributes.get(), TerrainSize * TerrainSize * sizeof(TerrainAttribute::Type));
-	bgfx::updateTexture2D(AttributesTexture, 0, 0, 0, 0, TerrainSize, TerrainSize, mem);
+	const auto immediateContext = MURenderState::GetImmediateContext();
+	immediateContext->UpdateTexture(
+		LightmapTexture,
+		0, 0,
+		Diligent::Box(0, TerrainSize, 0, TerrainSize),
+		Diligent::TextureSubResData(LightmapMemory.get(), TerrainSize * sizeof(mu_uint8) * 4),
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+	);
+	immediateContext->UpdateTexture(
+		NormalTexture,
+		0, 0,
+		Diligent::Box(0, TerrainSize, 0, TerrainSize),
+		Diligent::TextureSubResData(NormalMemory.get(), TerrainSize * sizeof(mu_uint16) * 4),
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+	);
+	immediateContext->UpdateTexture(
+		AttributesTexture,
+		0, 0,
+		Diligent::Box(0, TerrainSize, 0, TerrainSize),
+		Diligent::TextureSubResData(TerrainAttributes.get(), TerrainAttribute::Stride),
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+	);
 }
 
 void NTerrain::Render()
 {
-	// Render Terrain
-	bgfx::setVertexBuffer(0, VertexBuffer);
-	bgfx::setIndexBuffer(IndexBuffer);
-	bgfx::setTexture(0, HeightmapSampler, HeightmapTexture);
-	bgfx::setTexture(1, LightmapSampler, LightmapTexture);
-	bgfx::setTexture(2, NormalSampler, NormalTexture);
-	bgfx::setTexture(3, MappingSampler, MappingTexture);
-	bgfx::setTexture(4, TexturesSampler, Textures);
-	bgfx::setTexture(5, UVSampler, UVTexture);
-	bgfx::setTexture(6, AttributesSampler, AttributesTexture);
-	bgfx::submit(0, Program);
+	const auto renderManager = MUGraphics::GetRenderManager();
+	const auto immediateContext = MURenderState::GetImmediateContext();
 
-	// Render Grass
-	if (bgfx::isValid(GrassUVTexture))
+	renderManager->SetVertexBuffer(
+		RSetVertexBuffer{
+			.StartSlot = 0,
+			.Buffer = VertexBuffer.RawPtr(),
+			.Offset = 0,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_RESET,
+		}
+	);
+	renderManager->SetIndexBuffer(
+		RSetIndexBuffer{
+			.IndexBuffer = IndexBuffer,
+			.ByteOffset = 0,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+		}
+	);
+	renderManager->SetPipelineState(TerrainPipeline);
+	renderManager->CommitShaderResources(
+		RCommitShaderResources{
+			.ShaderResourceBinding = TerrainBinding,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+		}
+	);
+	renderManager->DrawIndexed(
+		RDrawIndexed{
+			.Attribs = Diligent::DrawIndexedAttribs(NumTerrainIndexes, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL)
+		},
+		RCommandListInfo{
+			.Type = NDrawOrderType::Blend,
+			.View = 0,
+			.Depth = 0,
+		}
+	);
+
+	if (GrassUVTexture != nullptr)
 	{
-		bgfx::setState((BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_ALPHA) ^ (BGFX_STATE_CULL_CW | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z));
-		bgfx::setVertexBuffer(0, VertexBuffer);
-		bgfx::setIndexBuffer(IndexBuffer);
-		bgfx::setTexture(0, HeightmapSampler, HeightmapTexture);
-		bgfx::setTexture(1, LightmapSampler, LightmapTexture);
-		bgfx::setTexture(2, NormalSampler, NormalTexture);
-		bgfx::setTexture(3, MappingSampler, MappingTexture);
-		bgfx::setTexture(4, TexturesSampler, GrassTextures);
-		bgfx::setTexture(5, UVSampler, GrassUVTexture);
-		bgfx::setTexture(6, AttributesSampler, AttributesTexture);
-		bgfx::submit(0, GrassProgram);
+		renderManager->SetVertexBuffer(
+			RSetVertexBuffer{
+				.StartSlot = 0,
+				.Buffer = VertexBuffer.RawPtr(),
+				.Offset = 0,
+				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+				.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_RESET,
+			}
+		);
+		renderManager->SetIndexBuffer(
+			RSetIndexBuffer{
+				.IndexBuffer = IndexBuffer,
+				.ByteOffset = 0,
+				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+			}
+		);
+		renderManager->SetPipelineState(GrassPipeline);
+		renderManager->CommitShaderResources(
+			RCommitShaderResources{
+				.ShaderResourceBinding = GrassBinding,
+				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+			}
+		);
+		renderManager->DrawIndexed(
+			RDrawIndexed{
+				.Attribs = Diligent::DrawIndexedAttribs(NumTerrainIndexes, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL)
+			},
+			RCommandListInfo{
+				.Type = NDrawOrderType::Blend,
+				.View = 0,
+				.Depth = 0,
+			}
+		);
 	}
 }
 
-const bgfx::TextureHandle NTerrain::GetLightmapTexture() const
+Diligent::ITexture *NTerrain::GetLightmapTexture()
 {
-	return LightmapTexture;
-}
-
-const bgfx::UniformHandle NTerrain::GetLightmapSampler() const
-{
-	return LightmapSampler;
+	return LightmapTexture.RawPtr();
 }
 
 const mu_float NTerrain::GetHeight(const mu_uint32 x, const mu_uint32 y)

@@ -62,11 +62,11 @@ void NEnvironment::Destroy()
 	}
 }
 
-void NEnvironment::Reset()
+void NEnvironment::Reset(const mu_boolean forceReset)
 {
 	const auto updateCount = MUState::GetUpdateCount();
 
-	if (updateCount > 0)
+	if (forceReset || updateCount > 0)
 	{
 		Terrain->Reset();
 	}

@@ -146,6 +146,12 @@ namespace MURoot
 			return false;
 		}
 
+		if (MURenderState::Initialize() == false)
+		{
+			mu_error("Failed to initialize render state.");
+			return false;
+		}
+
 #if PHYSICS_ENABLED == 1
 		if (MUPhysics::Initialize() == false)
 		{
@@ -213,6 +219,7 @@ namespace MURoot
 #if PHYSICS_ENABLED == 1
 		MUPhysics::Destroy();
 #endif
+		MURenderState::Destroy();
 		MUGraphics::Destroy();
 		MUAngelScript::Destroy();
 		MUWindow::Destroy();
@@ -291,12 +298,14 @@ namespace MURoot
 			return;
 		}
 
+		environment->Reset(true);
+
 		for (mu_uint32 n = 0; n < demo.MonstersCount; ++n)
 		{
 			AddMob();
 		}
 
-		const NModel *Model = MUResourcesManager::GetModel("monster_01");
+		NModel *Model = MUResourcesManager::GetModel("monster_01");
 		if (Model == nullptr)
 		{
 			return;
@@ -341,7 +350,7 @@ namespace MURoot
 			if (updateCount > 0)
 			{
 				auto *joints = environment->GetJoints();
-				/*for (mu_uint32 n = 0; n < 60; ++n)
+				for (mu_uint32 n = 0; n < 60; ++n)
 				{
 					const glm::vec3 position = glm::vec3(
 						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
@@ -361,10 +370,10 @@ namespace MURoot
 							.Scale = glm::linearRand(60.0f, 70.0f),
 						}
 					);
-				}*/
+				}/**/
 
 				auto *particles = environment->GetParticles();
-				/*for (mu_uint32 n = 0; n < 200; ++n)
+				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {
@@ -406,7 +415,7 @@ namespace MURoot
 							.Scale = 2.8f
 						}
 					);
-				}*/
+				}/**/
 			}
 
 			camera.Update();
@@ -435,9 +444,17 @@ namespace MURoot
 			const auto windowWidth = MUConfig::GetWindowWidth();
 			const auto windowHeight = MUConfig::GetWindowHeight();
 
-			// Set view 0 default viewport.
-			bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(windowWidth), static_cast<uint16_t>(windowHeight));
-			bgfx::touch(0);
+			const auto device = MUGraphics::GetDevice();
+			const auto swapchain = MUGraphics::GetSwapChain();
+			const auto immediateContext = MUGraphics::GetImmediateContext();
+			MURenderState::SetImmediateContext(immediateContext);
+
+			mu_float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+			auto *pRTV = swapchain->GetCurrentBackBufferRTV();
+			auto *pDSV = swapchain->GetDepthBufferDSV();
+			immediateContext->SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+			immediateContext->ClearRenderTarget(pRTV, clearColor, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY);
+			immediateContext->ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG | Diligent::CLEAR_STENCIL_FLAG, 1.0f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
 			camera.GetView(view);
 
@@ -481,7 +498,6 @@ namespace MURoot
 
 			camera.GenerateFrustum(view, frustumProjection);
 
-			bgfx::setViewTransform(0, view, projection);
 			MURenderState::SetViewTransform(view, projection);
 			MURenderState::AttachCamera(&camera);
 			MURenderState::AttachEnvironment(environment.get());
@@ -521,14 +537,14 @@ namespace MURoot
 				}
 			}
 
+			MUGraphics::GetRenderManager()->Execute(immediateContext);
+
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 			UINoesis::Update();
 			UINoesis::Render();
 #endif
 
-			// Advance to next frame. Rendering thread will be kicked to
-			// process submitted rendering primitives.
-			bgfx::frame();
+			swapchain->Present(MUConfig::GetVerticalSync() ? 1u : 0u);
 
 			MUInput::ProcessKeys();
 

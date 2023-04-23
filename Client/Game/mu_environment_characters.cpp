@@ -353,13 +353,13 @@ void NCharacters::ClearAttachmentParts(const entt::entity entity)
 
 void NCharacters::AddAttachmentPartFromItem(const entt::entity entity, const NEntity::PartType partType, const NItemCategory category, const mu_uint16 index)
 {
-	const NItem *item = MUItemsManager::GetItem(static_cast<mu_uint16>(category), index);
+	NItem *item = MUItemsManager::GetItem(static_cast<mu_uint16>(category), index);
 	if (item == nullptr) return;
-	const NRender *render = item->Render;
+	NRender *render = item->Render;
 	AddAttachmentPart(entity, partType, render);
 }
 
-void NCharacters::AddAttachmentPart(const entt::entity entity, const NEntity::PartType partType, const NRender *render)
+void NCharacters::AddAttachmentPart(const entt::entity entity, const NEntity::PartType partType, NRender *render)
 {
 	NEntity::NRenderPart part;
 	part.Type = partType;

@@ -14,7 +14,7 @@ public:
 	virtual TJoint::EnttIterator Move(TJoint::EnttRegistry &registry, TJoint::EnttView &view, TJoint::EnttIterator iter, TJoint::EnttIterator last) override;
 	virtual TJoint::EnttIterator Action(TJoint::EnttRegistry &registry, TJoint::EnttView &view, TJoint::EnttIterator iter, TJoint::EnttIterator last) override;
 	virtual TJoint::EnttIterator Render(TJoint::EnttRegistry &registry, TJoint::EnttView &view, TJoint::EnttIterator iter, TJoint::EnttIterator last, TJoint::NRenderBuffer &renderBuffer) override;
-	virtual void RenderGroup(const TJoint::NRenderGroup &renderGroup, const TJoint::NRenderBuffer &renderBuffer) override;
+	virtual void RenderGroup(const TJoint::NRenderGroup &renderGroup, TJoint::NRenderBuffer &renderBuffer) override;
 };
 
 #endif

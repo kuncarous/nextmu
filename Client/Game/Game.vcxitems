@@ -70,6 +70,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_physics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)res_items.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)res_renders.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_immutables.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_layouts.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resources.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_samplers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_base.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_thunder1_v7.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_base.cpp" />
@@ -106,6 +114,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_joints.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_objects.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_graphics.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_aabb.h" />
@@ -121,6 +130,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)res_render.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)res_renders.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_character_structs.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_immutables.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_layouts.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resources.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_samplers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_base.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_create.h" />

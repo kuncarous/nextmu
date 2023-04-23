@@ -10,19 +10,6 @@
 namespace TJoint
 {
 	constexpr mu_uint32 MaxRenderCount = 5000 * 50;
-#pragma pack(4)
-	struct NRenderVertex
-	{
-		glm::vec3 Position;
-#if NEXTMU_COMPRESSED_JOINTS == 1
-		mu_uint64 Color;
-		mu_uint32 UV;
-#else
-		glm::vec4 Color;
-		glm::vec2 UV;
-#endif
-	};
-#pragma pack()
 
 	struct NRenderGroup
 	{
@@ -33,16 +20,17 @@ namespace TJoint
 
 	struct NRenderBuffer
 	{
-		std::array<NRenderVertex, MaxRenderCount * 4> Vertices;
+		std::array<NJointVertex, MaxRenderCount * 4> Vertices;
 		std::array<mu_uint32, MaxRenderCount * 6> Indices;
 
 		std::vector<NRenderGroup> Groups;
 
-		bgfx::VertexLayout Layout;
-		bgfx::DynamicVertexBufferHandle VertexBuffer = BGFX_INVALID_HANDLE;
-		bgfx::DynamicIndexBufferHandle IndexBuffer = BGFX_INVALID_HANDLE;
-		bgfx::UniformHandle TextureSampler = BGFX_INVALID_HANDLE;
-		bgfx::ProgramHandle Program = BGFX_INVALID_HANDLE;
+		mu_shader Program = NInvalidShader;
+		NFixedPipelineState FixedPipelineState;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> IndexBuffer;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelViewUniform;
+		std::map<NPipelineStateId, Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>> Bindings;
 	};
 
 	NEXTMU_INLINE void RenderTail(

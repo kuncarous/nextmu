@@ -3,7 +3,7 @@
 #include "mu_textures.h"
 
 NTexture::NTexture(
-	const bgfx::TextureHandle texture,
+	Diligent::RefCntAutoPtr<Diligent::ITexture> texture,
 	const mu_uint16 width,
 	const mu_uint16 height,
 	const mu_boolean alpha
@@ -18,9 +18,4 @@ NTexture::NTexture(
 
 NTexture::~NTexture()
 {
-	if (bgfx::isValid(Texture))
-	{
-		bgfx::destroy(Texture);
-		Texture = BGFX_INVALID_HANDLE;
-	}
 }

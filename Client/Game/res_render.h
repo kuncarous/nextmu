@@ -42,7 +42,7 @@ struct NRenderAnimations
 struct NRender
 {
 	mu_utf8string Id;
-	const NModel *Model;
+	NModel *Model;
 	mu_boolean IsLinked;
 	NRenderAnimations Animations;
 

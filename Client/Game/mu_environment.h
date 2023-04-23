@@ -25,7 +25,7 @@ public:
 	const mu_boolean Initialize();
 	void Destroy();
 
-	void Reset();
+	void Reset(const mu_boolean forceReset = false);
 	void Update();
 	void Render();
 	void CalculateLight(
@@ -60,7 +60,7 @@ public:
 		return Joints.get();
 	}
 
-	const NTerrain *GetTerrain() const
+	NTerrain *GetTerrain() const
 	{
 		return Terrain.get();
 	}

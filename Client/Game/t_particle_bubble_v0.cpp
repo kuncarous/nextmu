@@ -2,6 +2,7 @@
 #include "t_particle_bubble_v0.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
+#include "mu_graphics.h"
 #include "mu_renderstate.h"
 #include "mu_state.h"
 
@@ -15,14 +16,13 @@ constexpr mu_float UVOffset = 0.005f;
 constexpr mu_float USize = 0.25f - 0.01f;
 constexpr mu_float VSize = 0.25f - 0.01f;
 
-constexpr mu_uint64 RenderState = (
-	BGFX_STATE_WRITE_RGB |
-	BGFX_STATE_WRITE_A |
-	BGFX_STATE_CULL_CW |
-	BGFX_STATE_DEPTH_TEST_LEQUAL |
-	BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE) |
-	BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD)
-);
+const NDynamicPipelineState DynamicPipelineState = {
+	.DepthWrite = false,
+	.DepthFunc = Diligent::COMPARISON_FUNC_LESS_EQUAL,
+	.SrcBlend = Diligent::BLEND_FACTOR_ONE,
+	.DestBlend = Diligent::BLEND_FACTOR_ONE,
+	.BlendOp = Diligent::BLEND_OPERATION_ADD,
+};
 
 static TParticleBubbleV0 Instance;
 
@@ -104,7 +104,7 @@ EnttIterator TParticleBubbleV0::Action(EnttRegistry &registry, EnttView &view, E
 	return iter;
 }
 
-static const NTexture *texture = nullptr;
+static NTexture *texture = nullptr;
 EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
@@ -138,19 +138,82 @@ EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, E
 	return iter;
 }
 
-void TParticleBubbleV0::RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer)
+void TParticleBubbleV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;
 
-	cglm::mat4 projection;
-	MURenderState::GetProjection(projection);
-	bgfx::update(renderBuffer.VertexBuffer, renderGroup.Index * 4, bgfx::makeRef(renderBuffer.Vertices.data() + renderGroup.Index * 4, sizeof(NRenderVertex) * renderGroup.Count * 4));
-	bgfx::update(renderBuffer.IndexBuffer, renderGroup.Index * 6, bgfx::makeRef(renderBuffer.Indices.data() + renderGroup.Index * 6, sizeof(mu_uint32) * renderGroup.Count * 6));
-	bgfx::setState(RenderState);
-	bgfx::setUniform(renderBuffer.Projection, projection);
-	bgfx::setTexture(0, renderBuffer.TextureSampler, texture->GetTexture());
-	bgfx::setVertexBuffer(0, renderBuffer.VertexBuffer, renderGroup.Index * 4, renderGroup.Count * 4);
-	bgfx::setIndexBuffer(renderBuffer.IndexBuffer, renderGroup.Index * 6, renderGroup.Count * 6);
-	bgfx::submit(0, renderBuffer.Program);
+	auto renderManager = MUGraphics::GetRenderManager();
+	auto immediateContext = MURenderState::GetImmediateContext();
+
+	immediateContext->UpdateBuffer(
+		renderBuffer.VertexBuffer,
+		sizeof(NParticleVertex) * renderGroup.Index * 4,
+		sizeof(NParticleVertex) * renderGroup.Count * 4,
+		renderBuffer.Vertices.data() + renderGroup.Index * 4,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+	);
+	immediateContext->UpdateBuffer(
+		renderBuffer.IndexBuffer,
+		sizeof(mu_uint32) * renderGroup.Index * 6,
+		sizeof(mu_uint32) * renderGroup.Count * 6,
+		renderBuffer.Indices.data() + renderGroup.Index * 6,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+	);
+
+	auto pipelineState = GetPipelineState(renderBuffer.FixedPipelineState, DynamicPipelineState);
+	auto bindingIter = renderBuffer.Bindings.find(pipelineState->Id);
+	if (bindingIter == renderBuffer.Bindings.end())
+	{
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetProjUniform());
+
+		Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> binding;
+		pipelineState->Pipeline->CreateShaderResourceBinding(&binding, true);
+
+		bindingIter = renderBuffer.Bindings.insert(std::make_pair(pipelineState->Id, binding)).first;
+	}
+	auto binding = bindingIter->second.RawPtr();
+
+	renderManager->SetDynamicTexture(
+		RSetDynamicTexture{
+			.Type = Diligent::SHADER_TYPE_PIXEL,
+			.Name = "g_Texture",
+			.View = texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE),
+			.Binding = binding,
+		}
+	);
+	renderManager->SetPipelineState(pipelineState);
+	renderManager->SetVertexBuffer(
+		RSetVertexBuffer{
+			.StartSlot = 0,
+			.Buffer = renderBuffer.VertexBuffer.RawPtr(),
+			.Offset = 0,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_RESET,
+		}
+	);
+	renderManager->SetIndexBuffer(
+		RSetIndexBuffer{
+			.IndexBuffer = renderBuffer.IndexBuffer,
+			.ByteOffset = 0,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+		}
+	);
+	renderManager->CommitShaderResources(
+		RCommitShaderResources{
+			.ShaderResourceBinding = binding,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+		}
+	);
+
+	renderManager->DrawIndexed(
+		RDrawIndexed{
+			.Attribs = Diligent::DrawIndexedAttribs(renderGroup.Count * 6, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL, 1, renderGroup.Index * 6, renderGroup.Index * 4)
+		},
+		RCommandListInfo{
+			.Type = NDrawOrderType::Blend,
+			.View = 0,
+			.Depth = 0,
+		}
+	);
 }

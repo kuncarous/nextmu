@@ -85,7 +85,7 @@ protected:
 	friend class NSkeletonInstance;
 	friend class MUModelRenderer;
 
-	bgfx::VertexBufferHandle VertexBuffer = BGFX_INVALID_HANDLE;
+	Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
 	std::vector<NModelTexture> Textures;
 
 	std::vector<NVirtualMesh> VirtualMeshes;

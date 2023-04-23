@@ -22,7 +22,7 @@ struct NItem
 	mu_uint16 Category;
 	mu_uint16 Index;
 	mu_utf8string Name;
-	const NRender *Render;
+	NRender *Render;
 };
 
 #endif

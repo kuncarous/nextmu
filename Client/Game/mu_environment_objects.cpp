@@ -297,12 +297,14 @@ const entt::entity NObjects::Add(
 
 	registry.emplace<NEntity::NRenderState>(
 		entity,
-		NEntity::NRenderFlags{
-			.Visible = false,
-			.LightEnable = object.LightEnable,
-		},
-		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
-		);
+		NEntity::NRenderState{
+			.Flags = NEntity::NRenderFlags{
+				.Visible = false,
+				.LightEnable = object.LightEnable,
+			},
+			.BodyLight = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+		}
+	);
 
 	NSkeletonInstance instance;
 	instance.SetParent(

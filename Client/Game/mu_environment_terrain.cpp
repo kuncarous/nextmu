@@ -38,7 +38,7 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 
 	const auto programId = document["program"].get<mu_utf8string>();
 	terrain->Program = MUResourcesManager::GetProgram(programId);
-	if (bgfx::isValid(terrain->Program) == false)
+	if (terrain->Program == NInvalidShader)
 	{
 		mu_error("terrain program not found ({}, {})", filename, programId);
 		return false;
@@ -46,7 +46,7 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 
 	const auto grassProgramId = document["grass_program"].get<mu_utf8string>();
 	terrain->GrassProgram = MUResourcesManager::GetProgram(grassProgramId);
-	if (bgfx::isValid(terrain->GrassProgram) == false)
+	if (terrain->GrassProgram == NInvalidShader)
 	{
 		mu_error("terrain grass program not found ({}, {})", filename, grassProgramId);
 		return false;
@@ -164,6 +164,11 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 	}
 
 	if (terrain->PrepareSettings(path, document) == false)
+	{
+		return false;
+	}
+
+	if (terrain->PreparePipelines() == false)
 	{
 		return false;
 	}

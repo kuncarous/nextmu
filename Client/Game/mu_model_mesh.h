@@ -5,6 +5,7 @@
 
 #include <array>
 #include <vector>
+#include "t_graphics.h"
 
 struct NVertex
 {
@@ -57,9 +58,9 @@ namespace ModelRenderMode
 
 struct NMeshRenderSettings
 {
-	bgfx::ProgramHandle Program = BGFX_INVALID_HANDLE;
-	const NTexture *Texture = nullptr;
-	mu_uint64 RenderState[ModelRenderMode::Count] = { BGFX_STATE_DEFAULT, BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_ALPHA };
+	mu_shader Program = NInvalidShader;
+	NTexture *Texture = nullptr;
+	NDynamicPipelineState RenderState[ModelRenderMode::Count] = { DefaultDynamicPipelineState, DefaultAlphaDynamicPipelineState };
 	mu_float Light = 1.0f;
 };
 

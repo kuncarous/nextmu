@@ -12,9 +12,19 @@ class NTexture;
 
 namespace MURenderState
 {
+	const mu_boolean Initialize();
+	void Destroy();
+
 	void Reset();
 
+	void SetImmediateContext(Diligent::IDeviceContext *context);
+	Diligent::IDeviceContext *GetImmediateContext();
+
+	Diligent::IBuffer *GetProjUniform();
+	Diligent::IBuffer *GetViewProjUniform();
+
 	void SetViewTransform(cglm::mat4 view, cglm::mat4 projection);
+	void GetViewProjection(cglm::mat4 dest);
 	void GetProjection(cglm::mat4 dest);
 	void GetView(cglm::mat4 dest);
 
@@ -25,11 +35,11 @@ namespace MURenderState
 
 	const NCamera *GetCamera();
 	const NEnvironment *GetEnvironment();
-	const NTerrain *GetTerrain();
+	NTerrain *GetTerrain();
 
-	void AttachTexture(TextureAttachment::Type type, const NTexture *texture);
+	void AttachTexture(TextureAttachment::Type type, NTexture *texture);
 	void DetachTexture(TextureAttachment::Type type);
-	const NTexture *GetTexture(TextureAttachment::Type type);
+	NTexture *GetTexture(TextureAttachment::Type type);
 };
 
 #endif

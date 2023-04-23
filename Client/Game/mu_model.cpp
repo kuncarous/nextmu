@@ -5,179 +5,118 @@
 #include "mu_textures.h"
 #include "mu_texture.h"
 #include "mu_resourcesmanager.h"
+#include "mu_graphics.h"
 #include <glm/gtc/type_ptr.hpp>
 
-std::map<mu_utf8string, mu_uint64> DepthTestMap = {
-	{ "none", 0u },
-	{ "equal", BGFX_STATE_DEPTH_TEST_EQUAL },
-	{ "not_equal", BGFX_STATE_DEPTH_TEST_NOTEQUAL },
-	{ "less", BGFX_STATE_DEPTH_TEST_LESS },
-	{ "less_equal", BGFX_STATE_DEPTH_TEST_LEQUAL },
-	{ "greater", BGFX_STATE_DEPTH_TEST_GREATER },
-	{ "greater_equal", BGFX_STATE_DEPTH_TEST_GEQUAL },
-	{ "never", BGFX_STATE_DEPTH_TEST_NEVER },
-	{ "always", BGFX_STATE_DEPTH_TEST_ALWAYS },
+std::map<mu_utf8string, Diligent::COMPARISON_FUNCTION> DepthTestMap = {
+	{ "none", Diligent::COMPARISON_FUNC_UNKNOWN },
+	{ "equal", Diligent::COMPARISON_FUNC_EQUAL },
+	{ "not_equal", Diligent::COMPARISON_FUNC_NOT_EQUAL },
+	{ "less", Diligent::COMPARISON_FUNC_LESS },
+	{ "less_equal", Diligent::COMPARISON_FUNC_LESS_EQUAL },
+	{ "greater", Diligent::COMPARISON_FUNC_GREATER },
+	{ "greater_equal", Diligent::COMPARISON_FUNC_GREATER_EQUAL },
+	{ "never", Diligent::COMPARISON_FUNC_NEVER },
+	{ "always", Diligent::COMPARISON_FUNC_ALWAYS },
 };
 
-std::map<mu_utf8string, mu_uint64> BlendFunctionMap = {
-	{ "zero", BGFX_STATE_BLEND_ZERO },
-	{ "one", BGFX_STATE_BLEND_ONE },
-	{ "src_alpha", BGFX_STATE_BLEND_SRC_ALPHA },
-	{ "src_color", BGFX_STATE_BLEND_SRC_COLOR },
-	{ "inv_src_alpha", BGFX_STATE_BLEND_INV_SRC_ALPHA },
-	{ "inv_src_color", BGFX_STATE_BLEND_INV_SRC_COLOR },
-	{ "dst_alpha", BGFX_STATE_BLEND_DST_ALPHA },
-	{ "dst_color", BGFX_STATE_BLEND_DST_COLOR },
-	{ "inv_dst_alpha", BGFX_STATE_BLEND_INV_DST_ALPHA },
-	{ "inv_dst_color", BGFX_STATE_BLEND_INV_DST_COLOR },
-	{ "src_alpha_sat", BGFX_STATE_BLEND_SRC_ALPHA_SAT },
+std::map<mu_utf8string, Diligent::BLEND_FACTOR> BlendFunctionMap = {
+	{ "zero", Diligent::BLEND_FACTOR_ZERO },
+	{ "one", Diligent::BLEND_FACTOR_ONE },
+	{ "src_alpha", Diligent::BLEND_FACTOR_SRC_ALPHA },
+	{ "src_color", Diligent::BLEND_FACTOR_SRC_COLOR },
+	{ "inv_src_alpha", Diligent::BLEND_FACTOR_INV_SRC_ALPHA },
+	{ "inv_src_color", Diligent::BLEND_FACTOR_INV_SRC_COLOR },
+	{ "dst_alpha", Diligent::BLEND_FACTOR_DEST_ALPHA },
+	{ "dst_color", Diligent::BLEND_FACTOR_DEST_COLOR },
+	{ "inv_dst_alpha", Diligent::BLEND_FACTOR_INV_DEST_ALPHA },
+	{ "inv_dst_color", Diligent::BLEND_FACTOR_INV_DEST_COLOR },
+	{ "src_alpha_sat", Diligent::BLEND_FACTOR_SRC_ALPHA_SAT },
 };
 
-std::map<mu_utf8string, mu_uint64> BlendEquationMap = {
-	{ "add", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD) },
-	{ "sub", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_SUB) },
-	{ "revsub", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD) },
-	{ "min", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_MIN) },
-	{ "max", BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_MAX) },
+std::map<mu_utf8string, Diligent::BLEND_OPERATION> BlendEquationMap = {
+	{ "add", Diligent::BLEND_OPERATION_ADD },
+	{ "sub", Diligent::BLEND_OPERATION_SUBTRACT },
+	{ "revsub", Diligent::BLEND_OPERATION_REV_SUBTRACT },
+	{ "min", Diligent::BLEND_OPERATION_MIN },
+	{ "max", Diligent::BLEND_OPERATION_MAX },
 };
 
-std::map<mu_utf8string, mu_uint64> CullMap = {
-	{ "none", 0 },
-	{ "cw", BGFX_STATE_CULL_CW },
-	{ "ccw", BGFX_STATE_CULL_CCW },
+std::map<mu_utf8string, Diligent::CULL_MODE> CullMap = {
+	{ "none", Diligent::CULL_MODE_NONE },
+	{ "cw", Diligent::CULL_MODE_FRONT },
+	{ "ccw", Diligent::CULL_MODE_BACK },
 };
 
-#define BGFX_VALUE_FROM_STRING(name, map, default_value) \
-constexpr mu_uint64 name##Default = default_value; \
-NEXTMU_INLINE const mu_uint64 name##FromString(const mu_utf8string value) \
+#define GRAPHICS_VALUE_FROM_STRING(name, map, default_value) \
+constexpr auto name##Default = default_value; \
+NEXTMU_INLINE const auto name##FromString(const mu_utf8string value) \
 { \
 	auto iter = map.find(value); \
 	if (iter == map.end()) return default_value; \
 	return iter->second; \
 }
 
-BGFX_VALUE_FROM_STRING(DepthTest, DepthTestMap, BGFX_STATE_DEPTH_TEST_LESS)
-BGFX_VALUE_FROM_STRING(BlendFunction, BlendFunctionMap, 0u)
-BGFX_VALUE_FROM_STRING(BlendEquation, BlendEquationMap, BGFX_STATE_BLEND_EQUATION_ADD)
-BGFX_VALUE_FROM_STRING(Cull, CullMap, BGFX_STATE_CULL_CW)
+GRAPHICS_VALUE_FROM_STRING(DepthTest, DepthTestMap, Diligent::COMPARISON_FUNC_LESS)
+GRAPHICS_VALUE_FROM_STRING(BlendFunction, BlendFunctionMap, Diligent::BLEND_FACTOR_UNDEFINED)
+GRAPHICS_VALUE_FROM_STRING(BlendEquation, BlendEquationMap, Diligent::BLEND_OPERATION_ADD)
+GRAPHICS_VALUE_FROM_STRING(Cull, CullMap, Diligent::CULL_MODE_NONE)
 
 const mu_utf8string ProgramDefault = "model_texture";
 
-#define NEXTMU_COMPRESSED_VERTEX (0)
-
-static bgfx::VertexLayout VertexLayout;
-
-static void InitializeVertexLayout()
-{
-	static mu_boolean initialized = false;
-	if (initialized) return;
-	initialized = true;
-	VertexLayout
-		.begin()
-		.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-#if NEXTMU_COMPRESSED_VERTEX
-		.add(bgfx::Attrib::Normal, 4, bgfx::AttribType::Int16, true, true)
-		.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Int16, true, true)
-#else
-		.add(bgfx::Attrib::Normal, 3, bgfx::AttribType::Float)
-		.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-#endif
-		.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Uint8)
-		.skip(2)
-		.end();
-}
-
-#pragma pack(4)
-struct MeshVertex
-{
-	glm::vec3 Position;
-#if NEXTMU_COMPRESSED_VERTEX
-	mu_uint32 Normal[2];
-	mu_uint32 TexCoords;
-#else
-	glm::vec3 Normal;
-	glm::vec2 TexCoords;
-#endif
-	mu_uint8 Bone[2];
-};
-#pragma pack()
-
 NModel::~NModel()
 {
-	if (bgfx::isValid(VertexBuffer))
-	{
-		bgfx::destroy(VertexBuffer);
-		VertexBuffer = BGFX_INVALID_HANDLE;
-	}
 }
 
-const mu_uint64 CalculateStateFromObject(const nlohmann::json &object)
+const NDynamicPipelineState CalculateStateFromObject(const nlohmann::json &object)
 {
-	mu_uint64 state = 0u;
+	NDynamicPipelineState state;
 
 	// Write
+	if (object.contains("write"))
 	{
-		mu_uint64 rgb = BGFX_STATE_WRITE_RGB;
-		mu_uint64 alpha = BGFX_STATE_WRITE_A;
-		mu_uint64 depth = BGFX_STATE_WRITE_Z;
+		const auto &write = object["write"];
+		if (write.contains("rgb"))
+			state.ColorWrite = !!write["rgb"].get<mu_boolean>();
 
-		if (object.contains("write"))
-		{
-			const auto &write = object["write"];
-			if (write.contains("rgb"))
-				rgb = write["rgb"].get<mu_boolean>() ? BGFX_STATE_WRITE_RGB : 0u;
+		if (write.contains("alpha"))
+			state.AlphaWrite = !!write["alpha"].get<mu_boolean>();
 
-			if (write.contains("alpha"))
-				alpha = write["alpha"].get<mu_boolean>() ? BGFX_STATE_WRITE_A : 0u;
-
-			if (write.contains("depth"))
-				depth = write["depth"].get<mu_boolean>() ? BGFX_STATE_WRITE_Z : 0u;
-		}
-
-		state |= rgb | alpha | depth;
+		if (write.contains("depth"))
+			state.DepthWrite = !!write["depth"].get<mu_boolean>();
 	}
 
 	// Culling
-	{
-		mu_uint64 cull = CullDefault;
-
-		if (object.contains("cull"))
-			cull = CullFromString(object["cull"].get<mu_utf8string>());
-
-		state |= cull;
-	}
+	if (object.contains("cull"))
+		state.CullMode = CullFromString(object["cull"].get<mu_utf8string>());
+	else
+		state.CullMode = CullDefault;
 
 	// Depth Test
-	{
-		mu_uint64 depthTest = DepthTestDefault;
-
-		if (object.contains("depth_test"))
-			depthTest = DepthTestFromString(object["depth_test"].get<mu_utf8string>());
-
-		state |= depthTest;
-	}
+	if (object.contains("depth_test"))
+		state.DepthFunc = DepthTestFromString(object["depth_test"].get<mu_utf8string>());
+	else
+		state.DepthFunc = DepthTestDefault;
 
 	// Blend
 	{
-		mu_uint64 srcFunction = BlendFunctionDefault, dstFunction = BlendFunctionDefault;
-		mu_uint64 equation = BlendEquationDefault;
+		state.SrcBlend = BlendFunctionDefault;
+		state.DestBlend = BlendFunctionDefault;
+		state.BlendOp = BlendEquationDefault;
 
 		if (object.contains("blend"))
 		{
 			const auto &blend = object["blend"];
 
 			if (blend.contains("src"))
-				srcFunction = BlendFunctionFromString(blend["src"].get<mu_utf8string>());
+				state.SrcBlend = BlendFunctionFromString(blend["src"].get<mu_utf8string>());
 
 			if (blend.contains("dst"))
-				dstFunction = BlendFunctionFromString(blend["dst"].get<mu_utf8string>());
+				state.DestBlend = BlendFunctionFromString(blend["dst"].get<mu_utf8string>());
 
 			if (blend.contains("equation"))
-				equation = BlendEquationFromString(blend["equation"].get<mu_utf8string>());
+				state.BlendOp = BlendEquationFromString(blend["equation"].get<mu_utf8string>());
 		}
-
-		state |= BGFX_STATE_BLEND_FUNC(srcFunction, dstFunction);
-		state |= equation;
 	}
 
 	return state;
@@ -255,8 +194,8 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 
 				if (mesh.contains("program"))
 				{
-					const bgfx::ProgramHandle program = MUResourcesManager::GetProgram(mesh["program"].get<mu_utf8string>());
-					if (bgfx::isValid(program))
+					const auto program = MUResourcesManager::GetProgram(mesh["program"].get<mu_utf8string>());
+					if (program != NInvalidShader)
 						settings.Program = program;
 				}
 
@@ -276,7 +215,7 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 
 		if (settings.contains("virtual_meshes"))
 		{
-			const bgfx::ProgramHandle program = MUResourcesManager::GetProgram(ProgramDefault);
+			const auto program = MUResourcesManager::GetProgram(ProgramDefault);
 			const auto &virtualMeshes = settings["virtual_meshes"];
 			for (const auto &mesh : virtualMeshes)
 			{
@@ -289,15 +228,13 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 
 				if (mesh.contains("program"))
 				{
-					const bgfx::ProgramHandle program = MUResourcesManager::GetProgram(mesh["program"].get<mu_utf8string>());
-					if (bgfx::isValid(program))
+					const auto program = MUResourcesManager::GetProgram(mesh["program"].get<mu_utf8string>());
+					if (program != NInvalidShader)
 						settings.Program = program;
 				}
 
-				if (!bgfx::isValid(settings.Program))
-				{
+				if (settings.Program == NInvalidShader)
 					settings.Program = program;
-				}
 
 				if (mesh.contains("texture"))
 					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
@@ -409,7 +346,7 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 	Animations.resize(numActions);
 	BoundingBoxes.resize(numBones);
 
-	const bgfx::ProgramHandle program = MUResourcesManager::GetProgram(ProgramDefault);
+	const auto program = MUResourcesManager::GetProgram(ProgramDefault);
 
 	mu_char filename[32 + 1] = {};
 	for (mu_uint32 m = 0; m < numMeshes; ++m)
@@ -756,8 +693,6 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 
 const mu_boolean NModel::GenerateBuffers()
 {
-	InitializeVertexLayout();
-
 	mu_uint32 verticesCount = 0;
 	for (auto &mesh : Meshes)
 	{
@@ -768,8 +703,9 @@ const mu_boolean NModel::GenerateBuffers()
 
 	if (verticesCount == 0) return true;
 
-	const bgfx::Memory *mem = bgfx::alloc(verticesCount * sizeof(MeshVertex));
-	MeshVertex *dest = reinterpret_cast<MeshVertex *>(mem->data);
+	const mu_size memorySize = verticesCount * sizeof(NMeshVertex);
+	std::unique_ptr<mu_uint8[]> memory(new (std::nothrow) mu_uint8[memorySize]);
+	NMeshVertex *dest = reinterpret_cast<NMeshVertex *>(memory.get());
 
 	for (const auto &mesh : Meshes)
 	{
@@ -788,7 +724,7 @@ const mu_boolean NModel::GenerateBuffers()
 				/*
 					V is being flipped because bgfx flips the image, it follows DirectX 9 functionality.
 				*/
-#if NEXTMU_COMPRESSED_VERTEX
+#if NEXTMU_COMPRESSED_MESHS
 				glm::vec4 Normal(normal.Normal, 0.0f);
 				bgfx::vertexPack(glm::value_ptr(Normal), true, bgfx::Attrib::Normal, VertexLayout, dest);
 				glm::vec2 UV(texCoord.UV.x, 1.0f - texCoord.UV.y);
@@ -806,11 +742,25 @@ const mu_boolean NModel::GenerateBuffers()
 		}
 	}
 
-	VertexBuffer = bgfx::createVertexBuffer(mem, VertexLayout);
-	if (!bgfx::isValid(VertexBuffer))
+	const auto device = MUGraphics::GetDevice();
+
+	Diligent::BufferDesc bufferDesc;
+	bufferDesc.Usage = Diligent::USAGE_IMMUTABLE;
+	bufferDesc.BindFlags = Diligent::BIND_VERTEX_BUFFER;
+	bufferDesc.Size = memorySize;
+
+	Diligent::BufferData bufferData;
+	bufferData.pData = memory.get();
+	bufferData.DataSize = memorySize;
+
+	Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
+	device->CreateBuffer(bufferDesc, &bufferData, &buffer);
+	if (buffer == nullptr)
 	{
 		return false;
 	}
+
+	VertexBuffer = buffer;
 
 	return true;
 }

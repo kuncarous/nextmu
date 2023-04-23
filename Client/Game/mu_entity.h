@@ -133,15 +133,15 @@ namespace NEntity
 	struct NRenderPart
 	{
 		PartType Type;
-		const NModel *Model;
+		NModel *Model;
 		mu_boolean IsLinked;
 		NRenderLink Link;
 	};
 
 	struct NAttachment
 	{
-		const NTexture *Skin = nullptr;
-		const NModel *Base;
+		NTexture *Skin = nullptr;
+		NModel *Base;
 		std::map<PartType, NRenderPart> Parts;
 	};
 };

@@ -10,7 +10,7 @@ namespace MUItemsManager
 	const mu_boolean Initialize();
 	void Destroy();
 
-	const NItem *GetItem(const mu_uint16 category, const mu_uint16 index);
+	NItem *GetItem(const mu_uint16 category, const mu_uint16 index);
 }
 
 #endif

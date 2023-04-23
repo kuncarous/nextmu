@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <bgfx/bgfx.h>
-
 enum class NResourceType
 {
 	Texture,
@@ -24,7 +22,7 @@ public:
 class NTextureResource
 {
 public:
-	bgfx::TextureHandle Handle;
+	Diligent::RefCntAutoPtr<Diligent::ITexture> Handle;
 };
 
 #endif

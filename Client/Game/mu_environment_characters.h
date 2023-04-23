@@ -24,7 +24,7 @@ public:
 
 	void ClearAttachmentParts(const entt::entity entity);
 	void AddAttachmentPartFromItem(const entt::entity entity, const NEntity::PartType partType, const NItemCategory category, const mu_uint16 index);
-	void AddAttachmentPart(const entt::entity entity, const NEntity::PartType partType, const NRender *render);
+	void AddAttachmentPart(const entt::entity entity, const NEntity::PartType partType, NRender *render);
 	void RemoveAttachmentPart(const entt::entity entity, const NEntity::PartType partType);
 
 private:

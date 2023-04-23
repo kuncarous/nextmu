@@ -7,7 +7,7 @@ class NTexture
 {
 public:
 	NTexture(
-		const bgfx::TextureHandle texture,
+		Diligent::RefCntAutoPtr<Diligent::ITexture> texture,
 		const mu_uint16 width,
 		const mu_uint16 height,
 		const mu_boolean alpha
@@ -17,7 +17,7 @@ public:
 public:
 	const mu_boolean IsValid() const
 	{
-		return bgfx::isValid(Texture);
+		return Texture != nullptr;
 	}
 
 	const mu_boolean HasAlpha() const
@@ -25,9 +25,9 @@ public:
 		return Alpha;
 	}
 
-	const bgfx::TextureHandle GetTexture() const
+	Diligent::ITexture *GetTexture()
 	{
-		return Texture;
+		return Texture.RawPtr();
 	}
 
 	const mu_uint16 GetWidth() const
@@ -41,7 +41,7 @@ public:
 	}
 
 private:
-	bgfx::TextureHandle Texture = BGFX_INVALID_HANDLE;
+	Diligent::RefCntAutoPtr<Diligent::ITexture> Texture;
 	mu_uint16 Width;
 	mu_uint16 Height;
 	mu_boolean Alpha;

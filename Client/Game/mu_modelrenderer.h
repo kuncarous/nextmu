@@ -18,23 +18,17 @@ public:
 	static void Destroy();
 
 	static void RenderMesh(
-		const NModel *model,
+		NModel *model,
 		const mu_uint32 meshIndex,
 		const NRenderConfig &config,
-		const mu_uint32 transformCache,
+		cglm::mat4 modelViewProj,
 		const NMeshRenderSettings *settings = nullptr
 	);
 	static void RenderBody(
 		const NSkeletonInstance &skeleton,
-		const NModel *model,
+		NModel *model,
 		const NRenderConfig &config
 	);
-
-private:
-	static bgfx::UniformHandle TextureSampler;
-	static bgfx::UniformHandle LightPositionUniform;
-	static bgfx::UniformHandle Settings1Uniform;
-	static bgfx::UniformHandle BodyLightUniform;
 };
 
 #endif
