@@ -17,9 +17,6 @@ namespace MURenderState
 
 	void Reset();
 
-	void SetImmediateContext(Diligent::IDeviceContext *context);
-	Diligent::IDeviceContext *GetImmediateContext();
-
 	Diligent::IBuffer *GetProjUniform();
 	Diligent::IBuffer *GetViewProjUniform();
 

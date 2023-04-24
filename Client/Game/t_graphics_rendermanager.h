@@ -28,6 +28,8 @@ struct RUpdateBuffer
 	Diligent::Uint64 Offset;
 	Diligent::Uint64 Size;
 	Diligent::RESOURCE_STATE_TRANSITION_MODE StateTransitionMode;
+	Diligent::RESOURCE_STATE TransitionState = Diligent::RESOURCE_STATE_UNKNOWN;
+	Diligent::STATE_TRANSITION_FLAGS TransitionFlags = Diligent::STATE_TRANSITION_FLAG_NONE;
 };
 
 struct RUpdateBufferWithMap
@@ -42,6 +44,7 @@ struct RUpdateBufferWithMap
 
 struct RUpdateTexture
 {
+	const mu_boolean ShouldReleaseMemory;
 	Diligent::ITexture *Texture;
 	Diligent::Uint32 MipLevel;
 	Diligent::Uint32 Slice;
@@ -49,6 +52,8 @@ struct RUpdateTexture
 	const Diligent::TextureSubResData SubresData;
 	Diligent::RESOURCE_STATE_TRANSITION_MODE SrcBufferTransitionMode;
 	Diligent::RESOURCE_STATE_TRANSITION_MODE TextureTransitionMode;
+	Diligent::RESOURCE_STATE TransitionState = Diligent::RESOURCE_STATE_UNKNOWN;
+	Diligent::STATE_TRANSITION_FLAGS TransitionFlags = Diligent::STATE_TRANSITION_FLAG_NONE;
 };
 
 struct RSetDynamicTexture
@@ -158,6 +163,7 @@ public:
 	void Execute(Diligent::IDeviceContext *immediateContext);
 
 public:
+	void TransitionResourceState(const Diligent::StateTransitionDesc &transition);
 	void UpdateBuffer(const RUpdateBuffer &data);
 	void UpdateBufferWithMap(const RUpdateBufferWithMap &data);
 	void UpdateTexture(const RUpdateTexture &data);
@@ -178,6 +184,7 @@ private:
 	NPipelineStateInfo *PipelineInfo = nullptr;
 	RCommandList *DraftCommandList = nullptr;
 	std::vector<RCommandList> CommandLists;
+	std::vector<Diligent::StateTransitionDesc> StateTransitions;
 };
 
 #endif

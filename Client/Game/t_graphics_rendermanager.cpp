@@ -21,8 +21,14 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 		);
 	}
 
+	if (StateTransitions.empty() == false)
+	{
+		immediateContext->TransitionResourceStates(static_cast<mu_uint32>(StateTransitions.size()), StateTransitions.data());
+	}
+
 	for (auto &commandList : CommandLists)
 	{
+		std::vector<Diligent::StateTransitionDesc> stateTransitions;
 		for (auto &command : commandList.Commands)
 		{
 			switch (command.Type)
@@ -34,6 +40,10 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 					if (data.ShouldReleaseMemory)
 					{
 						mu_free(data.Data);
+					}
+					if (data.TransitionState != Diligent::RESOURCE_STATE_UNKNOWN)
+					{
+						stateTransitions.push_back(Diligent::StateTransitionDesc(data.Buffer, Diligent::RESOURCE_STATE_COPY_DEST, data.TransitionState, data.TransitionFlags));
 					}
 				}
 				break;
@@ -50,6 +60,14 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 				{
 					auto &data = command.updateTexture;
 					immediateContext->UpdateTexture(data.Texture, data.MipLevel, data.Slice, data.DstBox, data.SubresData, data.SrcBufferTransitionMode, data.TextureTransitionMode);
+					if (data.SubresData.pData != nullptr && data.ShouldReleaseMemory)
+					{
+						mu_free(const_cast<void*>(data.SubresData.pData));
+					}
+					if (data.TransitionState != Diligent::RESOURCE_STATE_UNKNOWN)
+					{
+						stateTransitions.push_back(Diligent::StateTransitionDesc(data.Texture, Diligent::RESOURCE_STATE_COPY_DEST, data.TransitionState, data.TransitionFlags));
+					}
 				}
 				break;
 
@@ -105,6 +123,11 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 
 			case NRenderCommandType::Draw:
 				{
+					if (stateTransitions.empty() == false)
+					{
+						immediateContext->TransitionResourceStates(static_cast<mu_uint32>(stateTransitions.size()), stateTransitions.data());
+					}
+
 					auto &data = command.draw;
 					immediateContext->Draw(data.Attribs);
 				}
@@ -112,6 +135,11 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 
 			case NRenderCommandType::DrawIndexed:
 				{
+					if (stateTransitions.empty() == false)
+					{
+						immediateContext->TransitionResourceStates(static_cast<mu_uint32>(stateTransitions.size()), stateTransitions.data());
+					}
+
 					auto &data = command.drawIndexed;
 					immediateContext->DrawIndexed(data.Attribs);
 				}
@@ -124,6 +152,12 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 
 	Index = 0;
 	DraftCommandList = &CommandLists[Index];
+	StateTransitions.clear();
+}
+
+void NRenderManager::TransitionResourceState(const Diligent::StateTransitionDesc &transition)
+{
+	StateTransitions.push_back(transition);
 }
 
 void NRenderManager::UpdateBuffer(const RUpdateBuffer &data)

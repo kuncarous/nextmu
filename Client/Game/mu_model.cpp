@@ -264,6 +264,9 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 				if (mesh.contains("light"))
 					settings.Light = mesh["light"].get<mu_float>();
 
+				if (mesh.contains("alpha_test"))
+					settings.AlphaTest = mesh["alpha_test"].get<mu_float>();
+
 				VirtualMeshes.push_back(virtualMesh);
 			}
 		}
@@ -776,6 +779,9 @@ const mu_boolean NModel::GenerateBuffers()
 		return false;
 	}
 
+	const auto immediateContext = MUGraphics::GetImmediateContext();
+	Diligent::StateTransitionDesc barrier(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+	immediateContext->TransitionResourceStates(1, &barrier);
 	VertexBuffer = buffer;
 
 	return true;

@@ -58,9 +58,9 @@ private:
 
 protected:
 	friend class NEnvironment;
-	const mu_boolean LoadHeightmap(mu_utf8string path);
-	const mu_boolean GenerateNormal();
-	const mu_boolean LoadLightmap(mu_utf8string path);
+	const mu_boolean LoadHeightmap(mu_utf8string path, std::vector<Diligent::StateTransitionDesc> &barriers);
+	const mu_boolean GenerateNormal(std::vector<Diligent::StateTransitionDesc> &barriers);
+	const mu_boolean LoadLightmap(mu_utf8string path, std::vector<Diligent::StateTransitionDesc> &barriers);
 	const mu_boolean LoadTextures(
 		const mu_utf8string dir,
 		const nlohmann::json paths,
@@ -68,23 +68,26 @@ protected:
 		const mu_utf8string wrap,
 		const mu_float uvNormal,
 		const mu_float uvScaled,
-		std::map<mu_uint32, mu_uint32> &texturesMap
+		std::map<mu_uint32, mu_uint32> &texturesMap,
+		std::vector<Diligent::StateTransitionDesc> &barriers
 	);
 	const mu_boolean LoadGrassTextures(
 		const mu_utf8string dir,
 		const nlohmann::json paths,
 		const mu_utf8string filter,
 		const mu_utf8string wrap,
-		std::map<mu_uint32, mu_uint32> &texturesMap
+		std::map<mu_uint32, mu_uint32> &texturesMap,
+		std::vector<Diligent::StateTransitionDesc> &barriers
 	);
 	const mu_boolean LoadMappings(
 		mu_utf8string path,
 		const std::map<mu_uint32, mu_uint32> &texturesMap,
-		const std::map<mu_uint32, mu_uint32> &grassTexturesMap
+		const std::map<mu_uint32, mu_uint32> &grassTexturesMap,
+		std::vector<Diligent::StateTransitionDesc> &barriers
 	);
-	const mu_boolean LoadAttributes(mu_utf8string path);
-	const mu_boolean PrepareSettings(const mu_utf8string path, const nlohmann::json document);
-	const mu_boolean GenerateBuffers();
+	const mu_boolean LoadAttributes(mu_utf8string path, std::vector<Diligent::StateTransitionDesc> &barriers);
+	const mu_boolean PrepareSettings(const mu_utf8string path, const nlohmann::json document, std::vector<Diligent::StateTransitionDesc> &barriers);
+	const mu_boolean GenerateBuffers(std::vector<Diligent::StateTransitionDesc> &barriers);
 	const mu_boolean PreparePipelines();
 
 public:

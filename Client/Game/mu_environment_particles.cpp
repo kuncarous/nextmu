@@ -3,6 +3,7 @@
 #include "mu_resourcesmanager.h"
 #include "mu_threadsmanager.h"
 #include "mu_graphics.h"
+#include "mu_renderstate.h"
 #include "t_particle_base.h"
 #include "t_particle_entity.h"
 #include "mu_state.h"
@@ -58,13 +59,13 @@ const mu_boolean NParticles::Initialize()
 		RenderBuffer.IndexBuffer = buffer;
 	}
 
-	// Model View Uniform
+	// Settings Uniform
 	{
 		Diligent::BufferDesc bufferDesc;
 		bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
 		bufferDesc.BindFlags = Diligent::BIND_UNIFORM_BUFFER;
 		bufferDesc.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
-		bufferDesc.Size = sizeof(glm::mat4);
+		bufferDesc.Size = sizeof(NParticleSettings);
 
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
 		device->CreateBuffer(bufferDesc, nullptr, &buffer);
@@ -73,7 +74,7 @@ const mu_boolean NParticles::Initialize()
 			return false;
 		}
 
-		RenderBuffer.ModelViewUniform = buffer;
+		RenderBuffer.SettingsUniform = buffer;
 	}
 
 	RenderBuffer.Groups.reserve(100);
@@ -86,7 +87,7 @@ void NParticles::Destroy()
 	RenderBuffer.Program = NInvalidShader;
 	RenderBuffer.VertexBuffer.Release();
 	RenderBuffer.IndexBuffer.Release();
-	RenderBuffer.ModelViewUniform.Release();
+	RenderBuffer.SettingsUniform.Release();
 }
 
 void NParticles::Create(const NParticleData &data)
@@ -384,6 +385,8 @@ void NParticles::Render()
 	}
 #endif
 
+	const auto immediateContext = MUGraphics::GetImmediateContext();
+
 	// Render Groups
 	{
 		ParticleType type = ParticleType::Invalid;
@@ -401,6 +404,14 @@ void NParticles::Render()
 			}
 			_template->RenderGroup(renderGroup, RenderBuffer);
 		}
+	}
+
+	if (RenderBuffer.RequireTransition == true)
+	{
+		const auto renderManager = MUGraphics::GetRenderManager();
+		renderManager->TransitionResourceState(Diligent::StateTransitionDesc(RenderBuffer.VertexBuffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		renderManager->TransitionResourceState(Diligent::StateTransitionDesc(RenderBuffer.IndexBuffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		RenderBuffer.RequireTransition = false;
 	}
 
 	//auto endTimer = std::chrono::high_resolution_clock::now();

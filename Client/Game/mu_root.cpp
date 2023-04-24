@@ -447,7 +447,6 @@ namespace MURoot
 			const auto device = MUGraphics::GetDevice();
 			const auto swapchain = MUGraphics::GetSwapChain();
 			const auto immediateContext = MUGraphics::GetImmediateContext();
-			MURenderState::SetImmediateContext(immediateContext);
 
 			mu_float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 			auto *pRTV = swapchain->GetCurrentBackBufferRTV();

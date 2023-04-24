@@ -13,8 +13,12 @@ namespace MUSkeletonManager
 	const mu_boolean Initialize()
 	{
 		const auto device = MUGraphics::GetDevice();
+		const auto immediateContext = MUGraphics::GetImmediateContext();
 
 		Diligent::TextureDesc textureDesc;
+#if NEXTMU_COMPILE_DEBUG == 1
+		textureDesc.Name = "Skeleton Texture";
+#endif
 		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
 		textureDesc.Width = BonesTextureWidth;
 		textureDesc.Height = BonesTextureHeight;
@@ -28,6 +32,9 @@ namespace MUSkeletonManager
 		{
 			return false;
 		}
+
+		Diligent::StateTransitionDesc barrier(texture, Diligent::RESOURCE_STATE_UNDEFINED, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+		immediateContext->TransitionResourceStates(1, &barrier);
 
 		BonesTexture = texture;
 		BonesBuffer.resize(MaxBonesCount);
@@ -60,7 +67,9 @@ namespace MUSkeletonManager
 		const mu_uint32 width = glm::clamp(pixelsCount, 1u, BonesTextureWidth);
 		const mu_uint32 height = glm::clamp((pixelsCount / BonesTextureWidth) + extraHeight, 1u, BonesTextureHeight);
 
-		const auto immediateContext = MURenderState::GetImmediateContext();
+		const auto immediateContext = MUGraphics::GetImmediateContext();
+		const auto renderManager = MUGraphics::GetRenderManager();
+
 		immediateContext->UpdateTexture(
 			BonesTexture,
 			0, 0,
@@ -68,6 +77,9 @@ namespace MUSkeletonManager
 			Diligent::TextureSubResData(BonesBuffer.data(), sizeof(glm::vec4) * width),
 			Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
 			Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+		);
+		renderManager->TransitionResourceState(
+			Diligent::StateTransitionDesc(BonesTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
 		);
 	}
 

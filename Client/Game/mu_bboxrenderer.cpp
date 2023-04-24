@@ -33,6 +33,8 @@ namespace MUBBoxRenderer
 
 		BoundingBoxProgram = MUResourcesManager::GetProgram("boundingbox");
 
+		std::vector<Diligent::StateTransitionDesc> barriers;
+
 		// BBox Dimensions
 		{
 			Diligent::BufferDesc bufferDesc;
@@ -81,6 +83,7 @@ namespace MUBBoxRenderer
 			}
 
 			VertexBuffer = buffer;
+			barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		}
 
 		// Index Buffer
@@ -122,7 +125,11 @@ namespace MUBBoxRenderer
 			}
 
 			IndexBuffer = buffer;
+			barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		}
+
+		const auto immediateContext = MUGraphics::GetImmediateContext();
+		immediateContext->TransitionResourceStates(static_cast<mu_uint32>(barriers.size()), barriers.data());
 
 		const auto swapchain = MUGraphics::GetSwapChain();
 		const auto &swapchainDesc = swapchain->GetDesc();
@@ -178,15 +185,15 @@ namespace MUBBoxRenderer
 				.StartSlot = 0,
 				.Buffer = VertexBuffer.RawPtr(),
 				.Offset = 0,
-				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-				.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_RESET,
+				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+				.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
 			}
 		);
 		renderManager->SetIndexBuffer(
 			RSetIndexBuffer{
 				.IndexBuffer = IndexBuffer,
 				.ByteOffset = 0,
-				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
 			}
 		);
 

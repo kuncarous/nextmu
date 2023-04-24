@@ -36,7 +36,7 @@ void CreatePipelineResources()
 
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
-				Diligent::SHADER_TYPE_VERTEX,
+				Diligent::SHADER_TYPE_VERTEX | Diligent::SHADER_TYPE_PIXEL,
 				"ModelSettings",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
@@ -226,6 +226,14 @@ void CreatePipelineResources()
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_PIXEL,
+				"JointSettings",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_PIXEL,
 				"g_Texture",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
 			)
@@ -242,6 +250,14 @@ void CreatePipelineResources()
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_VERTEX,
 				"ModelViewProj",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_PIXEL,
+				"ParticleSettings",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
 		);

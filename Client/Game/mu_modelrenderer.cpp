@@ -13,11 +13,15 @@
 struct NModelSettings
 {
 	glm::vec4 LightPosition;
+	glm::vec4 BodyLight;
 	mu_float BoneOffset;
 	mu_float NormalScale;
 	mu_float EnableLight;
-	mu_float Dummy;
-	glm::vec4 BodyLight;
+	mu_float AlphaTest;
+	mu_float PremultiplyAlpha;
+	mu_float Dummy1;
+	mu_float Dummy2;
+	mu_float Dummy3;
 };
 #pragma pack()
 
@@ -135,6 +139,7 @@ void MUModelRenderer::RenderMesh(
 		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_SkeletonTexture")->Set(MUSkeletonManager::GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
 		//pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(terrain->GetLightmapTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
 		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelSettings")->Set(ModelSettingsUniform);
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ModelSettings")->Set(ModelSettingsUniform);
 		pipelineState->StaticInitialized = true;
 	}
 
@@ -169,11 +174,24 @@ void MUModelRenderer::RenderMesh(
 	{
 		auto uniform = ModelSettingsBuffer.Allocate();
 		uniform->LightPosition = terrain->GetLightPosition();
+		uniform->BodyLight = config.BodyLight;
 		uniform->BoneOffset = static_cast<mu_float>(config.BoneOffset);
 		uniform->NormalScale = 0.0f;
 		uniform->EnableLight = static_cast<mu_float>(config.EnableLight);
-		uniform->Dummy = 0.0f;
-		uniform->BodyLight = config.BodyLight;
+		uniform->AlphaTest = settings->AlphaTest;
+		uniform->PremultiplyAlpha = static_cast<mu_float>(
+			(
+				!texture->HasAlpha() &&
+				dynamicState->SrcBlend != Diligent::BLEND_FACTOR_UNDEFINED
+			) ||
+			(
+				texture->HasAlpha() &&
+				!(
+					dynamicState->SrcBlend == Diligent::BLEND_FACTOR_SRC_ALPHA ||
+					dynamicState->SrcBlend == Diligent::BLEND_FACTOR_SRC_ALPHA_SAT
+				)
+			)
+		);
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
 				.ShouldReleaseMemory = false,
@@ -192,8 +210,8 @@ void MUModelRenderer::RenderMesh(
 			.StartSlot = 0,
 			.Buffer = model->VertexBuffer.RawPtr(),
 			.Offset = 0,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_RESET,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
 		}
 	);
 	renderManager->CommitShaderResources(

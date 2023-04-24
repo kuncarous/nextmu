@@ -64,6 +64,7 @@ struct NMeshRenderSettings
 	NRenderClassify ClassifyMode = NRenderClassify::None;
 	mu_uint32 ClassifyIndex = 0;
 	mu_float Light = 1.0f;
+	mu_float AlphaTest = 0.25f;
 };
 
 class NMesh

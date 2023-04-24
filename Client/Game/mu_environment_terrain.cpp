@@ -3,6 +3,7 @@
 #include "mu_resourcesmanager.h"
 #include "mu_crypt.h"
 #include "shared_binaryreader.h"
+#include "mu_graphics.h"
 
 const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 {
@@ -54,21 +55,22 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 
 	terrain->HeightMultiplier = document["height_multiplier"].get<mu_float>();
 
+	std::vector<Diligent::StateTransitionDesc> barriers;
 	const auto heightmap = document["heightmap"].get<mu_utf8string>();
-	if (terrain->LoadHeightmap(path + heightmap) == false)
+	if (terrain->LoadHeightmap(path + heightmap, barriers) == false)
 	{
 		mu_error("failed to load heightmap ({})", path + heightmap);
 		return false;
 	}
 
-	if (terrain->GenerateNormal() == false)
+	if (terrain->GenerateNormal(barriers) == false)
 	{
 		mu_error("failed to generate normal ({})", filename);
 		return false;
 	}
 
 	const auto lightmap = document["lightmap"].get<mu_utf8string>();
-	if (terrain->LoadLightmap(path + lightmap) == false)
+	if (terrain->LoadLightmap(path + lightmap, barriers) == false)
 	{
 		mu_error("failed to load lightmap ({})", path + lightmap);
 		return false;
@@ -101,7 +103,7 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 		}
 	}
 
-	if (terrain->GenerateBuffers() == false)
+	if (terrain->GenerateBuffers(barriers) == false)
 	{
 		return false;
 	}
@@ -127,7 +129,7 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 	}
 
 	std::map<mu_uint32, mu_uint32> texturesMap, grassTexturesMap;
-	if (terrain->LoadTextures(path, textures, filter, wrap, uvNormal, uvScaled, texturesMap) == false)
+	if (terrain->LoadTextures(path, textures, filter, wrap, uvNormal, uvScaled, texturesMap, barriers) == false)
 	{
 		mu_error("failed to load textures ({})", filename);
 		return false;
@@ -142,7 +144,7 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 			return false;
 		}
 
-		if (terrain->LoadGrassTextures(path, grassTextures, filter, wrap, grassTexturesMap) == false)
+		if (terrain->LoadGrassTextures(path, grassTextures, filter, wrap, grassTexturesMap, barriers) == false)
 		{
 			mu_error("failed to load textures ({})", filename);
 			return false;
@@ -150,20 +152,20 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 	}
 
 	const auto mappings = document["mappings"].get<mu_utf8string>();
-	if (terrain->LoadMappings(path + mappings, texturesMap, grassTexturesMap) == false)
+	if (terrain->LoadMappings(path + mappings, texturesMap, grassTexturesMap, barriers) == false)
 	{
 		mu_error("failed to load mappings ({})", path + mappings);
 		return false;
 	}
 
 	const auto attributes = document["attributes"].get<mu_utf8string>();
-	if (terrain->LoadAttributes(path + attributes) == false)
+	if (terrain->LoadAttributes(path + attributes, barriers) == false)
 	{
 		mu_error("failed to load attributes ({})", path + attributes);
 		return false;
 	}
 
-	if (terrain->PrepareSettings(path, document) == false)
+	if (terrain->PrepareSettings(path, document, barriers) == false)
 	{
 		return false;
 	}
@@ -207,6 +209,9 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 	}
 
 	Terrain = std::move(terrain);
+
+	const auto immediateContext = MUGraphics::GetImmediateContext();
+	immediateContext->TransitionResourceStates(static_cast<mu_uint32>(barriers.size()), barriers.data());
 
 	return true;
 }

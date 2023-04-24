@@ -148,6 +148,9 @@ namespace MUTextures
 		subresources.push_back(subresource);
 
 		Diligent::TextureDesc textureDesc;
+#if NEXTMU_COMPILE_DEBUG == 1
+		textureDesc.Name = path.c_str();
+#endif
 		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
 		textureDesc.Width = width;
 		textureDesc.Height = height;
@@ -163,6 +166,9 @@ namespace MUTextures
 			return nullptr;
 		}
 
+		const auto immediateContext = MUGraphics::GetImmediateContext();
+		Diligent::StateTransitionDesc barrier(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+		immediateContext->TransitionResourceStates(1u, &barrier);
 		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(samplerDesc));
 		return std::make_unique<NGraphicsTexture>(TextureIdGenerator++, texture, width, height, info.Alpha);
 	}

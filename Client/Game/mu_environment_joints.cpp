@@ -58,13 +58,13 @@ const mu_boolean NJoints::Initialize()
 		RenderBuffer.IndexBuffer = buffer;
 	}
 
-	// Model View Uniform
+	// Settings Uniform
 	{
 		Diligent::BufferDesc bufferDesc;
 		bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
 		bufferDesc.BindFlags = Diligent::BIND_UNIFORM_BUFFER;
 		bufferDesc.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
-		bufferDesc.Size = sizeof(glm::mat4);
+		bufferDesc.Size = sizeof(NJointSettings);
 
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
 		device->CreateBuffer(bufferDesc, nullptr, &buffer);
@@ -73,7 +73,7 @@ const mu_boolean NJoints::Initialize()
 			return false;
 		}
 
-		RenderBuffer.ModelViewUniform = buffer;
+		RenderBuffer.SettingsUniform = buffer;
 	}
 
 	RenderBuffer.Groups.reserve(100);
@@ -86,7 +86,7 @@ void NJoints::Destroy()
 	RenderBuffer.Program = NInvalidShader;
 	RenderBuffer.VertexBuffer.Release();
 	RenderBuffer.IndexBuffer.Release();
-	RenderBuffer.ModelViewUniform.Release();
+	RenderBuffer.SettingsUniform.Release();
 }
 
 void NJoints::Create(const NJointData &data)
@@ -401,6 +401,14 @@ void NJoints::Render()
 			}
 			_template->RenderGroup(renderGroup, RenderBuffer);
 		}
+	}
+
+	if (RenderBuffer.RequireTransition == true)
+	{
+		const auto renderManager = MUGraphics::GetRenderManager();
+		renderManager->TransitionResourceState(Diligent::StateTransitionDesc(RenderBuffer.VertexBuffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		renderManager->TransitionResourceState(Diligent::StateTransitionDesc(RenderBuffer.IndexBuffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		RenderBuffer.RequireTransition = false;
 	}
 
 	//auto endTimer = std::chrono::high_resolution_clock::now();

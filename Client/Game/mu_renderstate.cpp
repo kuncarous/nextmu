@@ -7,7 +7,6 @@
 
 namespace MURenderState
 {
-	Diligent::IDeviceContext *ImmediateContext = nullptr;
 	cglm::mat4 Projection, View, ViewProjection;
 	NCamera *Camera = nullptr;
 	NEnvironment *Environment = nullptr;
@@ -74,16 +73,6 @@ namespace MURenderState
 		}
 	}
 
-	void SetImmediateContext(Diligent::IDeviceContext *context)
-	{
-		ImmediateContext = context;
-	}
-
-	Diligent::IDeviceContext *GetImmediateContext()
-	{
-		return ImmediateContext;
-	}
-
 	Diligent::IBuffer *GetProjUniform()
 	{
 		return ProjUniform.RawPtr();
@@ -100,7 +89,7 @@ namespace MURenderState
 		cglm::glm_mat4_copy(view, View);
 		cglm::glm_mat4_mul(projection, view, ViewProjection);
 
-		const auto immediateContext = ImmediateContext;
+		const auto immediateContext = MUGraphics::GetImmediateContext();
 
 		// Update
 		{

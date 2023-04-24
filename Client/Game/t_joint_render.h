@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "mu_resizablequeue.h"
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/packing.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,6 +11,13 @@
 namespace TJoint
 {
 	constexpr mu_uint32 MaxRenderCount = 5000 * 50;
+
+#pragma pack(4)
+	struct NJointSettings
+	{
+		mu_float IsPremultipliedAlpha;
+	};
+#pragma pack()
 
 	struct NRenderGroup
 	{
@@ -26,10 +34,12 @@ namespace TJoint
 		std::vector<NRenderGroup> Groups;
 
 		mu_shader Program = NInvalidShader;
+		mu_boolean RequireTransition = false;
 		NFixedPipelineState FixedPipelineState;
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> IndexBuffer;
-		Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelViewUniform;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> SettingsUniform;
+		NResizableQueue<NJointSettings> SettingsBuffer;
 		std::map<NPipelineStateId, Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>> Bindings;
 	};
 

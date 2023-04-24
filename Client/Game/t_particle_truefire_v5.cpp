@@ -18,6 +18,7 @@ const NDynamicPipelineState DynamicPipelineState = {
 	.DestBlend = Diligent::BLEND_FACTOR_ONE,
 	.BlendOp = Diligent::BLEND_OPERATION_ADD,
 };
+constexpr mu_boolean IsPremultipliedAlpha = true;
 
 static TParticleTrueFireV5 Instance;
 
@@ -140,27 +141,45 @@ void TParticleTrueFireV5::RenderGroup(const NRenderGroup &renderGroup, NRenderBu
 	if (texture == nullptr) return;
 
 	auto renderManager = MUGraphics::GetRenderManager();
-	auto immediateContext = MURenderState::GetImmediateContext();
+	auto immediateContext = MUGraphics::GetImmediateContext();
 
 	immediateContext->UpdateBuffer(
 		renderBuffer.VertexBuffer,
 		sizeof(NParticleVertex) * renderGroup.Index * 4,
 		sizeof(NParticleVertex) * renderGroup.Count * 4,
 		renderBuffer.Vertices.data() + renderGroup.Index * 4,
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+		renderBuffer.RequireTransition == false ? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION : Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
 	immediateContext->UpdateBuffer(
 		renderBuffer.IndexBuffer,
 		sizeof(mu_uint32) * renderGroup.Index * 6,
 		sizeof(mu_uint32) * renderGroup.Count * 6,
 		renderBuffer.Indices.data() + renderGroup.Index * 6,
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+		renderBuffer.RequireTransition == false ? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION : Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
+	renderBuffer.RequireTransition = true;
+
+	// Update Model Settings
+	{
+		auto uniform = renderBuffer.SettingsBuffer.Allocate();
+		uniform->IsPremultipliedAlpha = IsPremultipliedAlpha;
+		renderManager->UpdateBufferWithMap(
+			RUpdateBufferWithMap{
+				.ShouldReleaseMemory = false,
+				.Buffer = renderBuffer.SettingsUniform,
+				.Data = uniform,
+				.Size = sizeof(NParticleSettings),
+				.MapType = Diligent::MAP_WRITE,
+				.MapFlags = Diligent::MAP_FLAG_DISCARD,
+			}
+		);
+	}
 
 	auto pipelineState = GetPipelineState(renderBuffer.FixedPipelineState, DynamicPipelineState);
 	if (pipelineState->StaticInitialized == false)
 	{
 		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetProjUniform());
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ParticleSettings")->Set(MURenderState::GetProjUniform());
 		pipelineState->StaticInitialized = true;
 	}
 
@@ -178,15 +197,15 @@ void TParticleTrueFireV5::RenderGroup(const NRenderGroup &renderGroup, NRenderBu
 			.StartSlot = 0,
 			.Buffer = renderBuffer.VertexBuffer.RawPtr(),
 			.Offset = 0,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_RESET,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
 		}
 	);
 	renderManager->SetIndexBuffer(
 		RSetIndexBuffer{
 			.IndexBuffer = renderBuffer.IndexBuffer,
 			.ByteOffset = 0,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
 		}
 	);
 	renderManager->CommitShaderResources(

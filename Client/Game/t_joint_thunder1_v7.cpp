@@ -7,6 +7,7 @@
 #include "mu_state.h"
 #include <MapHelper.hpp>
 
+using namespace TJoint;
 constexpr auto Type = JointType::Thunder1_V7;
 constexpr auto LifeTime = 20;
 constexpr auto LightDivisor = 1.0f / 1.2f;
@@ -23,6 +24,7 @@ const NDynamicPipelineState DynamicPipelineState = {
 	.DestBlend = Diligent::BLEND_FACTOR_ONE,
 	.BlendOp = Diligent::BLEND_OPERATION_ADD,
 };
+constexpr mu_boolean IsPremultipliedAlpha = true;
 
 static TJointThunder1V7 Instance;
 
@@ -233,27 +235,45 @@ void TJointThunder1V7::RenderGroup(const TJoint::NRenderGroup &renderGroup, TJoi
 	if (texture == nullptr) return;
 
 	auto renderManager = MUGraphics::GetRenderManager();
-	auto immediateContext = MURenderState::GetImmediateContext();
+	auto immediateContext = MUGraphics::GetImmediateContext();
 
 	immediateContext->UpdateBuffer(
 		renderBuffer.VertexBuffer,
 		sizeof(NJointVertex) * renderGroup.Index * 4,
 		sizeof(NJointVertex) * renderGroup.Count * 4,
 		renderBuffer.Vertices.data() + renderGroup.Index * 4,
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+		renderBuffer.RequireTransition == false ? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION : Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
 	immediateContext->UpdateBuffer(
 		renderBuffer.IndexBuffer,
 		sizeof(mu_uint32) * renderGroup.Index * 6,
 		sizeof(mu_uint32) * renderGroup.Count * 6,
 		renderBuffer.Indices.data() + renderGroup.Index * 6,
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+		renderBuffer.RequireTransition == false ? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION : Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
+	renderBuffer.RequireTransition = true;
+
+	// Update Model Settings
+	{
+		auto uniform = renderBuffer.SettingsBuffer.Allocate();
+		uniform->IsPremultipliedAlpha = IsPremultipliedAlpha;
+		renderManager->UpdateBufferWithMap(
+			RUpdateBufferWithMap{
+				.ShouldReleaseMemory = false,
+				.Buffer = renderBuffer.SettingsUniform,
+				.Data = uniform,
+				.Size = sizeof(NJointSettings),
+				.MapType = Diligent::MAP_WRITE,
+				.MapFlags = Diligent::MAP_FLAG_DISCARD,
+			}
+		);
+	}
 
 	auto pipelineState = GetPipelineState(renderBuffer.FixedPipelineState, DynamicPipelineState);
 	if (pipelineState->StaticInitialized == false)
 	{
 		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "JointSettings")->Set(MURenderState::GetProjUniform());
 		pipelineState->StaticInitialized = true;
 	}
 
@@ -271,15 +291,15 @@ void TJointThunder1V7::RenderGroup(const TJoint::NRenderGroup &renderGroup, TJoi
 			.StartSlot = 0,
 			.Buffer = renderBuffer.VertexBuffer.RawPtr(),
 			.Offset = 0,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_RESET,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
 		}
 	);
 	renderManager->SetIndexBuffer(
 		RSetIndexBuffer{
 			.IndexBuffer = renderBuffer.IndexBuffer,
 			.ByteOffset = 0,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
 		}
 	);
 	renderManager->CommitShaderResources(
