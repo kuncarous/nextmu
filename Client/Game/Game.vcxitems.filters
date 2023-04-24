@@ -49,9 +49,6 @@
     <Filter Include="UI">
       <UniqueIdentifier>{352cc6ae-aafe-4dd8-b5fe-4977382c90d9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Texture">
-      <UniqueIdentifier>{cbeb6f06-7f5e-453e-8f9e-23b022b1807c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Environment">
       <UniqueIdentifier>{38eb499a-3e3a-4369-8e4a-cd7ca81646b3}</UniqueIdentifier>
     </Filter>
@@ -163,6 +160,33 @@
     <Filter Include="Renders">
       <UniqueIdentifier>{de0b807a-8c10-4b6f-a943-30c727cfc12a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Resources">
+      <UniqueIdentifier>{31e85a82-839c-454b-8879-f696c8100b62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Resources\Buffer">
+      <UniqueIdentifier>{26ef7963-dd74-430d-9ae2-c3aa812dc29e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Resources\Texture">
+      <UniqueIdentifier>{90804ab6-b602-4a9d-b5ad-69fd92a9dd34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Shaders">
+      <UniqueIdentifier>{238dfe68-3239-4bc3-b8f9-aff1b786b443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Pipelines">
+      <UniqueIdentifier>{8b8ad92f-fd44-4cb1-9106-da1be626aa9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Layouts">
+      <UniqueIdentifier>{2ae436cb-bf97-4216-a7af-892eb30346f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Samplers">
+      <UniqueIdentifier>{7dd5b32a-2b52-4d1c-b255-c221cc80f194}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Renderer">
+      <UniqueIdentifier>{ec333be7-ed51-4f74-852e-5b002fc036da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Renderer\Classifier">
+      <UniqueIdentifier>{1ccfe428-5982-45f9-9a9f-05903f3a0012}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -206,9 +230,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.cpp">
       <Filter>Skeleton</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_texture.cpp">
-      <Filter>Texture</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp">
       <Filter>State</Filter>
@@ -327,29 +348,44 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_entity.cpp">
       <Filter>Environment\Entity</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_layouts.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shader.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resources.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_immutables.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.cpp">
-      <Filter>Graphics</Filter>
+      <Filter>Graphics\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelineresources.cpp">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shader.cpp">
+      <Filter>Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_layouts.cpp">
+      <Filter>Graphics\Layouts</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_samplers.cpp">
-      <Filter>Graphics</Filter>
+      <Filter>Graphics\Samplers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_immutables.cpp">
+      <Filter>Graphics\Samplers</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.cpp">
-      <Filter>Graphics</Filter>
+      <Filter>Graphics\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_texture.cpp">
+      <Filter>Graphics\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resources.cpp">
+      <Filter>Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_buffer.cpp">
+      <Filter>Graphics\Resources\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shaderresources.cpp">
+      <Filter>Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.cpp">
+      <Filter>Graphics\Renderer\Classifier</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -412,9 +448,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.h">
       <Filter>Skeleton</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_texture.h">
-      <Filter>Texture</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h">
       <Filter>State</Filter>
@@ -593,26 +626,44 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_layouts.h">
-      <Filter>Graphics</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.h">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelineresources.h">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shaderresources.h">
+      <Filter>Graphics\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shader.h">
-      <Filter>Graphics</Filter>
+      <Filter>Graphics\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resources.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_immutables.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.h">
-      <Filter>Graphics</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_layouts.h">
+      <Filter>Graphics\Layouts</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_samplers.h">
-      <Filter>Graphics</Filter>
+      <Filter>Graphics\Samplers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_immutables.h">
+      <Filter>Graphics\Samplers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.h">
-      <Filter>Graphics</Filter>
+      <Filter>Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resources.h">
+      <Filter>Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_texture.h">
+      <Filter>Graphics\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_buffer.h">
+      <Filter>Graphics\Resources\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_resizablequeue.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.h">
+      <Filter>Graphics\Renderer\Classifier</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

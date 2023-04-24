@@ -3,7 +3,7 @@
 
 #pragma once
 
-class NTexture;
+class NGraphicsTexture;
 
 struct TextureInfo
 {
@@ -15,7 +15,7 @@ struct TextureInfo
 namespace MUTextures
 {
 	const mu_boolean LoadRaw(mu_utf8string path, FIBITMAP **texture, TextureInfo &info);
-	std::unique_ptr<NTexture> Load(mu_utf8string path, const Diligent::SamplerDesc &samplerDesc);
+	std::unique_ptr<NGraphicsTexture> Load(mu_utf8string path, const Diligent::SamplerDesc &samplerDesc);
 
 	const mu_boolean IsValidFilter(const mu_utf8string value);
 	const mu_boolean IsValidWrap(const mu_utf8string value);

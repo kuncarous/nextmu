@@ -17,6 +17,7 @@ public:
 	static const mu_boolean Initialize();
 	static void Destroy();
 
+	static void Reset();
 	static void RenderMesh(
 		NModel *model,
 		const mu_uint32 meshIndex,

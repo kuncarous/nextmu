@@ -3,7 +3,6 @@
 #include "mu_skeletonmanager.h"
 #include "mu_graphics.h"
 #include "mu_model.h"
-#include "mu_texture.h"
 #include "mu_textures.h"
 #include "res_renders.h"
 #include "res_items.h"
@@ -29,7 +28,7 @@ NEXTMU_INLINE std::vector<mu_char> mu_readshader(mu_utf8string filename)
 }
 
 typedef std::unique_ptr<NModel> ModelPointer;
-typedef std::unique_ptr<NTexture> TexturePointer;
+typedef std::unique_ptr<NGraphicsTexture> TexturePointer;
 
 namespace MUResourcesManager
 {
@@ -235,7 +234,7 @@ namespace MUResourcesManager
 		return iter->second;
 	}
 
-	NTexture *GetTexture(const mu_utf8string id)
+	NGraphicsTexture *GetTexture(const mu_utf8string id)
 	{
 		auto iter = Textures.find(id);
 		if (iter == Textures.end()) return nullptr;

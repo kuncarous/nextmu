@@ -42,7 +42,7 @@ namespace MUGraphics
 
     std::unique_ptr<NRenderManager> RenderManager;
 
-    const Diligent::TEXTURE_FORMAT DesiredColorFormat = Diligent::TEX_FORMAT_RGBA8_UNORM;
+    const Diligent::TEXTURE_FORMAT DesiredColorFormat = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
     constexpr mu_boolean ForceNonSeprblProgs = false;
 
     const mu_boolean InitializeEngine(const Diligent::NativeWindow *window)
@@ -430,6 +430,7 @@ namespace MUGraphics
     void Destroy()
     {
         RenderManager.reset();
+        DestroyShaderBindings();
         DestroyPipelines();
         DeviceContexts.clear();
         SwapChain.Release();

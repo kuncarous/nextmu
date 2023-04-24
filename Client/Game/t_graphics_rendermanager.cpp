@@ -2,17 +2,28 @@
 #include "t_graphics_rendermanager.h"
 #include <MapHelper.hpp>
 
+constexpr mu_uint32 CommandListsIncr = 4096;
+
+NRenderManager::NRenderManager()
+{
+	CommandLists.resize(CommandListsIncr);
+	DraftCommandList = &CommandLists[0];
+}
+
 void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 {
-	std::sort(
-		CommandLists.begin(),
-		CommandLists.end(),
-		[](const std::unique_ptr<RCommandList> &lhs, const std::unique_ptr<RCommandList> &rhs) -> bool { return lhs->Id < rhs->Id; }
-	);
+	if (Index > 1)
+	{
+		std::stable_sort(
+			CommandLists.begin(),
+			CommandLists.begin() + Index,
+			[](const RCommandList &lhs, const RCommandList &rhs) -> bool { return lhs.Id < rhs.Id; }
+		);
+	}
 
 	for (auto &commandList : CommandLists)
 	{
-		for (auto &command : commandList->Commands)
+		for (auto &command : commandList.Commands)
 		{
 			switch (command.Type)
 			{
@@ -20,6 +31,10 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 				{
 					auto &data = command.updateBuffer;
 					immediateContext->UpdateBuffer(data.Buffer, data.Offset, data.Size, data.Data, data.StateTransitionMode);
+					if (data.ShouldReleaseMemory)
+					{
+						mu_free(data.Data);
+					}
 				}
 				break;
 
@@ -76,7 +91,15 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 			case NRenderCommandType::CommitShaderResources:
 				{
 					auto &data = command.commitShaderResources;
-					immediateContext->CommitShaderResources(data.ShaderResourceBinding, data.StateTransitionMode);
+					auto stateTransitionMode = (
+						data.ShaderResourceBinding->ShouldTransition
+						? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+						: data.StateTransitionMode != Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE
+						? data.StateTransitionMode
+						: Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
+					);
+					immediateContext->CommitShaderResources(data.ShaderResourceBinding->Binding, stateTransitionMode);
+					data.ShaderResourceBinding->ShouldTransition = false;
 				}
 				break;
 
@@ -95,30 +118,31 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 				break;
 			}
 		}
+
+		commandList.Commands.clear();
 	}
 
-	CommandLists.clear();
+	Index = 0;
+	DraftCommandList = &CommandLists[Index];
 }
 
-void NRenderManager::UpdateBuffer(const RUpdateBuffer &data, std::unique_ptr<RTemporaryBuffer> tmpBuffer)
+void NRenderManager::UpdateBuffer(const RUpdateBuffer &data)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::UpdateBuffer,
-			.TmpBuffer = std::move(tmpBuffer),
 			.updateBuffer = data,
 		}
 	);
 }
 
-void NRenderManager::UpdateBufferWithMap(const RUpdateBufferWithMap &data, std::unique_ptr<RTemporaryBuffer> tmpBuffer)
+void NRenderManager::UpdateBufferWithMap(const RUpdateBufferWithMap &data)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::UpdateBufferWithMap,
-			.TmpBuffer = std::move(tmpBuffer),
 			.updateBufferWithMap = data,
 		}
 	);
@@ -126,8 +150,8 @@ void NRenderManager::UpdateBufferWithMap(const RUpdateBufferWithMap &data, std::
 
 void NRenderManager::UpdateTexture(const RUpdateTexture &data)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::UpdateTexture,
 			.updateTexture = data,
@@ -137,8 +161,8 @@ void NRenderManager::UpdateTexture(const RUpdateTexture &data)
 
 void NRenderManager::SetDynamicTexture(const RSetDynamicTexture &data)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::SetDynamicTexture,
 			.setDynamicTexture = data,
@@ -148,8 +172,8 @@ void NRenderManager::SetDynamicTexture(const RSetDynamicTexture &data)
 
 void NRenderManager::SetDynamicBuffer(const RSetDynamicBuffer &data)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::SetDynamicBuffer,
 			.setDynamicBuffer = data,
@@ -159,8 +183,8 @@ void NRenderManager::SetDynamicBuffer(const RSetDynamicBuffer &data)
 
 void NRenderManager::SetPipelineState(NPipelineState *pipeline)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::SetPipelineState,
 			.setPipelineState = RSetPipelineState{
@@ -168,13 +192,13 @@ void NRenderManager::SetPipelineState(NPipelineState *pipeline)
 			},
 		}
 	);
-	commandList.Blend = pipeline->BlendHash;
+	PipelineInfo = &pipeline->Info;
 }
 
 void NRenderManager::SetVertexBuffer(const RSetVertexBuffer &data)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::SetVertexBuffer,
 			.setVertexBuffer = data,
@@ -184,8 +208,8 @@ void NRenderManager::SetVertexBuffer(const RSetVertexBuffer &data)
 
 void NRenderManager::SetIndexBuffer(const RSetIndexBuffer &data)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::SetIndexBuffer,
 			.setIndexBuffer = data,
@@ -195,8 +219,8 @@ void NRenderManager::SetIndexBuffer(const RSetIndexBuffer &data)
 
 void NRenderManager::CommitShaderResources(const RCommitShaderResources &data)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::CommitShaderResources,
 			.commitShaderResources = data,
@@ -206,8 +230,8 @@ void NRenderManager::CommitShaderResources(const RCommitShaderResources &data)
 
 void NRenderManager::Draw(const RDraw &data, const RCommandListInfo &info)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::Draw,
 			.draw = data,
@@ -218,8 +242,8 @@ void NRenderManager::Draw(const RDraw &data, const RCommandListInfo &info)
 
 void NRenderManager::DrawIndexed(const RDrawIndexed &data, const RCommandListInfo &info)
 {
-	auto &commandList = DraftCommandList;
-	commandList.Commands.push_back(
+	auto commandList = DraftCommandList;
+	commandList->Commands.push_back(
 		NRenderCommand{
 			.Type = NRenderCommandType::DrawIndexed,
 			.drawIndexed = data,
@@ -228,31 +252,55 @@ void NRenderManager::DrawIndexed(const RDrawIndexed &data, const RCommandListInf
 	PushCommandList(info);
 }
 
-const mu_uint64 GetCommandListHash(
+constexpr mu_uint64 TypeMask = 0x7; // 3 bits
+const mu_uint64 GetCommandListClassifiedHash(
 	const mu_uint64 view,
-	const mu_uint64 blend,
-	const mu_uint64 group,
-	const mu_uint32 type,
+	const mu_uint64 classify,
+	const mu_uint64 index,
+	const mu_uint64 shader
+)
+{
+	constexpr mu_uint64 Type = static_cast<mu_uint64>(NDrawOrderType::Classifier);
+	constexpr mu_uint64 ViewMask = 0xFF; // 8 bits
+	constexpr mu_uint64 ClassifyMask = 0x3; // 2 bits
+	constexpr mu_uint64 ShaderMask = 0xFFFF; // 16 bits
+	constexpr mu_uint64 IndexMask = 0xFF; // 8 bits
+
+	return ((view & ViewMask) << 56) | ((Type & TypeMask) << 53) | ((classify & ClassifyMask) << 51) | ((index & IndexMask) << 43) | ((shader & ShaderMask) << 27);
+}
+
+const mu_uint64 GetCommandListSequentialHash(
+	const mu_uint64 view,
 	const mu_uint32 index
 )
 {
-	constexpr mu_uint64 ViewMask = 0xFFFF;
-	constexpr mu_uint64 GroupMask = 0xFF;
-	constexpr mu_uint64 BlendMask = 0x3FF;
-	constexpr mu_uint64 TypeMask = 0x7;
-	constexpr mu_uint64 IndexMask = 0xFFFF;
+	constexpr mu_uint64 Type = static_cast<mu_uint64>(NDrawOrderType::Sequential);
+	constexpr mu_uint64 ViewMask = 0xFF; // 8 bits
+	constexpr mu_uint64 IndexMask = 0xFFFFFFFF; // 32 bits
 
-	return ((view & ViewMask) << 48) | ((group & GroupMask) << 40) | ((blend & BlendMask) << 30) | ((type & TypeMask) << 27) | (index & IndexMask);
+	return ((view & ViewMask) << 56) | ((Type & TypeMask) << 53) | (index & IndexMask);
 }
 
 void NRenderManager::PushCommandList(const RCommandListInfo &info)
 {
-	DraftCommandList.Id = GetCommandListHash(
-		info.View,
-		0,
-		DraftCommandList.Blend,
-		static_cast<mu_uint32>(info.Type),
-		info.Index
+	DraftCommandList->Id = (
+		info.Type == NDrawOrderType::Classifier
+		? GetCommandListClassifiedHash(
+			info.View,
+			info.Classify == NRenderClassify::None
+			? static_cast<mu_uint64>(GetRenderClassify(PipelineInfo->DepthWrite, PipelineInfo->BlendEnable, PipelineInfo->SrcBlend, PipelineInfo->DestBlend, PipelineInfo->BlendHash))
+			: static_cast<mu_uint64>(info.Classify),
+			PipelineInfo->Shader,
+			info.Index
+		)
+		: GetCommandListSequentialHash(
+			info.View,
+			info.Index
+		)
 	);
-	CommandLists.push_back(std::make_unique<RCommandList>(std::move(DraftCommandList)));
+
+	const auto index = ++Index;
+	if (index >= static_cast<mu_uint32>(CommandLists.size()))
+		CommandLists.resize(CommandLists.size() + CommandListsIncr);
+	DraftCommandList = &CommandLists[index];
 }

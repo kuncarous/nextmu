@@ -61,7 +61,6 @@ namespace cglm
 #endif
 
 #include "mu_math.h"
-#include "mu_texture.h"
 #include "mu_model.h"
 #include "mu_terrain.h"
 #include "mu_skeletoninstance.h"

@@ -3,13 +3,36 @@
 
 #pragma once
 
-struct NPipelineResource
+enum class NGraphicsResourceType : mu_uint32
 {
-	std::vector<Diligent::ShaderResourceVariableDesc> Variables;
-	std::vector<Diligent::ImmutableSamplerDesc> ImmutableSamplers;
+	Texture,
+	Buffer,
 };
 
-void CreatePipelineResources();
-const NPipelineResource *GetPipelineResource(const mu_utf8string resourceId);
+typedef mu_uint32 NResourceId;
+class NGraphicsResource
+{
+public:
+	NGraphicsResource(const NGraphicsResourceType type);
+	virtual ~NGraphicsResource();
+
+public:
+	const NGraphicsResourceType GetType() const
+	{
+		return Type;
+	}
+
+	const mu_uint32 GetId() const
+	{
+		return Id;
+	}
+
+protected:
+	NGraphicsResourceType Type;
+	NResourceId Id;
+
+protected:
+	static mu_atomic_uint32_t IdGenerator;
+};
 
 #endif

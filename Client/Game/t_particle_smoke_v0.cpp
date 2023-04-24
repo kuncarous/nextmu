@@ -111,7 +111,7 @@ EnttIterator TParticleSmokeV0::Action(EnttRegistry &registry, EnttView &view, En
 	return iter;
 }
 
-static NTexture *texture = nullptr;
+static NGraphicsTexture *texture = nullptr;
 EnttIterator TParticleSmokeV0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
@@ -166,26 +166,20 @@ void TParticleSmokeV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffe
 	);
 
 	auto pipelineState = GetPipelineState(renderBuffer.FixedPipelineState, DynamicPipelineState);
-	auto bindingIter = renderBuffer.Bindings.find(pipelineState->Id);
-	if (bindingIter == renderBuffer.Bindings.end())
+	if (pipelineState->StaticInitialized == false)
 	{
 		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetProjUniform());
-
-		Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> binding;
-		pipelineState->Pipeline->CreateShaderResourceBinding(&binding, true);
-
-		bindingIter = renderBuffer.Bindings.insert(std::make_pair(pipelineState->Id, binding)).first;
+		pipelineState->StaticInitialized = true;
 	}
-	auto binding = bindingIter->second.RawPtr();
 
-	renderManager->SetDynamicTexture(
-		RSetDynamicTexture{
-			.Type = Diligent::SHADER_TYPE_PIXEL,
-			.Name = "g_Texture",
-			.View = texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE),
-			.Binding = binding,
-		}
-	);
+	NResourceId resourceIds[1] = { texture->GetId() };
+	auto binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+	if (binding->Initialized == false)
+	{
+		binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Texture")->Set(texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		binding->Initialized = true;
+	}
+
 	renderManager->SetPipelineState(pipelineState);
 	renderManager->SetVertexBuffer(
 		RSetVertexBuffer{
@@ -206,7 +200,6 @@ void TParticleSmokeV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffe
 	renderManager->CommitShaderResources(
 		RCommitShaderResources{
 			.ShaderResourceBinding = binding,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
 		}
 	);
 
@@ -215,9 +208,9 @@ void TParticleSmokeV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffe
 			.Attribs = Diligent::DrawIndexedAttribs(renderGroup.Count * 6, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL, 1, renderGroup.Index * 6, renderGroup.Index * 4)
 		},
 		RCommandListInfo{
-			.Type = NDrawOrderType::Blend,
+			.Type = NDrawOrderType::Classifier,
 			.View = 0,
-			.Depth = 0,
+			.Index = 0,
 		}
 	);
 }

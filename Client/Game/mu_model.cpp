@@ -3,7 +3,6 @@
 #include "mu_crypt.h"
 #include "shared_binaryreader.h"
 #include "mu_textures.h"
-#include "mu_texture.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -48,6 +47,13 @@ std::map<mu_utf8string, Diligent::CULL_MODE> CullMap = {
 	{ "ccw", Diligent::CULL_MODE_BACK },
 };
 
+std::map<mu_utf8string, NRenderClassify> ClassifyMap = {
+	{ "auto", NRenderClassify::None },
+	{ "opaque", NRenderClassify::Opaque },
+	{ "pre_alpha", NRenderClassify::PreAlpha },
+	{ "post_alpha", NRenderClassify::PostAlpha },
+};
+
 #define GRAPHICS_VALUE_FROM_STRING(name, map, default_value) \
 constexpr auto name##Default = default_value; \
 NEXTMU_INLINE const auto name##FromString(const mu_utf8string value) \
@@ -61,6 +67,7 @@ GRAPHICS_VALUE_FROM_STRING(DepthTest, DepthTestMap, Diligent::COMPARISON_FUNC_LE
 GRAPHICS_VALUE_FROM_STRING(BlendFunction, BlendFunctionMap, Diligent::BLEND_FACTOR_UNDEFINED)
 GRAPHICS_VALUE_FROM_STRING(BlendEquation, BlendEquationMap, Diligent::BLEND_OPERATION_ADD)
 GRAPHICS_VALUE_FROM_STRING(Cull, CullMap, Diligent::CULL_MODE_NONE)
+GRAPHICS_VALUE_FROM_STRING(Classify, ClassifyMap, NRenderClassify::None)
 
 const mu_utf8string ProgramDefault = "model_texture";
 
@@ -238,6 +245,15 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 
 				if (mesh.contains("texture"))
 					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
+
+				if (mesh.contains("classify"))
+				{
+					const auto classify = mesh["classify"];
+					if (classify.contains("mode"))
+						settings.ClassifyMode = ClassifyFromString(classify["mode"].get<mu_utf8string>());
+					if (classify.contains("index"))
+						settings.ClassifyIndex = classify["index"].get<mu_uint32>();
+				}
 
 				if (mesh.contains("normal"))
 					settings.RenderState[ModelRenderMode::Normal] = CalculateStateFromObject(mesh["normal"]);
@@ -671,7 +687,7 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 			}
 
 			filename = path + subPath + filename;
-			std::unique_ptr<NTexture> texture = MUTextures::Load(
+			std::unique_ptr<NGraphicsTexture> texture = MUTextures::Load(
 				filename,
 				MUTextures::CalculateSamplerFlags(filter, wrap)
 			);

@@ -59,8 +59,10 @@ namespace ModelRenderMode
 struct NMeshRenderSettings
 {
 	mu_shader Program = NInvalidShader;
-	NTexture *Texture = nullptr;
+	NGraphicsTexture *Texture = nullptr;
 	NDynamicPipelineState RenderState[ModelRenderMode::Count] = { DefaultDynamicPipelineState, DefaultAlphaDynamicPipelineState };
+	NRenderClassify ClassifyMode = NRenderClassify::None;
+	mu_uint32 ClassifyIndex = 0;
 	mu_float Light = 1.0f;
 };
 

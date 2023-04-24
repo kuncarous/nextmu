@@ -8,7 +8,7 @@
 class NCamera;
 class NEnvironment;
 class NTerrain;
-class NTexture;
+class NGraphicsTexture;
 
 namespace MURenderState
 {
@@ -37,9 +37,9 @@ namespace MURenderState
 	const NEnvironment *GetEnvironment();
 	NTerrain *GetTerrain();
 
-	void AttachTexture(TextureAttachment::Type type, NTexture *texture);
+	void AttachTexture(TextureAttachment::Type type, NGraphicsTexture *texture);
 	void DetachTexture(TextureAttachment::Type type);
-	NTexture *GetTexture(TextureAttachment::Type type);
+	NGraphicsTexture *GetTexture(TextureAttachment::Type type);
 };
 
 #endif

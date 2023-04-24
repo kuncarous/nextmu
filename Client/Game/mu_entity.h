@@ -140,7 +140,7 @@ namespace NEntity
 
 	struct NAttachment
 	{
-		NTexture *Skin = nullptr;
+		NGraphicsTexture *Skin = nullptr;
 		NModel *Base;
 		std::map<PartType, NRenderPart> Parts;
 	};

@@ -122,8 +122,8 @@ private:
 	mu_shader GrassProgram = NInvalidShader;
 	NPipelineState *TerrainPipeline = nullptr;
 	NPipelineState *GrassPipeline = nullptr;
-	Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> TerrainBinding;
-	Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> GrassBinding;
+	NShaderResourcesBinding *TerrainBinding = nullptr;
+	NShaderResourcesBinding *GrassBinding = nullptr;
 
 	Diligent::RefCntAutoPtr<Diligent::ITexture> HeightmapTexture;
 	Diligent::RefCntAutoPtr<Diligent::ITexture> LightmapTexture;

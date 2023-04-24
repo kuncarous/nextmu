@@ -3,6 +3,7 @@
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
 #include "mu_renderstate.h"
+#include "mu_resizablequeue.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <MapHelper.hpp>
@@ -22,7 +23,8 @@ namespace MUBBoxRenderer
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> IndexBuffer;
 	NPipelineState *PipelineState = nullptr;
-	Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> ShaderBinding;
+	NShaderResourcesBinding *ShaderBinding = nullptr;
+	NResizableQueue<NBBoxDimensions> DimensionsBuffer;
 
 	constexpr mu_uint32 NumIndexes = 6 * 6;
 	const mu_boolean Initialize()
@@ -139,17 +141,30 @@ namespace MUBBoxRenderer
 		dynamicState.BlendOp = Diligent::BLEND_OPERATION_ADD;
 
 		PipelineState = GetPipelineState(fixedState, dynamicState);
-		PipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "BBoxDimensions")->Set(BBoxDimensionsUniform);
+		if (PipelineState->StaticInitialized == false)
+		{
+			PipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "BBoxDimensions")->Set(BBoxDimensionsUniform);
+			PipelineState->StaticInitialized = true;
+		}
+
+		NResourceId resourceIds[1] = { NInvalidUInt32 };
+		ShaderBinding = GetShaderBinding(PipelineState, mu_countof(resourceIds), resourceIds);
+		ShaderBinding->Initialized = true;
 
 		return true;
 	}
 
 	void Destroy()
 	{
-		ShaderBinding.Release();
+		ReleaseShaderResources(ShaderBinding);
 		BBoxDimensionsUniform.Release();
 		VertexBuffer.Release();
 		IndexBuffer.Release();
+	}
+
+	void Reset()
+	{
+		DimensionsBuffer.Reset();
 	}
 
 	void Render(
@@ -177,19 +192,18 @@ namespace MUBBoxRenderer
 
 		// Update Min
 		{
-			auto uniform = std::make_unique<RTemporaryBuffer>(sizeof(NBBoxDimensions));
-			NBBoxDimensions *dimensions = uniform->Get<NBBoxDimensions *>();
+			auto dimensions = DimensionsBuffer.Allocate();
 			dimensions->Min = glm::vec4(bbox.Min, 1.0f);
 			dimensions->Max = glm::vec4(bbox.Max, 1.0f);
 			renderManager->UpdateBufferWithMap(
 				RUpdateBufferWithMap{
+					.ShouldReleaseMemory = false,
 					.Buffer = BBoxDimensionsUniform,
 					.Data = dimensions,
 					.Size = sizeof(NBBoxDimensions),
 					.MapType = Diligent::MAP_WRITE,
 					.MapFlags = Diligent::MAP_FLAG_DISCARD,
-				},
-				std::move(uniform)
+				}
 			);
 		}
 
@@ -197,7 +211,6 @@ namespace MUBBoxRenderer
 		renderManager->CommitShaderResources(
 			RCommitShaderResources{
 				.ShaderResourceBinding = ShaderBinding,
-				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
 			}
 		);
 		renderManager->DrawIndexed(
@@ -205,9 +218,10 @@ namespace MUBBoxRenderer
 				.Attribs = Diligent::DrawIndexedAttribs(NumIndexes, Diligent::VT_UINT16, Diligent::DRAW_FLAG_VERIFY_ALL)
 			},
 			RCommandListInfo{
-				.Type = NDrawOrderType::Blend,
+				.Type = NDrawOrderType::Classifier,
+				.Classify = NRenderClassify::PostAlpha,
 				.View = 10,
-				.Depth = 0,
+				.Index = 0,
 			}
 		);
 	}

@@ -118,7 +118,11 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
     const auto &blendDesc = graphicsInfo.BlendDesc.RenderTargets[0];
     NPipelineState pipelineState;
     pipelineState.Id = PipelineIdCache++;
-    pipelineState.BlendHash = (
+    pipelineState.Info.Shader = fixedState.CombinedShader;
+    pipelineState.Info.BlendEnable = blendDesc.BlendEnable;
+    pipelineState.Info.SrcBlend = blendDesc.SrcBlend;
+    pipelineState.Info.DestBlend = blendDesc.DestBlend;
+    pipelineState.Info.BlendHash = (
         blendDesc.BlendEnable
         ? CalculateBlendHash(blendDesc.SrcBlend, blendDesc.DestBlend)
         : 0

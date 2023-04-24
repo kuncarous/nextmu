@@ -7,14 +7,14 @@
 #include "mu_model_skeleton.h"
 #include "mu_renderstate_enums.h"
 
-class NTexture;
+class NGraphicsTexture;
 
 constexpr mu_uint32 MaxBones = 200;
 
 struct NModelTexture
 {
 	TextureAttachment::Type Type = TextureAttachment::Normal;
-	std::unique_ptr<NTexture> Texture;
+	std::unique_ptr<NGraphicsTexture> Texture;
 };
 
 class NModel

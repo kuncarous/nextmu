@@ -5,13 +5,9 @@
 #include "mu_graphics.h"
 #include "mu_renderstate.h"
 #include "mu_resourcesmanager.h"
+#include "mu_resizablequeue.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <MapHelper.hpp>
-
-std::map<NPipelineStateId, Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>> Bindings;
-NFixedPipelineState PreconfiguredFixedState;
-Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelViewUniform;
-Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelSettingsUniform;
 
 #pragma pack(4)
 struct NModelSettings
@@ -24,6 +20,16 @@ struct NModelSettings
 	glm::vec4 BodyLight;
 };
 #pragma pack()
+
+// TO DO : improve management of shader resources creating a central resource manager that creates a resource based on the mutable variables and when the resource is released it releases the shader resources.
+typedef std::map<mu_uint32, Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>> NTextureBindingMap;
+typedef std::map<NPipelineStateId, NTextureBindingMap> NPipelineBindingMap;
+NPipelineBindingMap Bindings;
+NFixedPipelineState PreconfiguredFixedState;
+Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelViewUniform;
+Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelSettingsUniform;
+NResizableQueue<cglm::mat4> ModelViewBuffer;
+NResizableQueue<NModelSettings> ModelSettingsBuffer;
 
 const mu_boolean MUModelRenderer::Initialize()
 {
@@ -79,6 +85,12 @@ void MUModelRenderer::Destroy()
 	ModelSettingsUniform.Release();
 }
 
+void MUModelRenderer::Reset()
+{
+	ModelViewBuffer.Reset();
+	ModelSettingsBuffer.Reset();
+}
+
 void MUModelRenderer::RenderMesh(
 	NModel *model,
 	const mu_uint32 meshIndex,
@@ -105,9 +117,9 @@ void MUModelRenderer::RenderMesh(
 	NFixedPipelineState fixedState = PreconfiguredFixedState;
 	fixedState.CombinedShader = settings->Program;
 
-	const mu_boolean isDepthRendering = texture->HasAlpha() || config.BodyLight[3] < 1.0f;
+	const mu_boolean isPostAlphaRendering = texture->HasAlpha() || config.BodyLight[3] < 1.0f;
 	const NDynamicPipelineState *dynamicState;
-	if (isDepthRendering)
+	if (isPostAlphaRendering)
 	{
 		dynamicState = &settings->RenderState[ModelRenderMode::Alpha];
 	}
@@ -117,70 +129,63 @@ void MUModelRenderer::RenderMesh(
 	}
 
 	auto pipelineState = GetPipelineState(fixedState, *dynamicState);
-	auto bindingIter = Bindings.find(pipelineState->Id);
-	if (bindingIter == Bindings.end())
+	if (pipelineState->StaticInitialized == false)
 	{
 		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(ModelViewUniform);
 		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_SkeletonTexture")->Set(MUSkeletonManager::GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
 		//pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(terrain->GetLightmapTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
 		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelSettings")->Set(ModelSettingsUniform);
-
-		Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> binding;
-		pipelineState->Pipeline->CreateShaderResourceBinding(&binding, true);
-		bindingIter = Bindings.insert(std::make_pair(pipelineState->Id, binding)).first;
+		pipelineState->StaticInitialized = true;
 	}
-	auto binding = bindingIter->second.RawPtr();
+
+	NResourceId resourceIds[1] = { texture->GetId() };
+	auto binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+	if (binding->Initialized == false)
+	{
+		binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Texture")->Set(texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		binding->Initialized = true;
+	}
 
 	const auto renderManager = MUGraphics::GetRenderManager();
 
 	// Update Model View
 	{
-		auto uniform = std::make_unique<RTemporaryBuffer>(sizeof(cglm::mat4));
-		cglm::mat4 *mvp = reinterpret_cast<cglm::mat4*>(uniform->Get<float*>());
-		cglm::glm_mat4_copy(modelViewProj, *mvp);
-		cglm::glm_mat4_transpose(*mvp);
+		auto uniform = ModelViewBuffer.Allocate();
+		cglm::glm_mat4_copy(modelViewProj, *uniform);
+		cglm::glm_mat4_transpose(*uniform);
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
+				.ShouldReleaseMemory = false,
 				.Buffer = ModelViewUniform,
-				.Data = mvp,
+				.Data = uniform,
 				.Size = sizeof(cglm::mat4),
 				.MapType = Diligent::MAP_WRITE,
 				.MapFlags = Diligent::MAP_FLAG_DISCARD,
-			},
-			std::move(uniform)
+			}
 		);
 	}
 
 	// Update Model Settings
 	{
-		auto uniform = std::make_unique<RTemporaryBuffer>(sizeof(NModelSettings));
-		NModelSettings *settings = uniform->Get<NModelSettings*>();
-		settings->LightPosition = terrain->GetLightPosition();
-		settings->BoneOffset = static_cast<mu_float>(config.BoneOffset);
-		settings->NormalScale = 0.0f;
-		settings->EnableLight = static_cast<mu_float>(config.EnableLight);
-		settings->Dummy = 0.0f;
-		settings->BodyLight = config.BodyLight;
+		auto uniform = ModelSettingsBuffer.Allocate();
+		uniform->LightPosition = terrain->GetLightPosition();
+		uniform->BoneOffset = static_cast<mu_float>(config.BoneOffset);
+		uniform->NormalScale = 0.0f;
+		uniform->EnableLight = static_cast<mu_float>(config.EnableLight);
+		uniform->Dummy = 0.0f;
+		uniform->BodyLight = config.BodyLight;
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
+				.ShouldReleaseMemory = false,
 				.Buffer = ModelSettingsUniform,
-				.Data = settings,
+				.Data = uniform,
 				.Size = sizeof(NModelSettings),
 				.MapType = Diligent::MAP_WRITE,
 				.MapFlags = Diligent::MAP_FLAG_DISCARD,
-			},
-			std::move(uniform)
+			}
 		);
 	}
 
-	renderManager->SetDynamicTexture(
-		RSetDynamicTexture{
-			.Type = Diligent::SHADER_TYPE_PIXEL,
-			.Name = "g_Texture",
-			.View = texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE),
-			.Binding = binding,
-		}
-	);
 	renderManager->SetPipelineState(pipelineState);
 	renderManager->SetVertexBuffer(
 		RSetVertexBuffer{
@@ -194,7 +199,6 @@ void MUModelRenderer::RenderMesh(
 	renderManager->CommitShaderResources(
 		RCommitShaderResources{
 			.ShaderResourceBinding = binding,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
 		}
 	);
 
@@ -203,9 +207,10 @@ void MUModelRenderer::RenderMesh(
 			.Attribs = Diligent::DrawAttribs(mesh.VertexBuffer.Count, Diligent::DRAW_FLAG_VERIFY_ALL, 1, mesh.VertexBuffer.Offset)
 		},
 		RCommandListInfo{
-			.Type = NDrawOrderType::Blend,
+			.Type = NDrawOrderType::Classifier,
+			.Classify = settings->ClassifyMode,
 			.View = 0,
-			.Depth = 0,
+			.Index = static_cast<mu_uint8>(settings->ClassifyIndex),
 		}
 	);
 }

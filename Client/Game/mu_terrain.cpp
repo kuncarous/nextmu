@@ -91,8 +91,8 @@ void NTerrain::Destroy()
 {
 #define RELEASE_HANDLER(handler) handler.Release();
 
-	RELEASE_HANDLER(TerrainBinding);
-	RELEASE_HANDLER(GrassBinding);
+	ReleaseShaderResources(TerrainBinding); TerrainBinding = nullptr;
+	ReleaseShaderResources(GrassBinding); GrassBinding = nullptr;
 	RELEASE_HANDLER(HeightmapTexture);
 	RELEASE_HANDLER(LightmapTexture);
 	RELEASE_HANDLER(NormalTexture);
@@ -1009,16 +1009,23 @@ const mu_boolean NTerrain::PreparePipelines()
 		NDynamicPipelineState dynamicState;
 
 		TerrainPipeline = GetPipelineState(fixedState, dynamicState);
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture")->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture")->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture")->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture")->Set(UVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture")->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings")->Set(SettingsUniform);
-		TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures")->Set(Textures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		TerrainPipeline->Pipeline->CreateShaderResourceBinding(&TerrainBinding, true);
+		if (TerrainPipeline->StaticInitialized == false)
+		{
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture")->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture")->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture")->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture")->Set(UVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture")->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings")->Set(SettingsUniform);
+			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures")->Set(Textures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			TerrainPipeline->StaticInitialized = true;
+		}
+
+		NResourceId resourceIds[1] = { NInvalidUInt32 };
+		TerrainBinding = GetShaderBinding(TerrainPipeline, mu_countof(resourceIds), resourceIds);
+		TerrainBinding->Initialized = true;
 	}
 
 	// Grass
@@ -1040,16 +1047,23 @@ const mu_boolean NTerrain::PreparePipelines()
 		dynamicState.BlendOp = Diligent::BLEND_OPERATION_ADD;
 
 		GrassPipeline = GetPipelineState(fixedState, dynamicState);
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture")->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture")->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture")->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture")->Set(GrassUVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture")->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings")->Set(SettingsUniform);
-		GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures")->Set(GrassTextures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		GrassPipeline->Pipeline->CreateShaderResourceBinding(&GrassBinding, true);
+		if (GrassPipeline->StaticInitialized == false)
+		{
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture")->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture")->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture")->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture")->Set(GrassUVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture")->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings")->Set(SettingsUniform);
+			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures")->Set(GrassTextures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			GrassPipeline->StaticInitialized = true;
+		}
+
+		NResourceId resourceIds[1] = { NInvalidUInt32 };
+		GrassBinding = GetShaderBinding(GrassPipeline, mu_countof(resourceIds), resourceIds);
+		GrassBinding->Initialized = true;
 	}
 
 	return true;
@@ -1140,9 +1154,10 @@ void NTerrain::Render()
 			.Attribs = Diligent::DrawIndexedAttribs(NumTerrainIndexes, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL)
 		},
 		RCommandListInfo{
-			.Type = NDrawOrderType::Blend,
+			.Type = NDrawOrderType::Classifier,
+			.Classify = NRenderClassify::Opaque,
 			.View = 0,
-			.Depth = 0,
+			.Index = 1,
 		}
 	);
 
@@ -1176,9 +1191,10 @@ void NTerrain::Render()
 				.Attribs = Diligent::DrawIndexedAttribs(NumTerrainIndexes, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL)
 			},
 			RCommandListInfo{
-				.Type = NDrawOrderType::Blend,
+				.Type = NDrawOrderType::Classifier,
+				.Classify = NRenderClassify::PreAlpha,
 				.View = 0,
-				.Depth = 0,
+				.Index = 1,
 			}
 		);
 	}

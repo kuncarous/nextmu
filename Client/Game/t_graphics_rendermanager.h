@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "t_graphics_renderclassifier.h"
+
 enum class NRenderCommandType : mu_uint32
 {
 	UpdateBuffer,
@@ -18,26 +20,11 @@ enum class NRenderCommandType : mu_uint32
 	DrawIndexed,
 };
 
-class RTemporaryBuffer
-{
-public:
-	RTemporaryBuffer(const mu_size size) { Buffer.resize(size); }
-	~RTemporaryBuffer() { Buffer.clear(); }
-
-	template<typename Type>
-	Type Get()
-	{
-		return reinterpret_cast<Type>(Buffer.data());
-	}
-
-protected:
-	std::vector<mu_uint8> Buffer;
-};
-
 struct RUpdateBuffer
 {
+	const mu_boolean ShouldReleaseMemory;
 	Diligent::IBuffer *Buffer;
-	const void *Data;
+	void *Data;
 	Diligent::Uint64 Offset;
 	Diligent::Uint64 Size;
 	Diligent::RESOURCE_STATE_TRANSITION_MODE StateTransitionMode;
@@ -45,8 +32,9 @@ struct RUpdateBuffer
 
 struct RUpdateBufferWithMap
 {
+	const mu_boolean ShouldReleaseMemory;
 	Diligent::IBuffer *Buffer;
-	const void *Data;
+	void *Data;
 	Diligent::Uint64 Size;
 	Diligent::MAP_TYPE MapType;
 	Diligent::MAP_FLAGS MapFlags;
@@ -103,8 +91,8 @@ struct RSetIndexBuffer
 
 struct RCommitShaderResources
 {
-	Diligent::IShaderResourceBinding *ShaderResourceBinding;
-	Diligent::RESOURCE_STATE_TRANSITION_MODE StateTransitionMode;
+	NShaderResourcesBinding *ShaderResourceBinding;
+	Diligent::RESOURCE_STATE_TRANSITION_MODE StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE;
 };
 
 struct RDraw
@@ -120,7 +108,6 @@ struct RDrawIndexed
 struct NRenderCommand
 {
 	NRenderCommandType Type;
-	std::unique_ptr<RTemporaryBuffer> TmpBuffer;
 	union
 	{
 		RUpdateBuffer updateBuffer;
@@ -139,14 +126,14 @@ struct NRenderCommand
 
 enum class NDrawOrderType : mu_uint32
 {
-	Blend,
-	Depth,
+	Classifier,
 	Sequential,
 };
 
 struct RCommandListInfo
 {
 	NDrawOrderType Type;
+	NRenderClassify Classify;
 	mu_uint16 View;
 	union
 	{
@@ -163,21 +150,16 @@ public:
 	std::vector<NRenderCommand> Commands;
 };
 
-class RCommandListExtended : public RCommandList
-{
-public:
-	mu_uint32 Group = 0;
-	mu_uint32 Blend = 0;
-};
-
 class NRenderManager
 {
 public:
+	NRenderManager();
+
 	void Execute(Diligent::IDeviceContext *immediateContext);
 
 public:
-	void UpdateBuffer(const RUpdateBuffer &data, std::unique_ptr<RTemporaryBuffer> tmpBuffer = nullptr);
-	void UpdateBufferWithMap(const RUpdateBufferWithMap &data, std::unique_ptr<RTemporaryBuffer> tmpBuffer = nullptr);
+	void UpdateBuffer(const RUpdateBuffer &data);
+	void UpdateBufferWithMap(const RUpdateBufferWithMap &data);
 	void UpdateTexture(const RUpdateTexture &data);
 	void SetDynamicTexture(const RSetDynamicTexture &data);
 	void SetDynamicBuffer(const RSetDynamicBuffer &data);
@@ -192,8 +174,10 @@ private:
 	void PushCommandList(const RCommandListInfo &info);
 
 private:
-	RCommandListExtended DraftCommandList;
-	std::vector<std::unique_ptr<RCommandList>> CommandLists;
+	mu_uint32 Index = 0;
+	NPipelineStateInfo *PipelineInfo = nullptr;
+	RCommandList *DraftCommandList = nullptr;
+	std::vector<RCommandList> CommandLists;
 };
 
 #endif

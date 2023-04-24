@@ -5,9 +5,12 @@
 
 #include "t_graphics_layouts.h"
 #include "t_graphics_shader.h"
-#include "t_graphics_resources.h"
+#include "t_graphics_pipelineresources.h"
 #include "t_graphics_pipelines.h"
 #include "t_graphics_samplers.h"
+#include "t_graphics_texture.h"
+#include "t_graphics_buffer.h"
+#include "t_graphics_shaderresources.h"
 #include "t_graphics_rendermanager.h"
 
 constexpr mu_uint32 ColorWriteBits = 1;

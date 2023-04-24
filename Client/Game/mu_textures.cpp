@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "mu_textures.h"
-#include "mu_texture.h"
 #include "mu_graphics.h"
 
 namespace MUTextures
 {
+	mu_atomic_uint32_t TextureIdGenerator = 0;
+
 	template <class T> void SwapValue(T& a, T& b) {
 		T tmp = a;
 		a = b;
@@ -123,7 +124,7 @@ namespace MUTextures
 		return true;
 	}
 
-	std::unique_ptr<NTexture> Load(mu_utf8string path, const Diligent::SamplerDesc &samplerDesc)
+	std::unique_ptr<NGraphicsTexture> Load(mu_utf8string path, const Diligent::SamplerDesc &samplerDesc)
 	{
 		TextureInfo info;
 		FIBITMAP *bitmap = nullptr;
@@ -163,7 +164,7 @@ namespace MUTextures
 		}
 
 		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(samplerDesc));
-		return std::make_unique<NTexture>(texture, width, height, info.Alpha);
+		return std::make_unique<NGraphicsTexture>(TextureIdGenerator++, texture, width, height, info.Alpha);
 	}
 
 	struct SamplerMode

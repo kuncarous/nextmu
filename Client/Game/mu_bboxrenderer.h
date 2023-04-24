@@ -11,6 +11,7 @@ namespace MUBBoxRenderer
 	const mu_boolean Initialize();
 	void Destroy();
 
+	void Reset();
 	void Render(
 		NBoundingBox &bbox
 	);
