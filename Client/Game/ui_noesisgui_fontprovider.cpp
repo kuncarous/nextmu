@@ -33,7 +33,7 @@ namespace UINoesis
 
 	Noesis::Ptr<Noesis::Stream> FontProvider::OpenFont(const Noesis::Uri &folder, const char *filename) const
 	{
-		const mu_utf8string path = GetResourcesPath() + folder.Str() + filename;
+		const mu_utf8string path = SupportPathUTF8 + GetResourcesPath() + folder.Str() + "/" + filename;
 		return Stream::Load(path);
 	}
 };

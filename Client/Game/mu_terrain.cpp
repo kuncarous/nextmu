@@ -3,6 +3,7 @@
 #include "mu_graphics.h"
 #include "mu_textures.h"
 #include "mu_resourcesmanager.h"
+#include "mu_renderstate.h"
 #include "mu_state.h"
 #include "mu_crypt.h"
 #include "shared_binaryreader.h"
@@ -816,7 +817,7 @@ void NTerrain::Render()
 	bgfx::setTexture(4, TexturesSampler, Textures);
 	bgfx::setTexture(5, UVSampler, UVTexture);
 	bgfx::setTexture(6, AttributesSampler, AttributesTexture);
-	bgfx::submit(0, Program);
+	bgfx::submit(MURenderState::RenderView, Program);
 
 	// Render Grass
 	if (bgfx::isValid(GrassUVTexture))
@@ -831,7 +832,7 @@ void NTerrain::Render()
 		bgfx::setTexture(4, TexturesSampler, GrassTextures);
 		bgfx::setTexture(5, UVSampler, GrassUVTexture);
 		bgfx::setTexture(6, AttributesSampler, AttributesTexture);
-		bgfx::submit(0, GrassProgram);
+		bgfx::submit(MURenderState::RenderView, GrassProgram);
 	}
 }
 

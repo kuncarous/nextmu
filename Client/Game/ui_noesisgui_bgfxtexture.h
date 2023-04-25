@@ -17,7 +17,8 @@ namespace UINoesis
 			bgfx::TextureFormat::Enum format,
 			mu_boolean isInverted,
 			mu_boolean hasAlphaChannel,
-			bgfx::TextureHandle texture
+			bgfx::TextureHandle texture,
+			mu_boolean flippedY = false
 		);
 		~BGFXTexture();
 
@@ -46,6 +47,11 @@ namespace UINoesis
 			return Texture;
 		}
 
+		const mu_boolean IsFlippedY() const
+		{
+			return FlippedY;
+		}
+
 	private:
 		friend class BGFXRenderDevice;
 		mu_uint32 Width;
@@ -56,6 +62,7 @@ namespace UINoesis
 		mu_boolean Inverted;
 		mu_boolean Alpha;
 		bgfx::TextureHandle Texture;
+		mu_boolean FlippedY;
 	};
 };
 #endif

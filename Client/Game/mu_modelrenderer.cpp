@@ -111,7 +111,7 @@ void MUModelRenderer::RenderMesh(
 	bgfx::setUniform(BodyLightUniform, glm::value_ptr(config.BodyLight));
 
 	bgfx::setVertexBuffer(0, model->VertexBuffer, mesh.VertexBuffer.Offset, mesh.VertexBuffer.Count);
-	bgfx::submit(0, settings->Program);
+	bgfx::submit(MURenderState::RenderView, settings->Program);
 }
 
 void MUModelRenderer::RenderBody(

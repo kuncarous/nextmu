@@ -6,7 +6,6 @@
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
-	constexpr mu_uint32 RenderView = 255u;
 	const mu_utf8string GetResourcesPath();
 };
 #endif

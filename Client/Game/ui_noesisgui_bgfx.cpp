@@ -4,6 +4,8 @@
 #include "ui_noesisgui_bgfxtexture.h"
 #include "ui_noesisgui_consts.h"
 #include "mu_resourcesmanager.h"
+#include "mu_renderstate.h"
+#include "mu_config.h"
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
@@ -120,21 +122,20 @@ namespace UINoesis
 			renderer == bgfx::RendererType::Vulkan ||
 			renderer == bgfx::RendererType::Metal
 		);
+		Caps.depthRangeZeroToOne = (
+			renderer != bgfx::RendererType::OpenGL &&
+			renderer != bgfx::RendererType::OpenGLES
+		);
 	}
 
 	void BGFXRenderDevice::CreateShaders()
 	{
-		DummyLayout
-			.begin()
-			.add(bgfx::Attrib::Position, 1, bgfx::AttribType::Float)
-			.end();
-
 		for (mu_uint32 n = 0; n < Noesis::Shader::Vertex::Format::Count; ++n)
 		{
 			auto &layout = VertexLayouts[n];
 			if (layout.Layout.m_stride == 0)
 			{
-				layout.Layout.begin();
+				layout.Layout.begin(bgfx::RendererType::Direct3D11);
 				uint32_t attributes = Noesis::AttributesForFormat[n];
 				for (uint32_t j = 0; j < Noesis::Shader::Vertex::Format::Attr::Count; j++)
 				{
@@ -201,13 +202,15 @@ namespace UINoesis
 		mu_assert(bgfx::isValid(VertexUniforms[0].Handle) == true);
 		FragmentUniforms[1].Handle = bgfx::createUniform("cbuffer1_ps", bgfx::UniformType::Vec4, 32);
 		mu_assert(bgfx::isValid(VertexUniforms[1].Handle) == true);
+		TexturesUniform.Handle = bgfx::createUniform("flipped_ps", bgfx::UniformType::Vec4, (TextureUnit::Count / 4) + !!(TextureUnit::Count % 4));
+		mu_assert(bgfx::isValid(TexturesUniform.Handle) == true);
 	}
 
 	void BGFXRenderDevice::CreateBuffers()
 	{
-		auto &vertexLayout = DummyLayout;
-		VertexBuffer.Handle = bgfx::createDynamicVertexBuffer(static_cast<uint32_t>(DYNAMIC_VB_SIZE) / vertexLayout.getStride(), vertexLayout);
-		IndexBuffer.Handle = bgfx::createDynamicIndexBuffer(static_cast<uint32_t>(DYNAMIC_IB_SIZE) / sizeof(mu_uint16));
+		//auto &vertexLayout = DummyLayout;
+		//VertexBuffer.Handle = bgfx::createDynamicVertexBuffer(static_cast<uint32_t>(DYNAMIC_VB_SIZE) / vertexLayout.getStride(), vertexLayout);
+		//IndexBuffer.Handle = bgfx::createDynamicIndexBuffer(static_cast<uint32_t>(DYNAMIC_IB_SIZE) / sizeof(mu_uint16));
 	}
 
 	const mu_char *ShaderIDs[Noesis::Shader::Count] = {
@@ -420,12 +423,7 @@ namespace UINoesis
 			false,
 			1,
 			textureFormat,
-			(
-				sampleCount < 2
-				? BGFX_TEXTURE_RT
-				: 0
-			) |
-			BGFX_SAMPLER_POINT
+			(sampleCount > 1 ? BGFX_TEXTURE_BLIT_DST : BGFX_TEXTURE_RT) | BGFX_SAMPLER_POINT
 		);
 		if (bgfx::isValid(color) == false)
 		{
@@ -441,8 +439,7 @@ namespace UINoesis
 				false,
 				1,
 				textureFormat,
-				msaaFlags |
-				BGFX_SAMPLER_POINT
+				msaaFlags | BGFX_SAMPLER_POINT
 			);
 			if (bgfx::isValid(colorMSAA) == false)
 			{
@@ -459,9 +456,8 @@ namespace UINoesis
 				height,
 				false,
 				1,
-				bgfx::TextureFormat::D0S8,
-				msaaFlags |
-				BGFX_SAMPLER_NONE
+				bgfx::TextureFormat::D24S8,
+				msaaFlags | BGFX_SAMPLER_NONE | BGFX_TEXTURE_RT_WRITE_ONLY
 			);
 			if (bgfx::isValid(depthStencil) == false)
 			{
@@ -472,7 +468,7 @@ namespace UINoesis
 		}
 
 		const bgfx::TextureHandle handles[2] = {
-			color,
+			bgfx::isValid(colorMSAA) ? colorMSAA : color,
 			depthStencil
 		};
 		auto framebuffer = bgfx::createFrameBuffer(
@@ -496,7 +492,8 @@ namespace UINoesis
 				textureFormat,
 				true,
 				true,
-				color
+				color,
+				true
 			),
 			colorMSAA,
 			depthStencil,
@@ -577,7 +574,7 @@ namespace UINoesis
 					   uint32_t width, uint32_t height, const void *data)
 	{
 		const auto bgfxTexture = static_cast<BGFXTexture *>(texture);
-		const bgfx::Memory *memory = bgfx::copy(data, width * height * static_cast<mu_uint32>(CalculateTextureSize(bgfxTexture->Format, width, height, 1)));
+		const bgfx::Memory *memory = bgfx::copy(data, static_cast<mu_uint32>(CalculateTextureSize(bgfxTexture->Format, width, height, 1)));
 		if (!memory) return;
 
 		bgfx::updateTexture2D(
@@ -603,6 +600,7 @@ namespace UINoesis
 	void BGFXRenderDevice::EndOffscreenRender()
 	{
 		// Nothing to do
+		RenderTarget = nullptr;
 	}
 
 	/// Begins rendering onscreen commands
@@ -610,12 +608,18 @@ namespace UINoesis
 	{
 		// Nothing to do
 		// Begin to render on screen
+		RenderView = MURenderState::RenderView;
+		bgfx::setViewRect(RenderView, 0, 0, MUConfig::GetWindowWidth(), MUConfig::GetWindowHeight());
+		bgfx::setViewMode(RenderView, bgfx::ViewMode::Sequential);
 	}
 
 	/// Ends rendering onscreen commands
 	void BGFXRenderDevice::EndOnscreenRender()
 	{
 		// Nothing to do
+		bgfx::setViewMode(RenderView, bgfx::ViewMode::Default);
+		RenderView = 0;
+		NextRenderView = 0;
 	}
 
 	/// Binds render target and sets viewport to cover the entire surface. The existing contents of
@@ -631,6 +635,28 @@ namespace UINoesis
 		RenderViewport.y = 0u;
 		RenderViewport.width = bgfxTexture->GetWidth();
 		RenderViewport.height = bgfxTexture->GetHeight();
+
+		RenderView = NextRenderView++;
+		bgfx::setViewFrameBuffer(RenderView, bgfxSurface->Framebuffer);
+		bgfx::setViewMode(RenderView, bgfx::ViewMode::Sequential);
+		bgfx::setViewRect(RenderView, 0, 0, RenderViewport.width, RenderViewport.height);
+		bgfx::setViewClear(RenderView, BGFX_CLEAR_NONE);
+		bgfx::touch(RenderView);
+	}
+
+	/// Indicates that until the next call to EndTile(), all drawing commands will only update the
+	/// contents of the render target defined by the extension of the given tile. This is a good
+	/// place to enable scissoring and apply optimizations for tile-based GPU architectures.
+	void BGFXRenderDevice::BeginTile(Noesis::RenderTarget* surface, const Noesis::Tile& tile)
+	{
+		auto texture = surface->GetTexture();
+		Scissor = bgfx::setScissor(tile.x, tile.y, tile.width, tile.height);
+	}
+
+	/// Completes rendering to the tile specified by BeginTile()
+	void BGFXRenderDevice::EndTile(Noesis::RenderTarget* surface)
+	{
+		Scissor = bgfx::kInvalidHandle;
 	}
 
 	/// Resolves multisample render target. Transient surfaces (stencil, colorAA) are discarded.
@@ -663,52 +689,26 @@ namespace UINoesis
 	void *BGFXRenderDevice::MapVertices(uint32_t bytes)
 	{
 		mu_info("[MapVertices] {}", bytes);
-		if (CPUVertexBuffer.Offset + bytes > DYNAMIC_VB_SIZE)
-			CPUVertexBuffer.Offset = 0;
-		CPUVertexBuffer.AllocateSize = bytes;
-		return CPUVertexBuffer.Buffer.get() + CPUVertexBuffer.Offset;
+		return VertexBuffer.data();
 	}
 
 	/// Invalidates the pointer previously mapped
 	void BGFXRenderDevice::UnmapVertices()
 	{
 		mu_info("[UnmapVertices]");
-		VertexUpdates.push_back(
-			BGFXUpdateBuffer(
-				CPUVertexBuffer.Offset,
-				bgfx::copy(
-					CPUVertexBuffer.Buffer.get() + CPUVertexBuffer.Offset,
-					CPUVertexBuffer.AllocateSize
-				)
-			)
-		);
-		CPUVertexBuffer.Offset += CPUVertexBuffer.AllocateSize;
 	}
 
 	/// Gets a pointer to stream 16-bit indices (bytes <= DYNAMIC_IB_SIZE)
 	void *BGFXRenderDevice::MapIndices(uint32_t bytes)
 	{
 		mu_info("[MapIndices] {}", bytes);
-		if (CPUIndexBuffer.Offset + bytes > DYNAMIC_IB_SIZE)
-			CPUIndexBuffer.Offset = 0;
-		CPUIndexBuffer.AllocateSize = bytes;
-		return CPUIndexBuffer.Buffer.get() + CPUIndexBuffer.Offset;
+		return IndexBuffer.data();
 	}
 
 	/// Invalidates the pointer previously mapped
 	void BGFXRenderDevice::UnmapIndices()
 	{
 		mu_info("[UnmapIndices]");
-		IndexUpdates.push_back(
-			BGFXUpdateBuffer(
-				CPUIndexBuffer.Offset,
-				bgfx::copy(
-					CPUIndexBuffer.Buffer.get() + CPUIndexBuffer.Offset,
-					CPUIndexBuffer.AllocateSize
-				)
-			)
-		);
-		CPUIndexBuffer.Offset += CPUIndexBuffer.AllocateSize;
 	}
 
 	void BGFXRenderDevice::SetTexture(const mu_uint8 stage, BGFXTexture *texture, Noesis::SamplerState sampler)
@@ -736,6 +736,7 @@ namespace UINoesis
 		case Noesis::MipFilter::Linear: break;
 		}
 
+		TextureFlipped[stage] = static_cast<mu_float>(texture->IsFlippedY());
 		bgfx::setTexture(stage, TextureSamplers[stage].Handle, texture->GetTexture(), flags);
 	}
 
@@ -769,12 +770,7 @@ namespace UINoesis
 
 	void BGFXRenderDevice::SetRenderState(Noesis::RenderState state, uint8_t stencilRef)
 	{
-		uint64_t bgfxState = (
-			BGFX_STATE_WRITE_Z
-			| BGFX_STATE_DEPTH_TEST_LESS
-			| BGFX_STATE_CULL_CW
-			| BGFX_STATE_MSAA
-		);
+		uint64_t bgfxState = BGFX_STATE_MSAA;
 
 		if (state.f.colorEnable > 0)
 			bgfxState |= BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A;
@@ -788,10 +784,6 @@ namespace UINoesis
 		case Noesis::BlendMode::SrcOver_Additive: bgfxState |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_INV_SRC_ALPHA); break;
 		}
 
-		bgfx::setState(
-			bgfxState
-		);
-
 		switch (state.f.stencilMode)
 		{
 		case Noesis::StencilMode::Disabled: break;
@@ -802,7 +794,8 @@ namespace UINoesis
 				BGFX_STENCIL_OP_PASS_Z_KEEP |
 				BGFX_STENCIL_TEST_EQUAL |
 				BGFX_STENCIL_FUNC_REF(stencilRef) |
-				BGFX_STENCIL_FUNC_RMASK(255)
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
 			);
 			break;
 		case Noesis::StencilMode::Equal_Incr:
@@ -812,7 +805,8 @@ namespace UINoesis
 				BGFX_STENCIL_OP_PASS_Z_INCR |
 				BGFX_STENCIL_TEST_EQUAL |
 				BGFX_STENCIL_FUNC_REF(stencilRef) |
-				BGFX_STENCIL_FUNC_RMASK(255)
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
 			);
 			break;
 		case Noesis::StencilMode::Equal_Decr:
@@ -822,7 +816,8 @@ namespace UINoesis
 				BGFX_STENCIL_OP_PASS_Z_DECR |
 				BGFX_STENCIL_TEST_EQUAL |
 				BGFX_STENCIL_FUNC_REF(stencilRef) |
-				BGFX_STENCIL_FUNC_RMASK(255)
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
 			);
 			break;
 		case Noesis::StencilMode::Clear:
@@ -832,10 +827,30 @@ namespace UINoesis
 				BGFX_STENCIL_OP_PASS_Z_ZERO |
 				BGFX_STENCIL_TEST_ALWAYS |
 				BGFX_STENCIL_FUNC_REF(0) |
-				BGFX_STENCIL_FUNC_RMASK(255)
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
+			);
+			break;
+		case Noesis::StencilMode::Disabled_ZTest:
+			bgfxState |= BGFX_STATE_DEPTH_TEST_LEQUAL;
+			break;
+		case Noesis::StencilMode::Equal_Keep_ZTest:
+			bgfxState |= BGFX_STATE_DEPTH_TEST_LEQUAL;
+			bgfx::setStencil(
+				BGFX_STENCIL_OP_FAIL_S_KEEP |
+				BGFX_STENCIL_OP_FAIL_Z_KEEP |
+				BGFX_STENCIL_OP_PASS_Z_KEEP |
+				BGFX_STENCIL_TEST_EQUAL |
+				BGFX_STENCIL_FUNC_REF(stencilRef) |
+				BGFX_STENCIL_FUNC_RMASK(255),
+				BGFX_STENCIL_NONE
 			);
 			break;
 		}
+
+		bgfx::setState(
+			bgfxState
+		);
 	}
 
 	/// Draws primitives for the given batch
@@ -847,39 +862,27 @@ namespace UINoesis
 		auto shader = static_cast<Noesis::Shader::Enum>(batch.shader.v);
 		auto vertexShader = Noesis::VertexForShader[shader];
 
-		EnsureProgram(static_cast<Noesis::Shader::Enum>(batch.shader.v));
-		const bgfx::ProgramHandle program = Programs[batch.shader.v];
+		EnsureProgram(shader);
+		const bgfx::ProgramHandle program = Programs[shader];
 		if (bgfx::isValid(program) == false) return;
 
 		auto format = Noesis::FormatForVertex[vertexShader];
 		auto stride = Noesis::SizeForFormat[format];
 		auto &vertexBuffer = VertexBuffer;
-		if (VertexUpdates.size() > 0)
-		{
-			auto &vertexUpdate = VertexUpdates[VertexUpdatesIndex++];
-
-			bgfx::update(
-				vertexBuffer.Handle,
-				vertexUpdate.Offset / stride,
-				vertexUpdate.Memory
-			);
-		}
-
 		auto &indexBuffer = IndexBuffer;
-		if (IndexUpdates.size() > 0)
-		{
-			auto &indexUpdate = IndexUpdates[IndexUpdatesIndex++];
 
-			bgfx::update(
-				indexBuffer.Handle,
-				indexUpdate.Offset / sizeof(mu_uint16),
-				indexUpdate.Memory
-			);
-		}
+		const auto &layout = VertexLayouts[format];
+		bgfx::TransientVertexBuffer vb{};
+		bgfx::allocTransientVertexBuffer(&vb, batch.numVertices, layout.Layout);
+		mu_memcpy(vb.data, VertexBuffer.data() + batch.vertexOffset, batch.numVertices * layout.Layout.getStride());
+
+		bgfx::TransientIndexBuffer ib{};
+		bgfx::allocTransientIndexBuffer(&ib, batch.numIndices);
+		mu_memcpy(ib.data, IndexBuffer.data() + batch.startIndex * sizeof(mu_uint16), batch.numIndices * sizeof(mu_uint16));
 
 		SetRenderState(batch.renderState, batch.stencilRef);
-		bgfx::setVertexBuffer(0, vertexBuffer.Handle, batch.vertexOffset / stride, batch.numVertices, VertexLayouts[format].Handle);
-		bgfx::setIndexBuffer(indexBuffer.Handle, batch.startIndex, batch.numIndices);
+		bgfx::setVertexBuffer(0, &vb, 0, batch.numVertices, layout.Handle);
+		bgfx::setIndexBuffer(&ib, 0, batch.numIndices);
 		SetTextures(batch);
 
 		static mu_float buffer[128];
@@ -898,26 +901,23 @@ namespace UINoesis
 		if (batch.pixelUniforms[0].values != nullptr)
 		{
 			mu_memcpy(buffer, batch.pixelUniforms[0].values, sizeof(mu_float) * batch.pixelUniforms[0].numDwords);
-			bgfx::setUniform(FragmentUniforms[0].Handle, buffer);
+			bgfx::setUniform(FragmentUniforms[0].Handle, buffer, (batch.pixelUniforms[0].numDwords / 4) + !!(batch.pixelUniforms[0].numDwords % 4));
 		}
 
 		if (batch.pixelUniforms[1].values != nullptr)
 		{
 			mu_memcpy(buffer, batch.pixelUniforms[1].values, sizeof(mu_float) * batch.pixelUniforms[1].numDwords);
-			bgfx::setUniform(FragmentUniforms[1].Handle, buffer);
+			bgfx::setUniform(FragmentUniforms[1].Handle, buffer, (batch.pixelUniforms[1].numDwords / 4) + !!(batch.pixelUniforms[1].numDwords % 4));
+		}
+
+		bgfx::setUniform(TexturesUniform.Handle, TextureFlipped, (TextureUnit::Count / 4) + !!(TextureUnit::Count % 4));
+
+		if (Scissor != bgfx::kInvalidHandle)
+		{
+			bgfx::setScissor(Scissor);
 		}
 
 		bgfx::submit(RenderView, program);
-
-		if (VertexUpdatesIndex >= VertexUpdates.size()) {
-			VertexUpdates.clear();
-			VertexUpdatesIndex = 0;
-		}
-
-		if (IndexUpdatesIndex >= IndexUpdates.size()) {
-			IndexUpdates.clear();
-			IndexUpdatesIndex = 0;
-		}
 	}
 };
 #endif

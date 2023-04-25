@@ -1,63 +1,3 @@
-#ifdef PAINT_SOLID
-    #define HAS_COLOR 1
-#endif
-
-#if defined(PAINT_LINEAR) || defined(PAINT_RADIAL) || defined(PAINT_PATTERN)
-    #define HAS_UV0 1
-#endif
-
-#ifdef CLAMP_PATTERN
-    #define HAS_RECT 1
-#endif
-
-#if defined(REPEAT_PATTERN) || defined(MIRRORU_PATTERN) || defined(MIRRORV_PATTERN) || defined(MIRROR_PATTERN)
-    #define HAS_RECT 1
-    #define HAS_TILE 1
-#endif
-
-#ifdef EFFECT_PATH_AA
-    #define HAS_COVERAGE 1
-#endif
-
-#ifdef EFFECT_SDF
-    #define HAS_UV1 1
-    #define HAS_ST1 1
-	#define SDF 1
-    #define SDF_SCALE 7.96875
-    #define SDF_BIAS 0.50196078431
-    #define SDF_AA_FACTOR 0.65
-    #define SDF_BASE_MIN 0.125
-    #define SDF_BASE_MAX 0.25
-    #define SDF_BASE_DEV -0.65
-#endif
-
-#ifdef EFFECT_OPACITY
-    #define HAS_UV1 1
-#endif
-
-#ifdef EFFECT_SHADOW
-    #define HAS_UV1 1
-    #define HAS_RECT 1
-#endif
-
-#ifdef EFFECT_BLUR
-    #define HAS_UV1 1
-#endif
-
-#ifdef EFFECT_DOWNSAMPLE
-    #define DOWNSAMPLE 1
-    #define HAS_UV0 1
-    #define HAS_UV1 1
-    #define HAS_UV2 1
-    #define HAS_UV3 1
-#endif
-
-#ifdef EFFECT_UPSAMPLE
-    #define HAS_COLOR 1
-    #define HAS_UV0 1
-    #define HAS_UV1 1
-#endif
-
 #include "./parameters.sh"
 
 $input a_position COLOR_INPUT UV0_INPUT UV1_INPUT RECT_INPUT TILE_INPUT COVERAGE_INPUT IMAGE_INPUT
@@ -78,6 +18,25 @@ float SRGBToLinear(float v)
     {
       return pow( v * (1.0 / 1.055) + 0.0521327, 2.4);
     }
+}
+
+// BGFX is missing Uint16 support...
+vec4 Uint16UnormStep = vec4(
+	1.0,
+	1.0,
+	1.0,
+	1.0
+);
+vec4 Int16x4SNormToUnorm(vec4 value)
+{
+	vec4 select = vec4(lessThanEqual(value, Uint16UnormStep));
+	// Why I didn't use a single mix? because it is only supported in OpenGL 4.0+ and OpenGLES 3.0+ only
+	return vec4(
+		mix(value.x * 0.5, 0.5 + (1.0 - value.x) * 0.5, select.x),
+		mix(value.y * 0.5, 0.5 + (1.0 - value.y) * 0.5, select.y),
+		mix(value.z * 0.5, 0.5 + (1.0 - value.z) * 0.5, select.z),
+		mix(value.w * 0.5, 0.5 + (1.0 - value.w) * 0.5, select.w)
+	);
 }
 
 void main()
@@ -114,7 +73,7 @@ void main()
 #endif
 
 #ifdef HAS_RECT
-    v_rect = a_texcoord2;
+    v_rect = Int16x4SNormToUnorm(a_texcoord2);
 #endif
 
 #ifdef HAS_TILE

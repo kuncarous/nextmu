@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "mu_bboxrenderer.h"
 #include "mu_resourcesmanager.h"
+#include "mu_renderstate.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -118,6 +119,6 @@ namespace MUBBoxRenderer
 		bgfx::setUniform(BBoxMaxUniform, glm::value_ptr(bbox.Max));
 		bgfx::setVertexBuffer(0, VertexBuffer);
 		bgfx::setIndexBuffer(IndexBuffer);
-		bgfx::submit(0, BoundingBoxProgram);
+		bgfx::submit(MURenderState::RenderView, BoundingBoxProgram);
 	}
 }

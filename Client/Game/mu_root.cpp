@@ -370,8 +370,8 @@ namespace MURoot
 			const auto windowHeight = MUConfig::GetWindowHeight();
 
 			// Set view 0 default viewport.
-			bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(windowWidth), static_cast<uint16_t>(windowHeight));
-			bgfx::touch(0);
+			bgfx::setViewRect(MURenderState::RenderView, 0, 0, static_cast<uint16_t>(windowWidth), static_cast<uint16_t>(windowHeight));
+			bgfx::touch(MURenderState::RenderView);
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_IMGUI
 			ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
@@ -419,7 +419,7 @@ namespace MURoot
 
 			camera.GenerateFrustum(view, frustumProjection);
 
-			bgfx::setViewTransform(0, view, projection);
+			bgfx::setViewTransform(MURenderState::RenderView, view, projection);
 			MURenderState::AttachCamera(&camera);
 			MURenderState::AttachEnvironment(&environment);
 

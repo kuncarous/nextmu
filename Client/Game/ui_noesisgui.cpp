@@ -41,7 +41,7 @@ namespace UINoesis
 		Noesis::GUI::SetFontProvider(Noesis::MakePtr<FontProvider>());
 		Noesis::GUI::SetTextureProvider(Noesis::MakePtr<TextureProvider>());
 
-		const char *fonts[] = { "Fonts/Exo2", "Fonts/Arial", "Fonts/Roboto" };
+		const char *fonts[] = { "Roboto", "Exo2", "Arial" };
 
 		Noesis::GUI::LoadApplicationResources("Theme/NoesisTheme.DarkBlue.xaml");
 		Noesis::GUI::SetFontFallbacks(fonts, 3);
@@ -64,20 +64,20 @@ namespace UINoesis
 
 	void Destroy()
 	{
-		if (Device && Device->Release() == 0)
-		{
-			Device = nullptr;
-		}
-
 		if (View && View->Release() == 0)
 		{
 			View = nullptr;
+		}
+
+		if (Device && Device->Release() == 0)
+		{
+			Device = nullptr;
 		}
 	}
 
 	const mu_boolean CreateView()
 	{
-		Noesis::Ptr<Noesis::FrameworkElement> xaml = Noesis::GUI::LoadXaml<Noesis::FrameworkElement>("Lottie.xaml");
+		Noesis::Ptr<Noesis::FrameworkElement> xaml = Noesis::GUI::LoadXaml<Noesis::FrameworkElement>("UpdateScene.xaml");
 		if (!xaml)
 		{
 			mu_error("failed to load xaml");

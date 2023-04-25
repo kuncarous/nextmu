@@ -12,7 +12,8 @@ namespace UINoesis
 		bgfx::TextureFormat::Enum format,
 		mu_boolean isInverted,
 		mu_boolean hasAlphaChannel,
-		bgfx::TextureHandle texture
+		bgfx::TextureHandle texture,
+		mu_boolean flippedY
 	) :
 		Width(width),
 		Height(height),
@@ -21,7 +22,8 @@ namespace UINoesis
 		Format(format),
 		Inverted(isInverted),
 		Alpha(hasAlphaChannel),
-		Texture(texture)
+		Texture(texture),
+		FlippedY(flippedY)
 	{
 
 	}

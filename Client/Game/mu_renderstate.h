@@ -12,6 +12,7 @@ class NTexture;
 
 namespace MURenderState
 {
+	constexpr bgfx::ViewId RenderView = 240;
 	void Reset();
 
 	void AttachCamera(NCamera *camera);
