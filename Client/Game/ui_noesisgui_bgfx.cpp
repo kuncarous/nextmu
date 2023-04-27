@@ -40,8 +40,8 @@ namespace UINoesis
 		for (mu_uint32 l = 0; l < levels; ++l)
 		{
 			size += width * height * bytesPerPixel;
-			width >>= 1;
-			height >>= 1;
+			width = std::max(width >> 1u, 1u);
+			height = std::max(height >> 1u, 1u);
 		}
 
 		return size;
@@ -202,8 +202,6 @@ namespace UINoesis
 		mu_assert(bgfx::isValid(VertexUniforms[0].Handle) == true);
 		FragmentUniforms[1].Handle = bgfx::createUniform("cbuffer1_ps", bgfx::UniformType::Vec4, 32);
 		mu_assert(bgfx::isValid(VertexUniforms[1].Handle) == true);
-		TexturesUniform.Handle = bgfx::createUniform("flipped_ps", bgfx::UniformType::Vec4, (TextureUnit::Count / 4) + !!(TextureUnit::Count % 4));
-		mu_assert(bgfx::isValid(TexturesUniform.Handle) == true);
 	}
 
 	void BGFXRenderDevice::CreateBuffers()
@@ -490,10 +488,9 @@ namespace UINoesis
 				1,
 				sampleCount,
 				textureFormat,
+				false,
 				true,
-				true,
-				color,
-				true
+				color
 			),
 			colorMSAA,
 			depthStencil,
@@ -533,11 +530,13 @@ namespace UINoesis
 		{
 			const auto bytesPerPixel = GetTextureBytesPerPixel(textureFormat);
 			mu_uint8 *dest = memory->data;
-			for (mu_uint32 l = 0, w = width, h = height; l < numLevels; ++l, w >>= 1, h >>= 1)
+			for (mu_uint32 l = 0, w = width, h = height; l < numLevels; ++l)
 			{
 				const mu_uint32 size = w * h * bytesPerPixel;
 				mu_memcpy(dest, data[l], size);
 				dest += size;
+				w = std::max(w >> 1u, 1u);
+				h = std::max(h >> 1u, 1u);
 			}
 		}
 
@@ -558,7 +557,7 @@ namespace UINoesis
 		return Noesis::MakePtr<BGFXTexture>(
 			width,
 			height,
-			1,
+			numLevels,
 			1,
 			textureFormat,
 			true,
@@ -736,7 +735,6 @@ namespace UINoesis
 		case Noesis::MipFilter::Linear: break;
 		}
 
-		TextureFlipped[stage] = static_cast<mu_float>(texture->IsFlippedY());
 		bgfx::setTexture(stage, TextureSamplers[stage].Handle, texture->GetTexture(), flags);
 	}
 
@@ -909,8 +907,6 @@ namespace UINoesis
 			mu_memcpy(buffer, batch.pixelUniforms[1].values, sizeof(mu_float) * batch.pixelUniforms[1].numDwords);
 			bgfx::setUniform(FragmentUniforms[1].Handle, buffer, (batch.pixelUniforms[1].numDwords / 4) + !!(batch.pixelUniforms[1].numDwords % 4));
 		}
-
-		bgfx::setUniform(TexturesUniform.Handle, TextureFlipped, (TextureUnit::Count / 4) + !!(TextureUnit::Count % 4));
 
 		if (Scissor != bgfx::kInvalidHandle)
 		{

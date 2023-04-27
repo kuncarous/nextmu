@@ -172,11 +172,9 @@ namespace UINoesis
 		BGFXRenderTarget *RenderTarget = nullptr;
 		BGFXViewport RenderViewport;
 		std::array<BGFXVertexLayout, Noesis::Shader::Vertex::Format::Count> VertexLayouts;
-		mu_float TextureFlipped[TextureUnit::Count] = {};
 		BGFXTextureSampler TextureSamplers[TextureUnit::Count];
 		BGFXUniform VertexUniforms[2];
 		BGFXUniform FragmentUniforms[2];
-		BGFXUniform TexturesUniform;
 
 		std::array<mu_uint8, DYNAMIC_VB_SIZE> VertexBuffer;
 		std::array<mu_uint8, DYNAMIC_IB_SIZE> IndexBuffer;

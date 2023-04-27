@@ -66,18 +66,12 @@ $input v_color0 UV0_OUTPUT UV1_OUTPUT DOWNSAMPLE_OUTPUT SDF_OUTPUT RECT_OUTPUT T
 
 uniform vec4 cbuffer0_ps[2];
 uniform vec4 cbuffer1_ps[32];
-uniform vec4 flipped_ps[2];
 
 SAMPLER2D(pattern, 0);
 SAMPLER2D(ramps, 1);
 SAMPLER2D(image, 2);
 SAMPLER2D(glyphs, 3);
 SAMPLER2D(shadow, 4);
-
-vec2 flipY(vec2 uv, float flip)
-{
-	return mix(uv, vec2(uv.x, 1.0-uv.y), flip);
-}
 
 #ifdef WAVES_BRUSH
 float wave(vec2 uv, vec2 s12, vec2 t12, vec2 f12, vec2 h12)
@@ -138,7 +132,7 @@ vec4 GetCustomPattern()
 vec4 GetCustomPattern()
 {
 	vec4 color = cbuffer1_ps[0];
-	vec4 c = texture2D(pattern, flipY(uv0, flipped_ps[0].x));
+	vec4 c = texture2D(pattern, uv0);
 	float l = c.r * 0.30 + c.g * 0.59 + c.b * 0.11;
 	return vec4(color.r * l, color.g * l, color.b * l, color.a);
 }
@@ -195,14 +189,14 @@ void main()
         float opacity_ = 1.0;
 
     #elif defined(PAINT_LINEAR)
-        vec4 paint = texture2D(ramps, flipY(v_texcoord0, flipped_ps[0].y));
+        vec4 paint = texture2D(ramps, v_texcoord0);
         float opacity_ = cbuffer0_ps[0][0];
 
     #elif defined(PAINT_RADIAL)
         float dd = cbuffer0_ps[1][0] * v_texcoord0.x - cbuffer0_ps[1][1] * v_texcoord0.y;
         float u = cbuffer0_ps[0][0] * v_texcoord0.x + cbuffer0_ps[0][1] * v_texcoord0.y + cbuffer0_ps[0][2] * 
             sqrt(v_texcoord0.x * v_texcoord0.x + v_texcoord0.y * v_texcoord0.y - dd * dd);
-        vec4 paint = texture2D(ramps, flipY(vec2(u, cbuffer0_ps[1][2]), flipped_ps[0].y));
+        vec4 paint = texture2D(ramps, vec2(u, cbuffer0_ps[1][2]));
         float opacity_ = cbuffer0_ps[0][3];
 
     #elif defined(PAINT_PATTERN)
@@ -210,7 +204,7 @@ void main()
             vec4 paint = GetCustomPattern();
         #elif defined(CLAMP_PATTERN)
             float inside = v_texcoord0 == clamp(v_texcoord0, v_rect.xy, v_rect.zw) ? 1.0 : 0.0;
-            vec4 paint = inside * texture2D(pattern, flipY(v_texcoord0, flipped_ps[0].x));
+            vec4 paint = inside * texture2D(pattern, v_texcoord0);
         #elif defined(REPEAT_PATTERN) || defined(MIRRORU_PATTERN) || defined(MIRRORV_PATTERN) || defined(MIRROR_PATTERN)
             vec2 uv = (v_texcoord0 - v_tile.xy) / v_tile.zw;
             #if defined(REPEAT_PATTERN)
@@ -226,9 +220,9 @@ void main()
             #endif
             uv = uv * v_tile.zw + v_tile.xy;
             float inside = v_texcoord0 == clamp(v_texcoord0, v_rect.xy, v_rect.zw) ? 1.0 : 0.0;
-            vec4 paint = inside * texture2DGrad(pattern, flipY(uv, flipped_ps[0].x), dFdx(v_texcoord0), dFdy(v_texcoord0));
+            vec4 paint = inside * texture2DGrad(pattern, uv, dFdx(v_texcoord0), dFdy(v_texcoord0));
         #else
-            vec4 paint = texture2D(pattern, flipY(v_texcoord0, flipped_ps[0].x));
+            vec4 paint = texture2D(pattern, v_texcoord0);
         #endif
         float opacity_ = cbuffer0_ps[0][0];
     #endif
@@ -252,21 +246,21 @@ void main()
         gl_FragColor = (opacity_ * v_coverage) * paint;
 
     #elif defined(EFFECT_OPACITY)
-        gl_FragColor = texture2D(image, flipY(v_texcoord1, flipped_ps[0].z)) * (opacity_ * paint.a);
+        gl_FragColor = texture2D(image, v_texcoord1) * (opacity_ * paint.a);
 
     #elif defined(EFFECT_SHADOW)
         vec4 shadowColor = cbuffer1_ps[0];
         vec2 offset = vec2(cbuffer1_ps[1].x, -cbuffer1_ps[1].y);
         vec2 uv = clamp(v_texcoord1 - offset, v_rect.xy, v_rect.zw);
-        float alpha = mix(texture2D(image, flipY(uv, flipped_ps[0].z)).a, texture2D(shadow, flipY(uv, flipped_ps[1].x)).a, cbuffer1_ps[1].z);
-        vec4 img = texture2D(image, flipY(clamp(v_texcoord1, v_rect.xy, v_rect.zw), flipped_ps[0].z));
+        float alpha = mix(texture2D(image, uv).a, texture2D(shadow, uv).a, cbuffer1_ps[1].z);
+        vec4 img = texture2D(image, clamp(v_texcoord1, v_rect.xy, v_rect.zw));
         gl_FragColor = (img + (1.0 - img.a) * (shadowColor * alpha)) * (opacity_ * paint.a);
 
     #elif defined(EFFECT_BLUR)
-        gl_FragColor = mix(texture2D(image, flipY(v_texcoord1, flipped_ps[0].z)), texture2D(shadow, flipY(v_texcoord1, flipped_ps[1].x)), cbuffer1_ps[0].x) * (opacity_ * paint.a);
+        gl_FragColor = mix(texture2D(image, v_texcoord1), texture2D(shadow, v_texcoord1), cbuffer1_ps[0].x) * (opacity_ * paint.a);
 
     #elif defined(EFFECT_SDF)
-        float distance = SDF_SCALE * (texture2D(glyphs, flipY(v_texcoord1, flipped_ps[0].w)).r - SDF_BIAS);
+        float distance = SDF_SCALE * (texture2D(glyphs, v_texcoord1).r - SDF_BIAS);
         vec2 grad = dFdx(v_st1);
 
         float gradLen = length(grad);
@@ -277,10 +271,10 @@ void main()
         gl_FragColor = (alpha * opacity_) * paint;
 
     #elif defined(EFFECT_DOWNSAMPLE)
-        gl_FragColor = (texture2D(pattern, flipY(v_texcoord0, flipped_ps[0].x)) + texture2D(pattern, flipY(v_texcoord1, flipped_ps[0].x)) + texture2D(pattern, flipY(v_texcoord2, flipped_ps[0].x)) + texture2D(pattern, flipY(v_texcoord3, flipped_ps[0].x))) * 0.25;
+        gl_FragColor = (texture2D(pattern, v_texcoord0) + texture2D(pattern, v_texcoord1) + texture2D(pattern, v_texcoord2) + texture2D(pattern, v_texcoord3)) * 0.25;
 
     #elif defined(EFFECT_UPSAMPLE)
-        gl_FragColor = mix(texture2D(image, flipY(v_texcoord1, flipped_ps[0].z)), texture2D(pattern, flipY(v_texcoord0, flipped_ps[0].x)), v_color0.a);
+        gl_FragColor = mix(texture2D(image, v_texcoord1), texture2D(pattern, v_texcoord0), v_color0.a);
 
     #else
         #error EFFECT not defined

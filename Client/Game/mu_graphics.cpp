@@ -29,6 +29,7 @@ namespace MUGraphics
 
 		bgfx::Init init;
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
+		//init.type = bgfx::RendererType::OpenGL;
 		init.type = bgfx::RendererType::Direct3D11;
 #else
 		init.type = bgfx::RendererType::Count;
