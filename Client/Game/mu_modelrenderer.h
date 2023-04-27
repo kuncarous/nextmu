@@ -22,7 +22,7 @@ public:
 		NModel *model,
 		const mu_uint32 meshIndex,
 		const NRenderConfig &config,
-		cglm::mat4 modelViewProj,
+		const glm::mat4 modelViewProj,
 		const NMeshRenderSettings *settings = nullptr
 	);
 	static void RenderBody(

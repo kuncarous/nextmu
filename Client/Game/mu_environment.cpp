@@ -6,8 +6,11 @@
 #include "mu_bboxrenderer.h"
 #include "mu_renderstate.h"
 #include "mu_threadsmanager.h"
+#include "mu_graphics.h"
+#include "mu_config.h"
 #include <algorithm>
 #include <execution>
+#include <MapHelper.hpp>
 
 enum class NThreadMode {
 	Single,
@@ -20,6 +23,11 @@ constexpr NThreadMode ThreadMode = NThreadMode::Multi;
 
 const mu_boolean NEnvironment::Initialize()
 {
+	if (CreateShadowMap() == false)
+	{
+		return false;
+	}
+
 	Objects.reset(new (std::nothrow) NObjects());
 	if (!Objects || Objects->Initialize() == false)
 	{
@@ -62,6 +70,53 @@ void NEnvironment::Destroy()
 	}
 }
 
+const mu_boolean NEnvironment::CreateShadowMap()
+{
+	const auto device = MUGraphics::GetDevice();
+	if (MUConfig::GetEnableShadows() == false)
+	{
+		return true;
+	}
+
+	ShadowResourceId = GenerateResourceId();
+	ShadowMap.reset(new (std::nothrow) Diligent::ShadowMapManager());
+	if (!ShadowMap)
+	{
+		return false;
+	}
+
+	Diligent::SamplerDesc ComparisonSampler;
+	ComparisonSampler.ComparisonFunc = Diligent::COMPARISON_FUNC_LESS;
+	// Note: anisotropic filtering requires SampleGrad to fix artifacts at
+	// cascade boundaries
+	ComparisonSampler.MinFilter = Diligent::FILTER_TYPE_COMPARISON_LINEAR;
+	ComparisonSampler.MagFilter = Diligent::FILTER_TYPE_COMPARISON_LINEAR;
+	ComparisonSampler.MipFilter = Diligent::FILTER_TYPE_COMPARISON_LINEAR;
+	Diligent::ISampler *comparisonSampler = GetTextureSampler(ComparisonSampler);
+
+	Diligent::SamplerDesc FilterableSampler;
+	FilterableSampler.MinFilter = Diligent::FILTER_TYPE_ANISOTROPIC;
+	FilterableSampler.MagFilter = Diligent::FILTER_TYPE_ANISOTROPIC;
+	FilterableSampler.MipFilter = Diligent::FILTER_TYPE_ANISOTROPIC;
+	FilterableSampler.MaxAnisotropy = LightAttribs.ShadowAttribs.iMaxAnisotropy;
+	Diligent::ISampler *filterableSampler = GetTextureSampler(FilterableSampler);
+
+	Diligent::ShadowMapManager::InitInfo initInfo;
+	initInfo.Format = ShadowMapDepthFormat;
+	initInfo.Resolution = ShadowMapResolution;
+	initInfo.NumCascades = ShadowMapCascadesCount;
+	initInfo.ShadowMode = static_cast<mu_int32>(ShadowMapMode);
+	initInfo.pComparisonSampler = comparisonSampler;
+	initInfo.pFilterableShadowMapSampler = filterableSampler;
+	ShadowMap->Initialize(device, nullptr, initInfo);
+
+	ShadowFrustums.resize(ShadowMapCascadesCount);
+	RenderSettings.ShadowFrustumsNum = ShadowMapCascadesCount;
+	RenderSettings.ShadowFrustums = ShadowFrustums.data();
+
+	return true;
+}
+
 void NEnvironment::Reset(const mu_boolean forceReset)
 {
 	const auto updateCount = MUState::GetUpdateCount();
@@ -77,31 +132,200 @@ void NEnvironment::Update()
 	const auto updateCount = MUState::GetUpdateCount();
 	const auto updateTime = MUState::GetUpdateTime();
 
+	RenderSettings.Frustum = MURenderState::GetCamera()->GetFrustum();
+
+	if (ShadowMap != nullptr)
+	{
+		LightAttribs.f4Direction = LightDirection;
+		LightAttribs.f4Direction.w = 0;
+
+		Diligent::float4 f4ExtraterrestrialSunColor = Diligent::float4(1.0f, 1.0f, 1.0f, 1.0f);
+		LightAttribs.f4Intensity = f4ExtraterrestrialSunColor; // *m_fScatteringScale;
+		LightAttribs.f4AmbientLight = Diligent::float4(0.2f, 0.2f, 0.2f, ShadowMapMinimumValue);
+
+		LightAttribs.ShadowAttribs.iNumCascades = ShadowMapCascadesCount;
+		if (ShadowMapResolution >= 2048)
+			LightAttribs.ShadowAttribs.fFixedDepthBias = 0.0025f;
+		else if (ShadowMapResolution >= 1024)
+			LightAttribs.ShadowAttribs.fFixedDepthBias = 0.0050f;
+		else
+			LightAttribs.ShadowAttribs.fFixedDepthBias = 0.0075f;
+
+		Diligent::float4x4 cameraView = Float4x4FromGLM(MURenderState::GetView());
+		Diligent::float4x4 cameraProj = Float4x4FromGLM(MURenderState::GetFrustumProjection());
+
+		Diligent::ShadowMapManager::DistributeCascadeInfo DistrInfo;
+		DistrInfo.pCameraView = &cameraView;
+		DistrInfo.pCameraProj = &cameraProj;
+		DistrInfo.pLightDir = &LightDirection;
+		DistrInfo.fPartitioningFactor = 0.95f;
+		DistrInfo.SnapCascades = true;
+		DistrInfo.EqualizeExtents = true;
+		DistrInfo.StabilizeExtents = true;
+		DistrInfo.AdjustCascadeRange =
+			[this](int iCascade, float &MinZ, float &MaxZ) {
+			if (iCascade < 0)
+			{
+				// Snap camera z range to the exponential scale
+				const float pw = 1.1f;
+				MinZ = std::pow(pw, std::floor(std::log(std::max(MinZ, 1.f)) / std::log(pw)));
+				MinZ = std::max(MinZ, 10.f);
+				MaxZ = std::pow(pw, std::ceil(std::log(std::max(MaxZ, 1.f)) / std::log(pw)));
+			}
+			else if (iCascade == FirstCascadeToRayMarch)
+			{
+				// Ray marching always starts at the camera position, not at the near plane.
+				// So we must make sure that the first cascade used for ray marching covers the camera position
+				MinZ = 10.f;
+			}
+		};
+		ShadowMap->DistributeCascades(DistrInfo, LightAttribs.ShadowAttribs);
+
+		const auto deviceType = MUGraphics::GetDeviceType();
+		const mu_boolean isGL = (
+			deviceType == Diligent::RENDER_DEVICE_TYPE_GL ||
+			deviceType == Diligent::RENDER_DEVICE_TYPE_GLES
+		);
+		for (mu_uint32 n = 0; n < ShadowMapCascadesCount; ++n)
+		{
+			const auto &cascadeProj = ShadowMap->GetCascadeTranform(n).Proj;
+
+			auto worldToLightViewSpaceMatr = LightAttribs.ShadowAttribs.mWorldToLightViewT.Transpose();
+			auto worldToLightProjSpaceMatr = worldToLightViewSpaceMatr * cascadeProj;
+
+			Diligent::ExtractViewFrustumPlanesFromMatrix(worldToLightProjSpaceMatr, ShadowFrustums[n], isGL);
+		}
+	}
+
 	if (updateCount > 0)
 	{
 		Terrain->Update();
 	}
 
-	Objects->Update();
-	Characters->Update();
+	Objects->Update(RenderSettings);
+	Characters->Update(RenderSettings);
 
 	Particles->Update();
 	Particles->Propagate();
 
 	Joints->Update();
 	Joints->Propagate();
+
+	Terrain->ConfigureUniforms();
 }
 
 void NEnvironment::Render()
 {
-	Terrain->ConfigureUniforms();
-	Terrain->Render();
-	
-	Objects->Render();
-	Characters->Render();
+	const auto immediateContext = MUGraphics::GetImmediateContext();
 
-	Particles->Render();
-	Joints->Render();
+	const auto renderMode = MURenderState::GetRenderMode();
+	switch (renderMode)
+	{
+	case NRenderMode::Normal:
+		{
+			Diligent::CameraAttribs cameraAttribs = {};
+			cameraAttribs.mViewT = Float4x4FromGLM(MURenderState::GetView()).Transpose();
+			cameraAttribs.mProjT = Float4x4FromGLM(MURenderState::GetProjection()).Transpose();
+			cameraAttribs.mViewProjT = Float4x4FromGLM(MURenderState::GetViewProjection()).Transpose();
+
+			{
+				Diligent::MapHelper<Diligent::CameraAttribs> uniform(immediateContext, MURenderState::GetCameraUniform(), Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
+				*uniform = cameraAttribs;
+			}
+
+			const auto enabledShadows = MUConfig::GetEnableShadows();
+			if (enabledShadows)
+			{
+				Diligent::MapHelper<Diligent::LightAttribs> uniform(immediateContext, MURenderState::GetLightUniform(), Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
+				*uniform = LightAttribs;
+			}
+
+			if (enabledShadows)
+			{
+				MURenderState::SetShadowMode(ShadowMapMode);
+				MURenderState::SetShadowResourceId(ShadowResourceId);
+				MURenderState::SetShadowMap(ShadowMap.get());
+			}
+
+			Terrain->Render(RenderSettings);
+			Objects->Render(RenderSettings);
+			Characters->Render(RenderSettings);
+			Particles->Render();
+			Joints->Render();
+
+			MUGraphics::GetRenderManager()->Execute(immediateContext);
+			MUBBoxRenderer::Reset();
+			MUModelRenderer::Reset();
+
+			MURenderState::SetShadowMap(nullptr);
+		}
+		break;
+
+	case NRenderMode::ShadowMap:
+		{
+			glm::mat4 viewProj = MURenderState::GetViewProjection();
+
+			MUGraphics::SetRenderTargetDesc(
+				NRenderTargetDesc{
+					.ColorFormat = Diligent::TEX_FORMAT_UNKNOWN,
+					.DepthStencilFormat = ShadowMapDepthFormat,
+				}
+			);
+
+			for (mu_uint32 n = 0; n < ShadowMapCascadesCount; ++n)
+			{
+				const auto &cascadeProj = ShadowMap->GetCascadeTranform(n).Proj;
+
+				auto worldToLightViewSpaceMatr = LightAttribs.ShadowAttribs.mWorldToLightViewT.Transpose();
+				auto worldToLightProjSpaceMatr = worldToLightViewSpaceMatr * cascadeProj;
+
+				Diligent::CameraAttribs shadowCameraAttribs = {};
+
+				shadowCameraAttribs.mViewT = LightAttribs.ShadowAttribs.mWorldToLightViewT;
+				shadowCameraAttribs.mProjT = cascadeProj.Transpose();
+				shadowCameraAttribs.mViewProjT = worldToLightProjSpaceMatr.Transpose();
+				MURenderState::SetViewProjection(GLMFromFloat4x4(worldToLightProjSpaceMatr));
+
+				shadowCameraAttribs.f4ViewportSize.x = static_cast<mu_float>(ShadowMapResolution);
+				shadowCameraAttribs.f4ViewportSize.y = static_cast<mu_float>(ShadowMapResolution);
+				shadowCameraAttribs.f4ViewportSize.z = 1.f / shadowCameraAttribs.f4ViewportSize.x;
+				shadowCameraAttribs.f4ViewportSize.w = 1.f / shadowCameraAttribs.f4ViewportSize.y;
+
+				{
+					Diligent::MapHelper<Diligent::CameraAttribs> uniform(immediateContext, MURenderState::GetCameraUniform(), Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
+					*uniform = shadowCameraAttribs;
+				}
+
+				auto *cascadeDSV = ShadowMap->GetCascadeDSV(n);
+				immediateContext->SetRenderTargets(0, nullptr, cascadeDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+				immediateContext->ClearDepthStencil(cascadeDSV, Diligent::CLEAR_DEPTH_FLAG, 1.0f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+				RenderSettings.CurrentShadowMap = n;
+
+				//Terrain->Render(RenderSettings); // grass shadows are ugly due to how it works
+				Objects->Render(RenderSettings);
+				Characters->Render(RenderSettings);
+
+				MUGraphics::GetRenderManager()->Execute(immediateContext);
+				MUBBoxRenderer::Reset();
+				MUModelRenderer::Reset();
+			}
+			
+			const Diligent::RESOURCE_STATE destState = (
+				MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_VULKAN
+				? Diligent::RESOURCE_STATE_DEPTH_READ
+				: Diligent::RESOURCE_STATE_SHADER_RESOURCE
+			);
+			Diligent::StateTransitionDesc barrier(ShadowMap->GetCascadeDSV(0)->GetTexture(), Diligent::RESOURCE_STATE_DEPTH_WRITE, destState, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+			immediateContext->TransitionResourceStates(1, &barrier);
+
+			if constexpr (ShadowMapMode != NShadowMode::PCF)
+				ShadowMap->ConvertToFilterable(immediateContext, LightAttribs.ShadowAttribs);
+
+			MURenderState::SetViewProjection(viewProj);
+		}
+		break;
+	}
 }
 
 void NEnvironment::CalculateLight(

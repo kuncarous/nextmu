@@ -22,9 +22,16 @@ namespace MUBBoxRenderer
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> BBoxDimensionsUniform;
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> IndexBuffer;
-	NPipelineState *PipelineState = nullptr;
-	NShaderResourcesBinding *ShaderBinding = nullptr;
 	NResizableQueue<NBBoxDimensions> DimensionsBuffer;
+
+	NDynamicPipelineState DynamicState = {
+		.CullMode = Diligent::CULL_MODE_NONE,
+		.AlphaWrite = false,
+		.DepthWrite = false,
+		.SrcBlend = Diligent::BLEND_FACTOR_ONE,
+		.DestBlend = Diligent::BLEND_FACTOR_ONE,
+		.BlendOp = Diligent::BLEND_OPERATION_ADD,
+	};
 
 	constexpr mu_uint32 NumIndexes = 6 * 6;
 	const mu_boolean Initialize()
@@ -131,39 +138,11 @@ namespace MUBBoxRenderer
 		const auto immediateContext = MUGraphics::GetImmediateContext();
 		immediateContext->TransitionResourceStates(static_cast<mu_uint32>(barriers.size()), barriers.data());
 
-		const auto swapchain = MUGraphics::GetSwapChain();
-		const auto &swapchainDesc = swapchain->GetDesc();
-
-		NFixedPipelineState fixedState;
-		fixedState.CombinedShader = BoundingBoxProgram;
-		fixedState.RTVFormat = swapchainDesc.ColorBufferFormat;
-		fixedState.DSVFormat = swapchainDesc.DepthBufferFormat;
-
-		NDynamicPipelineState dynamicState;
-		dynamicState.CullMode = Diligent::CULL_MODE_NONE;
-		dynamicState.AlphaWrite = false;
-		dynamicState.DepthWrite = false;
-		dynamicState.SrcBlend = Diligent::BLEND_FACTOR_ONE;
-		dynamicState.DestBlend = Diligent::BLEND_FACTOR_ONE;
-		dynamicState.BlendOp = Diligent::BLEND_OPERATION_ADD;
-
-		PipelineState = GetPipelineState(fixedState, dynamicState);
-		if (PipelineState->StaticInitialized == false)
-		{
-			PipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "BBoxDimensions")->Set(BBoxDimensionsUniform);
-			PipelineState->StaticInitialized = true;
-		}
-
-		NResourceId resourceIds[1] = { NInvalidUInt32 };
-		ShaderBinding = GetShaderBinding(PipelineState, mu_countof(resourceIds), resourceIds);
-		ShaderBinding->Initialized = true;
-
 		return true;
 	}
 
 	void Destroy()
 	{
-		ReleaseShaderResources(ShaderBinding);
 		BBoxDimensionsUniform.Release();
 		VertexBuffer.Release();
 		IndexBuffer.Release();
@@ -179,6 +158,25 @@ namespace MUBBoxRenderer
 	)
 	{
 		const auto renderManager = MUGraphics::GetRenderManager();
+		const auto &renderTargetDesc = MUGraphics::GetRenderTargetDesc();
+
+		NFixedPipelineState fixedState = {
+			.CombinedShader = BoundingBoxProgram,
+			.RTVFormat = renderTargetDesc.ColorFormat,
+			.DSVFormat = renderTargetDesc.DepthStencilFormat,
+		};
+
+		auto pipelineState = GetPipelineState(fixedState, DynamicState);
+		if (pipelineState->StaticInitialized == false)
+		{
+			pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbCameraAttribs")->Set(MURenderState::GetCameraUniform());
+			pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "BBoxDimensions")->Set(BBoxDimensionsUniform);
+			pipelineState->StaticInitialized = true;
+		}
+
+		NResourceId resourceIds[1] = { NInvalidUInt32 };
+		auto binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+		binding->Initialized = true;
 
 		renderManager->SetVertexBuffer(
 			RSetVertexBuffer{
@@ -214,10 +212,10 @@ namespace MUBBoxRenderer
 			);
 		}
 
-		renderManager->SetPipelineState(PipelineState);
+		renderManager->SetPipelineState(pipelineState);
 		renderManager->CommitShaderResources(
 			RCommitShaderResources{
-				.ShaderResourceBinding = ShaderBinding,
+				.ShaderResourceBinding = binding,
 			}
 		);
 		renderManager->DrawIndexed(

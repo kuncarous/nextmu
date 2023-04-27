@@ -69,7 +69,7 @@ GRAPHICS_VALUE_FROM_STRING(BlendEquation, BlendEquationMap, Diligent::BLEND_OPER
 GRAPHICS_VALUE_FROM_STRING(Cull, CullMap, Diligent::CULL_MODE_NONE)
 GRAPHICS_VALUE_FROM_STRING(Classify, ClassifyMap, NRenderClassify::None)
 
-const mu_utf8string ProgramDefault = "model_texture";
+const mu_utf8string ProgramDefault = "mesh_normal";
 
 NModel::~NModel()
 {
@@ -201,19 +201,33 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 
 				if (mesh.contains("program"))
 				{
-					const auto program = MUResourcesManager::GetProgram(mesh["program"].get<mu_utf8string>());
+					const auto shaderId = mesh["program"].get<mu_utf8string>();
+
+					const auto program = MUResourcesManager::GetProgram(shaderId);
 					if (program != NInvalidShader)
 						settings.Program = program;
+
+					const auto shadowProgram = MUResourcesManager::GetProgram(shaderId + "_shadow");
+					if (shadowProgram != NInvalidShader)
+						settings.ShadowProgram = shadowProgram;
 				}
 
 				if (mesh.contains("texture"))
 					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
 
-				if (mesh.contains("normal"))
-					settings.RenderState[ModelRenderMode::Normal] = CalculateStateFromObject(mesh["normal"]);
+				if (mesh.contains("normal")) {
+					auto &renderState = settings.RenderState[ModelRenderMode::Normal];
+					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Normal];
+					renderState = CalculateStateFromObject(mesh["normal"]);
+					shadowRenderState = NormalizeShadowRenderState(renderState);
+				}
 
-				if (mesh.contains("alpha"))
-					settings.RenderState[ModelRenderMode::Alpha] = CalculateStateFromObject(mesh["alpha"]);
+				if (mesh.contains("alpha")) {
+					auto &renderState = settings.RenderState[ModelRenderMode::Alpha];
+					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Alpha];
+					renderState = CalculateStateFromObject(mesh["alpha"]);
+					shadowRenderState = NormalizeShadowRenderState(renderState);
+				}
 
 				if (mesh.contains("light"))
 					settings.Light = mesh["light"].get<mu_float>();
@@ -223,6 +237,8 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 		if (settings.contains("virtual_meshes"))
 		{
 			const auto program = MUResourcesManager::GetProgram(ProgramDefault);
+			const auto shadowProgram = MUResourcesManager::GetProgram(ProgramDefault + "_shadow");
+
 			const auto &virtualMeshes = settings["virtual_meshes"];
 			for (const auto &mesh : virtualMeshes)
 			{
@@ -235,13 +251,22 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 
 				if (mesh.contains("program"))
 				{
-					const auto program = MUResourcesManager::GetProgram(mesh["program"].get<mu_utf8string>());
+					const auto shaderId = mesh["program"].get<mu_utf8string>();
+
+					const auto program = MUResourcesManager::GetProgram(shaderId);
 					if (program != NInvalidShader)
 						settings.Program = program;
+
+					const auto shadowProgram = MUResourcesManager::GetProgram(shaderId + "_shadow");
+					if (shadowProgram != NInvalidShader)
+						settings.ShadowProgram = shadowProgram;
 				}
 
 				if (settings.Program == NInvalidShader)
 					settings.Program = program;
+
+				if (settings.ShadowProgram == NInvalidShader)
+					settings.ShadowProgram = shadowProgram;
 
 				if (mesh.contains("texture"))
 					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
@@ -366,6 +391,7 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 	BoundingBoxes.resize(numBones);
 
 	const auto program = MUResourcesManager::GetProgram(ProgramDefault);
+	const auto shadowProgram = MUResourcesManager::GetProgram(ProgramDefault + "_shadow");
 
 	mu_char filename[32 + 1] = {};
 	for (mu_uint32 m = 0; m < numMeshes; ++m)
@@ -373,6 +399,7 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 		auto &mesh = Meshes[m];
 
 		mesh.Settings.Program = program;
+		mesh.Settings.ShadowProgram = shadowProgram;
 
 		const mu_uint32 numVertices = static_cast<mu_uint32>(reader.Read<mu_int16>());
 		const mu_uint32 numNormals = static_cast<mu_uint32>(reader.Read<mu_int16>());
@@ -735,8 +762,6 @@ const mu_boolean NModel::GenerateBuffers()
 				const auto &vertex = mesh.Vertices[triangle.Vertices[n]];
 				const auto &normal = mesh.Normals[triangle.Normals[n]];
 				const auto &texCoord = mesh.TexCoords[triangle.TexCoords[n]];
-
-				mu_assert(vertex.Node == normal.Node);
 
 				dest->Position = vertex.Position;
 

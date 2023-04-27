@@ -7,6 +7,8 @@ namespace MUConfig
 	mu_uint32 WindowWidth = 1024;
 	mu_uint32 WindowHeight = 768;
 
+	mu_boolean EnableShadows = true;
+
 	mu_boolean Antialiasing = false;
 	mu_boolean VerticalSync = false;
 
@@ -120,6 +122,11 @@ namespace MUConfig
 	const mu_uint32 GetWindowHeight()
 	{
 		return WindowHeight;
+	}
+
+	const mu_boolean GetEnableShadows()
+	{
+		return EnableShadows;
 	}
 
 	const mu_boolean GetAntialiasing()

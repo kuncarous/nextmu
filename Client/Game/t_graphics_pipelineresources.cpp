@@ -13,6 +13,22 @@ void CreatePipelineResources()
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_VERTEX,
+				"cbCameraAttribs",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_VERTEX | Diligent::SHADER_TYPE_PIXEL,
+				"cbLightAttribs",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_VERTEX,
 				"ModelViewProj",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
@@ -50,6 +66,22 @@ void CreatePipelineResources()
 			)
 		);
 
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_PIXEL,
+				"g_tex2DShadowMap",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_PIXEL,
+				"g_tex2DFilterableShadowMap",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
+			)
+		);
+
 		Resources.insert(std::make_pair("mesh", resource));
 	}
 
@@ -60,7 +92,15 @@ void CreatePipelineResources()
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_VERTEX,
-				"ModelViewProj",
+				"cbCameraAttribs",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_VERTEX | Diligent::SHADER_TYPE_PIXEL,
+				"cbLightAttribs",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
 		);
@@ -126,6 +166,22 @@ void CreatePipelineResources()
 				Diligent::SHADER_TYPE_PIXEL,
 				"g_Textures",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_PIXEL,
+				"g_tex2DShadowMap",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_PIXEL,
+				"g_tex2DFilterableShadowMap",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
 			)
 		);
 
@@ -139,7 +195,15 @@ void CreatePipelineResources()
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_VERTEX,
-				"ModelViewProj",
+				"cbCameraAttribs",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_VERTEX | Diligent::SHADER_TYPE_PIXEL,
+				"cbLightAttribs",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
 		);
@@ -208,6 +272,22 @@ void CreatePipelineResources()
 			)
 		);
 
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_PIXEL,
+				"g_tex2DShadowMap",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_PIXEL,
+				"g_tex2DFilterableShadowMap",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
+			)
+		);
+
 		Resources.insert(std::make_pair("grass", resource));
 	}
 
@@ -218,7 +298,7 @@ void CreatePipelineResources()
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_VERTEX,
-				"ModelViewProj",
+				"cbCameraAttribs",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
 		);
@@ -249,7 +329,7 @@ void CreatePipelineResources()
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_VERTEX,
-				"ModelViewProj",
+				"cbCameraAttribs",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
 		);
@@ -280,7 +360,7 @@ void CreatePipelineResources()
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_VERTEX,
-				"ModelViewProj",
+				"cbCameraAttribs",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
 		);

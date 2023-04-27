@@ -2,6 +2,7 @@
 #include "mu_modelrenderer.h"
 #include "mu_skeletonmanager.h"
 #include "mu_skeletoninstance.h"
+#include "mu_config.h"
 #include "mu_graphics.h"
 #include "mu_renderstate.h"
 #include "mu_resourcesmanager.h"
@@ -25,23 +26,14 @@ struct NModelSettings
 };
 #pragma pack()
 
-// TO DO : improve management of shader resources creating a central resource manager that creates a resource based on the mutable variables and when the resource is released it releases the shader resources.
-typedef std::map<mu_uint32, Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>> NTextureBindingMap;
-typedef std::map<NPipelineStateId, NTextureBindingMap> NPipelineBindingMap;
-NPipelineBindingMap Bindings;
-NFixedPipelineState PreconfiguredFixedState;
 Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelViewUniform;
 Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelSettingsUniform;
-NResizableQueue<cglm::mat4> ModelViewBuffer;
+NResizableQueue<glm::mat4> ModelViewBuffer;
 NResizableQueue<NModelSettings> ModelSettingsBuffer;
 
 const mu_boolean MUModelRenderer::Initialize()
 {
 	const auto device = MUGraphics::GetDevice();
-	const auto swapchain = MUGraphics::GetSwapChain();
-	const auto &swapchainDesc = swapchain->GetDesc();
-	PreconfiguredFixedState.RTVFormat = swapchainDesc.ColorBufferFormat;
-	PreconfiguredFixedState.DSVFormat = swapchainDesc.DepthBufferFormat;
 
 	// Model View Projection
 	{
@@ -84,7 +76,6 @@ const mu_boolean MUModelRenderer::Initialize()
 
 void MUModelRenderer::Destroy()
 {
-	Bindings.clear();
 	ModelViewUniform.Release();
 	ModelSettingsUniform.Release();
 }
@@ -99,7 +90,7 @@ void MUModelRenderer::RenderMesh(
 	NModel *model,
 	const mu_uint32 meshIndex,
 	const NRenderConfig &config,
-	cglm::mat4 modelViewProj,
+	const glm::mat4 modelViewProj,
 	const NMeshRenderSettings *settings
 )
 {
@@ -118,36 +109,76 @@ void MUModelRenderer::RenderMesh(
 		texture = textureInfo.Texture.get();
 	if (texture == nullptr || texture->IsValid() == false) return;
 
-	NFixedPipelineState fixedState = PreconfiguredFixedState;
-	fixedState.CombinedShader = settings->Program;
+	const auto &renderTargetDesc = MUGraphics::GetRenderTargetDesc();
+
+	const auto renderMode = MURenderState::GetRenderMode();
+	NFixedPipelineState fixedState = {
+		.CombinedShader = renderMode == NRenderMode::Normal ? settings->Program : settings->ShadowProgram,
+		.RTVFormat = renderTargetDesc.ColorFormat,
+		.DSVFormat = renderTargetDesc.DepthStencilFormat,
+	};
 
 	const mu_boolean isPostAlphaRendering = texture->HasAlpha() || config.BodyLight[3] < 1.0f;
 	const NDynamicPipelineState *dynamicState;
 	if (isPostAlphaRendering)
 	{
-		dynamicState = &settings->RenderState[ModelRenderMode::Alpha];
+		dynamicState = renderMode != NRenderMode::ShadowMap ? &settings->RenderState[ModelRenderMode::Alpha] : &settings->ShadowRenderState[ModelRenderMode::Alpha];
 	}
 	else
 	{
-		dynamicState = &settings->RenderState[ModelRenderMode::Normal];
+		dynamicState = renderMode != NRenderMode::ShadowMap ? &settings->RenderState[ModelRenderMode::Normal] : &settings->ShadowRenderState[ModelRenderMode::Normal];
 	}
 
 	auto pipelineState = GetPipelineState(fixedState, *dynamicState);
 	if (pipelineState->StaticInitialized == false)
 	{
-		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(ModelViewUniform);
-		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_SkeletonTexture")->Set(MUSkeletonManager::GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		//pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(terrain->GetLightmapTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelSettings")->Set(ModelSettingsUniform);
-		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ModelSettings")->Set(ModelSettingsUniform);
+		auto variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbCameraAttribs");
+		if (variable) variable->Set(MURenderState::GetCameraUniform());
+		variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbLightAttribs");
+		if (variable) variable->Set(MURenderState::GetLightUniform());
+		variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "cbLightAttribs");
+		if (variable) variable->Set(MURenderState::GetLightUniform());
+		variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj");
+		if (variable) variable->Set(ModelViewUniform);
+		variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_SkeletonTexture");
+		if (variable) variable->Set(MUSkeletonManager::GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelSettings");
+		if (variable) variable->Set(ModelSettingsUniform);
+		variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ModelSettings");
+		if (variable) variable->Set(ModelSettingsUniform);
 		pipelineState->StaticInitialized = true;
 	}
 
-	NResourceId resourceIds[1] = { texture->GetId() };
-	auto binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+	auto shadowMap = MURenderState::GetShadowMap();
+	NShaderResourcesBinding *binding;
+	if (renderMode == NRenderMode::Normal && shadowMap != nullptr)
+	{
+		NResourceId resourceIds[2] = { texture->GetId(), MURenderState::GetShadowResourceId() };
+		binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+	}
+	else
+	{
+		NResourceId resourceIds[1] = { texture->GetId() };
+		binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+	}
+
 	if (binding->Initialized == false)
 	{
-		binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Texture")->Set(texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		if (shadowMap != nullptr)
+		{
+			if (MURenderState::GetShadowMode() == NShadowMode::PCF)
+			{
+				auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_tex2DShadowMap");
+				if (variable) variable->Set(shadowMap->GetSRV());
+			}
+			else
+			{
+				auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_tex2DFilterableShadowMap");
+				if (variable) variable->Set(shadowMap->GetFilterableSRV());
+			}
+		}
+		auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Texture");
+		if (variable) variable->Set(texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
 		binding->Initialized = true;
 	}
 
@@ -156,14 +187,13 @@ void MUModelRenderer::RenderMesh(
 	// Update Model View
 	{
 		auto uniform = ModelViewBuffer.Allocate();
-		cglm::glm_mat4_copy(modelViewProj, *uniform);
-		cglm::glm_mat4_transpose(*uniform);
+		*uniform = glm::transpose(modelViewProj);
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
 				.ShouldReleaseMemory = false,
 				.Buffer = ModelViewUniform,
 				.Data = uniform,
-				.Size = sizeof(cglm::mat4),
+				.Size = sizeof(Diligent::float4x4),
 				.MapType = Diligent::MAP_WRITE,
 				.MapFlags = Diligent::MAP_FLAG_DISCARD,
 			}
@@ -244,16 +274,10 @@ void MUModelRenderer::RenderBody(
 	auto terrain = MURenderState::GetTerrain();
 	if (terrain == nullptr) return;
 
-	cglm::mat4 viewProj;
-	MURenderState::GetViewProjection(viewProj);
-
-	glm::mat4 modelView = glm::translate(
+	glm::mat4 modelViewProj = MURenderState::GetViewProjection() * glm::translate(
 		glm::scale(glm::mat4(1.0f), glm::vec3(config.BodyScale)),
 		config.BodyOrigin
 	);
-
-	cglm::mat4 modelViewProj;
-	cglm::glm_mat4_mul(viewProj, (cglm::vec4*)glm::value_ptr(modelView), modelViewProj);
 
 	if (model->VirtualMeshes.size() > 0)
 	{

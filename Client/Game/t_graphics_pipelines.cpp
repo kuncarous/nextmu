@@ -103,8 +103,16 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
         resourceLayout.ImmutableSamplers = resource->ImmutableSamplers.data();
     }
 
-    graphicsInfo.NumRenderTargets = 1;
-    graphicsInfo.RTVFormats[0] = fixedState.RTVFormat;
+    if (fixedState.RTVFormat != Diligent::TEX_FORMAT_UNKNOWN)
+    {
+        graphicsInfo.NumRenderTargets = 1;
+        graphicsInfo.RTVFormats[0] = fixedState.RTVFormat;
+    }
+    else
+    {
+        graphicsInfo.BlendDesc.RenderTargets->RenderTargetWriteMask = Diligent::COLOR_MASK_NONE;
+        graphicsInfo.NumRenderTargets = 0;
+    }
     graphicsInfo.DSVFormat = fixedState.DSVFormat;
 
     const auto device = MUGraphics::GetDevice();
@@ -119,6 +127,7 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
     NPipelineState pipelineState;
     pipelineState.Id = PipelineIdCache++;
     pipelineState.Info.Shader = fixedState.CombinedShader;
+    pipelineState.Info.DepthWrite = graphicsInfo.DepthStencilDesc.DepthWriteEnable;
     pipelineState.Info.BlendEnable = blendDesc.BlendEnable;
     pipelineState.Info.SrcBlend = blendDesc.SrcBlend;
     pipelineState.Info.DestBlend = blendDesc.DestBlend;
@@ -127,6 +136,10 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
         ? CalculateBlendHash(blendDesc.SrcBlend, blendDesc.DestBlend)
         : 0
     );
+#ifndef NDEBUG
+    pipelineState.FixedState = fixedState;
+    pipelineState.DynamicState = dynamicState;
+#endif
     pipelineState.Pipeline = pipeline;
 
     auto fixedIter = Pipelines.find(fixedState.GetHash());

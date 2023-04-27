@@ -67,6 +67,7 @@ namespace NEntity
 	struct NRenderState
 	{
 		NRenderFlags Flags;
+		std::array<mu_boolean, MAX_CASCADES> ShadowVisible = {};
 		glm::vec4 BodyLight = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	};
 

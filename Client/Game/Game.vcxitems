@@ -51,7 +51,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_graphics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_input.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_frustum.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_particles.cpp" />
@@ -74,6 +73,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_immutables.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_layouts.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelinestate.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelineresources.cpp" />
@@ -81,6 +81,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_samplers.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shaderresources.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shadows.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_texture.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_base.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_thunder1_v7.cpp" />
@@ -123,7 +124,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_aabb.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_frustum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_modelrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model_mesh.h" />
@@ -136,6 +136,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)res_renders.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_character_structs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_buffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelinestate.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_rendersettings.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_immutables.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_layouts.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.h" />
@@ -146,6 +148,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_samplers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shaderresources.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shadows.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_texture.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_base.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_config.h" />

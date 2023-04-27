@@ -3,7 +3,8 @@
 #include "mu_input.h"
 #include "mu_state.h"
 #include "mu_capabilities.h"
-#include "mu_math_frustum.h"
+#include "mu_graphics.h"
+#include "mu_math.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -49,7 +50,7 @@ void NCamera::Update()
 		MouseDelta.y = MouseDelta.y * PercentOfOld + static_cast<mu_float>(mousePosition.y) * PercentOfNew;
 
 		glm::vec2 rotVelocity(MouseDelta.x * 0.01f, MouseDelta.y * 0.01f);
-		cglm::glm_vec3_add(Angle, cglm::vec3{ -rotVelocity.x, rotVelocity.y, 0.0f }, Angle);
+		Angle += glm::vec3(-rotVelocity.x, rotVelocity.y, 0.0f);
 	}
 
 	switch (Mode)
@@ -74,40 +75,40 @@ void NCamera::Update()
 	const mu_float ySin = glm::sin(Angle[1]);
 	const mu_float yCos = glm::cos(Angle[1]);
 
-	cglm::vec3 direction = {
+	glm::vec3 direction(
 		xCos * ySin,
 		xSin * ySin,
 		yCos
-	};
+	);
 
 	if (shiftPressed && Mode == NCameraMode::Directional)
 	{
 		constexpr mu_float MoveSpeed = 2000.0f / 1000.0f;
 
-		cglm::vec3 right{
+		glm::vec3 right(
 			glm::cos(Angle[0] - glm::half_pi<mu_float>()) * -1.0f,
 			glm::sin(Angle[0] - glm::half_pi<mu_float>()) * -1.0f,
 			0.0f
-		};
+		);
 
 		if (MUInput::IsKeyPressing(SDL_SCANCODE_W))
 		{
-			cglm::glm_vec3_muladds(direction, MoveSpeed * elapsedTime, Eye);
+			Eye += direction * (MoveSpeed * elapsedTime);
 		}
 
 		if (MUInput::IsKeyPressing(SDL_SCANCODE_S))
 		{
-			cglm::glm_vec3_muladds(direction, -(MoveSpeed * elapsedTime), Eye);
+			Eye += direction * -(MoveSpeed * elapsedTime);
 		}
 
 		if (MUInput::IsKeyPressing(SDL_SCANCODE_A))
 		{
-			cglm::glm_vec3_muladds(right, MoveSpeed * elapsedTime, Eye);
+			Eye += right * (MoveSpeed * elapsedTime);
 		}
 
 		if (MUInput::IsKeyPressing(SDL_SCANCODE_D))
 		{
-			cglm::glm_vec3_muladds(right, -(MoveSpeed * elapsedTime), Eye);
+			Eye += right * -(MoveSpeed * elapsedTime);
 		}
 	}
 
@@ -115,27 +116,29 @@ void NCamera::Update()
 	{
 	case NCameraMode::Directional:
 		{
-			cglm::glm_vec3_add(Eye, direction, Target);
+			Target = Eye + direction;
 		}
 		break;
 
 	case NCameraMode::Positional:
 		{
-			cglm::glm_vec3_copy(Target, Eye);
-			cglm::glm_vec3_muladds(direction, Distance.Current, Eye);
+			Eye = Target + direction * Distance.Current;
 		}
 		break;
 	}
 }
 
-void NCamera::GenerateFrustum(cglm::mat4 view, cglm::mat4 projection)
+void NCamera::GenerateFrustum(glm::mat4 view, glm::mat4 projection)
 {
-	Frustum.Update(view, projection);
+	const auto deviceType = MUGraphics::GetDeviceType();
+	glm::mat4 viewProj = projection * view;
+	Diligent::ExtractViewFrustumPlanesFromMatrix(Float4x4FromGLM(viewProj), Frustum, deviceType == Diligent::RENDER_DEVICE_TYPE_D3D11 || deviceType == Diligent::RENDER_DEVICE_TYPE_D3D12);
 }
 
-void NCamera::GetView(cglm::mat4 out)
+glm::mat4 NCamera::GetView()
 {
-	cglm::glm_lookat_rh(Eye, Target, Up, out);
+	const glm::vec3 LeftHandedConversion(1.0f, -1.0f, 1.0f);
+	return glm::lookAtLH(Eye * LeftHandedConversion, Target * LeftHandedConversion, Up);
 }
 
 void NCamera::SetMode(NCameraMode mode)
@@ -145,22 +148,22 @@ void NCamera::SetMode(NCameraMode mode)
 
 void NCamera::SetEye(glm::vec3 eye)
 {
-	cglm::glm_vec3_copy(glm::value_ptr(eye), Eye);
+	Eye = eye;
 }
 
 void NCamera::SetTarget(glm::vec3 target)
 {
-	cglm::glm_vec3_copy(glm::value_ptr(target), Target);
+	Target = target;
 }
 
 void NCamera::SetAngle(glm::vec3 angle)
 {
-	cglm::glm_vec3_copy(glm::value_ptr(angle), Angle);
+	Angle = angle;
 }
 
 void NCamera::SetUp(glm::vec3 up)
 {
-	cglm::glm_vec3_copy(glm::value_ptr(up), Up);
+	Up = up;
 }
 
 void NCamera::SetDistance(const mu_float distance)
@@ -178,24 +181,24 @@ void NCamera::SetMaxDistance(const mu_float maxDistance)
 	Distance.Maximum = maxDistance;
 }
 
-void NCamera::GetEye(cglm::vec3 out)
+glm::vec3 NCamera::GetEye()
 {
-	cglm::glm_vec3_copy(Eye, out);
+	return Eye;
 }
 
-void NCamera::GetTarget(cglm::vec3 out)
+glm::vec3 NCamera::GetTarget()
 {
-	cglm::glm_vec3_copy(Target, out);
+	return Target;
 }
 
-void NCamera::GetAngle(cglm::vec3 out)
+glm::vec3 NCamera::GetAngle()
 {
-	cglm::glm_vec3_copy(Angle, out);
+	return Angle;
 }
 
-void NCamera::GetUp(cglm::vec3 out)
+glm::vec3 NCamera::GetUp()
 {
-	cglm::glm_vec3_copy(Up, out);
+	return Up;
 }
 
 const mu_float NCamera::GetDistance()

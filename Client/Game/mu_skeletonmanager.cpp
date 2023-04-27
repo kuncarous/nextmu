@@ -67,6 +67,7 @@ namespace MUSkeletonManager
 		const mu_uint32 width = glm::clamp(pixelsCount, 1u, BonesTextureWidth);
 		const mu_uint32 height = glm::clamp((pixelsCount / BonesTextureWidth) + extraHeight, 1u, BonesTextureHeight);
 
+		const auto deviceType = MUGraphics::GetDeviceType();
 		const auto immediateContext = MUGraphics::GetImmediateContext();
 		const auto renderManager = MUGraphics::GetRenderManager();
 
@@ -78,9 +79,15 @@ namespace MUSkeletonManager
 			Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
 			Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
 		);
-		renderManager->TransitionResourceState(
-			Diligent::StateTransitionDesc(BonesTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+		Diligent::StateTransitionDesc barrier(
+			BonesTexture,
+			deviceType == Diligent::RENDER_DEVICE_TYPE_D3D12
+			? Diligent::RESOURCE_STATE_UNKNOWN
+			: Diligent::RESOURCE_STATE_COPY_DEST,
+			Diligent::RESOURCE_STATE_SHADER_RESOURCE,
+			Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
 		);
+		immediateContext->TransitionResourceStates(1, &barrier);
 	}
 
 	const mu_uint32 UploadBones(const NCompressedMatrix *bones, const mu_uint32 bonesCount)

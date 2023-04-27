@@ -21,6 +21,7 @@
 #include "mu_bboxrenderer.h"
 #include "res_renders.h"
 #include "res_items.h"
+#include "mu_math.h"
 
 #include "ui_noesisgui.h"
 
@@ -231,48 +232,6 @@ namespace MURoot
 
 	void OnEvent(const SDL_Event* event);
 
-	struct MobInfo
-	{
-		mu_uint16 PriorAction = 0;
-		mu_uint16 CurrentAction = 0;
-		mu_float PriorFrame = 0.0f;
-		mu_float CurrentFrame = 0.0f;
-	};
-
-	std::vector<MobInfo> MobsInfo;
-	std::vector<NSkeletonInstance> MobsInstance;
-	std::vector<mu_uint32> MobsBonesOffset;
-
-	const mu_uint32 GetMobsCount()
-	{
-		return static_cast<mu_uint32>(MobsInstance.size());
-	}
-
-	void AddMob()
-	{
-		if (MobsInstance.size() >= 600) return;
-
-		NSkeletonInstance instance;
-		instance.SetParent(
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			1.0f
-		);
-
-		MobsInfo.push_back(MobInfo());
-		MobsInstance.push_back(instance);
-		MobsBonesOffset.push_back(0);
-	}
-
-	void RemoveMob()
-	{
-		if (MobsInstance.size() == 0) return;
-
-		MobsInfo.pop_back();
-		MobsInstance.pop_back();
-		MobsBonesOffset.pop_back();
-	}
-
 	void Run()
 	{
 		static mu_double fpsCounterTime = 0.0;
@@ -300,30 +259,60 @@ namespace MURoot
 
 		environment->Reset(true);
 
-		for (mu_uint32 n = 0; n < demo.MonstersCount; ++n)
-		{
-			AddMob();
-		}
-
 		NModel *Model = MUResourcesManager::GetModel("monster_01");
 		if (Model == nullptr)
 		{
 			return;
 		}
 
-		auto characters = environment->GetCharacters();
-		characters->AddOrFind(
-			TCharacter::Settings{
-				.Key = 0,
-				.Type = CharacterType::Character,
-				.X = 160,
-				.Y = 123,
-				.Rotation = 0.0f,
+		// Characters
+		{
+			auto characters = environment->GetCharacters();
+
+			// Dark Knight
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 0,
+						.Type = CharacterType::Character,
+						.X = 160,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				characters->AddAttachmentPart(entity, NEntity::PartType::Head, MURendersManager::GetRender("dk_head"));
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 1);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 1);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 1);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 1);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 1);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Maces, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 5);
 			}
-		);
+
+			// Dark Wizard
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 1,
+						.Type = CharacterType::Character,
+						.X = 163,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				//characters->AddAttachmentPart(entity, NEntity::PartType::Head, MURendersManager::GetRender("dk_head"));
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);
+			}
+		}
 
 		static mu_double accumulatedTime = 0.0;
-		static cglm::mat4 view, projection, frustumProjection;
 		while (!Quit)
 		{
 			accumulatedTime += elapsedTime;
@@ -421,125 +410,94 @@ namespace MURoot
 			camera.Update();
 			environment->Reset();
 
-			const mu_uint32 mobsCount = GetMobsCount();
-			for (mu_uint32 n = 0; n < mobsCount; ++n)
-			{
-				auto &mobInfo = MobsInfo[n];
-				auto &skeleton = MobsInstance[n];
-				Model->PlayAnimation(mobInfo.CurrentAction, mobInfo.PriorAction, mobInfo.CurrentFrame, mobInfo.PriorFrame, Model->GetPlaySpeed() * MUState::GetUpdateTime());
-				skeleton.Animate(
-					Model,
-					{
-						.Action = mobInfo.CurrentAction,
-						.Frame = mobInfo.CurrentFrame,
-					},
-					{
-						.Action = mobInfo.PriorAction,
-						.Frame = mobInfo.PriorFrame,
-					},
-					glm::vec3(0.0f, 0.0f, 0.0f)
-				);
-			}
-
 			const auto windowWidth = MUConfig::GetWindowWidth();
 			const auto windowHeight = MUConfig::GetWindowHeight();
 
+			glm::mat4 view = camera.GetView();
+			//glm::mat4 projection, frustumProjection;
+
+			constexpr mu_float HomogeneousFar = 5000.0f;
+			constexpr mu_float NonHomogeneousFar = 50000.0f;
+			const mu_float aspect = static_cast<mu_float>(windowWidth) / static_cast<mu_float>(windowHeight);
+			/*if (MUCapabilities::IsHomogeneousDepth())
+			{
+				projection = glm::perspectiveLH_NO(
+					glm::radians(35.0f),
+					aspect,
+					50.0f,
+					HomogeneousFar
+				);
+				frustumProjection = glm::perspectiveLH_ZO(
+					glm::radians(35.0f),
+					aspect,
+					50.0f,
+					HomogeneousFar
+				);
+			}
+			else
+			{
+				projection = glm::perspectiveLH_ZO(
+					glm::radians(35.0f),
+					aspect,
+					50.0f,
+					NonHomogeneousFar
+				);
+				frustumProjection = glm::perspectiveLH_ZO(
+					glm::radians(35.0f),
+					aspect,
+					50.0f,
+					NonHomogeneousFar
+				);
+			}*/
+
+			Diligent::float4x4 projection = Diligent::float4x4::Projection(
+				glm::radians(35.0f),
+				aspect,
+				50.0f,
+				MUCapabilities::IsHomogeneousDepth()
+				? HomogeneousFar
+				: NonHomogeneousFar,
+				MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GL ||
+				MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GLES
+			);
+
+			camera.GenerateFrustum(view, GLMFromFloat4x4(projection));
+
+			MURenderState::SetViewTransform(view, GLMFromFloat4x4(projection), GLMFromFloat4x4(projection));
+			MURenderState::AttachCamera(&camera);
+			MURenderState::AttachEnvironment(environment.get());
+
 			const auto device = MUGraphics::GetDevice();
 			const auto swapchain = MUGraphics::GetSwapChain();
+			const auto &swapchainDesc = swapchain->GetDesc();
 			const auto immediateContext = MUGraphics::GetImmediateContext();
 
 			mu_float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 			auto *pRTV = swapchain->GetCurrentBackBufferRTV();
 			auto *pDSV = swapchain->GetDepthBufferDSV();
+
+			environment->Update();
+			MUSkeletonManager::Update();
+
+			if (MUConfig::GetEnableShadows())
+			{
+				MURenderState::SetRenderMode(NRenderMode::ShadowMap);
+				environment->Render();
+			}
+
+			MURenderState::SetRenderMode(NRenderMode::Normal);
+			MUGraphics::SetRenderTargetDesc(
+				NRenderTargetDesc{
+					.ColorFormat = swapchainDesc.ColorBufferFormat,
+					.DepthStencilFormat = swapchainDesc.DepthBufferFormat,
+				}
+			);
 			immediateContext->SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 			immediateContext->ClearRenderTarget(pRTV, clearColor, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY);
 			immediateContext->ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG | Diligent::CLEAR_STENCIL_FLAG, 1.0f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-			camera.GetView(view);
-
-			constexpr mu_float HomogeneousFar = 5000.0f;
-			constexpr mu_float NonHomogeneousFar = 50000.0f;
-			const mu_float aspect = static_cast<mu_float>(windowWidth) / static_cast<mu_float>(windowHeight);
-			if (MUCapabilities::IsHomogeneousDepth())
-			{
-				cglm::glm_perspective_rh_no(
-					cglm::glm_rad(35.0f),
-					aspect,
-					50.0f,
-					HomogeneousFar,
-					projection
-				);
-				cglm::glm_perspective_rh_no(
-					cglm::glm_rad(35.0f),
-					aspect,
-					50.0f,
-					HomogeneousFar,
-					frustumProjection
-				);
-			}
-			else
-			{
-				cglm::glm_perspective_rh_zo(
-					cglm::glm_rad(35.0f),
-					aspect,
-					50.0f,
-					NonHomogeneousFar,
-					projection
-				);
-				cglm::glm_perspective_rh_no(
-					cglm::glm_rad(35.0f),
-					aspect,
-					50.0f,
-					NonHomogeneousFar,
-					frustumProjection
-				);
-			}
-
-			camera.GenerateFrustum(view, frustumProjection);
-
-			MURenderState::SetViewTransform(view, projection);
-			MURenderState::AttachCamera(&camera);
-			MURenderState::AttachEnvironment(environment.get());
-
-			environment->Update();
-
-			for (mu_uint32 n = 0; n < mobsCount; ++n)
-			{
-				auto &skeleton = MobsInstance[n];
-				MobsBonesOffset[n] = skeleton.Upload();
-			}
-
-			MUSkeletonManager::Update();
-
 			environment->Render();
 
-			mu_float mx = 0.0f, my = 0.0f;
-			for (mu_uint32 n = 0; n < mobsCount; ++n)
-			{
-				const auto bonesOffset = MobsBonesOffset[n];
-				if (bonesOffset == NInvalidUInt32) continue;
-				const glm::vec3 position = glm::vec3((100.0f + mx) * TerrainScale, (100.0f + my) * TerrainScale, 800.0f);
-				const mu_float scale = 1.0f;
-				const NRenderConfig config = {
-					.BoneOffset = bonesOffset,
-					.BodyOrigin = position,
-					.BodyScale = scale,
-					.EnableLight = true,
-					.BodyLight = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-				};
-				MUModelRenderer::RenderBody(MobsInstance[n], Model, config);
-				mx += 2.0f;
-				if (mx >= 100.0f)
-				{
-					mx = 0.0f;
-					my += 2.0f;
-				}
-			}
-
 			MergeTemporaryShaderBindings();
-			MUGraphics::GetRenderManager()->Execute(immediateContext);
-			MUBBoxRenderer::Reset();
-			MUModelRenderer::Reset();
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 			UINoesis::Update();

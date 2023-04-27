@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "mu_terrain.h"
+#include "mu_config.h"
 #include "mu_graphics.h"
 #include "mu_textures.h"
 #include "mu_resourcesmanager.h"
@@ -91,8 +92,6 @@ void NTerrain::Destroy()
 {
 #define RELEASE_HANDLER(handler) handler.Release();
 
-	ReleaseShaderResources(TerrainBinding); TerrainBinding = nullptr;
-	ReleaseShaderResources(GrassBinding); GrassBinding = nullptr;
 	RELEASE_HANDLER(HeightmapTexture);
 	RELEASE_HANDLER(LightmapTexture);
 	RELEASE_HANDLER(NormalTexture);
@@ -1006,7 +1005,7 @@ const mu_boolean NTerrain::GenerateBuffers(std::vector<Diligent::StateTransition
 			return false;
 		}
 
-		barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_UNDEFINED, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		VertexBuffer = buffer;
 	}
 
@@ -1028,83 +1027,8 @@ const mu_boolean NTerrain::GenerateBuffers(std::vector<Diligent::StateTransition
 			return false;
 		}
 
-		barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_UNDEFINED, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		IndexBuffer = buffer;
-	}
-
-	return true;
-}
-
-const mu_boolean NTerrain::PreparePipelines()
-{
-	// Terrain
-	{
-		const auto swapchain = MUGraphics::GetSwapChain();
-		const auto &swapchainDesc = swapchain->GetDesc();
-
-		NFixedPipelineState fixedState;
-		fixedState.CombinedShader = Program;
-		fixedState.RTVFormat = swapchainDesc.ColorBufferFormat;
-		fixedState.DSVFormat = swapchainDesc.DepthBufferFormat;
-
-		NDynamicPipelineState dynamicState;
-
-		TerrainPipeline = GetPipelineState(fixedState, dynamicState);
-		if (TerrainPipeline->StaticInitialized == false)
-		{
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture")->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture")->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture")->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture")->Set(UVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture")->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings")->Set(SettingsUniform);
-			TerrainPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures")->Set(Textures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			TerrainPipeline->StaticInitialized = true;
-		}
-
-		NResourceId resourceIds[1] = { NInvalidUInt32 };
-		TerrainBinding = GetShaderBinding(TerrainPipeline, mu_countof(resourceIds), resourceIds);
-		TerrainBinding->Initialized = true;
-	}
-
-	// Grass
-	{
-		const auto swapchain = MUGraphics::GetSwapChain();
-		const auto &swapchainDesc = swapchain->GetDesc();
-
-		NFixedPipelineState fixedState;
-		fixedState.CombinedShader = GrassProgram;
-		fixedState.RTVFormat = swapchainDesc.ColorBufferFormat;
-		fixedState.DSVFormat = swapchainDesc.DepthBufferFormat;
-
-		NDynamicPipelineState dynamicState;
-		dynamicState.CullMode = Diligent::CULL_MODE_NONE;
-		dynamicState.AlphaWrite = false;
-		dynamicState.DepthWrite = false;
-		dynamicState.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA;
-		dynamicState.DestBlend = Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
-		dynamicState.BlendOp = Diligent::BLEND_OPERATION_ADD;
-
-		GrassPipeline = GetPipelineState(fixedState, dynamicState);
-		if (GrassPipeline->StaticInitialized == false)
-		{
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture")->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture")->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture")->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture")->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture")->Set(GrassUVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture")->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings")->Set(SettingsUniform);
-			GrassPipeline->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures")->Set(GrassTextures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-			GrassPipeline->StaticInitialized = true;
-		}
-
-		NResourceId resourceIds[1] = { NInvalidUInt32 };
-		GrassBinding = GetShaderBinding(GrassPipeline, mu_countof(resourceIds), resourceIds);
-		GrassBinding->Initialized = true;
 	}
 
 	return true;
@@ -1138,82 +1062,122 @@ void NTerrain::Update()
 	const auto immediateContext = MUGraphics::GetImmediateContext();
 	const auto renderManager = MUGraphics::GetRenderManager();
 
+	Diligent::StateTransitionDesc updateBarriers[3] = {
+		Diligent::StateTransitionDesc(LightmapTexture, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+		Diligent::StateTransitionDesc(NormalTexture, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+		Diligent::StateTransitionDesc(AttributesTexture, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+	};
+	immediateContext->TransitionResourceStates(mu_countof(updateBarriers), updateBarriers);
+
 	immediateContext->UpdateTexture(
 		LightmapTexture,
 		0, 0,
 		Diligent::Box(0, TerrainSize, 0, TerrainSize),
 		Diligent::TextureSubResData(LightmapMemory.get(), TerrainSize * sizeof(mu_uint8) * 4),
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
-	);
-	renderManager->TransitionResourceState(
-		Diligent::StateTransitionDesc(LightmapTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
 	immediateContext->UpdateTexture(
 		NormalTexture,
 		0, 0,
 		Diligent::Box(0, TerrainSize, 0, TerrainSize),
 		Diligent::TextureSubResData(NormalMemory.get(), TerrainSize * sizeof(mu_uint16) * 4),
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
-	);
-	renderManager->TransitionResourceState(
-		Diligent::StateTransitionDesc(NormalTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
 	immediateContext->UpdateTexture(
 		AttributesTexture,
 		0, 0,
 		Diligent::Box(0, TerrainSize, 0, TerrainSize),
 		Diligent::TextureSubResData(TerrainAttributes.get(), TerrainAttribute::Stride),
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
-	renderManager->TransitionResourceState(
+
+	Diligent::StateTransitionDesc restoreBarriers[3] = {
+		Diligent::StateTransitionDesc(LightmapTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+		Diligent::StateTransitionDesc(NormalTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
 		Diligent::StateTransitionDesc(AttributesTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
-	);
+	};
+	immediateContext->TransitionResourceStates(mu_countof(restoreBarriers), restoreBarriers);
 }
 
-void NTerrain::Render()
+void NTerrain::Render(const NRenderSettings &renderSettings)
 {
 	const auto renderManager = MUGraphics::GetRenderManager();
 	const auto immediateContext = MUGraphics::GetImmediateContext();
+	const auto &renderTargetDesc = MUGraphics::GetRenderTargetDesc();
+	const auto renderMode = MURenderState::GetRenderMode();
+	const auto useShadows = MUConfig::GetEnableShadows();
 
-	renderManager->SetVertexBuffer(
-		RSetVertexBuffer{
-			.StartSlot = 0,
-			.Buffer = VertexBuffer.RawPtr(),
-			.Offset = 0,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
-			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
-		}
-	);
-	renderManager->SetIndexBuffer(
-		RSetIndexBuffer{
-			.IndexBuffer = IndexBuffer,
-			.ByteOffset = 0,
-			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
-		}
-	);
-	renderManager->SetPipelineState(TerrainPipeline);
-	renderManager->CommitShaderResources(
-		RCommitShaderResources{
-			.ShaderResourceBinding = TerrainBinding,
-		}
-	);
-	renderManager->DrawIndexed(
-		RDrawIndexed{
-			.Attribs = Diligent::DrawIndexedAttribs(NumTerrainIndexes, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL)
-		},
-		RCommandListInfo{
-			.Type = NDrawOrderType::Classifier,
-			.Classify = NRenderClassify::Opaque,
-			.View = 0,
-			.Index = 1,
-		}
-	);
-
-	if (GrassUVTexture != nullptr)
+	// Terrain
 	{
+		NFixedPipelineState fixedState = {
+			.CombinedShader = renderMode == NRenderMode::Normal ? TerrainProgram : TerrainShadowProgram,
+			.RTVFormat = renderTargetDesc.ColorFormat,
+			.DSVFormat = renderTargetDesc.DepthStencilFormat,
+		};
+
+		NDynamicPipelineState dynamicState = renderMode != NRenderMode::ShadowMap ? DefaultDynamicPipelineState : DefaultShadowDynamicPipelineState;
+		auto pipelineState = GetPipelineState(fixedState, dynamicState);
+		if (pipelineState->StaticInitialized == false)
+		{
+			auto variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbCameraAttribs");
+			if (variable) variable->Set(MURenderState::GetCameraUniform());
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbLightAttribs");
+			if (variable) variable->Set(MURenderState::GetLightUniform());
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "cbLightAttribs");
+			if (variable) variable->Set(MURenderState::GetLightUniform());
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture");
+			if (variable) variable->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture");
+			if (variable) variable->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture");
+			if (variable) variable->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture");
+			if (variable) variable->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture");
+			if (variable) variable->Set(UVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture");
+			if (variable) variable->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings");
+			if (variable) variable->Set(SettingsUniform);
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures");
+			if (variable) variable->Set(Textures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			pipelineState->StaticInitialized = true;
+		}
+
+		auto shadowMap = MURenderState::GetShadowMap();
+		NShaderResourcesBinding *binding;
+		if (renderMode == NRenderMode::Normal && shadowMap != nullptr)
+		{
+			NResourceId resourceIds[1] = { MURenderState::GetShadowResourceId() };
+			binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+			if (binding->Initialized == false)
+			{
+				if (shadowMap != nullptr)
+				{
+					if (MURenderState::GetShadowMode() == NShadowMode::PCF)
+					{
+						auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_tex2DShadowMap");
+						if (variable) variable->Set(shadowMap->GetSRV());
+					}
+					else
+					{
+						auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_tex2DFilterableShadowMap");
+						if (variable) variable->Set(shadowMap->GetFilterableSRV());
+					}
+				}
+				binding->Initialized = true;
+			}
+		}
+		else
+		{
+			NResourceId resourceIds[1] = { NInvalidUInt32 };
+			binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+			binding->Initialized = true;
+		}
+
 		renderManager->SetVertexBuffer(
 			RSetVertexBuffer{
 				.StartSlot = 0,
@@ -1230,10 +1194,126 @@ void NTerrain::Render()
 				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
 			}
 		);
-		renderManager->SetPipelineState(GrassPipeline);
+		renderManager->SetPipelineState(pipelineState);
 		renderManager->CommitShaderResources(
 			RCommitShaderResources{
-				.ShaderResourceBinding = GrassBinding,
+				.ShaderResourceBinding = binding,
+			}
+		);
+		renderManager->DrawIndexed(
+			RDrawIndexed{
+				.Attribs = Diligent::DrawIndexedAttribs(NumTerrainIndexes, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL)
+			},
+			RCommandListInfo{
+				.Type = NDrawOrderType::Classifier,
+				.Classify = NRenderClassify::Opaque,
+				.View = 0,
+				.Index = 1,
+			}
+		);
+	}
+
+	// Grass
+	if (GrassUVTexture != nullptr)
+	{
+		NFixedPipelineState fixedState = {
+			.CombinedShader = renderMode == NRenderMode::Normal ? GrassProgram : GrassShadowProgram,
+			.RTVFormat = renderTargetDesc.ColorFormat,
+			.DSVFormat = renderTargetDesc.DepthStencilFormat,
+		};
+
+		NDynamicPipelineState dynamicState = (
+			renderMode != NRenderMode::ShadowMap
+			? NDynamicPipelineState{
+				.CullMode = Diligent::CULL_MODE_NONE,
+				.AlphaWrite = false,
+				.DepthWrite = false,
+				.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA,
+				.DestBlend = Diligent::BLEND_FACTOR_INV_SRC_ALPHA,
+				.BlendOp = Diligent::BLEND_OPERATION_ADD,
+			}
+			: DefaultShadowDynamicPipelineState
+		);
+
+		auto pipelineState = GetPipelineState(fixedState, dynamicState);
+		if (pipelineState->StaticInitialized == false)
+		{
+			auto variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbCameraAttribs");
+			if (variable) variable->Set(MURenderState::GetCameraUniform());
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbLightAttribs");
+			if (variable) variable->Set(MURenderState::GetLightUniform());
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "cbLightAttribs");
+			if (variable) variable->Set(MURenderState::GetLightUniform());
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_HeightTexture");
+			if (variable) variable->Set(HeightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_LightTexture");
+			if (variable) variable->Set(LightmapTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_NormalTexture");
+			if (variable) variable->Set(NormalTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_MappingTexture");
+			if (variable) variable->Set(MappingTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_UVTexture");
+			if (variable) variable->Set(GrassUVTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_AttributesTexture");
+			if (variable) variable->Set(AttributesTexture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "TerrainSettings");
+			if (variable) variable->Set(SettingsUniform);
+			variable = pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Textures");
+			if (variable) variable->Set(GrassTextures->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+			pipelineState->StaticInitialized = true;
+		}
+
+		auto shadowMap = MURenderState::GetShadowMap();
+		NShaderResourcesBinding *binding;
+		if (renderMode == NRenderMode::Normal && shadowMap != nullptr)
+		{
+			NResourceId resourceIds[1] = { MURenderState::GetShadowResourceId() };
+			binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+			if (binding->Initialized == false)
+			{
+				if (shadowMap != nullptr)
+				{
+					if (MURenderState::GetShadowMode() == NShadowMode::PCF)
+					{
+						auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_tex2DShadowMap");
+						if (variable) variable->Set(shadowMap->GetSRV());
+					}
+					else
+					{
+						auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_tex2DFilterableShadowMap");
+						if (variable) variable->Set(shadowMap->GetFilterableSRV());
+					}
+				}
+				binding->Initialized = true;
+			}
+		}
+		else
+		{
+			NResourceId resourceIds[1] = { NInvalidUInt32 };
+			binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+			binding->Initialized = true;
+		}
+
+		renderManager->SetVertexBuffer(
+			RSetVertexBuffer{
+				.StartSlot = 0,
+				.Buffer = VertexBuffer.RawPtr(),
+				.Offset = 0,
+				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+				.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
+			}
+		);
+		renderManager->SetIndexBuffer(
+			RSetIndexBuffer{
+				.IndexBuffer = IndexBuffer,
+				.ByteOffset = 0,
+				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+			}
+		);
+		renderManager->SetPipelineState(pipelineState);
+		renderManager->CommitShaderResources(
+			RCommitShaderResources{
+				.ShaderResourceBinding = binding,
 			}
 		);
 		renderManager->DrawIndexed(

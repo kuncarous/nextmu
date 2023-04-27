@@ -88,13 +88,12 @@ protected:
 	const mu_boolean LoadAttributes(mu_utf8string path, std::vector<Diligent::StateTransitionDesc> &barriers);
 	const mu_boolean PrepareSettings(const mu_utf8string path, const nlohmann::json document, std::vector<Diligent::StateTransitionDesc> &barriers);
 	const mu_boolean GenerateBuffers(std::vector<Diligent::StateTransitionDesc> &barriers);
-	const mu_boolean PreparePipelines();
 
 public:
 	void Reset();
 	void ConfigureUniforms();
 	void Update();
-	void Render();
+	void Render(const NRenderSettings &renderSettings);
 
 	Diligent::ITexture *GetLightmapTexture();
 
@@ -121,12 +120,10 @@ public:
 private:
 	mu_utf8string Id;
 
-	mu_shader Program = NInvalidShader;
+	mu_shader TerrainProgram = NInvalidShader;
+	mu_shader TerrainShadowProgram = NInvalidShader;
 	mu_shader GrassProgram = NInvalidShader;
-	NPipelineState *TerrainPipeline = nullptr;
-	NPipelineState *GrassPipeline = nullptr;
-	NShaderResourcesBinding *TerrainBinding = nullptr;
-	NShaderResourcesBinding *GrassBinding = nullptr;
+	mu_shader GrassShadowProgram = NInvalidShader;
 
 	Diligent::RefCntAutoPtr<Diligent::ITexture> HeightmapTexture;
 	Diligent::RefCntAutoPtr<Diligent::ITexture> LightmapTexture;

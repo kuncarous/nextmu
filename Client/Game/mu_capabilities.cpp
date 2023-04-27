@@ -10,8 +10,8 @@ namespace MUCapabilities
 	{
 		const auto device = MUGraphics::GetDevice();
 		const auto &deviceInfo = device->GetDeviceInfo();
-		//auto caps = bgfx::getCaps();
-		//HomogeneousDepth = caps->homogeneousDepth;
+
+		HomogeneousDepth = deviceInfo.IsGLDevice();
 
 		return true;
 	}

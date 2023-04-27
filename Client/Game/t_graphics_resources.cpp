@@ -13,3 +13,8 @@ NGraphicsResource::~NGraphicsResource()
 {
 	ReleaseShaderResourcesByResourceId(Id);
 }
+
+mu_uint32 GenerateResourceId()
+{
+	return NGraphicsResource::IdGenerator++;
+}

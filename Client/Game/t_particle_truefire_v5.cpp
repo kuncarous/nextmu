@@ -114,8 +114,7 @@ EnttIterator TParticleTrueFireV5::Render(EnttRegistry &registry, EnttView &view,
 	const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 	const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
 
-	cglm::mat4 gview;
-	MURenderState::GetView(gview);
+	glm::mat4 gview = MURenderState::GetView();
 
 	for (; iter != last; ++iter)
 	{
@@ -143,21 +142,30 @@ void TParticleTrueFireV5::RenderGroup(const NRenderGroup &renderGroup, NRenderBu
 	auto renderManager = MUGraphics::GetRenderManager();
 	auto immediateContext = MUGraphics::GetImmediateContext();
 
+	if (renderBuffer.RequireTransition == false)
+	{
+		Diligent::StateTransitionDesc updateBarriers[2] = {
+			Diligent::StateTransitionDesc(renderBuffer.VertexBuffer, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+			Diligent::StateTransitionDesc(renderBuffer.IndexBuffer, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+		};
+		immediateContext->TransitionResourceStates(mu_countof(updateBarriers), updateBarriers);
+		renderBuffer.RequireTransition = true;
+	}
+
 	immediateContext->UpdateBuffer(
 		renderBuffer.VertexBuffer,
 		sizeof(NParticleVertex) * renderGroup.Index * 4,
 		sizeof(NParticleVertex) * renderGroup.Count * 4,
 		renderBuffer.Vertices.data() + renderGroup.Index * 4,
-		renderBuffer.RequireTransition == false ? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION : Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE
 	);
 	immediateContext->UpdateBuffer(
 		renderBuffer.IndexBuffer,
 		sizeof(mu_uint32) * renderGroup.Index * 6,
 		sizeof(mu_uint32) * renderGroup.Count * 6,
 		renderBuffer.Indices.data() + renderGroup.Index * 6,
-		renderBuffer.RequireTransition == false ? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION : Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE
 	);
-	renderBuffer.RequireTransition = true;
 
 	// Update Model Settings
 	{
@@ -178,8 +186,8 @@ void TParticleTrueFireV5::RenderGroup(const NRenderGroup &renderGroup, NRenderBu
 	auto pipelineState = GetPipelineState(renderBuffer.FixedPipelineState, DynamicPipelineState);
 	if (pipelineState->StaticInitialized == false)
 	{
-		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetProjUniform());
-		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ParticleSettings")->Set(MURenderState::GetProjUniform());
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbCameraAttribs")->Set(MURenderState::GetCameraUniform());
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ParticleSettings")->Set(renderBuffer.SettingsUniform);
 		pipelineState->StaticInitialized = true;
 	}
 

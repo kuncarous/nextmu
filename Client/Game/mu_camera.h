@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "mu_math_frustum.h"
-
 enum class NCameraMode
 {
 	Directional, // Target depends on Eye and Direction
@@ -22,9 +20,9 @@ class NCamera
 {
 public:
 	void Update();
-	void GenerateFrustum(cglm::mat4 view, cglm::mat4 projection);
+	void GenerateFrustum(glm::mat4 view, glm::mat4 projection);
 
-	void GetView(cglm::mat4 out);
+	glm::mat4 GetView();
 
 	void SetMode(NCameraMode mode);
 	void SetEye(glm::vec3 eye);
@@ -35,27 +33,27 @@ public:
 	void SetMinDistance(const mu_float minDistance);
 	void SetMaxDistance(const mu_float maxDistance);
 
-	void GetEye(cglm::vec3 out);
-	void GetTarget(cglm::vec3 out);
-	void GetAngle(cglm::vec3 out);
-	void GetUp(cglm::vec3 out);
+	glm::vec3 GetEye();
+	glm::vec3 GetTarget();
+	glm::vec3 GetAngle();
+	glm::vec3 GetUp();
 	const mu_float GetDistance();
 	const mu_float GetMinDistance();
 	const mu_float GetMaxDistance();
 
 public:
-	const NMathFrustum *GetFrustum() const
+	const Diligent::ViewFrustumExt *GetFrustum() const
 	{
 		return &Frustum;
 	}
 
 private:
-	NMathFrustum Frustum;
+	Diligent::ViewFrustumExt Frustum;
 	NCameraMode Mode = NCameraMode::Directional;
-	cglm::vec3 Eye = {};
-	cglm::vec3 Target = {};
-	cglm::vec3 Angle = {};
-	cglm::vec3 Up = {};
+	glm::vec3 Eye;
+	glm::vec3 Target;
+	glm::vec3 Angle;
+	glm::vec3 Up;
 	NCameraDistance Distance;
 
 	glm::ivec2 BackupMousePosition = glm::ivec2();

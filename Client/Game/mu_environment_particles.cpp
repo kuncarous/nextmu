@@ -77,6 +77,13 @@ const mu_boolean NParticles::Initialize()
 		RenderBuffer.SettingsUniform = buffer;
 	}
 
+	const auto immediateContext = MUGraphics::GetImmediateContext();
+	Diligent::StateTransitionDesc updateBarriers[2] = {
+		Diligent::StateTransitionDesc(RenderBuffer.VertexBuffer, Diligent::RESOURCE_STATE_UNDEFINED, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+		Diligent::StateTransitionDesc(RenderBuffer.IndexBuffer, Diligent::RESOURCE_STATE_UNDEFINED, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+	};
+	immediateContext->TransitionResourceStates(mu_countof(updateBarriers), updateBarriers);
+
 	RenderBuffer.Groups.reserve(100);
 
 	return true;
@@ -385,7 +392,10 @@ void NParticles::Render()
 	}
 #endif
 
-	const auto immediateContext = MUGraphics::GetImmediateContext();
+	const auto &renderTargetDesc = MUGraphics::GetRenderTargetDesc();
+	auto &fixedState = RenderBuffer.FixedPipelineState;
+	fixedState.RTVFormat = renderTargetDesc.ColorFormat;
+	fixedState.DSVFormat = renderTargetDesc.DepthStencilFormat;
 
 	// Render Groups
 	{
@@ -408,9 +418,12 @@ void NParticles::Render()
 
 	if (RenderBuffer.RequireTransition == true)
 	{
-		const auto renderManager = MUGraphics::GetRenderManager();
-		renderManager->TransitionResourceState(Diligent::StateTransitionDesc(RenderBuffer.VertexBuffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
-		renderManager->TransitionResourceState(Diligent::StateTransitionDesc(RenderBuffer.IndexBuffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		const auto immediateContext = MUGraphics::GetImmediateContext();
+		Diligent::StateTransitionDesc updateBarriers[2] = {
+			Diligent::StateTransitionDesc(RenderBuffer.VertexBuffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+			Diligent::StateTransitionDesc(RenderBuffer.IndexBuffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+		};
+		immediateContext->TransitionResourceStates(mu_countof(updateBarriers), updateBarriers);
 		RenderBuffer.RequireTransition = false;
 	}
 

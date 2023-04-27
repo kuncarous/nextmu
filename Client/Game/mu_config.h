@@ -14,6 +14,8 @@ namespace MUConfig
 	const mu_uint32 GetWindowWidth();
 	const mu_uint32 GetWindowHeight();
 
+	const mu_boolean GetEnableShadows();
+
 	const mu_boolean GetAntialiasing();
 	const mu_boolean GetVerticalSync();
 };

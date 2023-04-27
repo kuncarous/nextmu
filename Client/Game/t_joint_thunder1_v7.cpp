@@ -237,21 +237,30 @@ void TJointThunder1V7::RenderGroup(const TJoint::NRenderGroup &renderGroup, TJoi
 	auto renderManager = MUGraphics::GetRenderManager();
 	auto immediateContext = MUGraphics::GetImmediateContext();
 
+	if (renderBuffer.RequireTransition == false)
+	{
+		Diligent::StateTransitionDesc updateBarriers[2] = {
+			Diligent::StateTransitionDesc(renderBuffer.VertexBuffer, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+			Diligent::StateTransitionDesc(renderBuffer.IndexBuffer, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+		};
+		immediateContext->TransitionResourceStates(mu_countof(updateBarriers), updateBarriers);
+		renderBuffer.RequireTransition = true;
+	}
+
 	immediateContext->UpdateBuffer(
 		renderBuffer.VertexBuffer,
 		sizeof(NJointVertex) * renderGroup.Index * 4,
 		sizeof(NJointVertex) * renderGroup.Count * 4,
 		renderBuffer.Vertices.data() + renderGroup.Index * 4,
-		renderBuffer.RequireTransition == false ? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION : Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE
 	);
 	immediateContext->UpdateBuffer(
 		renderBuffer.IndexBuffer,
 		sizeof(mu_uint32) * renderGroup.Index * 6,
 		sizeof(mu_uint32) * renderGroup.Count * 6,
 		renderBuffer.Indices.data() + renderGroup.Index * 6,
-		renderBuffer.RequireTransition == false ? Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION : Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE
 	);
-	renderBuffer.RequireTransition = true;
 
 	// Update Model Settings
 	{
@@ -272,8 +281,8 @@ void TJointThunder1V7::RenderGroup(const TJoint::NRenderGroup &renderGroup, TJoi
 	auto pipelineState = GetPipelineState(renderBuffer.FixedPipelineState, DynamicPipelineState);
 	if (pipelineState->StaticInitialized == false)
 	{
-		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ModelViewProj")->Set(MURenderState::GetViewProjUniform());
-		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "JointSettings")->Set(MURenderState::GetProjUniform());
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbCameraAttribs")->Set(MURenderState::GetCameraUniform());
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "JointSettings")->Set(renderBuffer.SettingsUniform);
 		pipelineState->StaticInitialized = true;
 	}
 

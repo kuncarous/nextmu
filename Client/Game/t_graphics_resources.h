@@ -32,7 +32,10 @@ protected:
 	NResourceId Id;
 
 protected:
+	friend mu_uint32 GenerateResourceId();
 	static mu_atomic_uint32_t IdGenerator;
 };
+
+mu_uint32 GenerateResourceId();
 
 #endif

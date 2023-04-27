@@ -10,13 +10,14 @@ namespace MUGraphics
 	const mu_boolean Initialize();
 	void Destroy();
 
+	NRenderTargetDesc &GetRenderTargetDesc();
+	void SetRenderTargetDesc(const NRenderTargetDesc desc);
+
+	Diligent::RENDER_DEVICE_TYPE GetDeviceType();
 	Diligent::IRenderDevice *GetDevice();
 	Diligent::ISwapChain *GetSwapChain();
 	Diligent::IDeviceContext *GetImmediateContext();
 	NRenderManager *GetRenderManager();
-
-	const char *GetShaderFolder();
-	const char *GetShaderExtension();
 };
 
 #endif

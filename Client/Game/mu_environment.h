@@ -12,6 +12,7 @@
 
 class NTerrain;
 
+typedef std::unique_ptr<Diligent::ShadowMapManager> NShadowMapPtr;
 typedef std::unique_ptr<NTerrain> NTerrainPtr;
 typedef std::unique_ptr<NModel> NModelPtr;
 typedef std::unique_ptr<NObjects> NObjectsPtr;
@@ -24,6 +25,8 @@ class NEnvironment
 public:
 	const mu_boolean Initialize();
 	void Destroy();
+
+	const mu_boolean CreateShadowMap();
 
 	void Reset(const mu_boolean forceReset = false);
 	void Update();
@@ -66,6 +69,14 @@ public:
 	}
 
 private:
+	NRenderSettings RenderSettings;
+	Diligent::LightAttribs LightAttribs;
+
+	Diligent::float3 LightDirection = Diligent::float3(-1.3f, 0.0f, -2.0f);//Diligent::float3(-0.554699242f, -0.0599640049f, -0.829887390f);
+	NResourceId ShadowResourceId = NInvalidUInt32;
+	NShadowMapPtr ShadowMap;
+	std::vector<Diligent::ViewFrustumExt> ShadowFrustums;
+
 	NTerrainPtr Terrain;
 	std::vector<NModelPtr> Models;
 	NObjectsPtr Objects;

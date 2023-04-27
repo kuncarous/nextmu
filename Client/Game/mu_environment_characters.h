@@ -13,8 +13,8 @@ public:
 	const mu_boolean Initialize();
 	void Destroy();
 
-	void Update();
-	void Render();
+	void Update(const NRenderSettings &renderSettings);
+	void Render(const NRenderSettings &renderSettings);
 
 	void Clear();
 	const entt::entity AddOrFind(

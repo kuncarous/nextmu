@@ -22,10 +22,9 @@ void NCharacters::Destroy()
 
 }
 
-void NCharacters::Update()
+void NCharacters::Update(const NRenderSettings &renderSettings)
 {
 	const auto updateTime = MUState::GetUpdateTime();
-	const auto frustum = MURenderState::GetCamera()->GetFrustum();
 	const auto environment = MURenderState::GetEnvironment();
 
 	const auto view = Registry.view<
@@ -43,7 +42,7 @@ void NCharacters::Update()
 		std::unique_ptr<NThreadExecutorBase>(
 			new (std::nothrow) NThreadExecutorIterator(
 				view.begin(), view.end(),
-				[&view, environment, frustum, updateTime](const entt::entity entity) -> void {
+				[&view, environment, &renderSettings, updateTime](const entt::entity entity) -> void {
 					auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
 						NEntity::NAttachment,
 						NEntity::NLight,
@@ -125,12 +124,38 @@ void NCharacters::Update()
 
 							bbox.Min = glm::min(bbox.Min, tmpBBox.Min);
 							bbox.Max = glm::max(bbox.Max, tmpBBox.Max);
+							bbox.Order();
 						}
 					}
 
-					renderState.Flags.Visible = frustum->IsBoxVisible(bbox.Min, bbox.Max);
+					const mu_boolean isVisible = Diligent::GetBoxVisibility(
+						*renderSettings.Frustum,
+						Diligent::BoundBox{
+							.Min = Diligent::float3(bbox.Min.x, -bbox.Max.y, bbox.Min.z),
+							.Max = Diligent::float3(bbox.Max.x, -bbox.Min.y, bbox.Max.z),
+						}
+					) != Diligent::BoxVisibility::Invisible;
 
-					if (!renderState.Flags.Visible) return;
+					mu_boolean shadowVisible = false;
+					if (renderSettings.ShadowFrustums != nullptr)
+					{
+						for (mu_uint32 n = 0; n < renderSettings.ShadowFrustumsNum; ++n)
+						{
+							renderState.ShadowVisible[n] = Diligent::GetBoxVisibility(
+								renderSettings.ShadowFrustums[n],
+								Diligent::BoundBox{
+									.Min = Diligent::float3(bbox.Min.x, -bbox.Max.y, bbox.Min.z),
+									.Max = Diligent::float3(bbox.Max.x, -bbox.Min.y, bbox.Max.z),
+								},
+								Diligent::FRUSTUM_PLANE_FLAG_OPEN_NEAR
+							) != Diligent::BoxVisibility::Invisible;
+							shadowVisible |= renderState.ShadowVisible[n];
+						}
+					}
+
+					renderState.Flags.Visible = isVisible;
+
+					if (!renderState.Flags.Visible && !shadowVisible) return;
 
 					environment->CalculateLight(position, light, renderState);
 
@@ -190,51 +215,98 @@ void NCharacters::Update()
 	);
 }
 
-void NCharacters::Render()
+void NCharacters::Render(const NRenderSettings &renderSettings)
 {
 	const auto view = Registry.view<NEntity::NRenderable, NEntity::NAttachment, NEntity::NRenderState, NEntity::NSkeleton>();
-	for (auto [entity, attachment, renderState, skeleton] : view.each())
+
+	const auto renderMode = MURenderState::GetRenderMode();
+	switch (renderMode)
 	{
-		if (!renderState.Flags.Visible) continue;
-		if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
-
-		MURenderState::AttachTexture(TextureAttachment::Skin, attachment.Skin);
-
-		const NRenderConfig config = {
-			.BoneOffset = skeleton.SkeletonOffset,
-			.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
-			.BodyScale = 1.0f,
-			.EnableLight = renderState.Flags.LightEnable,
-			.BodyLight = renderState.BodyLight,
-		};
-		MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
-
-		for (auto &[type, part] : attachment.Parts)
+	case NRenderMode::Normal:
 		{
-			const auto model = part.Model;
-			auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
+			for (auto [entity, attachment, renderState, skeleton] : view.each())
+			{
+				if (!renderState.Flags.Visible) continue;
+				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
 
-			const NRenderConfig config = {
-				.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
-				.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
-				.BodyScale = 1.0f,
-				.EnableLight = renderState.Flags.LightEnable,
-				.BodyLight = renderState.BodyLight,
-			};
-			MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
-		}
+				MURenderState::AttachTexture(TextureAttachment::Skin, attachment.Skin);
 
-		MURenderState::DetachTexture(TextureAttachment::Skin);
-	}
+				const NRenderConfig config = {
+					.BoneOffset = skeleton.SkeletonOffset,
+					.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+					.BodyScale = 1.0f,
+					.EnableLight = renderState.Flags.LightEnable,
+					.BodyLight = renderState.BodyLight,
+				};
+				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
+
+				for (auto &[type, part] : attachment.Parts)
+				{
+					const auto model = part.Model;
+					auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
+
+					const NRenderConfig config = {
+						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
+						.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+						.BodyScale = 1.0f,
+						.EnableLight = renderState.Flags.LightEnable,
+						.BodyLight = renderState.BodyLight,
+					};
+					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
+				}
+
+				MURenderState::DetachTexture(TextureAttachment::Skin);
+			}
 
 #if RENDER_BBOX
-	const auto bboxView = Objects.view<NEntity::NRenderable, NEntity::NRenderState, NEntity::NBoundingBoxes>();
-	for (auto [entity, renderState, boundingBox] : bboxView.each())
-	{
-		if (!renderState.Flags.Visible) continue;
-		MUBBoxRenderer::Render(boundingBox.Calculated);
-	}
+			const auto bboxView = Objects.view<NEntity::NRenderable, NEntity::NRenderState, NEntity::NBoundingBox>();
+			for (auto [entity, renderState, boundingBox] : bboxView.each())
+			{
+				if (!renderState.Flags.Visible) continue;
+				MUBBoxRenderer::Render(boundingBox.Calculated);
+			}
 #endif
+		}
+		break;
+
+	case NRenderMode::ShadowMap:
+		{
+			for (auto [entity, attachment, renderState, skeleton] : view.each())
+			{
+				if (!renderState.ShadowVisible[renderSettings.CurrentShadowMap]) continue;
+				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
+
+				MURenderState::AttachTexture(TextureAttachment::Skin, attachment.Skin);
+
+				const NRenderConfig config = {
+					.BoneOffset = skeleton.SkeletonOffset,
+					.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+					.BodyScale = 1.0f,
+					.EnableLight = renderState.Flags.LightEnable,
+					.BodyLight = renderState.BodyLight,
+				};
+				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
+
+				for (auto &[type, part] : attachment.Parts)
+				{
+					const auto model = part.Model;
+					auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
+
+					const NRenderConfig config = {
+						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
+						.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+						.BodyScale = 1.0f,
+						.EnableLight = renderState.Flags.LightEnable,
+						.BodyLight = renderState.BodyLight,
+					};
+					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
+				}
+
+				MURenderState::DetachTexture(TextureAttachment::Skin);
+			}
+		}
+		break;
+	}
 }
 
 void NCharacters::Clear()
@@ -321,18 +393,6 @@ const entt::entity NCharacters::AddOrFind(
 			}
 		}
 	);
-
-	/*
-		TO DO : remove this and configure it based on the character equipment
-	*/
-	AddAttachmentPart(entity, NEntity::PartType::Head, MURendersManager::GetRender("dk_head"));
-	AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 0);
-	AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 0);
-	AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 0);
-	AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 0);
-	AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 0);
-	AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Maces, 5);
-	AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 5);
 
 	return entity;
 }

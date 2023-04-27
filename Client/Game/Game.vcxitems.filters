@@ -55,9 +55,6 @@
     <Filter Include="Math">
       <UniqueIdentifier>{708273af-4e66-4498-9b69-68d035789674}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Math\Frustum">
-      <UniqueIdentifier>{f674ce35-2860-4304-b734-6fdbbca4e171}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Caps">
       <UniqueIdentifier>{ef27b566-d744-4558-bde3-8732c3d1f3dd}</UniqueIdentifier>
     </Filter>
@@ -187,6 +184,9 @@
     <Filter Include="Graphics\Renderer\Classifier">
       <UniqueIdentifier>{1ccfe428-5982-45f9-9a9f-05903f3a0012}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Shadows">
+      <UniqueIdentifier>{4e96e200-008b-4ebb-893b-c2a371857804}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -242,9 +242,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_crypt.cpp">
       <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_frustum.cpp">
-      <Filter>Math\Frustum</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_capabilities.cpp">
       <Filter>Caps</Filter>
@@ -387,6 +384,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.cpp">
       <Filter>Graphics\Renderer\Classifier</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelinestate.cpp">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shadows.cpp">
+      <Filter>Graphics\Shadows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
@@ -457,9 +460,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h">
       <Filter>Environment</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_frustum.h">
-      <Filter>Math\Frustum</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h">
       <Filter>Math</Filter>
@@ -664,6 +664,15 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.h">
       <Filter>Graphics\Renderer\Classifier</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_rendersettings.h">
+      <Filter>Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelinestate.h">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shadows.h">
+      <Filter>Graphics\Shadows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

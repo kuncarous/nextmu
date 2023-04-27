@@ -40,6 +40,7 @@ namespace MUGraphics
     std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceContext>> DeviceContexts;
     mu_uint32 CurrentDeviceContext = 0;
 
+    NRenderTargetDesc RenderTargetDesc = {};
     std::unique_ptr<NRenderManager> RenderManager;
 
     const Diligent::TEXTURE_FORMAT DesiredColorFormat = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
@@ -419,6 +420,11 @@ namespace MUGraphics
             return false;
         }
 
+        const auto swapchain = SwapChain;
+        const auto &swapchainDesc = swapchain->GetDesc();
+        RenderTargetDesc.ColorFormat = swapchainDesc.ColorBufferFormat;
+        RenderTargetDesc.DepthStencilFormat = swapchainDesc.DepthBufferFormat;
+
         RenderManager.reset(new (std::nothrow) NRenderManager());
         CreateInputLayouts();
         CreatePipelineResources();
@@ -437,6 +443,21 @@ namespace MUGraphics
         Device.Release();
         EngineFactory.Release();
         FreeImage_DeInitialise();
+    }
+
+    NRenderTargetDesc &GetRenderTargetDesc()
+    {
+        return RenderTargetDesc;
+    }
+
+    void SetRenderTargetDesc(const NRenderTargetDesc desc)
+    {
+        RenderTargetDesc = desc;
+    }
+
+    Diligent::RENDER_DEVICE_TYPE GetDeviceType()
+    {
+        return DeviceType;
     }
 
     Diligent::IRenderDevice *GetDevice()
@@ -458,39 +479,4 @@ namespace MUGraphics
     {
         return RenderManager.get();
     }
-
-	const char *GetShaderFolder()
-	{
-        return "/";
-#if 0
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
-		return "/windows/";
-#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX
-		return "/linux/";
-#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
-		return "/macos/";
-#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
-		return "/android/";
-#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
-		return "/ios/";
-#endif
-#endif
-	}
-
-	const char *GetShaderExtension()
-	{
-        return "";
-#if 0
-		switch (DeviceType)
-		{
-		default: mu_error("Not supported renderer");
-		case Diligent::RENDER_DEVICE_TYPE_GLES: return ".gles";
-		case Diligent::RENDER_DEVICE_TYPE_GL: return ".gl";
-		case Diligent::RENDER_DEVICE_TYPE_D3D11: return ".d3d";
-		case Diligent::RENDER_DEVICE_TYPE_D3D12: return ".d3d";
-		case Diligent::RENDER_DEVICE_TYPE_VULKAN: return ".vk";
-        case Diligent::RENDER_DEVICE_TYPE_METAL: return ".mtl";
-		}
-#endif
-	}
 };

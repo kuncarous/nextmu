@@ -39,6 +39,8 @@ namespace cglm
 #include <SwapChain.h>
 #include <ScreenCapture.hpp>
 #include <GraphicsTypesX.hpp>
+#include <AdvancedMath.hpp>
+#include <ShadowMapManager.hpp>
 
 #define NEXTMU_TITLE "NextMU Project"
 

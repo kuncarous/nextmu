@@ -7,25 +7,31 @@
 
 namespace MURenderState
 {
-	cglm::mat4 Projection, View, ViewProjection;
+	glm::mat4 FrustomProjection, Projection, View, ViewProjection;
 	NCamera *Camera = nullptr;
 	NEnvironment *Environment = nullptr;
 	std::array<NGraphicsTexture *, TextureAttachment::Count> Textures = { {} };
 
-	Diligent::RefCntAutoPtr<Diligent::IBuffer> ProjUniform;
-	Diligent::RefCntAutoPtr<Diligent::IBuffer> ViewProjUniform;
+	Diligent::RefCntAutoPtr<Diligent::IBuffer> CameraUniform;
+	Diligent::RefCntAutoPtr<Diligent::IBuffer> LightUniform;
+
+	NRenderMode RenderMode = NRenderMode::Normal;
+
+	NResourceId ShadowResourceId = NInvalidUInt32;
+	NShadowMode ShadowMode = ShadowMapMode;
+	Diligent::ShadowMapManager *ShadowMap = nullptr;
 
 	const mu_boolean Initialize()
 	{
 		const auto device = MUGraphics::GetDevice();
 
-		// Projection Uniform
+		// Camera Uniform
 		{
 			Diligent::BufferDesc bufferDesc;
 			bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
 			bufferDesc.BindFlags = Diligent::BIND_UNIFORM_BUFFER;
 			bufferDesc.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
-			bufferDesc.Size = sizeof(cglm::mat4);
+			bufferDesc.Size = sizeof(Diligent::CameraAttribs);
 
 			Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
 			device->CreateBuffer(bufferDesc, nullptr, &buffer);
@@ -34,16 +40,16 @@ namespace MURenderState
 				return false;
 			}
 
-			ProjUniform = buffer;
+			CameraUniform = buffer;
 		}
 
-		// View Projection Uniform
+		// Light Uniform
 		{
 			Diligent::BufferDesc bufferDesc;
 			bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
 			bufferDesc.BindFlags = Diligent::BIND_UNIFORM_BUFFER;
 			bufferDesc.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
-			bufferDesc.Size = sizeof(cglm::mat4);
+			bufferDesc.Size = sizeof(Diligent::LightAttribs);
 
 			Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
 			device->CreateBuffer(bufferDesc, nullptr, &buffer);
@@ -52,7 +58,7 @@ namespace MURenderState
 				return false;
 			}
 
-			ViewProjUniform = buffer;
+			LightUniform = buffer;
 		}
 
 		return true;
@@ -60,8 +66,8 @@ namespace MURenderState
 
 	void Destroy()
 	{
-		ProjUniform.Release();
-		ViewProjUniform.Release();
+		CameraUniform.Release();
+		LightUniform.Release();
 	}
 
 	void Reset()
@@ -73,52 +79,87 @@ namespace MURenderState
 		}
 	}
 
-	Diligent::IBuffer *GetProjUniform()
+	void SetRenderMode(const NRenderMode mode)
 	{
-		return ProjUniform.RawPtr();
+		RenderMode = mode;
 	}
 
-	Diligent::IBuffer *GetViewProjUniform()
+	const NRenderMode GetRenderMode()
 	{
-		return ViewProjUniform.RawPtr();
+		return RenderMode;
 	}
 
-	void SetViewTransform(cglm::mat4 view, cglm::mat4 projection)
+	void SetShadowResourceId(const NResourceId resourceId)
 	{
-		cglm::glm_mat4_copy(projection, Projection);
-		cglm::glm_mat4_copy(view, View);
-		cglm::glm_mat4_mul(projection, view, ViewProjection);
-
-		const auto immediateContext = MUGraphics::GetImmediateContext();
-
-		// Update
-		{
-			Diligent::MapHelper<cglm::mat4> uniform(immediateContext, ProjUniform, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
-			cglm::glm_mat4_copy(Projection, *uniform);
-			cglm::glm_mat4_transpose(*uniform);
-		}
-
-		// Update
-		{
-			Diligent::MapHelper<cglm::mat4> uniform(immediateContext, ViewProjUniform, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
-			cglm::glm_mat4_copy(ViewProjection, *uniform);
-			cglm::glm_mat4_transpose(*uniform);
-		}
+		ShadowResourceId = resourceId;
 	}
 
-	void GetViewProjection(cglm::mat4 dest)
+	const NResourceId GetShadowResourceId()
 	{
-		cglm::glm_mat4_copy(ViewProjection, dest);
+		return ShadowResourceId;
 	}
 
-	void GetProjection(cglm::mat4 dest)
+	void SetShadowMode(const NShadowMode mode)
 	{
-		cglm::glm_mat4_copy(Projection, dest);
+		ShadowMode = mode;
 	}
 
-	void GetView(cglm::mat4 dest)
+	const NShadowMode GetShadowMode()
 	{
-		cglm::glm_mat4_copy(View, dest);
+		return ShadowMode;
+	}
+
+	void SetShadowMap(Diligent::ShadowMapManager *shadowMap)
+	{
+		ShadowMap = shadowMap;
+	}
+
+	Diligent::ShadowMapManager *GetShadowMap()
+	{
+		return ShadowMap;
+	}
+
+	Diligent::IBuffer *GetCameraUniform()
+	{
+		return CameraUniform.RawPtr();
+	}
+
+	Diligent::IBuffer *GetLightUniform()
+	{
+		return LightUniform.RawPtr();
+	}
+
+	void SetViewTransform(glm::mat4 view, glm::mat4 projection, glm::mat4 frustumProjection)
+	{
+		FrustomProjection = frustumProjection;
+		Projection = projection;
+		View = view;
+		ViewProjection = Projection * View;
+	}
+
+	void SetViewProjection(glm::mat4 viewProj)
+	{
+		ViewProjection = viewProj;
+	}
+
+	glm::mat4 &GetViewProjection()
+	{
+		return ViewProjection;
+	}
+
+	glm::mat4 &GetFrustumProjection()
+	{
+		return Projection;
+	}
+
+	glm::mat4 &GetProjection()
+	{
+		return Projection;
+	}
+
+	glm::mat4 &GetView()
+	{
+		return View;
 	}
 
 	void AttachCamera(NCamera *camera)

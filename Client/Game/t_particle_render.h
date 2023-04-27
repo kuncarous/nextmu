@@ -102,10 +102,9 @@ namespace TParticle
 		*indices = vertex + 3; ++indices;
 	}
 
-	NEXTMU_INLINE void RenderBillboardSprite(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, cglm::mat4 view, const glm::vec3 &position, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
+	NEXTMU_INLINE void RenderBillboardSprite(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, const glm::mat4 &view, const glm::vec3 &position, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
 	{
-		cglm::vec3 cposition;
-		cglm::glm_mat4_mulv3(view, (mu_float *)glm::value_ptr(position), 1.0f, cposition);
+		glm::vec3 cposition = view * glm::vec4(position.x, -position.y, position.z, 1.0f);
 
 		glm::vec3 rposition[4] = {
 			{ cposition[0] - width, cposition[1] - height, cposition[2] },
@@ -117,10 +116,9 @@ namespace TParticle
 		RenderSprite(renderBuffer, renderGroup, renderIndex, rposition, light, uv);
 	}
 
-	NEXTMU_INLINE void RenderBillboardSpriteWithRotation(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, cglm::mat4 view, const glm::vec3 &position, const mu_float rotation, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
+	NEXTMU_INLINE void RenderBillboardSpriteWithRotation(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, const glm::mat4 &view, const glm::vec3 &position, const mu_float rotation, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
 	{
-		cglm::vec3 cposition;
-		cglm::glm_mat4_mulv3(view, (mu_float *)glm::value_ptr(position), 1.0f, cposition);
+		glm::vec3 cposition = view * glm::vec4(position.x, -position.y, position.z, 1.0f);
 
 		glm::vec3 rposition[4] = {
 			{ -width, -height, cposition[2] },

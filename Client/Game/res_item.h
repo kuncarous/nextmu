@@ -9,6 +9,7 @@ enum class NItemCategory : mu_uint16
 {
 	Axes = 1,
 	Maces = 2,
+	Staffs = 5,
 	Helm = 7,
 	Armor = 8,
 	Pants = 9,

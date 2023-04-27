@@ -3,8 +3,7 @@
 
 #pragma once
 
-struct NFixedPipelineState;
-struct NDynamicPipelineState;
+#include "t_graphics_pipelinestate.h"
 
 typedef mu_uint32 NPipelineStateId;
 typedef mu_uint32 NPipelineBlendHash;
@@ -23,6 +22,10 @@ struct NPipelineState
 {
 	NPipelineStateId Id;
 	NPipelineStateInfo Info;
+#ifndef NDEBUG
+	NFixedPipelineState FixedState;
+	NDynamicPipelineState DynamicState;
+#endif
 	mu_boolean StaticInitialized = false;
 	Diligent::RefCntAutoPtr<Diligent::IPipelineState> Pipeline;
 };

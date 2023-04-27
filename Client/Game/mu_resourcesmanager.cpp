@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "mu_resourcesmanager.h"
 #include "mu_skeletonmanager.h"
+#include "mu_config.h"
 #include "mu_graphics.h"
 #include "mu_model.h"
 #include "mu_textures.h"
@@ -36,7 +37,6 @@ namespace MUResourcesManager
 	std::map<mu_utf8string, TexturePointer> Textures;
 	std::map<mu_utf8string, ModelPointer> Models;
 
-	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment, const mu_utf8string resourceId);
 	const mu_boolean LoadPrograms(const mu_utf8string basePath, const nlohmann::json &programs);
 	const mu_boolean LoadTextures(const mu_utf8string basePath, const nlohmann::json &textures);
 	const mu_boolean LoadModels(const mu_utf8string basePath, const nlohmann::json &models);
@@ -104,14 +104,12 @@ namespace MUResourcesManager
 		Models.clear();
 	}
 
-	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment, const mu_utf8string resourceId)
+	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment, const mu_utf8string resourceId, const nlohmann::json &jmacros)
 	{
 		const auto device = MUGraphics::GetDevice();
-		const mu_utf8string folder = MUGraphics::GetShaderFolder();
-		const mu_utf8string ext = MUGraphics::GetShaderExtension();
 
-		const auto vertexBuffer = mu_readshader<EGameDirectoryType::eSupport>(vertex + folder + "shader.vs" + ext);
-		const auto fragmentBuffer = mu_readshader<EGameDirectoryType::eSupport>(fragment + folder + "shader.fs" + ext);
+		const auto vertexBuffer = mu_readshader<EGameDirectoryType::eSupport>(vertex);
+		const auto fragmentBuffer = mu_readshader<EGameDirectoryType::eSupport>(fragment);
 		if (vertexBuffer.empty() || fragmentBuffer.empty())
 		{
 			return false;
@@ -120,8 +118,36 @@ namespace MUResourcesManager
 		Diligent::ShaderMacroHelper macros;
 		macros.AddShaderMacro("SKELETON_TEXTURE_WIDTH", MUSkeletonManager::BonesTextureWidth);
 		macros.AddShaderMacro("SKELETON_TEXTURE_HEIGHT", MUSkeletonManager::BonesTextureHeight);
+		macros.AddShaderMacro("USE_SHADOW", MUConfig::GetEnableShadows() ? 1 : 0);
+		macros.AddShaderMacro("SHADOW_MODE", static_cast<mu_int32>(ShadowMapMode));
+
+		for (const auto jmacro : jmacros)
+		{
+			const auto type = jmacro["type"].get<mu_utf8string>();
+			const auto name = jmacro["name"].get<mu_utf8string>();
+
+			if (type == "integer")
+			{
+				macros.AddShaderMacro(name.c_str(), jmacro["value"].get<mu_int32>());
+			}
+			else if (type == "float")
+			{
+				macros.AddShaderMacro(name.c_str(), jmacro["value"].get<mu_float>());
+			}
+			else if (type == "boolean")
+			{
+				macros.AddShaderMacro(name.c_str(), jmacro["value"].get<mu_boolean>());
+			}
+			else if (type == "string")
+			{
+				macros.AddShaderMacro(name.c_str(), jmacro["value"].get<mu_utf8string>().c_str());
+			}
+		}
 
 		Diligent::ShaderCreateInfo createInfo;
+#ifndef NDEBUG
+		createInfo.Desc.Name = id.c_str();
+#endif
 		createInfo.SourceLanguage = Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
 		createInfo.Desc.ShaderType = Diligent::SHADER_TYPE_VERTEX;
 		createInfo.Desc.UseCombinedTextureSamplers = true;
@@ -159,14 +185,16 @@ namespace MUResourcesManager
 
 	const mu_boolean LoadPrograms(const mu_utf8string basePath, const nlohmann::json &programs)
 	{
+		const auto dummyArray = nlohmann::json().array();
 		for (const auto &p : programs)
 		{
-			const mu_utf8string id = p["id"];
-			const mu_utf8string vertex = p["vertex"];
-			const mu_utf8string fragment = p["fragment"];
-			const mu_utf8string resourceId = p["resource_id"];
+			const mu_utf8string id = p["id"].get<mu_utf8string>();
+			const mu_utf8string vertex = p["vertex"].get<mu_utf8string>();
+			const mu_utf8string fragment = p["fragment"].get<mu_utf8string>();
+			const mu_utf8string resourceId = p["resource_id"].get<mu_utf8string>();
+			const auto &macros = p.contains("macros") ? p["macros"] : dummyArray;
 
-			if (LoadProgram(id, basePath + vertex, basePath + fragment, resourceId) == false)
+			if (LoadProgram(id, basePath + vertex, basePath + fragment, resourceId, macros) == false)
 			{
 				return false;
 			}
