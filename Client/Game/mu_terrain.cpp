@@ -550,7 +550,7 @@ const mu_boolean NTerrain::LoadTextures(
 		}
 
 		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
-		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(MUTextures::CalculateSamplerFlags(filter, wrap)));
+		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(MUTextures::CalculateSamplerFlags(filter, wrap))->Sampler);
 		Textures = texture;
 	}
 
@@ -694,7 +694,7 @@ const mu_boolean NTerrain::LoadGrassTextures(
 		}
 
 		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
-		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(MUTextures::CalculateSamplerFlags(filter, wrap)));
+		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(MUTextures::CalculateSamplerFlags(filter, wrap))->Sampler);
 		GrassTextures = texture;
 	}
 
@@ -1074,7 +1074,7 @@ void NTerrain::Update()
 		0, 0,
 		Diligent::Box(0, TerrainSize, 0, TerrainSize),
 		Diligent::TextureSubResData(LightmapMemory.get(), TerrainSize * sizeof(mu_uint8) * 4),
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE,
 		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
 	immediateContext->UpdateTexture(
@@ -1082,7 +1082,7 @@ void NTerrain::Update()
 		0, 0,
 		Diligent::Box(0, TerrainSize, 0, TerrainSize),
 		Diligent::TextureSubResData(NormalMemory.get(), TerrainSize * sizeof(mu_uint16) * 4),
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE,
 		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
 	immediateContext->UpdateTexture(
@@ -1090,7 +1090,7 @@ void NTerrain::Update()
 		0, 0,
 		Diligent::Box(0, TerrainSize, 0, TerrainSize),
 		Diligent::TextureSubResData(TerrainAttributes.get(), TerrainAttribute::Stride),
-		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE,
 		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
 
@@ -1152,7 +1152,7 @@ void NTerrain::Render(const NRenderSettings &renderSettings)
 		if (renderMode == NRenderMode::Normal && shadowMap != nullptr)
 		{
 			NResourceId resourceIds[1] = { MURenderState::GetShadowResourceId() };
-			binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+			binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
 			if (binding->Initialized == false)
 			{
 				if (shadowMap != nullptr)
@@ -1174,7 +1174,7 @@ void NTerrain::Render(const NRenderSettings &renderSettings)
 		else
 		{
 			NResourceId resourceIds[1] = { NInvalidUInt32 };
-			binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+			binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
 			binding->Initialized = true;
 		}
 
@@ -1230,7 +1230,8 @@ void NTerrain::Render(const NRenderSettings &renderSettings)
 				.DepthWrite = false,
 				.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA,
 				.DestBlend = Diligent::BLEND_FACTOR_INV_SRC_ALPHA,
-				.BlendOp = Diligent::BLEND_OPERATION_ADD,
+				.SrcBlendAlpha = Diligent::BLEND_FACTOR_SRC_ALPHA,
+				.DestBlendAlpha = Diligent::BLEND_FACTOR_INV_SRC_ALPHA,
 			}
 			: DefaultShadowDynamicPipelineState
 		);
@@ -1268,7 +1269,7 @@ void NTerrain::Render(const NRenderSettings &renderSettings)
 		if (renderMode == NRenderMode::Normal && shadowMap != nullptr)
 		{
 			NResourceId resourceIds[1] = { MURenderState::GetShadowResourceId() };
-			binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+			binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
 			if (binding->Initialized == false)
 			{
 				if (shadowMap != nullptr)
@@ -1290,7 +1291,7 @@ void NTerrain::Render(const NRenderSettings &renderSettings)
 		else
 		{
 			NResourceId resourceIds[1] = { NInvalidUInt32 };
-			binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+			binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
 			binding->Initialized = true;
 		}
 

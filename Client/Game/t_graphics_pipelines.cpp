@@ -36,7 +36,7 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
     // Configure Rasterizer
     {
         auto &rasterizer = graphicsInfo.RasterizerDesc;
-        rasterizer.CullMode = dynamicState.CullMode;
+        rasterizer.CullMode = dynamicState.GetCullMode();
     }
 
     // Configure Blend
@@ -49,12 +49,12 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
             );
         if (blend.BlendEnable)
         {
-            blend.SrcBlend = dynamicState.SrcBlend;
-            blend.DestBlend = dynamicState.DestBlend;
-            blend.BlendOp = dynamicState.BlendOp;
-            blend.SrcBlendAlpha = dynamicState.SrcBlend;
-            blend.DestBlendAlpha = dynamicState.DestBlend;
-            blend.BlendOpAlpha = dynamicState.BlendOp;
+            blend.SrcBlend = dynamicState.GetSrcBlend();
+            blend.DestBlend = dynamicState.GetDestBlend();
+            blend.BlendOp = dynamicState.GetBlendOp();
+            blend.SrcBlendAlpha = dynamicState.GetSrcBlendAlpha();
+            blend.DestBlendAlpha = dynamicState.GetDestBlendAlpha();
+            blend.BlendOpAlpha = dynamicState.GetBlendOpAlpha();
         }
 
         blend.RenderTargetWriteMask = Diligent::COLOR_MASK_NONE;
@@ -74,19 +74,19 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
 
         depthStencil.StencilEnable = dynamicState.StencilEnable;
         depthStencil.StencilReadMask = dynamicState.StencilReadMask;
-        depthStencil.StencilWriteMask = dynamicState.StencilWriteMask;
+        depthStencil.StencilWriteMask = 0xFF; // dynamicState.StencilWriteMask;
 
         auto &stencilFront = depthStencil.FrontFace;
-        stencilFront.StencilFailOp = dynamicState.StencilFailOp;
-        stencilFront.StencilDepthFailOp = dynamicState.StencilDepthFailOp;
-        stencilFront.StencilPassOp = dynamicState.StencilPassOp;
-        stencilFront.StencilFunc = dynamicState.StencilFunc;
+        stencilFront.StencilFailOp = dynamicState.GetStencilFailOp();
+        stencilFront.StencilDepthFailOp = dynamicState.GetStencilDepthFailOp();
+        stencilFront.StencilPassOp = dynamicState.GetStencilPassOp();
+        stencilFront.StencilFunc = dynamicState.GetStencilFunc();
 
         auto &stencilBack = depthStencil.BackFace;
-        stencilBack.StencilFailOp = dynamicState.StencilFailOp;
-        stencilBack.StencilDepthFailOp = dynamicState.StencilDepthFailOp;
-        stencilBack.StencilPassOp = dynamicState.StencilPassOp;
-        stencilBack.StencilFunc = dynamicState.StencilFunc;
+        stencilBack.StencilFailOp = dynamicState.GetStencilFailOp();
+        stencilBack.StencilDepthFailOp = dynamicState.GetStencilDepthFailOp();
+        stencilBack.StencilPassOp = dynamicState.GetStencilPassOp();
+        stencilBack.StencilFunc = dynamicState.GetStencilFunc();
     }
 
     // Configure Shader
@@ -95,12 +95,20 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
         createInfo.pVS = shader->Vertex.RawPtr();
         createInfo.pPS = shader->Pixel.RawPtr();
 
-        const auto resource = shader->Resource;
-        auto &resourceLayout = pipelineStateDesc.ResourceLayout;
-        resourceLayout.NumVariables = static_cast<mu_uint32>(resource->Variables.size());
-        resourceLayout.Variables = resource->Variables.data();
-        resourceLayout.NumImmutableSamplers = static_cast<mu_uint32>(resource->ImmutableSamplers.size());
-        resourceLayout.ImmutableSamplers = resource->ImmutableSamplers.data();
+        if (shader->Resource != nullptr)
+        {
+            const auto resource = shader->Resource;
+            auto &resourceLayout = pipelineStateDesc.ResourceLayout;
+            resourceLayout.NumVariables = static_cast<mu_uint32>(resource->Variables.size());
+            resourceLayout.Variables = resource->Variables.data();
+            resourceLayout.NumImmutableSamplers = static_cast<mu_uint32>(resource->ImmutableSamplers.size());
+            resourceLayout.ImmutableSamplers = resource->ImmutableSamplers.data();
+        }
+        else if (shader->ResourceSignatures.empty() == false)
+        {
+            createInfo.ResourceSignaturesCount = static_cast<Diligent::Uint32>(shader->ResourceSignatures.size());
+            createInfo.ppResourceSignatures = shader->ResourceSignatures.data();
+        }
     }
 
     if (fixedState.RTVFormat != Diligent::TEX_FORMAT_UNKNOWN)

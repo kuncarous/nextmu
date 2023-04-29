@@ -24,6 +24,7 @@ namespace MURenderState
 	const mu_boolean Initialize()
 	{
 		const auto device = MUGraphics::GetDevice();
+		const auto immediateContext = MUGraphics::GetImmediateContext();
 
 		// Camera Uniform
 		{
@@ -41,6 +42,9 @@ namespace MURenderState
 			}
 
 			CameraUniform = buffer;
+
+			Diligent::MapHelper<Diligent::CameraAttribs> uniform(immediateContext, CameraUniform, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
+			*uniform = Diligent::CameraAttribs();
 		}
 
 		// Light Uniform
@@ -59,6 +63,9 @@ namespace MURenderState
 			}
 
 			LightUniform = buffer;
+
+			Diligent::MapHelper<Diligent::LightAttribs> uniform(immediateContext, LightUniform, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
+			*uniform = Diligent::LightAttribs();
 		}
 
 		return true;

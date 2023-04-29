@@ -76,7 +76,7 @@ namespace MUSkeletonManager
 			0, 0,
 			Diligent::Box(0, width, 0, height),
 			Diligent::TextureSubResData(BonesBuffer.data(), sizeof(glm::vec4) * width),
-			Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+			Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE,
 			Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
 		);
 		Diligent::StateTransitionDesc barrier(

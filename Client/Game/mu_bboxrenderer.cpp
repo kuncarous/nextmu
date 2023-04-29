@@ -30,7 +30,6 @@ namespace MUBBoxRenderer
 		.DepthWrite = false,
 		.SrcBlend = Diligent::BLEND_FACTOR_ONE,
 		.DestBlend = Diligent::BLEND_FACTOR_ONE,
-		.BlendOp = Diligent::BLEND_OPERATION_ADD,
 	};
 
 	constexpr mu_uint32 NumIndexes = 6 * 6;
@@ -175,7 +174,7 @@ namespace MUBBoxRenderer
 		}
 
 		NResourceId resourceIds[1] = { NInvalidUInt32 };
-		auto binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+		auto binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
 		binding->Initialized = true;
 
 		renderManager->SetVertexBuffer(

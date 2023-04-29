@@ -21,7 +21,8 @@ const NDynamicPipelineState DynamicPipelineState = {
 	.DepthFunc = Diligent::COMPARISON_FUNC_LESS_EQUAL,
 	.SrcBlend = Diligent::BLEND_FACTOR_ONE,
 	.DestBlend = Diligent::BLEND_FACTOR_ONE,
-	.BlendOp = Diligent::BLEND_OPERATION_ADD,
+	.SrcBlendAlpha = Diligent::BLEND_FACTOR_ONE,
+	.DestBlendAlpha = Diligent::BLEND_FACTOR_ONE,
 };
 constexpr mu_boolean IsPremultipliedAlpha = true;
 
@@ -196,7 +197,7 @@ void TParticleBubbleV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuff
 	}
 
 	NResourceId resourceIds[1] = { texture->GetId() };
-	auto binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+	auto binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
 	if (binding->Initialized == false)
 	{
 		binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Texture")->Set(texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));

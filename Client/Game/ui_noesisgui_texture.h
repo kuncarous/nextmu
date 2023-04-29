@@ -1,25 +1,26 @@
-#ifndef __UI_NOESISGUI_BGFXTEXTURE_H__
-#define __UI_NOESISGUI_BGFXTEXTURE_H__
+#ifndef __UI_NOESISGUI_DETEXTURE_H__
+#define __UI_NOESISGUI_DETEXTURE_H__
 
 #pragma once
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
-	class BGFXTexture : public Noesis::Texture
+	class DETexture : public Noesis::Texture
 	{
 	public:
-		BGFXTexture(
+		DETexture(
 			mu_uint32 width,
 			mu_uint32 height,
 			mu_uint32 levels,
 			mu_uint32 sampleCount,
-			bgfx::TextureFormat::Enum format,
 			mu_boolean isInverted,
 			mu_boolean hasAlphaChannel,
-			bgfx::TextureHandle texture
+			Diligent::TEXTURE_FORMAT format,
+			Diligent::RefCntAutoPtr<Diligent::ITexture> texture,
+			mu_boolean transitionRequired = false
 		);
-		~BGFXTexture();
+		~DETexture();
 
 		/// Returns the width of the texture, in pixels
 		virtual uint32_t GetWidth() const override;
@@ -41,21 +42,44 @@ namespace UINoesis
 		/// to optimize rendering as alpha blending can be disabled when there is no transparency.
 		virtual bool HasAlpha() const override;
 
-		const bgfx::TextureHandle GetTexture() const
+		Diligent::ITexture *GetTexture()
 		{
 			return Texture;
 		}
 
+		void SetRegionMapped(mu_boolean mapped)
+		{
+			RegionMapped = mapped;
+		}
+
+		mu_boolean GetRegionMapped() const
+		{
+			return RegionMapped;
+		}
+
+		void SetRequireTransition(mu_boolean require)
+		{
+			TransitionRequired = require;
+		}
+
+		mu_boolean GetRequireTransition() const
+		{
+			return TransitionRequired;
+		}
+
 	private:
-		friend class BGFXRenderDevice;
+		friend class DERenderDevice;
+		NResourceId ResourceId;
 		mu_uint32 Width;
 		mu_uint32 Height;
 		mu_uint32 Levels;
 		mu_uint32 SampleCount;
-		bgfx::TextureFormat::Enum Format;
 		mu_boolean Inverted;
 		mu_boolean Alpha;
-		bgfx::TextureHandle Texture;
+		Diligent::TEXTURE_FORMAT Format;
+		Diligent::RefCntAutoPtr<Diligent::ITexture> Texture;
+		mu_boolean RegionMapped = false;
+		mu_boolean TransitionRequired;
 	};
 };
 #endif

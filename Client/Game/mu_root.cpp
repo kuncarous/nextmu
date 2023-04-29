@@ -479,11 +479,19 @@ namespace MURoot
 			environment->Update();
 			MUSkeletonManager::Update();
 
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
+			UINoesis::Update();
+#endif
+
 			if (MUConfig::GetEnableShadows())
 			{
 				MURenderState::SetRenderMode(NRenderMode::ShadowMap);
 				environment->Render();
 			}
+
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
+			UINoesis::RenderOffscreen();
+#endif
 
 			MURenderState::SetRenderMode(NRenderMode::Normal);
 			MUGraphics::SetRenderTargetDesc(
@@ -497,11 +505,10 @@ namespace MURoot
 			immediateContext->ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG | Diligent::CLEAR_STENCIL_FLAG, 1.0f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 			environment->Render();
 
-			MergeTemporaryShaderBindings();
+			ShaderResourcesBindingManager.MergeTemporaryShaderBindings();
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
-			UINoesis::Update();
-			UINoesis::Render();
+			UINoesis::RenderOnscreen();
 #endif
 
 			swapchain->Present(MUConfig::GetVerticalSync() ? 1u : 0u);

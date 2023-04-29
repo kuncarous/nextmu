@@ -7,7 +7,7 @@
 #include "mu_textures.h"
 #include "res_renders.h"
 #include "res_items.h"
-#include <ShaderMacroHelper.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 template<const EGameDirectoryType dirType>
 NEXTMU_INLINE std::vector<mu_char> mu_readshader(mu_utf8string filename)
@@ -104,7 +104,23 @@ namespace MUResourcesManager
 		Models.clear();
 	}
 
-	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment, const mu_utf8string resourceId, const nlohmann::json &jmacros)
+	const mu_utf8string FixShaderSourceByDeviceType(const Diligent::RENDER_DEVICE_TYPE deviceType, mu_utf8string source)
+	{
+		switch (deviceType)
+		{
+		case Diligent::RENDER_DEVICE_TYPE_GL:
+		case Diligent::RENDER_DEVICE_TYPE_GLES:
+			{
+				boost::replace_all(source, "half4", "float4");
+				boost::replace_all(source, "half3", "float3");
+				boost::replace_all(source, "half2", "float2");
+				boost::replace_all(source, "half", "float");
+			}
+		default: return source;
+		}
+	}
+
+	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment, NShaderSettings &settings)
 	{
 		const auto device = MUGraphics::GetDevice();
 
@@ -115,6 +131,53 @@ namespace MUResourcesManager
 			return false;
 		}
 
+		const auto deviceType = MUGraphics::GetDeviceType();
+		const mu_utf8string vertexBufferStr = FixShaderSourceByDeviceType(deviceType, settings.AppendVertex + mu_utf8string(vertexBuffer.begin(), vertexBuffer.end()));
+		const mu_utf8string fragmentBufferStr = FixShaderSourceByDeviceType(deviceType, settings.AppendPixel + mu_utf8string(fragmentBuffer.begin(), fragmentBuffer.end()));
+
+		Diligent::ShaderCreateInfo createInfo;
+#ifndef NDEBUG
+		createInfo.Desc.Name = id.c_str();
+#endif
+		createInfo.SourceLanguage = Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
+		createInfo.Desc.ShaderType = Diligent::SHADER_TYPE_VERTEX;
+		createInfo.Desc.UseCombinedTextureSamplers = true;
+		createInfo.Source = vertexBufferStr.c_str();
+		createInfo.Macros = settings.VertexMacros;
+
+		Diligent::RefCntAutoPtr<Diligent::IShader> vertexShader;
+		device->CreateShader(createInfo, &vertexShader);
+		if (vertexShader == nullptr)
+		{
+			return false;
+		}
+
+		createInfo.Desc.ShaderType = Diligent::SHADER_TYPE_PIXEL;
+		createInfo.Source = fragmentBufferStr.c_str();
+		createInfo.Macros = settings.PixelMacros;
+
+		Diligent::RefCntAutoPtr<Diligent::IShader> pixelShader;
+		device->CreateShader(createInfo, &pixelShader);
+		if (pixelShader == nullptr)
+		{
+			return false;
+		}
+
+		NCombinedShader shader;
+		shader.Layout = settings.InputLayout;
+		shader.Vertex = vertexShader;
+		shader.Pixel = pixelShader;
+		shader.ResourceSignatures = std::move(settings.ResourceSignatures);
+		shader.Resource = settings.Resource;
+		const auto index = RegisterShader(shader);
+
+		Programs.insert(std::pair(id, index));
+
+		return true;
+	}
+
+	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment, const mu_utf8string resourceId, const nlohmann::json &jmacros)
+	{
 		Diligent::ShaderMacroHelper macros;
 		macros.AddShaderMacro("SKELETON_TEXTURE_WIDTH", MUSkeletonManager::BonesTextureWidth);
 		macros.AddShaderMacro("SKELETON_TEXTURE_HEIGHT", MUSkeletonManager::BonesTextureHeight);
@@ -144,43 +207,13 @@ namespace MUResourcesManager
 			}
 		}
 
-		Diligent::ShaderCreateInfo createInfo;
-#ifndef NDEBUG
-		createInfo.Desc.Name = id.c_str();
-#endif
-		createInfo.SourceLanguage = Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
-		createInfo.Desc.ShaderType = Diligent::SHADER_TYPE_VERTEX;
-		createInfo.Desc.UseCombinedTextureSamplers = true;
-		createInfo.Source = vertexBuffer.data();
-		createInfo.Macros = macros;
+		NShaderSettings settings;
+		settings.VertexMacros = macros;
+		settings.PixelMacros = macros;
+		settings.InputLayout = GetInputLayout(resourceId);
+		settings.Resource = GetPipelineResource(resourceId);
 
-		Diligent::RefCntAutoPtr<Diligent::IShader> vertexShader;
-		device->CreateShader(createInfo, &vertexShader);
-		if (vertexShader == nullptr)
-		{
-			return false;
-		}
-
-		createInfo.Desc.ShaderType = Diligent::SHADER_TYPE_PIXEL;
-		createInfo.Source = fragmentBuffer.data();
-
-		Diligent::RefCntAutoPtr<Diligent::IShader> pixelShader;
-		device->CreateShader(createInfo, &pixelShader);
-		if (pixelShader == nullptr)
-		{
-			return false;
-		}
-
-		NCombinedShader shader;
-		shader.Layout = GetInputLayout(resourceId);
-		shader.Resource = GetPipelineResource(resourceId);
-		shader.Vertex = vertexShader;
-		shader.Pixel = pixelShader;
-		const auto index = RegisterShader(shader);
-
-		Programs.insert(std::pair(id, index));
-
-		return true;
+		return LoadProgram(id, vertex, fragment, settings);
 	}
 
 	const mu_boolean LoadPrograms(const mu_utf8string basePath, const nlohmann::json &programs)

@@ -77,6 +77,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelineresources.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resourceid.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resources.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_samplers.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shader.cpp" />
@@ -91,9 +92,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_threading_helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_renderdevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_rendertarget.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_texture.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_consts.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_fontprovider.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_sdl.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelineresources.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resourceid.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resources.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_samplers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shader.h" />
@@ -187,12 +189,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_threading_helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_renderdevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_texture.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_consts.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_fontprovider.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_license.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_rendertarget.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_sdl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_stream.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_textureprovider.h" />

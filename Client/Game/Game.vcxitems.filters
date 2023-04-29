@@ -187,6 +187,15 @@
     <Filter Include="Graphics\Shadows">
       <UniqueIdentifier>{4e96e200-008b-4ebb-893b-c2a371857804}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\RenderDevice">
+      <UniqueIdentifier>{6ea3c672-84e0-4fb7-9ced-11ebca2612ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Texture">
+      <UniqueIdentifier>{41fc2974-cd05-442c-be53-6483f2ff933f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\RenderTarget">
+      <UniqueIdentifier>{5e012fbf-7abb-445d-abec-e714e40108d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -268,15 +277,6 @@
       <Filter>Scripting\Addons\Array</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.cpp">
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_consts.cpp">
@@ -390,6 +390,18 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shadows.cpp">
       <Filter>Graphics\Shadows</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_texture.cpp">
+      <Filter>UI\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_rendertarget.cpp">
+      <Filter>UI\RenderTarget</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_renderdevice.cpp">
+      <Filter>UI\RenderDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resourceid.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
@@ -498,15 +510,6 @@
       <Filter>Scripting\Addons\Array</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui.h">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.h">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.h">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.h">
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_consts.h">
@@ -673,6 +676,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shadows.h">
       <Filter>Graphics\Shadows</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_texture.h">
+      <Filter>UI\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_rendertarget.h">
+      <Filter>UI\RenderTarget</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_renderdevice.h">
+      <Filter>UI\RenderDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resourceid.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

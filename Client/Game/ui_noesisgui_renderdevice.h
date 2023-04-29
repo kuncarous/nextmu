@@ -1,5 +1,5 @@
-#ifndef __UI_NOESISGUI_BGFX_H__
-#define __UI_NOESISGUI_BGFX_H__
+#ifndef __UI_NOESISGUI_RENDERDEVICE_H__
+#define __UI_NOESISGUI_RENDERDEVICE_H__
 
 #pragma once
 
@@ -21,86 +21,40 @@ namespace UINoesis
 		};
 	};
 
-	class BGFXRenderTarget;
-	class BGFXTexture;
+	class DERenderTarget;
+	class DETexture;
 
-	struct BGFXViewport
-	{
-		mu_uint32 x = 0u;
-		mu_uint32 y = 0u;
-		mu_uint32 width = 0u;
-		mu_uint32 height = 0u;
-	};
-
-	class BGFXVertexLayout
+	class DERenderDevice : public Noesis::RenderDevice
 	{
 	public:
-		~BGFXVertexLayout()
-		{
-			if (bgfx::isValid(Handle))
-			{
-				bgfx::destroy(Handle);
-				Handle = BGFX_INVALID_HANDLE;
-			}
-		}
-
-	public:
-		bgfx::VertexLayout Layout;
-		bgfx::VertexLayoutHandle Handle;
-	};
-	
-	class BGFXTextureSampler
-	{
-	public:
-		~BGFXTextureSampler()
-		{
-			if (bgfx::isValid(Handle))
-			{
-				bgfx::destroy(Handle);
-				Handle = BGFX_INVALID_HANDLE;
-			}
-		}
-
-		bgfx::UniformHandle Handle = BGFX_INVALID_HANDLE;
-	};
-
-	class BGFXUniform
-	{
-	public:
-		~BGFXUniform()
-		{
-			if (bgfx::isValid(Handle))
-			{
-				bgfx::destroy(Handle);
-				Handle = BGFX_INVALID_HANDLE;
-			}
-		}
-
-		bgfx::UniformHandle Handle = BGFX_INVALID_HANDLE;
-	};
-
-	class BGFXRenderDevice : public Noesis::RenderDevice
-	{
-	public:
-		BGFXRenderDevice(const mu_boolean sRGB);
+		DERenderDevice(const mu_boolean sRGB);
+		~DERenderDevice();
 
 	private:
 		void FillCaps(const mu_boolean sRGB);
+		void CreateShaderResources();
+		void InitializeShaderResources();
 		void CreateShaders();
-		void CreateSamplers();
 		void CreateUniforms();
 		void CreateBuffers();
 
-		const bgfx::ProgramHandle LoadShader(const Noesis::Shader::Enum shader);
+		const mu_shader LoadShader(const Noesis::Shader::Enum shader);
 		void EnsureProgram(const Noesis::Shader::Enum shader);
 
 	public:
 		/// Retrieves device render capabilities
 		virtual const Noesis::DeviceCaps &GetCaps() const override;
 
+		Noesis::Ptr<Noesis::RenderTarget> CreateRenderTarget(
+			const char *label,
+			uint32_t width, uint32_t height,
+			uint32_t sampleCount, bool needsStencil,
+			Diligent::RefCntAutoPtr<Diligent::ITexture> colorMSAA,
+			Diligent::RefCntAutoPtr<Diligent::ITexture> stencil
+		);
+
 		/// Creates render target surface with given dimensions, samples and optional stencil buffer
-		virtual Noesis::Ptr<Noesis::RenderTarget> CreateRenderTarget(const char *label, uint32_t width, uint32_t height,
-													 uint32_t sampleCount, bool needsStencil) override;
+		virtual Noesis::Ptr<Noesis::RenderTarget> CreateRenderTarget(const char *label, uint32_t width, uint32_t height, uint32_t sampleCount, bool needsStencil) override;
 
 		/// Creates render target sharing transient (stencil, colorAA) buffers with the given surface
 		virtual Noesis::Ptr<Noesis::RenderTarget> CloneRenderTarget(const char *label, Noesis::RenderTarget *surface) override;
@@ -157,23 +111,30 @@ namespace UINoesis
 		/// Invalidates the pointer previously mapped
 		virtual void UnmapIndices() override;
 
-		void SetTexture(const mu_uint8 stage, BGFXTexture *texture, Noesis::SamplerState sampler);
-		void SetTextures(const Noesis::Batch &batch);
-		void SetRenderState(Noesis::RenderState state, uint8_t stencilRef);
+		DETexture *GetTexture(Noesis::Texture *texture);
+		NSampler *GetTextureSampler(DETexture *texture, const Noesis::SamplerState &sampler);
+		Diligent::ITextureView *GetTextureView(DETexture *texture);
+		NResourceId GetTextureResourceId(DETexture *texture);
+		NResourceId GetTextureSamplerResourceId(NSampler *sampler);
+		void GetDynamicPipelineState(const Noesis::Batch &batch, NDynamicPipelineState &dynamicState);
 
 		/// Draws primitives for the given batch
 		virtual void DrawBatch(const Noesis::Batch &batch) override;
 
 	private:
-		uint16_t Scissor = bgfx::kInvalidHandle;
-		std::vector<bgfx::ProgramHandle> Programs = std::vector<bgfx::ProgramHandle>(static_cast<size_t>(Noesis::Shader::Count), BGFX_INVALID_HANDLE);
+		NFixedPipelineState FixedPipelineState;
+		mu_boolean EnableScissors = false;
+		mu_boolean IsCombinedSampler = false;
+		std::vector<mu_shader> Programs;
 		Noesis::DeviceCaps Caps;
-		BGFXRenderTarget *RenderTarget = nullptr;
-		BGFXViewport RenderViewport;
-		std::array<BGFXVertexLayout, Noesis::Shader::Vertex::Format::Count> VertexLayouts;
-		BGFXTextureSampler TextureSamplers[TextureUnit::Count];
-		BGFXUniform VertexUniforms[2];
-		BGFXUniform FragmentUniforms[2];
+		DERenderTarget *RenderTarget = nullptr;
+		std::array<Diligent::InputLayoutDescX, Noesis::Shader::Vertex::Format::Count> InputLayouts;
+		Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> ResourceSignature;
+		NShaderResourcesBindingManager<Diligent::IPipelineResourceSignature> ResourceBindingsManager;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> GPUVertexBuffer;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> GPUIndexBuffer;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexUniforms[2];
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> FragmentUniforms[2];
 
 		std::array<mu_uint8, DYNAMIC_VB_SIZE> VertexBuffer;
 		std::array<mu_uint8, DYNAMIC_IB_SIZE> IndexBuffer;

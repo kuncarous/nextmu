@@ -3,6 +3,18 @@
 
 #pragma once
 
-Diligent::ISampler *GetTextureSampler(const Diligent::SamplerDesc &samplerDesc);
+#include "t_graphics_resourceid.h"
+
+class NSampler
+{
+public:
+	NSampler(Diligent::RefCntAutoPtr<Diligent::ISampler> sampler);
+
+public:
+	NResourceId Id;
+	Diligent::RefCntAutoPtr<Diligent::ISampler> Sampler;
+};
+
+NSampler *GetTextureSampler(const Diligent::SamplerDesc &samplerDesc);
 
 #endif

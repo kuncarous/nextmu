@@ -54,19 +54,23 @@ struct NSamplerState
 	}
 };
 
-std::map<NSamplerHash, Diligent::RefCntAutoPtr<Diligent::ISampler>> Samplers;
+std::map<NSamplerHash, NSampler> Samplers;
 
-Diligent::ISampler *CreateTextureSampler(const NSamplerState &state, const Diligent::SamplerDesc &samplerDesc)
+NSampler::NSampler(Diligent::RefCntAutoPtr<Diligent::ISampler> sampler) : Id(GenerateResourceId()), Sampler(sampler)
+{}
+
+NSampler *CreateTextureSampler(const NSamplerState &state, const Diligent::SamplerDesc &samplerDesc)
 {
 	const auto device = MUGraphics::GetDevice();
 	Diligent::RefCntAutoPtr<Diligent::ISampler> sampler;
 	device->CreateSampler(samplerDesc, &sampler);
 	if (sampler == nullptr) return nullptr;
-	Samplers.insert(std::make_pair(state.GetHash(), sampler));
-	return sampler.RawPtr();
+
+	auto iter = Samplers.insert(std::make_pair(state.GetHash(), NSampler(sampler))).first;
+	return &iter->second;
 }
 
-Diligent::ISampler *GetTextureSampler(const Diligent::SamplerDesc &samplerDesc)
+NSampler *GetTextureSampler(const Diligent::SamplerDesc &samplerDesc)
 {
 	NSamplerState state;
 	state.MinFilter = samplerDesc.MinFilter;
@@ -81,5 +85,5 @@ Diligent::ISampler *GetTextureSampler(const Diligent::SamplerDesc &samplerDesc)
 
 	auto iter = Samplers.find(state.GetHash());
 	if (iter == Samplers.end()) return CreateTextureSampler(state, samplerDesc);
-	return iter->second.RawPtr();
+	return &iter->second;
 }

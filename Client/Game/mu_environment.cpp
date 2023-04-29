@@ -18,7 +18,6 @@ enum class NThreadMode {
 	MultiSTL,
 };
 
-#define RENDER_BBOX (0)
 constexpr NThreadMode ThreadMode = NThreadMode::Multi;
 
 const mu_boolean NEnvironment::Initialize()
@@ -92,22 +91,22 @@ const mu_boolean NEnvironment::CreateShadowMap()
 	ComparisonSampler.MinFilter = Diligent::FILTER_TYPE_COMPARISON_LINEAR;
 	ComparisonSampler.MagFilter = Diligent::FILTER_TYPE_COMPARISON_LINEAR;
 	ComparisonSampler.MipFilter = Diligent::FILTER_TYPE_COMPARISON_LINEAR;
-	Diligent::ISampler *comparisonSampler = GetTextureSampler(ComparisonSampler);
+	NSampler *comparisonSampler = GetTextureSampler(ComparisonSampler);
 
 	Diligent::SamplerDesc FilterableSampler;
 	FilterableSampler.MinFilter = Diligent::FILTER_TYPE_ANISOTROPIC;
 	FilterableSampler.MagFilter = Diligent::FILTER_TYPE_ANISOTROPIC;
 	FilterableSampler.MipFilter = Diligent::FILTER_TYPE_ANISOTROPIC;
 	FilterableSampler.MaxAnisotropy = LightAttribs.ShadowAttribs.iMaxAnisotropy;
-	Diligent::ISampler *filterableSampler = GetTextureSampler(FilterableSampler);
+	NSampler *filterableSampler = GetTextureSampler(FilterableSampler);
 
 	Diligent::ShadowMapManager::InitInfo initInfo;
 	initInfo.Format = ShadowMapDepthFormat;
 	initInfo.Resolution = ShadowMapResolution;
 	initInfo.NumCascades = ShadowMapCascadesCount;
 	initInfo.ShadowMode = static_cast<mu_int32>(ShadowMapMode);
-	initInfo.pComparisonSampler = comparisonSampler;
-	initInfo.pFilterableShadowMapSampler = filterableSampler;
+	initInfo.pComparisonSampler = comparisonSampler->Sampler;
+	initInfo.pFilterableShadowMapSampler = filterableSampler->Sampler;
 	ShadowMap->Initialize(device, nullptr, initInfo);
 
 	ShadowFrustums.resize(ShadowMapCascadesCount);
@@ -195,6 +194,13 @@ void NEnvironment::Update()
 
 			Diligent::ExtractViewFrustumPlanesFromMatrix(worldToLightProjSpaceMatr, ShadowFrustums[n], isGL);
 		}
+		
+		// Update Light Attribs
+		{
+			const auto immediateContext = MUGraphics::GetImmediateContext();
+			Diligent::MapHelper<Diligent::LightAttribs> uniform(immediateContext, MURenderState::GetLightUniform(), Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
+			*uniform = LightAttribs;
+		}
 	}
 
 	if (updateCount > 0)
@@ -228,18 +234,13 @@ void NEnvironment::Render()
 			cameraAttribs.mProjT = Float4x4FromGLM(MURenderState::GetProjection()).Transpose();
 			cameraAttribs.mViewProjT = Float4x4FromGLM(MURenderState::GetViewProjection()).Transpose();
 
+			// Update Camera Attribs
 			{
 				Diligent::MapHelper<Diligent::CameraAttribs> uniform(immediateContext, MURenderState::GetCameraUniform(), Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
 				*uniform = cameraAttribs;
 			}
 
 			const auto enabledShadows = MUConfig::GetEnableShadows();
-			if (enabledShadows)
-			{
-				Diligent::MapHelper<Diligent::LightAttribs> uniform(immediateContext, MURenderState::GetLightUniform(), Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD);
-				*uniform = LightAttribs;
-			}
-
 			if (enabledShadows)
 			{
 				MURenderState::SetShadowMode(ShadowMapMode);

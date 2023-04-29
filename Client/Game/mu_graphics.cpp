@@ -386,6 +386,9 @@ namespace MUGraphics
         SwapChainInitDesc.DepthBufferFormat = Diligent::TEX_FORMAT_D32_FLOAT_S8X24_UINT;
 
         const Diligent::RENDER_DEVICE_TYPE deviceTypes[] = {
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
+            Diligent::RENDER_DEVICE_TYPE_GL,
+#endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
             Diligent::RENDER_DEVICE_TYPE_VULKAN,
 #endif
@@ -397,9 +400,6 @@ namespace MUGraphics
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
             Diligent::RENDER_DEVICE_TYPE_METAL,
-#endif
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
-            Diligent::RENDER_DEVICE_TYPE_GL,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
             Diligent::RENDER_DEVICE_TYPE_GLES,
@@ -436,7 +436,7 @@ namespace MUGraphics
     void Destroy()
     {
         RenderManager.reset();
-        DestroyShaderBindings();
+        ShaderResourcesBindingManager.Destroy();
         DestroyPipelines();
         DeviceContexts.clear();
         SwapChain.Release();

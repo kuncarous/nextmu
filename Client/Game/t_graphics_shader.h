@@ -7,9 +7,10 @@ struct NPipelineResource;
 struct NCombinedShader
 {
 	Diligent::InputLayoutDesc Layout;
-	const NPipelineResource *Resource;
 	Diligent::RefCntAutoPtr<Diligent::IShader> Vertex;
 	Diligent::RefCntAutoPtr<Diligent::IShader> Pixel;
+	const NPipelineResource *Resource = nullptr;
+	std::vector<Diligent::IPipelineResourceSignature *> ResourceSignatures;
 };
 
 typedef mu_uint16 mu_shader;

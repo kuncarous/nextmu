@@ -154,12 +154,12 @@ void MUModelRenderer::RenderMesh(
 	if (renderMode == NRenderMode::Normal && shadowMap != nullptr)
 	{
 		NResourceId resourceIds[2] = { texture->GetId(), MURenderState::GetShadowResourceId() };
-		binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+		binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
 	}
 	else
 	{
 		NResourceId resourceIds[1] = { texture->GetId() };
-		binding = GetShaderBinding(pipelineState, mu_countof(resourceIds), resourceIds);
+		binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
 	}
 
 	if (binding->Initialized == false)

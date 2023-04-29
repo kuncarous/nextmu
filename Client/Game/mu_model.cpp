@@ -109,20 +109,32 @@ const NDynamicPipelineState CalculateStateFromObject(const nlohmann::json &objec
 	{
 		state.SrcBlend = BlendFunctionDefault;
 		state.DestBlend = BlendFunctionDefault;
+		state.SrcBlendAlpha = BlendFunctionDefault;
+		state.DestBlendAlpha = BlendFunctionDefault;
 		state.BlendOp = BlendEquationDefault;
+		state.BlendOpAlpha = BlendEquationDefault;
 
 		if (object.contains("blend"))
 		{
 			const auto &blend = object["blend"];
 
 			if (blend.contains("src"))
-				state.SrcBlend = BlendFunctionFromString(blend["src"].get<mu_utf8string>());
+				state.SrcBlend = state.SrcBlendAlpha = BlendFunctionFromString(blend["src"].get<mu_utf8string>());
 
 			if (blend.contains("dst"))
-				state.DestBlend = BlendFunctionFromString(blend["dst"].get<mu_utf8string>());
+				state.DestBlend = state.DestBlendAlpha = BlendFunctionFromString(blend["dst"].get<mu_utf8string>());
+
+			if (blend.contains("src_alpha"))
+				state.SrcBlendAlpha = BlendFunctionFromString(blend["src_alpha"].get<mu_utf8string>());
+
+			if (blend.contains("dst_alpha"))
+				state.DestBlendAlpha = BlendFunctionFromString(blend["dst_alpha"].get<mu_utf8string>());
 
 			if (blend.contains("equation"))
-				state.BlendOp = BlendEquationFromString(blend["equation"].get<mu_utf8string>());
+				state.BlendOp = state.BlendOpAlpha = BlendEquationFromString(blend["equation"].get<mu_utf8string>());
+
+			if (blend.contains("equation_alpha"))
+				state.BlendOpAlpha = BlendEquationFromString(blend["equation_alpha"].get<mu_utf8string>());
 		}
 	}
 
@@ -765,14 +777,12 @@ const mu_boolean NModel::GenerateBuffers()
 
 				dest->Position = vertex.Position;
 
-				/*
-					V is being flipped because bgfx flips the image, it follows DirectX 9 functionality.
-				*/
 #if NEXTMU_COMPRESSED_MESHS
 				glm::vec4 Normal(normal.Normal, 0.0f);
-				bgfx::vertexPack(glm::value_ptr(Normal), true, bgfx::Attrib::Normal, VertexLayout, dest);
+				dest->Normal[0] = glm::packSnorm2x16(glm::vec2(normal.Normal[0], normal.Normal[1]));
+				dest->Normal[1] = glm::packSnorm2x16(glm::vec2(normal.Normal[2], normal.Normal[3]));
 				glm::vec2 UV(texCoord.UV.x, 1.0f - texCoord.UV.y);
-				bgfx::vertexPack(glm::value_ptr(UV), true, bgfx::Attrib::TexCoord0, VertexLayout, dest);
+				dest->UV = glm::packSnorm2x16(UV);
 #else
 				dest->Normal = normal.Normal;
 				dest->TexCoords = glm::vec2(texCoord.UV.x, 1.0f - texCoord.UV.y);

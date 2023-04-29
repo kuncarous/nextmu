@@ -258,8 +258,8 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 				MURenderState::DetachTexture(TextureAttachment::Skin);
 			}
 
-#if RENDER_BBOX
-			const auto bboxView = Objects.view<NEntity::NRenderable, NEntity::NRenderState, NEntity::NBoundingBox>();
+#if NEXTMU_RENDER_BBOX
+			const auto bboxView = Registry.view<NEntity::NRenderable, NEntity::NRenderState, NEntity::NBoundingBoxes>();
 			for (auto [entity, renderState, boundingBox] : bboxView.each())
 			{
 				if (!renderState.Flags.Visible) continue;

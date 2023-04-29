@@ -136,6 +136,17 @@ namespace UINoesis
 		const auto components = MUTextures::CalculateComponentsCount(bitmap);
 		const auto pixels = width * height;
 
+		if (components != 4)
+		{
+			FIBITMAP *newBitmap = FreeImage_ConvertTo32Bits(bitmap);
+			FreeImage_Unload(bitmap);
+			if (newBitmap == nullptr)
+			{
+				return nullptr;
+			}
+			bitmap = newBitmap;
+		}
+
 		//     N=#comp     components
 		//       1           grey
 		//       2           grey, alpha
