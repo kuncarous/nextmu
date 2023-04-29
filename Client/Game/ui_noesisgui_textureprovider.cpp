@@ -115,21 +115,6 @@ namespace UINoesis
 			return nullptr;
 		}
 
-#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
-		const auto bit_count = FreeImage_GetBPP(bitmap);
-		if (bit_count == 24 || bit_count == 32) {
-			const unsigned width = FreeImage_GetWidth(bitmap);
-			const unsigned height = FreeImage_GetHeight(bitmap);
-			for (unsigned y = 0; y < height; y++) {
-				BYTE *pixel = FreeImage_GetScanLine(bitmap, y);
-				for (unsigned x = 0; x < width; x++) {
-					SwapValue(pixel[0], pixel[2]);
-					pixel += (bit_count >> 3);
-				}
-			}
-		}
-#endif
-
 		const auto width = FreeImage_GetWidth(bitmap);
 		const auto height = FreeImage_GetHeight(bitmap);
 		const auto bpp = FreeImage_GetBPP(bitmap);
@@ -146,6 +131,21 @@ namespace UINoesis
 			}
 			bitmap = newBitmap;
 		}
+
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
+		const auto bit_count = FreeImage_GetBPP(bitmap);
+		if (bit_count == 24 || bit_count == 32) {
+			const unsigned width = FreeImage_GetWidth(bitmap);
+			const unsigned height = FreeImage_GetHeight(bitmap);
+			for (unsigned y = 0; y < height; y++) {
+				BYTE *pixel = FreeImage_GetScanLine(bitmap, y);
+				for (unsigned x = 0; x < width; x++) {
+					SwapValue(pixel[0], pixel[2]);
+					pixel += (bit_count >> 3);
+				}
+			}
+		}
+#endif
 
 		//     N=#comp     components
 		//       1           grey
