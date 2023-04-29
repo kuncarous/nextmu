@@ -15,8 +15,8 @@ namespace UINoesis
 		switch (format)
 		{
 		default:
-		case Noesis::TextureFormat::RGBA8: return bgfx::TextureFormat::RGBA8;
-		case Noesis::TextureFormat::RGBX8: return bgfx::TextureFormat::RGB8;
+		case Noesis::TextureFormat::RGBA8:
+		case Noesis::TextureFormat::RGBX8: return bgfx::TextureFormat::RGBA8;
 		case Noesis::TextureFormat::R8: return bgfx::TextureFormat::R8;
 		}
 	}
@@ -27,7 +27,6 @@ namespace UINoesis
 		{
 		default:
 		case bgfx::TextureFormat::RGBA8: return 4;
-		case bgfx::TextureFormat::RGB8: return 3;
 		case bgfx::TextureFormat::R8: return 1;
 		}
 	}
@@ -116,12 +115,7 @@ namespace UINoesis
 		const auto renderer = bgfx::getRendererType();
 		Caps.centerPixelOffset = 0.0f;
 		Caps.linearRendering = sRGB;
-		Caps.subpixelRendering = (
-			renderer == bgfx::RendererType::Direct3D11 ||
-			renderer == bgfx::RendererType::Direct3D12 ||
-			renderer == bgfx::RendererType::Vulkan ||
-			renderer == bgfx::RendererType::Metal
-		);
+		Caps.subpixelRendering = false; // bgfx doesn't support dual source blending so we can't enable this
 		Caps.depthRangeZeroToOne = (
 			renderer != bgfx::RendererType::OpenGL &&
 			renderer != bgfx::RendererType::OpenGLES
