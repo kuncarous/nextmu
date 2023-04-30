@@ -93,6 +93,21 @@ namespace MUTextures
 			bitmap = newBitmap;
 		}
 
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
+		if (bpp == 24 || bpp == 32) {
+			const mu_uint32 bytesPerPixel = bpp >> 3;
+			const mu_uint32 width = FreeImage_GetWidth(bitmap);
+			const mu_uint32 height = FreeImage_GetHeight(bitmap);
+			for (mu_uint32 y = 0; y < height; y++) {
+				mu_uint8 *pixel = FreeImage_GetScanLine(bitmap, y);
+				for (mu_uint32 x = 0; x < width; x++) {
+					SwapValue(pixel[0], pixel[2]);
+					pixel += bytesPerPixel;
+				}
+			}
+		}
+#endif
+
 		info.Width = FreeImage_GetWidth(bitmap);
 		info.Height = FreeImage_GetHeight(bitmap);
 		info.Alpha = alpha;
