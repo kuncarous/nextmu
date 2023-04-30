@@ -4,8 +4,8 @@
 namespace MUConfig
 {
 	mu_boolean WindowMode = true;
-	mu_uint32 WindowWidth = 1920;
-	mu_uint32 WindowHeight = 1080;
+	mu_uint32 WindowWidth = 1366;
+	mu_uint32 WindowHeight = 768;
 
 	mu_boolean EnableShadows = true;
 

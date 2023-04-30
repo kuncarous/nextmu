@@ -13,6 +13,7 @@ namespace MUGraphics
 	NRenderTargetDesc &GetRenderTargetDesc();
 	void SetRenderTargetDesc(const NRenderTargetDesc desc);
 
+	mu_boolean IssRGB();
 	Diligent::RENDER_DEVICE_TYPE GetDeviceType();
 	Diligent::IRenderDevice *GetDevice();
 	Diligent::ISwapChain *GetSwapChain();

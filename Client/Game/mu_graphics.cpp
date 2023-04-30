@@ -39,6 +39,7 @@ namespace MUGraphics
     Diligent::RefCntAutoPtr<Diligent::ISwapChain> SwapChain;
     std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceContext>> DeviceContexts;
     mu_uint32 CurrentDeviceContext = 0;
+    mu_boolean SwapchainsRGB = false;
 
     NRenderTargetDesc RenderTargetDesc = {};
     std::unique_ptr<NRenderManager> RenderManager;
@@ -386,9 +387,6 @@ namespace MUGraphics
         SwapChainInitDesc.DepthBufferFormat = Diligent::TEX_FORMAT_D32_FLOAT_S8X24_UINT;
 
         const Diligent::RENDER_DEVICE_TYPE deviceTypes[] = {
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
-            Diligent::RENDER_DEVICE_TYPE_GL,
-#endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
             Diligent::RENDER_DEVICE_TYPE_VULKAN,
 #endif
@@ -397,6 +395,9 @@ namespace MUGraphics
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
             Diligent::RENDER_DEVICE_TYPE_D3D11,
+#endif
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
+            Diligent::RENDER_DEVICE_TYPE_GL,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
             Diligent::RENDER_DEVICE_TYPE_METAL,
@@ -424,6 +425,10 @@ namespace MUGraphics
         const auto &swapchainDesc = swapchain->GetDesc();
         RenderTargetDesc.ColorFormat = swapchainDesc.ColorBufferFormat;
         RenderTargetDesc.DepthStencilFormat = swapchainDesc.DepthBufferFormat;
+        SwapchainsRGB = (
+            swapchainDesc.ColorBufferFormat == Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB ||
+            swapchainDesc.ColorBufferFormat == Diligent::TEX_FORMAT_BGRA8_UNORM_SRGB
+        );
 
         RenderManager.reset(new (std::nothrow) NRenderManager());
         CreateInputLayouts();
@@ -453,6 +458,11 @@ namespace MUGraphics
     void SetRenderTargetDesc(const NRenderTargetDesc desc)
     {
         RenderTargetDesc = desc;
+    }
+
+    mu_boolean IssRGB()
+    {
+        return SwapchainsRGB;
     }
 
     Diligent::RENDER_DEVICE_TYPE GetDeviceType()

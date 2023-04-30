@@ -1118,27 +1118,23 @@ namespace UINoesis
 	/// Gets a pointer to stream vertices (bytes <= DYNAMIC_VB_SIZE)
 	void *DERenderDevice::MapVertices(uint32_t bytes)
 	{
-		mu_info("[MapVertices] {}", bytes);
 		return VertexBuffer.data();
 	}
 
 	/// Invalidates the pointer previously mapped
 	void DERenderDevice::UnmapVertices()
 	{
-		mu_info("[UnmapVertices]");
 	}
 
 	/// Gets a pointer to stream 16-bit indices (bytes <= DYNAMIC_IB_SIZE)
 	void *DERenderDevice::MapIndices(uint32_t bytes)
 	{
-		mu_info("[MapIndices] {}", bytes);
 		return IndexBuffer.data();
 	}
 
 	/// Invalidates the pointer previously mapped
 	void DERenderDevice::UnmapIndices()
 	{
-		mu_info("[UnmapIndices]");
 	}
 
 	DETexture *DERenderDevice::GetTexture(Noesis::Texture *texture)
@@ -1342,8 +1338,6 @@ namespace UINoesis
 	void DERenderDevice::DrawBatch(const Noesis::Batch &batch)
 	{
 		const auto immediateContext = MUGraphics::GetImmediateContext();
-
-		mu_info("[DrawBatch]");
 
 		mu_assert(batch.pixelShader == nullptr);
 		auto shader = static_cast<Noesis::Shader::Enum>(batch.shader.v);
