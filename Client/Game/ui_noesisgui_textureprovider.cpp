@@ -191,12 +191,12 @@ namespace UINoesis
 			}
 			bitmap = newBitmap;
 		}
-
-		const auto bpp = FreeImage_GetBPP(bitmap);
-		const auto bytesPerPixel = bpp >> 3;
+		
+		constexpr mu_uint32 bitsPerPixel = 32u;
+		constexpr mu_uint32 bytesPerPixel = bitsPerPixel / 8u;
 
 #if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
-		if (bpp == 24 || bpp == 32) {
+		{
 			for (mu_uint32 y = 0; y < height; y++) {
 				mu_uint8 *pixels = FreeImage_GetScanLine(bitmap, y);
 				for (mu_uint32 x = 0; x < width; x++) {
