@@ -107,9 +107,11 @@ const mu_boolean NEnvironment::CreateShadowMap()
 	initInfo.ShadowMode = static_cast<mu_int32>(ShadowMapMode);
 	initInfo.pComparisonSampler = comparisonSampler->Sampler;
 	initInfo.pFilterableShadowMapSampler = filterableSampler->Sampler;
+	initInfo.Is32BitFilterableFmt = ShadowMapDepthFormat == Diligent::TEX_FORMAT_D32_FLOAT;
 	ShadowMap->Initialize(device, nullptr, initInfo);
 
 	ShadowFrustums.resize(ShadowMapCascadesCount);
+	ShadowFrustumVisible.resize(ShadowMapCascadesCount);
 	RenderSettings.ShadowFrustumsNum = ShadowMapCascadesCount;
 	RenderSettings.ShadowFrustums = ShadowFrustums.data();
 
@@ -135,8 +137,8 @@ void NEnvironment::Update()
 
 	if (ShadowMap != nullptr)
 	{
-		LightAttribs.f4Direction = LightDirection;
-		LightAttribs.f4Direction.w = 0;
+		LightAttribs.f4Direction = LightDirection;// Diligent::float4(0.0f, 0.0f, -1.0f, 0.0f);// LightDirection;
+		//LightAttribs.f4Direction.w = 0;
 
 		Diligent::float4 f4ExtraterrestrialSunColor = Diligent::float4(1.0f, 1.0f, 1.0f, 1.0f);
 		LightAttribs.f4Intensity = f4ExtraterrestrialSunColor; // *m_fScatteringScale;
@@ -150,13 +152,18 @@ void NEnvironment::Update()
 		else
 			LightAttribs.ShadowAttribs.fFixedDepthBias = 0.0075f;
 
+		LightAttribs.ShadowAttribs.iFixedFilterSize = 0;
+		LightAttribs.ShadowAttribs.fFilterWorldSize = 0.1f;
+
 		Diligent::float4x4 cameraView = Float4x4FromGLM(MURenderState::GetView());
 		Diligent::float4x4 cameraProj = Float4x4FromGLM(MURenderState::GetFrustumProjection());
 
 		Diligent::ShadowMapManager::DistributeCascadeInfo DistrInfo;
+		DistrInfo.UseRightHandedLightViewTransform = false;
 		DistrInfo.pCameraView = &cameraView;
 		DistrInfo.pCameraProj = &cameraProj;
-		DistrInfo.pLightDir = &LightDirection;
+		Diligent::float3 lightDirection(LightAttribs.f4Direction.x, LightAttribs.f4Direction.y, LightAttribs.f4Direction.z);
+		DistrInfo.pLightDir = &lightDirection;
 		DistrInfo.fPartitioningFactor = 0.95f;
 		DistrInfo.SnapCascades = true;
 		DistrInfo.EqualizeExtents = true;
@@ -180,6 +187,7 @@ void NEnvironment::Update()
 		};
 		ShadowMap->DistributeCascades(DistrInfo, LightAttribs.ShadowAttribs);
 
+		const auto camerBBox = MURenderState::GetCamera()->GetFrustumBBox();
 		const auto deviceType = MUGraphics::GetDeviceType();
 		const mu_boolean isGL = (
 			deviceType == Diligent::RENDER_DEVICE_TYPE_GL ||
@@ -193,6 +201,11 @@ void NEnvironment::Update()
 			auto worldToLightProjSpaceMatr = worldToLightViewSpaceMatr * cascadeProj;
 
 			Diligent::ExtractViewFrustumPlanesFromMatrix(worldToLightProjSpaceMatr, ShadowFrustums[n], isGL);
+			ShadowFrustumVisible[n] = Diligent::GetBoxVisibility(
+				ShadowFrustums[n],
+				camerBBox,
+				Diligent::FRUSTUM_PLANE_FLAG_OPEN_NEAR
+			) != Diligent::BoxVisibility::Invisible;
 		}
 		
 		// Update Light Attribs
@@ -275,6 +288,7 @@ void NEnvironment::Render()
 
 			for (mu_uint32 n = 0; n < ShadowMapCascadesCount; ++n)
 			{
+				//if (ShadowFrustumVisible[n] == false) continue;
 				const auto &cascadeProj = ShadowMap->GetCascadeTranform(n).Proj;
 
 				auto worldToLightViewSpaceMatr = LightAttribs.ShadowAttribs.mWorldToLightViewT.Transpose();
@@ -317,11 +331,16 @@ void NEnvironment::Render()
 				? Diligent::RESOURCE_STATE_DEPTH_READ
 				: Diligent::RESOURCE_STATE_SHADER_RESOURCE
 			);
-			Diligent::StateTransitionDesc barrier(ShadowMap->GetCascadeDSV(0)->GetTexture(), Diligent::RESOURCE_STATE_DEPTH_WRITE, destState, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+			Diligent::StateTransitionDesc barrier(ShadowMap->GetCascadeDSV(0)->GetTexture(), Diligent::RESOURCE_STATE_UNKNOWN, destState, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
 			immediateContext->TransitionResourceStates(1, &barrier);
 
 			if constexpr (ShadowMapMode != NShadowMode::PCF)
+			{
 				ShadowMap->ConvertToFilterable(immediateContext, LightAttribs.ShadowAttribs);
+
+				Diligent::StateTransitionDesc barrier(ShadowMap->GetFilterableSRV()->GetTexture(), Diligent::RESOURCE_STATE_RENDER_TARGET, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+				immediateContext->TransitionResourceStates(1, &barrier);
+			}
 
 			MURenderState::SetViewProjection(viewProj);
 		}

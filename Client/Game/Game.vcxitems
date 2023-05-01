@@ -38,6 +38,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourAlloc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourAssert.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourCommon.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMeshBuilder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMeshQuery.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNode.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_angelscript.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp" />
@@ -54,6 +61,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_particles.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_navigation.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_resourcesmanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp" />
@@ -106,6 +114,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptarray\scriptarray.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptmath\scriptmath.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourAlloc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourAssert.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourCommon.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourMath.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMeshBuilder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMeshQuery.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNode.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourStatus.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
@@ -120,7 +137,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_joints.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_objects.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_graphics.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_navigation.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_resizablequeue.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)nav_path.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)nav_polys.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h" />

@@ -132,7 +132,22 @@ void NCamera::GenerateFrustum(glm::mat4 view, glm::mat4 projection)
 {
 	const auto deviceType = MUGraphics::GetDeviceType();
 	glm::mat4 viewProj = projection * view;
-	Diligent::ExtractViewFrustumPlanesFromMatrix(Float4x4FromGLM(viewProj), Frustum, deviceType == Diligent::RENDER_DEVICE_TYPE_D3D11 || deviceType == Diligent::RENDER_DEVICE_TYPE_D3D12);
+	Diligent::ExtractViewFrustumPlanesFromMatrix(Float4x4FromGLM(viewProj), Frustum, deviceType == Diligent::RENDER_DEVICE_TYPE_GL || deviceType == Diligent::RENDER_DEVICE_TYPE_GLES);
+	Diligent::BoundBox bbox{
+		.Min = Diligent::float3(FLT_MAX, FLT_MAX, FLT_MAX),
+		.Max = Diligent::float3(FLT_MIN, FLT_MIN, FLT_MIN),
+	};
+	for (mu_uint32 n = 0; n < 8; ++n)
+	{
+		auto &point = Frustum.FrustumCorners[n];
+		bbox.Min.x = glm::min(bbox.Min.x, point.x);
+		bbox.Min.y = glm::min(bbox.Min.y, point.y);
+		bbox.Min.z = glm::min(bbox.Min.z, point.z);
+		bbox.Max.x = glm::min(bbox.Max.x, point.x);
+		bbox.Max.y = glm::min(bbox.Max.y, point.y);
+		bbox.Max.z = glm::min(bbox.Max.z, point.z);
+	}
+	FrustumBBox = bbox;
 }
 
 glm::mat4 NCamera::GetView()

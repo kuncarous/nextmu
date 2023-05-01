@@ -83,6 +83,12 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 		return false;
 	}
 
+	const auto navMesh = document["nav_mesh"].get<mu_utf8string>();
+	if (terrain->LoadNavMesh(path + navMesh) == false)
+	{
+		return false;
+	}
+
 	const auto lightmap = document["lightmap"].get<mu_utf8string>();
 	if (terrain->LoadLightmap(path + lightmap, barriers) == false)
 	{

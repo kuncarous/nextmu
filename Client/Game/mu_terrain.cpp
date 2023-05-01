@@ -4,10 +4,15 @@
 #include "mu_graphics.h"
 #include "mu_textures.h"
 #include "mu_resourcesmanager.h"
+#include "mu_threadsmanager.h"
 #include "mu_state.h"
 #include "mu_renderstate.h"
 #include "mu_crypt.h"
+#include "mu_navigation.h"
 #include "shared_binaryreader.h"
+#include "DetourCommon.h"
+#include "DetourNavMesh.h"
+#include "DetourNavMeshQuery.h"
 #include <glm/gtx/normal.hpp>
 #include <glm/gtc/packing.hpp>
 #include <MapHelper.hpp>
@@ -297,6 +302,28 @@ const mu_boolean NTerrain::GenerateNormal(std::vector<Diligent::StateTransitionD
 
 	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 	NormalTexture = texture;
+
+	return true;
+}
+
+const mu_boolean NTerrain::LoadNavMesh(mu_utf8string path)
+{
+	NormalizePath(path);
+
+	auto ext = path.substr(path.find_last_of('.') + 1);
+	std::transform(ext.begin(), ext.end(), ext.begin(), mu_utf8tolower);
+
+	if (MUNavigation::CreateNavMesh(path, &NavMesh) == false)
+	{
+		return false;
+	}
+
+	const auto threadsCount = MUThreadsManager::GetThreadsCount();
+	NavMeshQuery.resize(threadsCount);
+	if (MUNavigation::CreateNavMeshQuery(NavMesh, threadsCount, NavMeshQuery.data()) == false)
+	{
+		return false;
+	}
 
 	return true;
 }

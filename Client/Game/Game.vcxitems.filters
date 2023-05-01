@@ -196,6 +196,12 @@
     <Filter Include="UI\RenderTarget">
       <UniqueIdentifier>{5e012fbf-7abb-445d-abec-e714e40108d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Navigation">
+      <UniqueIdentifier>{f1f69de9-0ee3-47d4-99bb-52f39717ed51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Navigation\Detour">
+      <UniqueIdentifier>{8bd5757a-e9f3-40cf-9567-318891334455}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -401,6 +407,30 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resourceid.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourAlloc.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourAssert.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourCommon.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMesh.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMeshBuilder.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMeshQuery.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNode.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_navigation.cpp">
+      <Filter>Navigation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -688,6 +718,42 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resourceid.h">
       <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourAlloc.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourAssert.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourCommon.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourMath.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMesh.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMeshBuilder.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMeshQuery.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNode.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourStatus.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_navigation.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)nav_path.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)nav_polys.h">
+      <Filter>Navigation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

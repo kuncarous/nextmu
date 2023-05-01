@@ -47,8 +47,14 @@ public:
 		return &Frustum;
 	}
 
+	const Diligent::BoundBox GetFrustumBBox() const
+	{
+		return FrustumBBox;
+	}
+
 private:
 	Diligent::ViewFrustumExt Frustum;
+	Diligent::BoundBox FrustumBBox;
 	NCameraMode Mode = NCameraMode::Directional;
 	glm::vec3 Eye;
 	glm::vec3 Target;

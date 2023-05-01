@@ -7,7 +7,7 @@ namespace MUConfig
 	mu_uint32 WindowWidth = 1366;
 	mu_uint32 WindowHeight = 768;
 
-	mu_boolean EnableShadows = true;
+	mu_boolean EnableShadows = false;
 
 	mu_boolean Antialiasing = false;
 	mu_boolean VerticalSync = false;
@@ -75,6 +75,11 @@ namespace MUConfig
 			}
 		}
 #endif
+
+		if (document.contains("Shadows") == true)
+		{
+			EnableShadows = document["Shadows"].get<mu_boolean>();
+		}
 
 		if (document.contains("Antialiasing") == true)
 		{

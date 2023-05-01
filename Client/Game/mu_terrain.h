@@ -3,6 +3,9 @@
 
 #pragma once
 
+class dtNavMesh;
+class dtNavMeshQuery;
+
 constexpr mu_float TerrainScale = 100.0f;
 constexpr mu_float TerrainScaleInv = 1.0f / TerrainScale;
 constexpr mu_uint32 TerrainSize = 256u; // MU has a fixed terrain size of 256x256
@@ -60,6 +63,7 @@ protected:
 	friend class NEnvironment;
 	const mu_boolean LoadHeightmap(mu_utf8string path, std::vector<Diligent::StateTransitionDesc> &barriers);
 	const mu_boolean GenerateNormal(std::vector<Diligent::StateTransitionDesc> &barriers);
+	const mu_boolean LoadNavMesh(mu_utf8string path);
 	const mu_boolean LoadLightmap(mu_utf8string path, std::vector<Diligent::StateTransitionDesc> &barriers);
 	const mu_boolean LoadTextures(
 		const mu_utf8string dir,
@@ -157,6 +161,9 @@ private:
 	std::unique_ptr<glm::vec3[]> TerrainPrimaryLight;
 	std::unique_ptr<glm::vec3[]> TerrainNormal;
 	std::unique_ptr<TerrainAttribute::Type[]> TerrainAttributes;
+
+	dtNavMesh *NavMesh;
+	std::vector<dtNavMeshQuery *> NavMeshQuery;
 
 	TerrainSettings Settings;
 };
