@@ -3,7 +3,7 @@
 
 #pragma once
 
-constexpr mu_uint32 MaxPathPolys = 256u;
+constexpr mu_uint32 MaxPathPolys = 128u;
 
 struct NNavPolys
 {

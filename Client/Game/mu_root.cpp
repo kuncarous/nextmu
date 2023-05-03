@@ -12,6 +12,7 @@
 #include "mu_environment.h"
 #include "mu_state.h"
 #include "mu_renderstate.h"
+#include "mu_controllerstate.h"
 #include "mu_threadsmanager.h"
 #include "mu_resourcesmanager.h"
 #include "mu_skeletoninstance.h"
@@ -245,12 +246,6 @@ namespace MURoot
 
 		const DemoSettings demo = LoadDemoSettings();
 
-		static NCamera camera;
-		camera.SetMode(NCameraMode::Directional);
-		camera.SetEye(glm::vec3(demo.X * TerrainScale, demo.Y * TerrainScale, demo.Z));
-		camera.SetAngle(glm::vec3(glm::radians(demo.CX), glm::radians(demo.CY), glm::radians(0.0f)));
-		camera.SetUp(glm::vec3(0.0f, 0.0f, 1.0f));
-
 		std::unique_ptr<NEnvironment> environment(new NEnvironment());
 		if (environment->Initialize() == false || environment->LoadTerrain(demo.Map) == false)
 		{
@@ -288,6 +283,8 @@ namespace MURoot
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 1);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Maces, 5);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 5);
+
+				environment->GetController()->SetCharacter(entity);
 			}
 
 			// Dark Wizard
@@ -407,65 +404,7 @@ namespace MURoot
 				}*/
 			}
 
-			camera.Update();
 			environment->Reset();
-
-			const auto windowWidth = MUConfig::GetWindowWidth();
-			const auto windowHeight = MUConfig::GetWindowHeight();
-
-			glm::mat4 view = camera.GetView();
-			//glm::mat4 projection, frustumProjection;
-
-			constexpr mu_float HomogeneousFar = 5000.0f;
-			constexpr mu_float NonHomogeneousFar = 50000.0f;
-			const mu_float aspect = static_cast<mu_float>(windowWidth) / static_cast<mu_float>(windowHeight);
-			/*if (MUCapabilities::IsHomogeneousDepth())
-			{
-				projection = glm::perspectiveLH_NO(
-					glm::radians(35.0f),
-					aspect,
-					50.0f,
-					HomogeneousFar
-				);
-				frustumProjection = glm::perspectiveLH_ZO(
-					glm::radians(35.0f),
-					aspect,
-					50.0f,
-					HomogeneousFar
-				);
-			}
-			else
-			{
-				projection = glm::perspectiveLH_ZO(
-					glm::radians(35.0f),
-					aspect,
-					50.0f,
-					NonHomogeneousFar
-				);
-				frustumProjection = glm::perspectiveLH_ZO(
-					glm::radians(35.0f),
-					aspect,
-					50.0f,
-					NonHomogeneousFar
-				);
-			}*/
-
-			Diligent::float4x4 projection = Diligent::float4x4::Projection(
-				glm::radians(35.0f),
-				aspect,
-				50.0f,
-				MUCapabilities::IsHomogeneousDepth()
-				? HomogeneousFar
-				: NonHomogeneousFar,
-				MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GL ||
-				MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GLES
-			);
-
-			camera.GenerateFrustum(view, GLMFromFloat4x4(projection));
-
-			MURenderState::SetViewTransform(view, GLMFromFloat4x4(projection), GLMFromFloat4x4(projection));
-			MURenderState::AttachCamera(&camera);
-			MURenderState::AttachEnvironment(environment.get());
 
 			const auto device = MUGraphics::GetDevice();
 			const auto swapchain = MUGraphics::GetSwapChain();
@@ -476,6 +415,7 @@ namespace MURoot
 			auto *pRTV = swapchain->GetCurrentBackBufferRTV();
 			auto *pDSV = swapchain->GetDepthBufferDSV();
 
+			MURenderState::AttachEnvironment(environment.get());
 			environment->Update();
 			MUSkeletonManager::Update();
 
@@ -538,6 +478,15 @@ namespace MURoot
 	{
 		switch (event->type)
 		{
+		case SDL_MOUSEMOTION:
+			{
+				if (event->motion.which == SDL_TOUCH_MOUSEID) return;
+				const mu_int32 mx = MUInput::GetRealPixelSize(event->motion.x);
+				const mu_int32 my = MUInput::GetRealPixelSize(event->motion.y);
+				MUInput::SetMousePosition(mx, my);
+			}
+			break;
+
 		case SDL_MOUSEBUTTONDOWN:
 			{
 				switch (event->button.button)

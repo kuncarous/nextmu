@@ -16,6 +16,12 @@ struct NCameraDistance
 	mu_float Maximum = 0.0f;
 };
 
+struct NCameraDefault
+{
+	glm::vec3 Eye, Target, Angle, Up;
+	NCameraDistance Distance;
+};
+
 class NCamera
 {
 public:
@@ -33,13 +39,14 @@ public:
 	void SetMinDistance(const mu_float minDistance);
 	void SetMaxDistance(const mu_float maxDistance);
 
-	glm::vec3 GetEye();
-	glm::vec3 GetTarget();
-	glm::vec3 GetAngle();
-	glm::vec3 GetUp();
-	const mu_float GetDistance();
-	const mu_float GetMinDistance();
-	const mu_float GetMaxDistance();
+	const NCameraMode GetMode() const;
+	glm::vec3 GetEye() const;
+	glm::vec3 GetTarget() const;
+	glm::vec3 GetAngle() const;
+	glm::vec3 GetUp() const;
+	const mu_float GetDistance() const;
+	const mu_float GetMinDistance() const;
+	const mu_float GetMaxDistance() const;
 
 public:
 	const Diligent::ViewFrustumExt *GetFrustum() const
@@ -52,6 +59,27 @@ public:
 		return FrustumBBox;
 	}
 
+	void SaveAsDefault()
+	{
+		Default.Eye = Eye;
+		Default.Target = Target;
+		Default.Angle = Angle;
+		Default.Up = Up;
+		Default.Distance = Distance;
+	}
+
+	void RestoreDefault()
+	{
+		if (Mode == NCameraMode::Directional)
+		{
+			Eye = Default.Eye;
+		}
+
+		Angle = Default.Angle;
+		Up = Default.Up;
+		Distance = Default.Distance;
+	}
+
 private:
 	Diligent::ViewFrustumExt Frustum;
 	Diligent::BoundBox FrustumBBox;
@@ -61,6 +89,7 @@ private:
 	glm::vec3 Angle;
 	glm::vec3 Up;
 	NCameraDistance Distance;
+	NCameraDefault Default;
 
 	glm::ivec2 BackupMousePosition = glm::ivec2();
 	glm::vec2 MouseDelta = glm::vec2();

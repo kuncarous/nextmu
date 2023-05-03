@@ -8,9 +8,12 @@
 #include "mu_threadsmanager.h"
 #include "mu_graphics.h"
 #include "mu_config.h"
+#include "mu_capabilities.h"
+#include "mu_input.h"
 #include <algorithm>
 #include <execution>
 #include <MapHelper.hpp>
+#include <chrono>
 
 enum class NThreadMode {
 	Single,
@@ -27,13 +30,19 @@ const mu_boolean NEnvironment::Initialize()
 		return false;
 	}
 
-	Objects.reset(new (std::nothrow) NObjects());
+	Controller.reset(new (std::nothrow) NController(this));
+	if (!Controller)
+	{
+		return false;
+	}
+
+	Objects.reset(new (std::nothrow) NObjects(this));
 	if (!Objects || Objects->Initialize() == false)
 	{
 		return false;
 	}
 
-	Characters.reset(new (std::nothrow) NCharacters());
+	Characters.reset(new (std::nothrow) NCharacters(this));
 	if (!Characters || Characters->Initialize() == false)
 	{
 		return false;
@@ -131,7 +140,10 @@ void NEnvironment::Reset(const mu_boolean forceReset)
 void NEnvironment::Update()
 {
 	const auto updateCount = MUState::GetUpdateCount();
-	const auto updateTime = MUState::GetUpdateTime();
+
+	Characters->Update();
+	Objects->Update();
+	Controller->Update();
 
 	RenderSettings.Frustum = MURenderState::GetCamera()->GetFrustum();
 
@@ -221,8 +233,8 @@ void NEnvironment::Update()
 		Terrain->Update();
 	}
 
-	Objects->Update(RenderSettings);
-	Characters->Update(RenderSettings);
+	Objects->PreRender(RenderSettings);
+	Characters->PreRender(RenderSettings);
 
 	Particles->Update();
 	Particles->Propagate();

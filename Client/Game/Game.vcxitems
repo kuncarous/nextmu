@@ -53,6 +53,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_crypt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_entity.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_controller.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_joints.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_objects.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp" />
@@ -76,6 +77,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_physics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)res_items.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)res_renders.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_character_move.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_buffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_immutables.cpp" />
@@ -134,6 +136,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_characters.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_characters.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_controller.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_joints.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_objects.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_graphics.h" />

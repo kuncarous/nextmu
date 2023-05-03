@@ -7,13 +7,17 @@
 #include "res_item.h"
 #include "mu_entity.h"
 
+class NEnvironment;
 class NCharacters
 {
 public:
+	NCharacters(const NEnvironment *environment);
+
 	const mu_boolean Initialize();
 	void Destroy();
 
-	void Update(const NRenderSettings &renderSettings);
+	void Update();
+	void PreRender(const NRenderSettings &renderSettings);
 	void Render(const NRenderSettings &renderSettings);
 
 	void Clear();
@@ -28,6 +32,17 @@ public:
 	void RemoveAttachmentPart(const entt::entity entity, const NEntity::PartType partType);
 
 private:
+	void MoveCharacter(const entt::entity);
+	mu_boolean MovePath(NEntity::NPosition &position, NEntity::NMovement &movement, NEntity::NMoveSpeed &moveSpeed);
+
+public:
+	entt::registry &GetRegistry()
+	{
+		return Registry;
+	}
+
+private:
+	const NEnvironment *Environment;
 	entt::registry Registry;
 	std::map<mu_key, entt::entity> RegistryMap;
 };

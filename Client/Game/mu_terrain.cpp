@@ -15,6 +15,7 @@
 #include "DetourNavMeshQuery.h"
 #include <glm/gtx/normal.hpp>
 #include <glm/gtc/packing.hpp>
+#include <glm/gtx/intersect.hpp>
 #include <MapHelper.hpp>
 
 NTerrainVertex TerrainVertices[4 * TerrainSize * TerrainSize] = {};
@@ -338,7 +339,7 @@ const mu_boolean NTerrain::LoadLightmap(mu_utf8string path, std::vector<Diligent
 	SDL_RWops *fp = nullptr;
 	if (mu_rwfromfile<EGameDirectoryType::eSupport>(&fp, path, "rb") == false)
 	{
-		mu_error("heightmap not found ({})", path);
+		mu_error("lightmap not found ({})", path);
 		return false;
 	}
 
@@ -791,7 +792,7 @@ const mu_boolean NTerrain::LoadMappings(
 	SDL_RWops *fp = nullptr;
 	if (mu_rwfromfile<EGameDirectoryType::eSupport>(&fp, path, "rb") == false)
 	{
-		mu_error("heightmap not found ({})", path);
+		mu_error("mappings not found ({})", path);
 		return false;
 	}
 
@@ -872,7 +873,7 @@ const mu_boolean NTerrain::LoadAttributes(mu_utf8string path, std::vector<Dilige
 	SDL_RWops *fp = nullptr;
 	if (mu_rwfromfile<EGameDirectoryType::eSupport>(&fp, path, "rb") == false)
 	{
-		mu_error("heightmap not found ({})", path);
+		mu_error("attributes not found ({})", path);
 		return false;
 	}
 
@@ -1363,39 +1364,65 @@ Diligent::ITexture *NTerrain::GetLightmapTexture()
 	return LightmapTexture.RawPtr();
 }
 
-const mu_float NTerrain::GetHeight(const mu_uint32 x, const mu_uint32 y)
+const mu_float NTerrain::GetHeight(const mu_uint32 x, const mu_uint32 y) const
 {
 	return TerrainHeight[GetTerrainMaskIndex(x, y)];
 }
 
-const glm::vec3 NTerrain::GetLight(const mu_uint32 x, const mu_uint32 y)
+const mu_float NTerrain::RequestHeight(mu_float x, mu_float y) const
+{
+	constexpr mu_float TerrainSpecialHeight = 1200.0f;
+	constexpr mu_uint32 TerrainSquareSize = TerrainSize * TerrainSize;
+
+	const mu_uint32 xi = GetPositionFromFloat(x);
+	const mu_uint32 yi = GetPositionFromFloat(y);
+	if (xi >= TerrainSize || yi >= TerrainSize) return 0.0f;
+
+	const mu_float xd = x - static_cast<mu_float>(xi);
+	const mu_float yd = y - static_cast<mu_float>(yi);
+
+	const mu_uint32 Index = GetTerrainIndex(xi, yi);
+	if ((TerrainAttributes[Index] & TerrainAttribute::Height) != 0)
+	{
+		return TerrainSpecialHeight;
+	}
+
+	const mu_uint32 index1 = GetTerrainMaskIndex(xi, yi);
+	const mu_uint32 index2 = GetTerrainMaskIndex(xi, yi + 1);
+	const mu_uint32 index3 = GetTerrainMaskIndex(xi + 1, yi);
+	const mu_uint32 index4 = GetTerrainMaskIndex(xi + 1, yi + 1);
+
+	const mu_float left = TerrainHeight[index1] + (TerrainHeight[index2] - TerrainHeight[index1]) * yd;
+	const mu_float right = TerrainHeight[index3] + (TerrainHeight[index4] - TerrainHeight[index3]) * yd;
+
+	return left + (right - left) * xd;
+}
+
+const glm::vec3 NTerrain::GetLight(const mu_uint32 x, const mu_uint32 y) const
 {
 	return TerrainLight[GetTerrainMaskIndex(x, y)];
 }
 
-const glm::vec3 NTerrain::GetPrimaryLight(const mu_uint32 x, const mu_uint32 y)
+const glm::vec3 NTerrain::GetPrimaryLight(const mu_uint32 x, const mu_uint32 y) const
 {
 	return TerrainPrimaryLight[GetTerrainMaskIndex(x, y)];
 }
 
-const glm::vec3 NTerrain::GetNormal(const mu_uint32 x, const mu_uint32 y)
+const glm::vec3 NTerrain::GetNormal(const mu_uint32 x, const mu_uint32 y) const
 {
 	return TerrainNormal[GetTerrainMaskIndex(x, y)];
 }
 
-const TerrainAttribute::Type NTerrain::GetAttribute(const mu_uint32 x, const mu_uint32 y)
+const TerrainAttribute::Type NTerrain::GetAttribute(const mu_uint32 x, const mu_uint32 y) const
 {
 	return TerrainAttributes[GetTerrainMaskIndex(x, y)];
 }
 
-const glm::vec3 NTerrain::CalculatePrimaryLight(mu_float x, mu_float y)
+const glm::vec3 NTerrain::CalculatePrimaryLight(mu_float x, mu_float y) const
 {
-	x *= TerrainScaleInv;
-	y *= TerrainScaleInv;
-
-	const mu_int32 xi = static_cast<mu_int32>(x);
-	const mu_int32 yi = static_cast<mu_int32>(y);
-	if (xi < 0 || xi >= TerrainMask || yi < 0 || yi >= TerrainMask)
+	const mu_uint32 xi = GetPositionFromFloat(x);
+	const mu_uint32 yi = GetPositionFromFloat(y);
+	if (xi >= TerrainMask || yi >= TerrainMask)
 	{
 		return glm::vec3(0.0f, 0.0f, 0.0f);
 	}
@@ -1418,14 +1445,11 @@ const glm::vec3 NTerrain::CalculatePrimaryLight(mu_float x, mu_float y)
 	return light;
 }
 
-const glm::vec3 NTerrain::CalculateBackLight(mu_float x, mu_float y)
+const glm::vec3 NTerrain::CalculateBackLight(mu_float x, mu_float y) const
 {
-	x *= TerrainScaleInv;
-	y *= TerrainScaleInv;
-
-	const mu_int32 xi = static_cast<mu_int32>(x);
-	const mu_int32 yi = static_cast<mu_int32>(y);
-	if (xi < 0 || xi >= TerrainMask || yi < 0 || yi >= TerrainMask)
+	const mu_uint32 xi = GetPositionFromFloat(x);
+	const mu_uint32 yi = GetPositionFromFloat(y);
+	if (xi >= TerrainMask || yi >= TerrainMask)
 	{
 		return glm::vec3(0.0f, 0.0f, 0.0f);
 	}
@@ -1446,4 +1470,104 @@ const glm::vec3 NTerrain::CalculateBackLight(mu_float x, mu_float y)
 	}
 
 	return light;
+}
+
+NEXTMU_INLINE void ClampPoint(Diligent::float2 &point, const mu_float xratio, const mu_float yratio)
+{
+	constexpr mu_float scaledSize = static_cast<mu_float>(TerrainSize) * TerrainScale;
+
+	if (point.x < 0.0f)
+	{
+		const mu_float d = -point.x;
+		point.x += d;
+		point.y += d * yratio;
+	}
+	else if (point.x > scaledSize)
+	{
+		const mu_float d = scaledSize - point.x;
+		point.x += d;
+		point.y += d * yratio;
+	}
+
+	if (point.y < 0.0f)
+	{
+		const mu_float d = -point.y;
+		point.y += d;
+		point.x += d * xratio;
+	}
+	else if (point.y > scaledSize)
+	{
+		const mu_float d = scaledSize - point.y;
+		point.y += d;
+		point.x += d * xratio;
+	}
+}
+
+const mu_boolean NTerrain::GetTriangleIntersection(const glm::vec3 nearPoint, const glm::vec3 farPoint, const glm::vec3 direction, glm::vec3 &intersection) const
+{
+
+	static const Diligent::float2 boxMin(0.0f, 0.0f);
+	static const Diligent::float2 boxMax(256.0f * TerrainScale, 256.0f * TerrainScale);
+	Diligent::float2 near2d(nearPoint.x, nearPoint.y);
+	Diligent::float2 far2d(farPoint.x, farPoint.y);
+	Diligent::float2 dir2d = Diligent::normalize(far2d - near2d);
+
+	mu_float enterDist, exitDist;
+	if (Diligent::IntersectRayBox2D(near2d, dir2d, boxMin, boxMax, enterDist, exitDist) == false)
+	{
+		return false;
+	}
+
+	const mu_float xratio = dir2d.x / dir2d.y;
+	const mu_float yratio = dir2d.y / dir2d.x;
+	ClampPoint(near2d, xratio, yratio);
+	ClampPoint(far2d, xratio, yratio);
+	near2d *= TerrainScaleInv;
+	far2d *= TerrainScaleInv;
+
+	mu_float foundDistance = FLT_MAX;
+	while (true)
+	{
+		const mu_uint32 x = static_cast<mu_uint32>(glm::floor(near2d.x));
+		const mu_uint32 y = static_cast<mu_uint32>(glm::floor(near2d.y));
+
+		const mu_uint32 index1 = GetTerrainIndex(x, y);
+		const mu_uint32 index2 = GetTerrainIndex(x + 1, y);
+		const mu_uint32 index3 = GetTerrainIndex(x + 1, y + 1);
+		const mu_uint32 index4 = GetTerrainIndex(x, y + 1);
+
+		const mu_float xf = static_cast<mu_float>(x) * TerrainScale;
+		const mu_float yf = static_cast<mu_float>(y) * TerrainScale;
+		const glm::vec3 triangle1[3] = {
+			glm::vec3(xf, yf, TerrainHeight[index1]),
+			glm::vec3(xf + TerrainScale, yf, TerrainHeight[index2]),
+			glm::vec3(xf + TerrainScale, yf + TerrainScale, TerrainHeight[index3]),
+		};
+		const glm::vec3 triangle2[3] = {
+			glm::vec3(xf, yf, TerrainHeight[index1]),
+			glm::vec3(xf + TerrainScale, yf + TerrainScale, TerrainHeight[index3]),
+			glm::vec3(xf, yf + TerrainScale, TerrainHeight[index4]),
+		};
+
+		glm::vec2 baryPosition;
+		mu_float distance;
+		if (glm::intersectRayTriangle(nearPoint, direction, triangle1[0], triangle1[1], triangle1[2], baryPosition, distance) == true && distance < foundDistance)
+		{
+			intersection = baryPosition.x * triangle1[1] + baryPosition.y * triangle1[2] + (1.0f - (baryPosition.x + baryPosition.y)) * triangle1[0];
+			foundDistance = distance;
+		}
+
+		if (glm::intersectRayTriangle(nearPoint, direction, triangle2[0], triangle2[1], triangle2[2], baryPosition, distance) == true && distance < foundDistance)
+		{
+			intersection = baryPosition.x * triangle2[1] + baryPosition.y * triangle2[2] + (1.0f - (baryPosition.x + baryPosition.y)) * triangle2[0];
+			foundDistance = distance;
+		}
+
+		if (foundDistance < FLT_MAX) break;
+		near2d += dir2d;
+		if (near2d.x < 0.0f || near2d.x > static_cast<mu_float>(TerrainSize)) break;
+		if (near2d.y < 0.0f || near2d.y > static_cast<mu_float>(TerrainSize)) break;
+	}
+
+	return foundDistance < FLT_MAX;
 }

@@ -5,6 +5,7 @@
 
 #include "mu_entity_light.h"
 #include "res_render.h"
+#include "nav_path.h"
 
 class NModel;
 class NSkeletonInstance;
@@ -88,6 +89,26 @@ namespace NEntity
 		glm::vec3 Position;
 		glm::vec3 Angle;
 		mu_float Scale = 1.0f;
+	};
+
+	struct NAction
+	{
+		mu_uint16 Group = NInvalidUInt16;
+		mu_uint16 Index = NInvalidUInt16;
+	};
+
+	struct NMovement
+	{
+		mu_boolean Moving = false;
+		NNavPath Path;
+	};
+
+	struct NMoveSpeed
+	{
+		mu_float Walk = 10.0f;
+		mu_float Run = 10.0f;
+		mu_float Swim = 10.0f;
+		mu_float Multiplier = 1.0f;
 	};
 
 	struct NAnimation

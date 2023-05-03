@@ -52,6 +52,9 @@ namespace MUInput
 	void Reset();
 	void ProcessKeys();
 
+	void SetMousePosition(mu_int32 x, mu_int32 y);
+	const glm::ivec2 GetMousePosition();
+
 	void SetMouseButton(mu_uint32 index, mu_uint8 state);
 	const mu_boolean IsMousePressed(mu_int32 index);
 	const mu_boolean IsMouseDoublePressed(mu_int32 index);
@@ -65,6 +68,16 @@ namespace MUInput
 	mu_boolean GetKeyState(mu_uint32 Key);
 	const mu_boolean IsKeyPressing(const mu_uint32 key);
 	const mu_boolean IsShiftPressing();
+
+	template<typename T>
+	NEXTMU_INLINE const T GetRealPixelSize(const T in)
+	{
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
+		return static_cast<T>(static_cast<mu_float>(in) * ScreenScaleRatio);
+#else
+		return in;
+#endif
+	}
 };
 
 #endif

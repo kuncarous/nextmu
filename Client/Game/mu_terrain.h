@@ -22,6 +22,11 @@ NEXTMU_INLINE mu_uint32 GetTerrainMaskIndex(const mu_uint32 x, const mu_uint32 y
 	return (y & TerrainMask) * TerrainSize + (x & TerrainMask);
 }
 
+NEXTMU_INLINE mu_uint32 GetPositionFromFloat(const mu_float value)
+{
+	return static_cast<mu_uint32>(glm::floor(value * TerrainScaleInv));
+}
+
 typedef glm::u8vec4 MappingFormat;
 
 struct TerrainSettings
@@ -49,6 +54,12 @@ namespace TerrainAttribute
 		CameraUp = 1 << 7,
 		NoAttackZone = 1 << 8,
 	};
+};
+
+enum class NRunMode : mu_uint32
+{
+	Normal,
+	Swimming,
 };
 
 class NTerrain
@@ -101,14 +112,17 @@ public:
 
 	Diligent::ITexture *GetLightmapTexture();
 
-	const mu_float GetHeight(const mu_uint32 x, const mu_uint32 y);
-	const glm::vec3 GetLight(const mu_uint32 x, const mu_uint32 y);
-	const glm::vec3 GetPrimaryLight(const mu_uint32 x, const mu_uint32 y);
-	const glm::vec3 GetNormal(const mu_uint32 x, const mu_uint32 y);
-	const TerrainAttribute::Type GetAttribute(const mu_uint32 x, const mu_uint32 y);
+	const mu_float GetHeight(const mu_uint32 x, const mu_uint32 y) const;
+	const mu_float RequestHeight(mu_float x, mu_float y) const;
+	const glm::vec3 GetLight(const mu_uint32 x, const mu_uint32 y) const;
+	const glm::vec3 GetPrimaryLight(const mu_uint32 x, const mu_uint32 y) const;
+	const glm::vec3 GetNormal(const mu_uint32 x, const mu_uint32 y) const;
+	const TerrainAttribute::Type GetAttribute(const mu_uint32 x, const mu_uint32 y) const;
 
-	const glm::vec3 CalculatePrimaryLight(const mu_float x, const mu_float y);
-	const glm::vec3 CalculateBackLight(const mu_float x, const mu_float y);
+	const glm::vec3 CalculatePrimaryLight(const mu_float x, const mu_float y) const;
+	const glm::vec3 CalculateBackLight(const mu_float x, const mu_float y) const;
+
+	const mu_boolean GetTriangleIntersection(const glm::vec3 nearPoint, const glm::vec3 farPoint, const glm::vec3 direction, glm::vec3 &intersection) const;
 
 public:
 	const mu_utf8string GetId() const
@@ -119,6 +133,26 @@ public:
 	const glm::vec4 &GetLightPosition() const
 	{
 		return LightPosition;
+	}
+
+	void SetRunMode(NRunMode mode)
+	{
+		RunMode = mode;
+	}
+
+	const mu_boolean IsSwimming() const
+	{
+		return RunMode == NRunMode::Swimming;
+	}
+
+	const dtNavMesh *GetNavMesh() const
+	{
+		return NavMesh;
+	}
+
+	const dtNavMeshQuery *GetNavMeshQuery(const mu_uint32 index) const
+	{
+		return NavMeshQuery[index];
 	}
 
 private:
@@ -155,6 +189,7 @@ private:
 	mu_float WindScale = 1.0f;
 	mu_float WindModulus = 1.0f;
 	mu_float WindMultiplier = 1.0f;
+	NRunMode RunMode = NRunMode::Normal;
 
 	std::unique_ptr<mu_float[]> TerrainHeight;
 	std::unique_ptr<glm::vec3[]> TerrainLight;

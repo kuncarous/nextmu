@@ -10,6 +10,9 @@
 #include "mu_threadsmanager.h"
 #include "res_renders.h"
 
+NObjects::NObjects(const NEnvironment *environment) : Environment(environment)
+{}
+
 const mu_boolean NObjects::Initialize()
 {
 	return true;
@@ -20,7 +23,45 @@ void NObjects::Destroy()
 
 }
 
-void NObjects::Update(const NRenderSettings &renderSettings)
+void NObjects::Update()
+{
+	const auto updateTime = MUState::GetUpdateTime();
+	const auto environment = MURenderState::GetEnvironment();
+
+	/*const auto view = Registry.view<
+		NEntity::NRenderable,
+		NEntity::NAttachment,
+		NEntity::NLight,
+		NEntity::NRenderState,
+		NEntity::NSkeleton,
+		NEntity::NPosition,
+		NEntity::NAnimation,
+		NEntity::NBoundingBoxes
+	>();
+
+	MUThreadsManager::Run(
+		std::unique_ptr<NThreadExecutorBase>(
+			new (std::nothrow) NThreadExecutorIterator(
+				view.begin(), view.end(),
+				[&view, environment, &renderSettings, updateTime](const entt::entity entity) -> void {
+					auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
+						NEntity::NAttachment,
+						NEntity::NLight,
+						NEntity::NRenderState,
+						NEntity::NSkeleton,
+						NEntity::NPosition,
+						NEntity::NAnimation,
+						NEntity::NBoundingBoxes
+					>(entity);
+
+					
+				}
+			)
+		)
+	);*/
+}
+
+void NObjects::PreRender(const NRenderSettings &renderSettings)
 {
 	const auto updateTime = MUState::GetUpdateTime();
 	const auto environment = MURenderState::GetEnvironment();

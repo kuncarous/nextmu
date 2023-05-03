@@ -2,10 +2,6 @@
 #include "mu_navigation.h"
 #include "mu_terrain.h"
 
-#include "DetourCommon.h"
-#include "DetourNavMesh.h"
-#include "DetourNavMeshQuery.h"
-
 NEXTMU_INLINE mu_boolean inRange(const mu_float *v1, const mu_float *v2, const mu_float r, const mu_float h)
 {
 	const mu_float dx = v2[0] - v1[0];
@@ -186,9 +182,14 @@ namespace MUNavigation
 			return false;
 		}
 
-		mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
-		std::unique_ptr<mu_uint8[]> buffer(new_nothrow mu_uint8[fileLength]);
-		SDL_RWread(fp, buffer.get(), fileLength, 1);
+		mu_size navDataSize = static_cast<mu_size>(SDL_RWsize(fp));
+		mu_uint8 *navData = reinterpret_cast<mu_uint8 *>(dtAlloc(sizeof(mu_uint8) * navDataSize, DT_ALLOC_PERM));
+		if (navData == nullptr)
+		{
+			return false;
+		}
+
+		SDL_RWread(fp, navData, navDataSize, 1);
 		SDL_RWclose(fp);
 
 		dtNavMesh *tmpNavMesh = dtAllocNavMesh();
@@ -198,7 +199,7 @@ namespace MUNavigation
 			return false;
 		}
 
-		dtStatus status = tmpNavMesh->init(buffer.get(), fileLength, DT_TILE_FREE_DATA);
+		dtStatus status = tmpNavMesh->init(navData, static_cast<mu_int32>(navDataSize), DT_TILE_FREE_DATA);
 		if (dtStatusFailed(status))
 		{
 			dtFreeNavMesh(tmpNavMesh);
@@ -257,7 +258,7 @@ namespace MUNavigation
 		glm::vec2 endPosition,
 		NNavPolys *navPolys,
 		NNavPath *navPath,
-		mu_float distance
+		mu_float distanceOffset
 	)
 	{
 		dtPolyRef startPolygon = 0;
@@ -419,20 +420,20 @@ namespace MUNavigation
 			}
 		}
 
-		//distance -= 5.0f; // This prevent distance issue when attacking or doing actions
-		if (distance > 0.0f)
+		//distanceOffset -= 5.0f; // This prevent distance issue when attacking or doing actions
+		if (distanceOffset > 0.0f)
 		{
 			glm::vec2 tPosition = endPosition;
 			mu_int32 currentPoint = navPath->PointsCount - 2;
-			while (distance > 0.0f)
+			while (distanceOffset > 0.0f)
 			{
 				glm::vec2 pointPosition = navPath->Points[currentPoint];
 				const mu_float d = glm::distance(pointPosition, tPosition);
-				const mu_float distanceToSub = glm::min(d, distance);
-				distance -= distanceToSub;
+				const mu_float distanceToSub = glm::min(d, distanceOffset);
+				distanceOffset -= distanceToSub;
 				navPath->Points[currentPoint + 1] = glm::mix(tPosition, pointPosition, distanceToSub / d);
 
-				if (distance <= 0.0f || currentPoint < 1)
+				if (distanceOffset <= 0.0f || currentPoint < 1)
 				{
 					break;
 				}
@@ -683,7 +684,7 @@ namespace MUNavigation
 		}
 
 		glm::vec2 currentPosition = navPath->Points[0];
-		mu_int32 currentPoint = 1;
+		mu_uint32 currentPoint = 1;
 		mu_float distance = 0.0f;
 		while (currentPoint < navPath->PointsCount)
 		{

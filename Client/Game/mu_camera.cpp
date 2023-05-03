@@ -50,7 +50,19 @@ void NCamera::Update()
 		MouseDelta.y = MouseDelta.y * PercentOfOld + static_cast<mu_float>(mousePosition.y) * PercentOfNew;
 
 		glm::vec2 rotVelocity(MouseDelta.x * 0.01f, MouseDelta.y * 0.01f);
-		Angle += glm::vec3(-rotVelocity.x, rotVelocity.y, 0.0f);
+		if (Mode == NCameraMode::Directional)
+			Angle += glm::vec3(-rotVelocity.x, rotVelocity.y, 0.0f);
+		else
+			Angle += glm::vec3(rotVelocity.x, -rotVelocity.y, 0.0f);
+	}
+
+	if (
+		shiftPressed == true &&
+		Dragging == false &&
+		MUInput::IsMousePressing(MOUSE_BUTTON_RIGHT) == true
+	)
+	{
+		RestoreDefault();
 	}
 
 	switch (Mode)
@@ -58,14 +70,16 @@ void NCamera::Update()
 	case NCameraMode::Directional:
 		{
 			Angle[0] = glm::mod(Angle[0], glm::radians(360.0f));
-			Angle[1] = glm::clamp(Angle[1], glm::radians(0.0f), glm::radians(180.0f));
+			// We need to limit the angle to avoid direction become exactly |up*inf|, this way we avoid the nand view issue
+			Angle[1] = glm::clamp(Angle[1], glm::radians(2.0f), glm::radians(178.0f));
 		}
 		break;
 
 	case NCameraMode::Positional:
 		{
-			Angle[0] = glm::mod(Angle[0], glm::radians(360.0f) - glm::pi<float>() * 0.5f);
-			Angle[1] = glm::clamp(Angle[1], glm::radians(80.0f) - glm::pi<float>() * 0.5f, glm::radians(180.0f) - glm::pi<float>() * 0.5f);
+			Angle[0] = glm::mod(Angle[0], glm::radians(360.0f));
+			// We need to limit the angle to avoid direction become exactly |up*inf|, this way we avoid the nand view issue
+			Angle[1] = glm::clamp(Angle[1], glm::radians(90.0f), glm::radians(160.0f));
 		}
 		break;
 	}
@@ -122,7 +136,7 @@ void NCamera::Update()
 
 	case NCameraMode::Positional:
 		{
-			Eye = Target + direction * Distance.Current;
+			Eye = Target - direction * Distance.Current;
 		}
 		break;
 	}
@@ -196,37 +210,42 @@ void NCamera::SetMaxDistance(const mu_float maxDistance)
 	Distance.Maximum = maxDistance;
 }
 
-glm::vec3 NCamera::GetEye()
+const NCameraMode NCamera::GetMode() const
+{
+	return Mode;
+}
+
+glm::vec3 NCamera::GetEye() const
 {
 	return Eye;
 }
 
-glm::vec3 NCamera::GetTarget()
+glm::vec3 NCamera::GetTarget() const
 {
 	return Target;
 }
 
-glm::vec3 NCamera::GetAngle()
+glm::vec3 NCamera::GetAngle() const
 {
 	return Angle;
 }
 
-glm::vec3 NCamera::GetUp()
+glm::vec3 NCamera::GetUp() const
 {
 	return Up;
 }
 
-const mu_float NCamera::GetDistance()
+const mu_float NCamera::GetDistance() const
 {
 	return Distance.Current;
 }
 
-const mu_float NCamera::GetMinDistance()
+const mu_float NCamera::GetMinDistance() const
 {
 	return Distance.Minimum;
 }
 
-const mu_float NCamera::GetMaxDistance()
+const mu_float NCamera::GetMaxDistance() const
 {
 	return Distance.Maximum;
 }

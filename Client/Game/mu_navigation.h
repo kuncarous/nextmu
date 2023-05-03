@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "DetourCommon.h"
+#include "DetourNavMesh.h"
+#include "DetourNavMeshQuery.h"
 #include "nav_polys.h"
 #include "nav_path.h"
 
@@ -25,7 +28,7 @@ namespace MUNavigation
 		glm::vec2 endPosition,
 		NNavPolys *navPolys,
 		NNavPath *navPath,
-		mu_float distance
+		mu_float distanceOffset
 	);
 	const mu_boolean TestPath(
 		const dtNavMesh *navMesh,

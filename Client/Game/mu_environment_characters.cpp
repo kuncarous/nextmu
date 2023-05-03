@@ -12,6 +12,9 @@
 #include "res_items.h"
 #include "res_renders.h"
 
+NCharacters::NCharacters(const NEnvironment *environment) : Environment(environment)
+{}
+
 const mu_boolean NCharacters::Initialize()
 {
 	return true;
@@ -22,7 +25,29 @@ void NCharacters::Destroy()
 
 }
 
-void NCharacters::Update(const NRenderSettings &renderSettings)
+void NCharacters::Update()
+{
+	const auto characters = this;
+	const auto updateTime = MUState::GetUpdateTime();
+	const auto environment = MURenderState::GetEnvironment();
+
+	const auto view = Registry.view<
+		NEntity::NRenderable
+	>();
+
+	MUThreadsManager::Run(
+		std::unique_ptr<NThreadExecutorBase>(
+			new (std::nothrow) NThreadExecutorIterator(
+				view.begin(), view.end(),
+				[characters, updateTime](const entt::entity entity) -> void {
+					characters->MoveCharacter(entity);
+				}
+			)
+		)
+	);
+}
+
+void NCharacters::PreRender(const NRenderSettings &renderSettings)
 {
 	const auto updateTime = MUState::GetUpdateTime();
 	const auto environment = MURenderState::GetEnvironment();
@@ -68,7 +93,7 @@ void NCharacters::Update(const NRenderSettings &renderSettings)
 
 					const auto model = attachment.Base;
 					model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed() * updateTime);
-					
+
 					auto &bbox = boundingBox.Calculated;
 					if (model->HasMeshes() && model->HasGlobalBBox())
 					{
@@ -97,7 +122,7 @@ void NCharacters::Update(const NRenderSettings &renderSettings)
 								.Frame = animation.PriorFrame,
 							},
 							glm::vec3(0.0f, 0.0f, 0.0f)
-						);
+							);
 					}
 
 					for (auto &[type, part] : attachment.Parts)
@@ -148,7 +173,7 @@ void NCharacters::Update(const NRenderSettings &renderSettings)
 									.Max = Diligent::float3(bbox.Max.x, -bbox.Min.y, bbox.Max.z),
 								},
 								Diligent::FRUSTUM_PLANE_FLAG_OPEN_NEAR
-							) != Diligent::BoxVisibility::Invisible;
+								) != Diligent::BoxVisibility::Invisible;
 							shadowVisible |= renderState.ShadowVisible[n];
 						}
 					}
@@ -173,7 +198,7 @@ void NCharacters::Update(const NRenderSettings &renderSettings)
 								.Frame = animation.PriorFrame,
 							},
 							glm::vec3(0.0f, 0.0f, 0.0f)
-						);
+							);
 					}
 					skeleton.SkeletonOffset = skeleton.Instance.Upload();
 
@@ -206,7 +231,7 @@ void NCharacters::Update(const NRenderSettings &renderSettings)
 								.Frame = animation.PriorFrame,
 							},
 							glm::vec3(0.0f, 0.0f, 0.0f)
-						);
+							);
 						link.SkeletonOffset = partSkeleton.Upload();
 					}
 				}
@@ -356,16 +381,34 @@ const entt::entity NCharacters::AddOrFind(
 		NEntity::NSkeleton{}
 	);
 
+	const auto terrain = Environment->GetTerrain();
+	const mu_float positionX = (static_cast<mu_float>(character.X) + 0.5f) * TerrainScale;
+	const mu_float positionY = (static_cast<mu_float>(character.Y) + 0.5f) * TerrainScale;
 	registry.emplace<NEntity::NPosition>(
 		entity,
 		NEntity::NPosition{
 			.Position = glm::vec3(
-				(static_cast<mu_float>(character.X) + 0.5f) * TerrainScale,
-				(static_cast<mu_float>(character.Y) + 0.5f) * TerrainScale,
-				300.0f
+				positionX,
+				positionY,
+				terrain->RequestHeight(positionX, positionY)
 			),
 			.Angle = glm::vec3(0.0f, 0.0f, character.Rotation),
 		}
+	);
+
+	registry.emplace<NEntity::NAction>(
+		entity,
+		NEntity::NAction()
+	);
+
+	registry.emplace<NEntity::NMovement>(
+		entity,
+		NEntity::NMovement()
+	);
+
+	registry.emplace<NEntity::NMoveSpeed>(
+		entity,
+		NEntity::NMoveSpeed()
 	);
 
 	registry.emplace<NEntity::NAnimation>(

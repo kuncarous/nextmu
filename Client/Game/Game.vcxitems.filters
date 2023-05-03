@@ -31,9 +31,6 @@
     <Filter Include="Textures">
       <UniqueIdentifier>{b841628b-979c-45fb-8d71-9d9873fff6dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="State">
-      <UniqueIdentifier>{bf2d47ed-f01b-40fe-bfbe-6b4955d35b3a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Model">
       <UniqueIdentifier>{6ff101c5-bebe-42b6-9b34-fba312a96054}</UniqueIdentifier>
     </Filter>
@@ -202,6 +199,18 @@
     <Filter Include="Navigation\Detour">
       <UniqueIdentifier>{8bd5757a-e9f3-40cf-9567-318891334455}</UniqueIdentifier>
     </Filter>
+    <Filter Include="States">
+      <UniqueIdentifier>{bf2d47ed-f01b-40fe-bfbe-6b4955d35b3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="States\Render">
+      <UniqueIdentifier>{114cf7a7-e2b7-402d-beba-5b78658068e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="States\Global">
+      <UniqueIdentifier>{fcd1e889-f053-4ec9-af7f-6e6ffa6a952f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Controller">
+      <UniqueIdentifier>{bb6cf302-ebaa-4a4d-9f41-3be1d61f65ce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -231,9 +240,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_textures.cpp">
       <Filter>Textures</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_state.cpp">
-      <Filter>State</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp">
       <Filter>Model</Filter>
     </ClCompile>
@@ -245,9 +251,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.cpp">
       <Filter>Skeleton</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp">
-      <Filter>State</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp">
       <Filter>Environment</Filter>
@@ -432,6 +435,18 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_navigation.cpp">
       <Filter>Navigation</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp">
+      <Filter>States\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_state.cpp">
+      <Filter>States\Global</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_controller.cpp">
+      <Filter>Environment\Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_character_move.cpp">
+      <Filter>Environment\Characters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
@@ -467,9 +482,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_textures.h">
       <Filter>Textures</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_state.h">
-      <Filter>State</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model.h">
       <Filter>Model</Filter>
     </ClInclude>
@@ -493,12 +505,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.h">
       <Filter>Skeleton</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h">
-      <Filter>State</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate_enums.h">
-      <Filter>State</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h">
       <Filter>Environment</Filter>
@@ -754,6 +760,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)nav_polys.h">
       <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h">
+      <Filter>States\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate_enums.h">
+      <Filter>States\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_state.h">
+      <Filter>States\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_controller.h">
+      <Filter>Environment\Controller</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
