@@ -6,10 +6,26 @@
 #include "mu_entity_light.h"
 #include "res_render.h"
 #include "nav_path.h"
+#include "t_model_enums.h"
 
 class NModel;
 class NSkeletonInstance;
 struct NRender;
+struct NAnimationsRoot;
+
+enum class NAnimationType : mu_uint16
+{
+	Appear,
+	Stop,
+	Walk,
+	Run,
+	Attack,
+	Shock,
+	Die,
+	Max,
+};
+constexpr mu_uint32 AnimationTypeMax = static_cast<mu_uint32>(NAnimationType::Max);
+extern std::array<const mu_utf8string, AnimationTypeMax> AnimationTypeStrings;
 
 namespace NEntity
 {
@@ -88,6 +104,7 @@ namespace NEntity
 	{
 		glm::vec3 Position;
 		glm::vec3 Angle;
+		glm::vec3 HeadAngle = glm::vec3(0.0f, 0.0f, 0.0f);
 		mu_float Scale = 1.0f;
 	};
 
@@ -105,18 +122,40 @@ namespace NEntity
 
 	struct NMoveSpeed
 	{
-		mu_float Walk = 10.0f;
-		mu_float Run = 10.0f;
-		mu_float Swim = 10.0f;
-		mu_float Multiplier = 1.0f;
+		mu_float Walk = 12.0f;
+		mu_float Run = 15.0f;
+		mu_float Swim = 15.0f;
 	};
 
 	struct NAnimation
 	{
+		NAnimationModifierType ModifierType = NAnimationModifierType::None;
 		mu_uint16 CurrentAction = 0u;
 		mu_uint16 PriorAction = 0u;
 		mu_float CurrentFrame = 0.0f;
 		mu_float PriorFrame = 0.0f;
+	};
+
+	struct NModifiers
+	{
+		struct
+		{
+			mu_float MoveSpeed = 1.0f;
+			mu_float AttackSpeed = 1.0f;
+		} Current;
+
+		struct
+		{
+			mu_float MoveSpeed = 1.0f;
+			mu_float AttackSpeed = 1.0f;
+		} Normalized;
+	};
+
+	struct NAnimationsMapping
+	{
+		const NAnimationsRoot *Root = nullptr;
+		std::map<NAnimationType, mu_uint32> Normal;
+		std::map<NAnimationType, mu_uint32> Safezone;
 	};
 
 	enum class PartType : mu_uint32

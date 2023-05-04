@@ -57,9 +57,9 @@ public:
 		return BBoxes.Global;
 	}
 
-	NEXTMU_INLINE const mu_float GetPlaySpeed() const
+	NEXTMU_INLINE const mu_float GetPlaySpeed(const mu_uint32 index) const
 	{
-		return PlaySpeed;
+		return Animations[index].PlaySpeed;
 	}
 
 	NEXTMU_INLINE const mu_uint32 GetBoneById(const mu_utf8string id) const
@@ -79,6 +79,11 @@ public:
 		auto iter = AnimationsById.find(id);
 		if (iter == AnimationsById.end()) return NInvalidUInt32;
 		return iter->second;
+	}
+
+	NEXTMU_INLINE const NAnimationModifierType GetAnimationModifierType(const mu_uint32 index) const
+	{
+		return Animations[index].Modifier;
 	}
 
 protected:
@@ -102,7 +107,6 @@ protected:
 	mu_utf8string Id;
 	mu_int16 BoneHead = NInvalidInt16;
 	mu_float BodyHeight = 0.0f;
-	mu_float PlaySpeed = 1.0f;
 };
 
 #endif

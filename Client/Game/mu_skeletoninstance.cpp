@@ -23,10 +23,10 @@ void NSkeletonInstance::Animate(
 	if (Prior.Action >= numAnimations) Prior.Action = 0;
 	if (Prior.Frame < 0.0f) Prior.Frame = 0.0f;
 
-	mu_uint32 current = static_cast<mu_uint32>(Current.Frame);
-	mu_uint32 prior = static_cast<mu_uint32>(Prior.Frame);
-	mu_uint32 currentNext = current + 1u;
-	mu_uint32 priorNext = prior + 1u;
+	mu_uint32 current = static_cast<mu_uint32>(glm::floor(Current.Frame));
+	mu_uint32 prior = static_cast<mu_uint32>(glm::floor(Prior.Frame));
+	mu_uint32 currentNext = static_cast<mu_uint32>(glm::ceil(Current.Frame));
+	mu_uint32 priorNext = static_cast<mu_uint32>(glm::ceil(Prior.Frame));
 
 	const auto &currentAnimation = Model->Animations[Current.Action];
 	const auto &priorAnimation = Model->Animations[Prior.Action];
@@ -59,6 +59,7 @@ void NSkeletonInstance::Animate(
 		Why I processed 4 frames instead of only 2 frames?
 		To provide a correct animation blending in high framerates.
 	*/
+	const auto &currentStartFrame = currentAnimation.Keys[0];
 	const auto &currentFrame1 = currentAnimation.Keys[current];
 	const auto &currentFrame2 = currentAnimation.Keys[currentNext];
 	const auto &priorFrame1 = priorAnimation.Keys[prior];
@@ -77,6 +78,7 @@ void NSkeletonInstance::Animate(
 		auto &info = Model->BoneInfo[b];
 		if (info.Dummy) continue;
 
+		const auto &currentStartBone = currentStartFrame.Bones[b];
 		const auto &currentBone1 = currentFrame1.Bones[b];
 		const auto &currentBone2 = currentFrame2.Bones[b];
 		const auto &priorBone1 = priorFrame1.Bones[b];
@@ -110,8 +112,8 @@ void NSkeletonInstance::Animate(
 
 		if (b == 0 && lockPosition)
 		{
-			outBone.Position[0] = currentBone1.Position[0];
-			outBone.Position[1] = currentBone1.Position[1];
+			outBone.Position[0] = currentStartBone.Position[0];
+			outBone.Position[1] = currentStartBone.Position[1];
 			outBone.Position[2] = priorPosition[2] * s2 + currentPosition[2] * s1 + Model->BodyHeight;
 		}
 		else

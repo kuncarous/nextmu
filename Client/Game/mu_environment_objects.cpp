@@ -106,7 +106,7 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 					);
 
 					const auto model = attachment.Base;
-					model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed() * updateTime);
+					model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed(animation.CurrentAction) * updateTime);
 
 					auto &bbox = boundingBox.Calculated;
 					if (model->HasMeshes() && model->HasGlobalBBox())
@@ -148,7 +148,7 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 						{
 							auto &link = part.Link;
 							auto &animation = link.Animation;
-							model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed() * updateTime);
+							model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed(animation.CurrentAction) * updateTime);
 						}
 
 						if (model->HasMeshes() && model->HasGlobalBBox())

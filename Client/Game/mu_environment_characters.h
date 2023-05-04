@@ -30,10 +30,14 @@ public:
 	void AddAttachmentPartFromItem(const entt::entity entity, const NEntity::PartType partType, const NItemCategory category, const mu_uint16 index);
 	void AddAttachmentPart(const entt::entity entity, const NEntity::PartType partType, NRender *render);
 	void RemoveAttachmentPart(const entt::entity entity, const NEntity::PartType partType);
+	void ConfigureAnimationsMapping(const entt::entity entity);
+
+	void SetCharacterAction(const entt::entity entity, NAnimationType type);
+	const mu_float GetAnimationModifier(const entt::entity entity, NAnimationModifierType type) const;
 
 private:
 	void MoveCharacter(const entt::entity);
-	mu_boolean MovePath(NEntity::NPosition &position, NEntity::NMovement &movement, NEntity::NMoveSpeed &moveSpeed);
+	mu_boolean MovePath(NEntity::NPosition &position, NEntity::NMovement &movement, NEntity::NMoveSpeed &moveSpeed, const NEntity::NModifiers &modifiers);
 
 public:
 	entt::registry &GetRegistry()

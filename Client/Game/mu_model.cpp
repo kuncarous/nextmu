@@ -54,7 +54,12 @@ std::map<mu_utf8string, NRenderClassify> ClassifyMap = {
 	{ "post_alpha", NRenderClassify::PostAlpha },
 };
 
-#define GRAPHICS_VALUE_FROM_STRING(name, map, default_value) \
+std::map<mu_utf8string, NAnimationModifierType> AnimationModifierMap = {
+	{ "move_speed", NAnimationModifierType::MoveSpeed },
+	{ "attack_speed", NAnimationModifierType::AttackSpeed },
+};
+
+#define MAPPING_VALUE_FROM_STRING(name, map, default_value) \
 constexpr auto name##Default = default_value; \
 NEXTMU_INLINE const auto name##FromString(const mu_utf8string value) \
 { \
@@ -63,11 +68,12 @@ NEXTMU_INLINE const auto name##FromString(const mu_utf8string value) \
 	return iter->second; \
 }
 
-GRAPHICS_VALUE_FROM_STRING(DepthTest, DepthTestMap, Diligent::COMPARISON_FUNC_LESS)
-GRAPHICS_VALUE_FROM_STRING(BlendFunction, BlendFunctionMap, Diligent::BLEND_FACTOR_UNDEFINED)
-GRAPHICS_VALUE_FROM_STRING(BlendEquation, BlendEquationMap, Diligent::BLEND_OPERATION_ADD)
-GRAPHICS_VALUE_FROM_STRING(Cull, CullMap, Diligent::CULL_MODE_NONE)
-GRAPHICS_VALUE_FROM_STRING(Classify, ClassifyMap, NRenderClassify::None)
+MAPPING_VALUE_FROM_STRING(DepthTest, DepthTestMap, Diligent::COMPARISON_FUNC_LESS)
+MAPPING_VALUE_FROM_STRING(BlendFunction, BlendFunctionMap, Diligent::BLEND_FACTOR_UNDEFINED)
+MAPPING_VALUE_FROM_STRING(BlendEquation, BlendEquationMap, Diligent::BLEND_OPERATION_ADD)
+MAPPING_VALUE_FROM_STRING(Cull, CullMap, Diligent::CULL_MODE_NONE)
+MAPPING_VALUE_FROM_STRING(Classify, ClassifyMap, NRenderClassify::None)
+MAPPING_VALUE_FROM_STRING(AnimationModifier, AnimationModifierMap, NAnimationModifierType::None)
 
 const mu_utf8string ProgramDefault = "mesh_normal";
 
@@ -191,11 +197,6 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 	if (document.contains("bodyHeight"))
 	{
 		BodyHeight = document["bodyHeight"].get<mu_float>();
-	}
-
-	if (document.contains("playSpeed"))
-	{
-		PlaySpeed = document["playSpeed"].get<mu_float>();
 	}
 
 	if (document.contains("settings"))
@@ -329,7 +330,18 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 			const auto id = janimation["id"].get<mu_utf8string>();
 			const auto index = janimation["index"].get<mu_uint32>();
 
-			Animations[index].Id = id;
+			auto &animation = Animations[index];
+			animation.Id = id;
+			if (janimation.contains("play_speed"))
+			{
+				animation.PlaySpeed = janimation["play_speed"].get<mu_float>();
+			}
+
+			if (janimation.contains("modifier"))
+			{
+				animation.Modifier = AnimationModifierFromString(janimation["modifier"].get<mu_utf8string>());
+			}
+
 			AnimationsById.insert(std::make_pair(id, index));
 		}
 	}
@@ -855,6 +867,7 @@ const mu_boolean NModel::PlayAnimation(
 	const mu_float PlaySpeed
 ) const
 {
+	if (glm::abs(PlaySpeed) < glm::epsilon<mu_float>()) return true;
 	const mu_uint32 numAnimations = static_cast<mu_uint32>(this->Animations.size());
 
 	// Return true to keep original logic
@@ -864,14 +877,15 @@ const mu_boolean NModel::PlayAnimation(
 	const auto &currentFramesCount = static_cast<mu_uint32>(currentAnimation.Keys.size());
 	if (currentFramesCount <= 1) return true;
 
-	const mu_uint32 lastFrame = static_cast<mu_uint32>(CurrentFrame);
+	const mu_float tmpFrame = CurrentFrame;
+	const mu_uint32 lastFrame = static_cast<mu_uint32>(glm::floor(CurrentFrame));
 	CurrentFrame += PlaySpeed;
-	const mu_uint32 newFrame = static_cast<mu_uint32>(CurrentFrame);
+	const mu_uint32 newFrame = static_cast<mu_uint32>(glm::floor(CurrentFrame));
 
-	if (lastFrame != newFrame)
+	if (CurrentAction == PriorAction || lastFrame != newFrame)
 	{
 		PriorAction = CurrentAction;
-		PriorFrame = static_cast<mu_float>(lastFrame);
+		PriorFrame = tmpFrame;
 	}
 
 	mu_boolean loop = true;
@@ -885,7 +899,7 @@ const mu_boolean NModel::PlayAnimation(
 	}
 	else
 	{
-		const auto maxFrames = currentFramesCount - static_cast<mu_uint32>(currentAnimation.LockPositions);
+		const auto maxFrames = currentFramesCount - static_cast<mu_uint32>(!!currentAnimation.LockPositions);
 		if (newFrame >= maxFrames)
 		{
 			CurrentFrame = glm::mod(CurrentFrame, static_cast<mu_float>(maxFrames));

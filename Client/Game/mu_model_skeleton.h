@@ -4,6 +4,7 @@
 #pragma once
 
 #include "mu_math_aabb.h"
+#include "t_model_enums.h"
 
 class NBone
 {
@@ -24,6 +25,7 @@ public:
 	mu_utf8string Id;
 	mu_boolean Loop = false;
 	mu_boolean LockPositions = false;
+	NAnimationModifierType Modifier = NAnimationModifierType::None;
 	mu_float PlaySpeed = 1.0f;
 	std::vector<NAnimationKey> Keys; // Per Animation Frame
 };

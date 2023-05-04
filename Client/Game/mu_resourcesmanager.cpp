@@ -49,7 +49,7 @@ namespace MUResourcesManager
 		SDL_RWops *fp = nullptr;
 		if (mu_rwfromfile<EGameDirectoryType::eSupport>(&fp, filename, "rb") == false)
 		{
-			mu_error("terrain.json missing ({})", filename);
+			mu_error("resources.json missing ({})", filename);
 			return false;
 		}
 

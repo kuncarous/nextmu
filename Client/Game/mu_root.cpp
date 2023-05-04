@@ -15,6 +15,7 @@
 #include "mu_controllerstate.h"
 #include "mu_threadsmanager.h"
 #include "mu_resourcesmanager.h"
+#include "mu_animationsmanager.h"
 #include "mu_skeletoninstance.h"
 #include "mu_skeletonmanager.h"
 #include "mu_model.h"
@@ -174,6 +175,12 @@ namespace MURoot
 			return false;
 		}
 
+		if (MUAnimationsManager::Load() == false)
+		{
+			mu_error("Failed to load animations.");
+			return false;
+		}
+
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		if (UINoesis::Initialize() == false)
 		{
@@ -270,6 +277,7 @@ namespace MURoot
 					TCharacter::Settings{
 						.Key = 0,
 						.Type = CharacterType::Character,
+						.AnimationsId = "player",
 						.X = 160,
 						.Y = 128,
 						.Rotation = 0.0f,
@@ -288,11 +296,12 @@ namespace MURoot
 			}
 
 			// Dark Wizard
-			{
+			/*{
 				auto entity = characters->AddOrFind(
 					TCharacter::Settings{
 						.Key = 1,
 						.Type = CharacterType::Character,
+						.AnimationsId = "player",
 						.X = 163,
 						.Y = 128,
 						.Rotation = 0.0f,
@@ -306,19 +315,19 @@ namespace MURoot
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);
-			}
+			}*/
 		}
 
 		static mu_double accumulatedTime = 0.0;
 		while (!Quit)
 		{
 			accumulatedTime += elapsedTime;
-			const mu_float updateTime = static_cast<mu_float>(accumulatedTime / GameCycleTime);
-			const mu_uint32 updateCount = static_cast<mu_uint32>(updateTime); // Calculate update count using fixed update time from MU (25 FPS)
+			const mu_float updateTime = static_cast<mu_float>(elapsedTime / GameCycleTime);
+			const mu_uint32 updateCount = static_cast<mu_uint32>(glm::floor(accumulatedTime / GameCycleTime)); // Calculate update count using fixed update time from MU (25 FPS)
 			accumulatedTime -= static_cast<mu_double>(updateCount) * GameCycleTime; // Remove acummulated time
 
 			MUState::SetTime(static_cast<mu_float>(currentTime), static_cast<mu_float>(elapsedTime));
-			MUState::SetUpdate(glm::floor(updateTime), updateCount);
+			MUState::SetUpdate(updateTime, updateCount);
 			MURenderState::Reset();
 			MUSkeletonManager::Reset();
 

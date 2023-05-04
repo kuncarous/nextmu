@@ -15,6 +15,7 @@ namespace TCharacter
 	{
 		mu_key Key;
 		CharacterType Type;
+		mu_utf8string AnimationsId;
 		mu_uint16 X, Y;
 		mu_float Rotation;
 	};

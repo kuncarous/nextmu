@@ -211,6 +211,9 @@
     <Filter Include="Environment\Controller">
       <UniqueIdentifier>{bb6cf302-ebaa-4a4d-9f41-3be1d61f65ce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Animations">
+      <UniqueIdentifier>{abec6bdc-e543-46a8-aa63-cd61236ead53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -446,6 +449,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_character_move.cpp">
       <Filter>Environment\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_animationsmanager.cpp">
+      <Filter>Animations</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -772,6 +778,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_controller.h">
       <Filter>Environment\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_animationsmanager.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ani_node.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ani_input.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_model_enums.h">
+      <Filter>Model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -100,6 +100,10 @@ void NController::Update()
 				auto [position, movement] = registry.get<NEntity::NPosition, NEntity::NMovement>(Character);
 
 				movement.Moving = MUNavigation::FindShortestPath(terrain->GetNavMesh(), terrain->GetNavMeshQuery(0), position.Position, intersection, &navPolys, &movement.Path, 0.0f);
+				if (movement.Moving)
+				{
+					characters->SetCharacterAction(Character, NAnimationType::Walk);
+				}
 			}
 
 			const auto updateCount = MUState::GetUpdateCount();

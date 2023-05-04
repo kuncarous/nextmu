@@ -46,6 +46,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMeshQuery.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNode.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_angelscript.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_animationsmanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_capabilities.cpp" />
@@ -116,6 +117,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptarray\scriptarray.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptmath\scriptmath.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Dependencies\Installed\AngelScript\add_on\scriptstdstring\scriptstdstring.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ani_input.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ani_node.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourAlloc.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourAssert.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourCommon.h" />
@@ -126,6 +129,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNode.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourStatus.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_animationsmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_capabilities.h" />
@@ -183,6 +187,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_render.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_tails.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_thunder1_v7.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_model_enums.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_object_structs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_config.h" />

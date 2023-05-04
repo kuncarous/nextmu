@@ -9,6 +9,7 @@
 #include "mu_renderstate.h"
 #include "mu_threadsmanager.h"
 #include "mu_resourcesmanager.h"
+#include "mu_animationsmanager.h"
 #include "res_items.h"
 #include "res_renders.h"
 
@@ -49,6 +50,7 @@ void NCharacters::Update()
 
 void NCharacters::PreRender(const NRenderSettings &renderSettings)
 {
+	auto characters = this;
 	const auto updateTime = MUState::GetUpdateTime();
 	const auto environment = MURenderState::GetEnvironment();
 
@@ -67,7 +69,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 		std::unique_ptr<NThreadExecutorBase>(
 			new (std::nothrow) NThreadExecutorIterator(
 				view.begin(), view.end(),
-				[&view, environment, &renderSettings, updateTime](const entt::entity entity) -> void {
+				[&view, environment, characters, &renderSettings, updateTime](const entt::entity entity) -> void {
 					auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
 						NEntity::NAttachment,
 						NEntity::NLight,
@@ -92,7 +94,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 					);
 
 					const auto model = attachment.Base;
-					model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed() * updateTime);
+					model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed(animation.CurrentAction) * characters->GetAnimationModifier(entity, animation.ModifierType) * updateTime);
 
 					auto &bbox = boundingBox.Calculated;
 					if (model->HasMeshes() && model->HasGlobalBBox())
@@ -121,8 +123,8 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 								.Action = animation.PriorAction,
 								.Frame = animation.PriorFrame,
 							},
-							glm::vec3(0.0f, 0.0f, 0.0f)
-							);
+							position.HeadAngle
+						);
 					}
 
 					for (auto &[type, part] : attachment.Parts)
@@ -134,7 +136,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 						{
 							auto &link = part.Link;
 							auto &animation = link.Animation;
-							model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed() * updateTime);
+							model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed(animation.CurrentAction) * updateTime);
 						}
 
 						if (model->HasMeshes() && model->HasGlobalBBox())
@@ -419,6 +421,18 @@ const entt::entity NCharacters::AddOrFind(
 		}
 	);
 
+	registry.emplace<NEntity::NModifiers>(
+		entity,
+		NEntity::NModifiers()
+	);
+
+	registry.emplace<NEntity::NAnimationsMapping>(
+		entity,
+		NEntity::NAnimationsMapping{
+			.Root = MUAnimationsManager::GetAnimationsRoot(character.AnimationsId)
+		}
+	);
+
 	registry.emplace<NEntity::NAttachment>(
 		entity,
 		NEntity::NAttachment{
@@ -436,6 +450,8 @@ const entt::entity NCharacters::AddOrFind(
 			}
 		}
 	);
+
+	ConfigureAnimationsMapping(entity);
 
 	return entity;
 }
@@ -493,4 +509,73 @@ void NCharacters::RemoveAttachmentPart(const entt::entity entity, const NEntity:
 {
 	auto &attachment = Registry.get<NEntity::NAttachment>(entity);
 	attachment.Parts.erase(partType);
+}
+
+void NCharacters::ConfigureAnimationsMapping(const entt::entity entity)
+{
+	auto [animationsMapping, attachment] = Registry.get<NEntity::NAnimationsMapping, NEntity::NAttachment>(entity);
+	if (animationsMapping.Root == nullptr) return;
+	
+	animationsMapping.Normal.clear();
+	animationsMapping.Safezone.clear();
+
+	NAnimationInput input;
+	input.Swimming = Environment->GetTerrain()->IsSwimming();
+
+	for (mu_uint32 n = 0; n < AnimationTypeMax; ++n)
+	{
+		const auto &id = AnimationTypeStrings[n];
+		input.Action = id;
+		const auto animationId = MUAnimationsManager::GetAnimation(animationsMapping.Root, input);
+		if (animationId.empty() == true) continue;
+		const auto index = attachment.Base->GetAnimationById(animationId);
+		if (index == NInvalidUInt32) continue;
+		animationsMapping.Normal.insert(std::make_pair(static_cast<NAnimationType>(n), index));
+	}
+
+	input.SafeZone = true;
+
+	for (mu_uint32 n = 0; n < AnimationTypeMax; ++n)
+	{
+		const auto &id = AnimationTypeStrings[n];
+		input.Action = id;
+		const auto animationId = MUAnimationsManager::GetAnimation(animationsMapping.Root, input);
+		if (animationId.empty() == true) continue;
+		const auto index = attachment.Base->GetAnimationById(animationId);
+		if (index == NInvalidUInt32) continue;
+		animationsMapping.Safezone.insert(std::make_pair(static_cast<NAnimationType>(n), index));
+	}
+}
+
+void NCharacters::SetCharacterAction(const entt::entity entity, NAnimationType type)
+{
+	auto [position, animationsMapping, animation, attachment] = Registry.get<NEntity::NPosition, NEntity::NAnimationsMapping, NEntity::NAnimation, NEntity::NAttachment>(entity);
+
+	const auto terrain = Environment->GetTerrain();
+	const auto attribute = terrain->GetAttribute(GetPositionFromFloat(position.Position.x), GetPositionFromFloat(position.Position.y));
+	const auto safezone = (attribute & TerrainAttribute::SafeZone) != 0;
+
+	const auto &mapping = (safezone ? animationsMapping.Safezone : animationsMapping.Normal);
+	const auto iter = mapping.find(type);
+	if (iter == mapping.end()) return;
+
+	const auto action = iter->second;
+	if (animation.CurrentAction == action) return;
+
+	animation.ModifierType = attachment.Base->GetAnimationModifierType(action);
+	animation.PriorAction = animation.CurrentAction;
+	animation.PriorFrame = animation.CurrentFrame;
+	animation.CurrentAction = action;
+	animation.CurrentFrame = 0.0f;
+}
+
+const mu_float NCharacters::GetAnimationModifier(const entt::entity entity, NAnimationModifierType type) const
+{
+	auto &modifiers = Registry.get<NEntity::NModifiers>(entity);
+	switch (type)
+	{
+	case NAnimationModifierType::MoveSpeed: return modifiers.Normalized.MoveSpeed;
+	case NAnimationModifierType::AttackSpeed: return modifiers.Normalized.AttackSpeed;
+	default: return 1.0f;
+	}
 }

@@ -15,4 +15,6 @@
 #include "shared_operatingsystem_backend.h"
 #include "shared_json.h"
 
+#include "shared_enums.h"
+
 #endif
