@@ -113,7 +113,7 @@ namespace UINoesis
 
 	void Update()
 	{
-		View->Update(MUState::GetElapsedTime() / 1000.0);
+		View->Update(MUState::GetWorldTime() / 1000.0);
 	}
 
 	void Render()
