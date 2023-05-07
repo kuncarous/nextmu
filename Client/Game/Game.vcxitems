@@ -50,6 +50,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_capabilities.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_charactersmanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_config.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_crypt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_entity.cpp" />
@@ -71,6 +72,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_state.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_terrain.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_textureattachments.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_textures.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_threadsmanager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_timer.cpp" />
@@ -130,6 +132,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourStatus.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_animationsmanager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_charactersmanager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_textureattachments.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_capabilities.h" />
@@ -148,6 +152,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_resizablequeue.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)nav_path.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)nav_polys.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_charactersmanager_structs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h" />
@@ -198,7 +203,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_precompiled.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_rendererconfig.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate_enums.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_resources.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_resourcesmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h" />
@@ -215,6 +219,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_render.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_textureattachments.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_threading_helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_renderdevice.h" />

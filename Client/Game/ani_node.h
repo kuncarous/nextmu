@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "t_character_structs.h"
+
 enum class NAnimationCondition : mu_uint32
 {
 	Unknown,
@@ -11,6 +13,7 @@ enum class NAnimationCondition : mu_uint32
 	Swimming,
 	Sex,
 	Class,
+	SubClass,
 	Mount,
 	Pet,
 	Wings,
@@ -23,6 +26,7 @@ enum class NAnimationRouteType : mu_uint32
 	Boolean,
 	UInteger,
 	String,
+	CharacterType,
 };
 
 struct NAnimationString
@@ -73,12 +77,19 @@ struct NAnimationValue
 		String = AllocateString(value);
 	}
 
+	void SetCharacterType(const NCharacterType characterType)
+	{
+		Type = NAnimationRouteType::CharacterType;
+		CharacterType = characterType;
+	}
+
 	NAnimationRouteType Type;
 	union
 	{
 		mu_boolean Bool;
 		mu_uint32 UInteger;
 		NAnimationString String;
+		NCharacterType CharacterType;
 	};
 };
 

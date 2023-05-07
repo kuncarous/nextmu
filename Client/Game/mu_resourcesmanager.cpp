@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "mu_resourcesmanager.h"
 #include "mu_skeletonmanager.h"
+#include "mu_textureattachments.h"
 #include "mu_config.h"
 #include "mu_graphics.h"
 #include "mu_model.h"
@@ -65,6 +66,15 @@ namespace MUResourcesManager
 		{
 			mu_error("resources malformed ({})", filename);
 			return false;
+		}
+
+		if (document.contains("attachments"))
+		{
+			const auto jattachments = document["attachments"];
+			for (const auto &jattachment : jattachments)
+			{
+				MUTextureAttachments::CreateAttachmentTypeByString(jattachment.get<mu_utf8string>());
+			}
 		}
 
 		if (document.contains("shaders"))
@@ -278,6 +288,44 @@ namespace MUResourcesManager
 			std::unique_ptr<NModel> model(new_nothrow NModel());
 			if (model->Load(id, basePath + path) == false)
 			{
+				mu_info("{}", path);
+				for (const auto &mesh : model->Meshes)
+				{
+					mu_utf8string filename = mesh.Texture.Filename;
+					mu_utf8string filenameLC = mesh.Texture.Filename;
+					std::transform(filenameLC.begin(), filenameLC.end(), filenameLC.begin(), mu_utf8tolower);
+					/* Hard-coded attachments, in future these will be removed and configured directly in the jsons of models */
+					if (filename.starts_with("ski") || filename.starts_with("level_"))
+					{
+					}
+					else if (filenameLC.starts_with("hqskin3"))
+					{
+					}
+					else if (filenameLC.starts_with("hqskin2"))
+					{
+					}
+					else if (filenameLC.starts_with("hqskin") || filenameLC.starts_with("hqlevel_"))
+					{
+					}
+					else if (filename.starts_with("hid"))
+					{
+					}
+					else if (filename.starts_with("hair"))
+					{
+					}
+					else if (filenameLC.starts_with("hqhair_"))
+					{
+					}
+					else if (filename.starts_with("face_"))
+					{
+					}
+					else
+					{
+						mu_info("{}", mesh.Texture.Filename);
+					}
+				}
+				//mu_error("failed to load model ({})", path);
+				continue;
 				mu_error("failed to load model ({})", path);
 				return false;
 			}

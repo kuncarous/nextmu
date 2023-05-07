@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "mu_renderstate_enums.h"
+#include "t_textureattachments.h"
 
 class NCamera;
 class NEnvironment;
@@ -45,9 +45,9 @@ namespace MURenderState
 	const NEnvironment *GetEnvironment();
 	NTerrain *GetTerrain();
 
-	void AttachTexture(TextureAttachment::Type type, NGraphicsTexture *texture);
-	void DetachTexture(TextureAttachment::Type type);
-	NGraphicsTexture *GetTexture(TextureAttachment::Type type);
+	void AttachTexture(const NTextureAttachmentType type, NGraphicsTexture *texture);
+	void DetachTexture(const NTextureAttachmentType type);
+	NGraphicsTexture *GetTexture(const NTextureAttachmentType type);
 };
 
 #endif

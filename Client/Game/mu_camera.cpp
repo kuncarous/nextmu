@@ -95,34 +95,45 @@ void NCamera::Update()
 		yCos
 	);
 
-	if (shiftPressed && Mode == NCameraMode::Directional)
+	if (shiftPressed)
 	{
-		constexpr mu_float MoveSpeed = 2000.0f / 1000.0f;
-
-		glm::vec3 right(
-			glm::cos(Angle[0] - glm::half_pi<mu_float>()) * -1.0f,
-			glm::sin(Angle[0] - glm::half_pi<mu_float>()) * -1.0f,
-			0.0f
-		);
-
-		if (MUInput::IsKeyPressing(SDL_SCANCODE_W))
+		if (Mode == NCameraMode::Directional)
 		{
-			Eye += direction * (MoveSpeed * elapsedTime);
+			constexpr mu_float MoveSpeed = 2000.0f / 1000.0f;
+
+			glm::vec3 right(
+				glm::cos(Angle[0] - glm::half_pi<mu_float>()) * -1.0f,
+				glm::sin(Angle[0] - glm::half_pi<mu_float>()) * -1.0f,
+				0.0f
+			);
+
+			if (MUInput::IsKeyPressing(SDL_SCANCODE_W))
+			{
+				Eye += direction * (MoveSpeed * elapsedTime);
+			}
+
+			if (MUInput::IsKeyPressing(SDL_SCANCODE_S))
+			{
+				Eye += direction * -(MoveSpeed * elapsedTime);
+			}
+
+			if (MUInput::IsKeyPressing(SDL_SCANCODE_A))
+			{
+				Eye += right * (MoveSpeed * elapsedTime);
+			}
+
+			if (MUInput::IsKeyPressing(SDL_SCANCODE_D))
+			{
+				Eye += right * -(MoveSpeed * elapsedTime);
+			}
 		}
-
-		if (MUInput::IsKeyPressing(SDL_SCANCODE_S))
+		else if (Mode == NCameraMode::Positional)
 		{
-			Eye += direction * -(MoveSpeed * elapsedTime);
-		}
-
-		if (MUInput::IsKeyPressing(SDL_SCANCODE_A))
-		{
-			Eye += right * (MoveSpeed * elapsedTime);
-		}
-
-		if (MUInput::IsKeyPressing(SDL_SCANCODE_D))
-		{
-			Eye += right * -(MoveSpeed * elapsedTime);
+			const auto wheel = MUInput::GetMouseWheel() * 100.0f;
+			if (glm::abs(wheel) > glm::epsilon<mu_float>())
+			{
+				Distance.Current -= wheel;
+			}
 		}
 	}
 

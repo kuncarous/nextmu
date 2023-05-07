@@ -9,15 +9,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-namespace cglm
-{
-#include <cglm/types.h>
-#include <cglm/cam.h>
-#include <cglm/frustum.h>
-#include <cglm/box.h>
-#include <cglm/sphere.h>
-#include <cglm/clipspace/persp_rh_zo.h>
-}
 
 #include <SDL.h>
 #include <FreeImage.h>

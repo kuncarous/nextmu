@@ -23,6 +23,7 @@ namespace MUInput
 
 	void ProcessKeys()
 	{
+		MouseWheel = 0.0f;
 		mu_memcpy(KeyState, KeyPressed, sizeof(KeyState));
 	}
 

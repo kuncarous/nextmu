@@ -26,14 +26,9 @@ mu_float CalculateAngle(const glm::vec2 &vec1, const glm::vec2 &vec2)
 
 void NCharacters::MoveCharacter(const entt::entity entity)
 {
-	auto [position, action, movement, moveSpeed, modifiers] = Registry.get<NEntity::NPosition, NEntity::NAction, NEntity::NMovement, NEntity::NMoveSpeed, NEntity::NModifiers>(entity);
+	auto [position, movement, moveSpeed, modifiers] = Registry.get<NEntity::NPosition, NEntity::NMovement, NEntity::NMoveSpeed, NEntity::NModifiers>(entity);
 	
 	mu_boolean canMove = true;
-	if (action.Index != NInvalidUInt16)
-	{
-
-	}
-
 	if (canMove && movement.Moving && MovePath(position, movement, moveSpeed, modifiers) == true)
 	{
 		movement.Moving = false;
@@ -52,8 +47,9 @@ NEXTMU_INLINE const mu_float CalculateMoveSpeed(const NTerrain *terrain, const g
 
 mu_boolean NCharacters::MovePath(NEntity::NPosition &position, NEntity::NMovement &movement, NEntity::NMoveSpeed &moveSpeed, const NEntity::NModifiers &modifiers)
 {
+	const auto terrain = Environment->GetTerrain();
 	const mu_float updateTime = MUState::GetUpdateTime();
-	mu_float distanceToMove = CalculateMoveSpeed(Environment->GetTerrain(), position.Position, moveSpeed, modifiers) * updateTime;
+	mu_float distanceToMove = CalculateMoveSpeed(terrain, position.Position, moveSpeed, modifiers) * updateTime;
 	if (distanceToMove <= 0.0f) return true;
 	auto &path = movement.Path;
 	if (path.CurrentPoint >= path.PointsCount) return true;
@@ -79,6 +75,7 @@ mu_boolean NCharacters::MovePath(NEntity::NPosition &position, NEntity::NMovemen
 		if (distanceToMove <= 0.0f || path.CurrentPoint >= path.PointsCount)
 		{
 			position.Angle.z = CalculateAngle(sourcePosition, targetPosition);
+			position.Position.z = terrain->RequestHeight(newPosition.x, newPosition.y);
 			return path.CurrentPoint >= path.PointsCount;
 		}
 	}

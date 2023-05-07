@@ -14,8 +14,6 @@ std::array<const mu_utf8string, AnimationTypeMax> AnimationTypeStrings = {
 namespace NEntity
 {
 	std::array<mu_utf8string, MaxPartType> PartTypeIds = {
-		"body",
-		"head",
 		"helm",
 		"armor",
 		"pants",

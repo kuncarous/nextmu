@@ -18,6 +18,8 @@
 #include "mu_animationsmanager.h"
 #include "mu_skeletoninstance.h"
 #include "mu_skeletonmanager.h"
+#include "mu_charactersmanager.h"
+#include "mu_textureattachments.h"
 #include "mu_model.h"
 #include "mu_modelrenderer.h"
 #include "mu_bboxrenderer.h"
@@ -149,12 +151,6 @@ namespace MURoot
 			return false;
 		}
 
-		if (MURenderState::Initialize() == false)
-		{
-			mu_error("Failed to initialize render state.");
-			return false;
-		}
-
 #if PHYSICS_ENABLED == 1
 		if (MUPhysics::Initialize() == false)
 		{
@@ -175,9 +171,27 @@ namespace MURoot
 			return false;
 		}
 
+		if (MUCharactersManager::Load() == false)
+		{
+			mu_error("Failed to load characters.");
+			return false;
+		}
+
+		if (MUTextureAttachments::Initialize() == false)
+		{
+			mu_error("Failed to initialize attachments.");
+			return false;
+		}
+
 		if (MUAnimationsManager::Load() == false)
 		{
 			mu_error("Failed to load animations.");
+			return false;
+		}
+
+		if (MURenderState::Initialize() == false)
+		{
+			mu_error("Failed to initialize render state.");
 			return false;
 		}
 
@@ -271,51 +285,357 @@ namespace MURoot
 		{
 			auto characters = environment->GetCharacters();
 
-			// Dark Knight
+			// Dark Wizard
 			{
 				auto entity = characters->AddOrFind(
 					TCharacter::Settings{
 						.Key = 0,
 						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 0,
+							.SubClass = 0,
+						},
 						.AnimationsId = "player",
 						.X = 160,
 						.Y = 128,
 						.Rotation = 0.0f,
 					}
 				);
-				characters->AddAttachmentPart(entity, NEntity::PartType::Head, MURendersManager::GetRender("dk_head"));
-				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 1);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 1);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 1);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 1);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 1);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 1);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Maces, 5);
-				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 5);*/
 
 				environment->GetController()->SetCharacter(entity);
 			}
 
-			// Dark Wizard
-			/*{
+			// Dark Knight
+			{
 				auto entity = characters->AddOrFind(
 					TCharacter::Settings{
 						.Key = 1,
 						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 1,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 161,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Elf
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 2,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 2,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 162,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Magic Gladiator
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 3,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 3,
+							.SubClass = 0,
+						},
 						.AnimationsId = "player",
 						.X = 163,
 						.Y = 128,
 						.Rotation = 0.0f,
 					}
 				);
-				//characters->AddAttachmentPart(entity, NEntity::PartType::Head, MURendersManager::GetRender("dk_head"));
-				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
 				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);
-			}*/
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Dark Lord
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 4,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 4,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 164,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Summoner
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 5,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 5,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 165,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Rage Fighter
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 6,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 6,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 166,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Grow Lancer
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 7,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 7,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 167,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Rune Mage
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 8,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 8,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 168,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Slayer
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 9,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 9,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 169,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Gun Crasher
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 10,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 10,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 170,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// White Wizard
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 11,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 11,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 171,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Mage
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 12,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 12,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 172,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
+
+			// Illusion Knight
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 13,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 13,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 173,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Helm, NItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Armor, NItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Pants, NItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Gloves, NItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Boots, NItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::ItemLeft, NItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NEntity::PartType::Wings, NItemCategory::Wings, 4);*/
+			}
 		}
 
 		static mu_double accumulatedTime = 0.0;

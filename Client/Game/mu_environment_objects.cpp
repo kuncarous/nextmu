@@ -268,8 +268,6 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 				if (!renderState.Flags.Visible) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
 
-				MURenderState::AttachTexture(TextureAttachment::Skin, attachment.Skin);
-
 				const NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
 					.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -293,8 +291,6 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 					};
 					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
 				}
-
-				MURenderState::DetachTexture(TextureAttachment::Skin);
 			}
 
 #if NEXTMU_RENDER_BBOX
@@ -315,8 +311,6 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 				if (!renderState.ShadowVisible[renderSettings.CurrentShadowMap]) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
 
-				MURenderState::AttachTexture(TextureAttachment::Skin, attachment.Skin);
-
 				const NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
 					.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -340,8 +334,6 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 					};
 					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
 				}
-
-				MURenderState::DetachTexture(TextureAttachment::Skin);
 			}
 		}
 		break;

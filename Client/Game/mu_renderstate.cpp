@@ -3,6 +3,7 @@
 #include "mu_environment.h"
 #include "mu_camera.h"
 #include "mu_graphics.h"
+#include "mu_textureattachments.h"
 #include <MapHelper.hpp>
 
 namespace MURenderState
@@ -10,7 +11,7 @@ namespace MURenderState
 	glm::mat4 FrustomProjection, Projection, View, ViewProjection;
 	NCamera *Camera = nullptr;
 	NEnvironment *Environment = nullptr;
-	std::array<NGraphicsTexture *, TextureAttachment::Count> Textures = { {} };
+	std::vector<NGraphicsTexture *> TextureAttachments;
 
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> CameraUniform;
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> LightUniform;
@@ -68,6 +69,8 @@ namespace MURenderState
 			*uniform = Diligent::LightAttribs();
 		}
 
+		TextureAttachments.resize(MUTextureAttachments::GetAttachmentsCount(), nullptr);
+
 		return true;
 	}
 
@@ -80,9 +83,9 @@ namespace MURenderState
 	void Reset()
 	{
 		Environment = nullptr;
-		for (mu_uint32 n = 0; n < TextureAttachment::Count; ++n)
+		for (mu_uint32 n = 0; n < TextureAttachments.size(); ++n)
 		{
-			Textures[n] = nullptr;
+			TextureAttachments[n] = nullptr;
 		}
 	}
 
@@ -205,18 +208,19 @@ namespace MURenderState
 		return Environment->GetTerrain();
 	}
 
-	void AttachTexture(TextureAttachment::Type type, NGraphicsTexture *texture)
+	void AttachTexture(const NTextureAttachmentType type, NGraphicsTexture *texture)
 	{
-		Textures[type] = texture;
+		TextureAttachments[type] = texture;
 	}
 
-	void DetachTexture(TextureAttachment::Type type)
+	void DetachTexture(const NTextureAttachmentType type)
 	{
-		Textures[type] = nullptr;
+		TextureAttachments[type] = nullptr;
 	}
 
-	NGraphicsTexture *GetTexture(TextureAttachment::Type type)
+	NGraphicsTexture *GetTexture(const NTextureAttachmentType type)
 	{
-		return Textures[type];
+		if (type == NInvalidAttachment) return nullptr;
+		return TextureAttachments[type];
 	}
 }

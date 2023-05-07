@@ -1376,16 +1376,18 @@ const mu_float NTerrain::RequestHeight(mu_float x, mu_float y) const
 
 	const mu_uint32 xi = GetPositionFromFloat(x);
 	const mu_uint32 yi = GetPositionFromFloat(y);
-	if (xi >= TerrainSize || yi >= TerrainSize) return 0.0f;
+	if (xi >= TerrainSize || yi >= TerrainSize)
+		return 0.0f;
+
+	x *= TerrainScaleInv;
+	y *= TerrainScaleInv;
 
 	const mu_float xd = x - static_cast<mu_float>(xi);
 	const mu_float yd = y - static_cast<mu_float>(yi);
 
 	const mu_uint32 Index = GetTerrainIndex(xi, yi);
 	if ((TerrainAttributes[Index] & TerrainAttribute::Height) != 0)
-	{
 		return TerrainSpecialHeight;
-	}
 
 	const mu_uint32 index1 = GetTerrainMaskIndex(xi, yi);
 	const mu_uint32 index2 = GetTerrainMaskIndex(xi, yi + 1);
@@ -1427,6 +1429,9 @@ const glm::vec3 NTerrain::CalculatePrimaryLight(mu_float x, mu_float y) const
 		return glm::vec3(0.0f, 0.0f, 0.0f);
 	}
 
+	x *= TerrainScaleInv;
+	y *= TerrainScaleInv;
+
 	const mu_uint32 index1 = GetTerrainIndex(xi, yi);
 	const mu_uint32 index2 = GetTerrainIndex(xi + 1, yi);
 	const mu_uint32 index3 = GetTerrainIndex(xi + 1, yi + 1);
@@ -1453,6 +1458,9 @@ const glm::vec3 NTerrain::CalculateBackLight(mu_float x, mu_float y) const
 	{
 		return glm::vec3(0.0f, 0.0f, 0.0f);
 	}
+
+	x *= TerrainScaleInv;
+	y *= TerrainScaleInv;
 
 	const mu_uint32 index1 = GetTerrainIndex(xi, yi);
 	const mu_uint32 index2 = GetTerrainIndex(xi + 1, yi);

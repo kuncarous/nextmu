@@ -10,6 +10,7 @@
 #include "mu_threadsmanager.h"
 #include "mu_resourcesmanager.h"
 #include "mu_animationsmanager.h"
+#include "mu_charactersmanager.h"
 #include "res_items.h"
 #include "res_renders.h"
 
@@ -61,7 +62,9 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 		NEntity::NRenderState,
 		NEntity::NSkeleton,
 		NEntity::NPosition,
+		NEntity::NAnimationsMapping,
 		NEntity::NAnimation,
+		NEntity::NAction,
 		NEntity::NBoundingBoxes
 	>();
 
@@ -70,15 +73,19 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 			new (std::nothrow) NThreadExecutorIterator(
 				view.begin(), view.end(),
 				[&view, environment, characters, &renderSettings, updateTime](const entt::entity entity) -> void {
-					auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
+					auto [attachment, light, renderState, skeleton, position, animationsMapping, animation, action, boundingBox] = view.get<
 						NEntity::NAttachment,
 						NEntity::NLight,
 						NEntity::NRenderState,
 						NEntity::NSkeleton,
 						NEntity::NPosition,
+						NEntity::NAnimationsMapping,
 						NEntity::NAnimation,
+						NEntity::NAction,
 						NEntity::NBoundingBoxes
 					>(entity);
+
+					characters->SetCharacterAnimation(action.Type, position, animationsMapping, animation, attachment);
 
 					skeleton.Instance.SetParent(
 						position.Angle,
@@ -256,7 +263,14 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 				if (!renderState.Flags.Visible) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
 
-				MURenderState::AttachTexture(TextureAttachment::Skin, attachment.Skin);
+				const auto character = attachment.Character;
+				if (character != nullptr)
+				{
+					for (const auto &attachment : character->Attachments)
+					{
+						MURenderState::AttachTexture(attachment.Type, attachment.Texture);
+					}
+				}
 
 				const NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
@@ -267,10 +281,12 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 				};
 				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
 
+				mu_boolean hideBody[NEntity::MaxPartType] = {};
 				for (auto &[type, part] : attachment.Parts)
 				{
 					const auto model = part.Model;
 					auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
+					hideBody[static_cast<mu_uint32>(type)] = model->ShouldHideBody();
 
 					const NRenderConfig config = {
 						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
@@ -282,7 +298,39 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
 				}
 
-				MURenderState::DetachTexture(TextureAttachment::Skin);
+				if (character != nullptr)
+				{
+					for (mu_uint32 n = 0; n < NEntity::MaxPartType; ++n)
+					{
+						if (hideBody[n]) continue;
+						NEntity::PartType type = static_cast<NEntity::PartType>(n);
+						NModel *model = nullptr;
+						switch (type)
+						{
+						case NEntity::PartType::Helm: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Head)]; break;
+						case NEntity::PartType::Armor: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Chest)]; break;
+						case NEntity::PartType::Pants: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Lower)]; break;
+						case NEntity::PartType::Gloves: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Arms)]; break;
+						case NEntity::PartType::Boots: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Legs)]; break;
+						}
+						if (model == nullptr) continue;
+
+						auto &skeletonInstance = skeleton.Instance;
+						const NRenderConfig config = {
+							.BoneOffset = skeleton.SkeletonOffset,
+							.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+							.BodyScale = 1.0f,
+							.EnableLight = renderState.Flags.LightEnable,
+							.BodyLight = renderState.BodyLight,
+						};
+						MUModelRenderer::RenderBody(skeletonInstance, model, config);
+					}
+
+					for (const auto &attachment : character->Attachments)
+					{
+						MURenderState::DetachTexture(attachment.Type);
+					}
+				}
 			}
 
 #if NEXTMU_RENDER_BBOX
@@ -303,7 +351,14 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 				if (!renderState.ShadowVisible[renderSettings.CurrentShadowMap]) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
 
-				MURenderState::AttachTexture(TextureAttachment::Skin, attachment.Skin);
+				const auto character = attachment.Character;
+				if (character != nullptr)
+				{
+					for (const auto &attachment : character->Attachments)
+					{
+						MURenderState::AttachTexture(attachment.Type, attachment.Texture);
+					}
+				}
 
 				const NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
@@ -314,10 +369,12 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 				};
 				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
 
+				mu_boolean hideBody[NEntity::MaxPartType] = {};
 				for (auto &[type, part] : attachment.Parts)
 				{
 					const auto model = part.Model;
 					auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
+					hideBody[static_cast<mu_uint32>(type)] = model->ShouldHideBody();
 
 					const NRenderConfig config = {
 						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
@@ -329,7 +386,39 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
 				}
 
-				MURenderState::DetachTexture(TextureAttachment::Skin);
+				if (character != nullptr)
+				{
+					for (mu_uint32 n = 0; n < NEntity::MaxPartType; ++n)
+					{
+						if (hideBody[n]) continue;
+						NEntity::PartType type = static_cast<NEntity::PartType>(n);
+						NModel *model = nullptr;
+						switch (type)
+						{
+						case NEntity::PartType::Helm: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Head)]; break;
+						case NEntity::PartType::Armor: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Chest)]; break;
+						case NEntity::PartType::Pants: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Lower)]; break;
+						case NEntity::PartType::Gloves: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Arms)]; break;
+						case NEntity::PartType::Boots: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Legs)]; break;
+						}
+						if (model == nullptr) continue;
+
+						auto &skeletonInstance = skeleton.Instance;
+						const NRenderConfig config = {
+							.BoneOffset = skeleton.SkeletonOffset,
+							.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+							.BodyScale = 1.0f,
+							.EnableLight = renderState.Flags.LightEnable,
+							.BodyLight = renderState.BodyLight,
+						};
+						MUModelRenderer::RenderBody(skeletonInstance, model, config);
+					}
+
+					for (const auto &attachment : character->Attachments)
+					{
+						MURenderState::DetachTexture(attachment.Type);
+					}
+				}
 			}
 		}
 		break;
@@ -358,6 +447,21 @@ const entt::entity NCharacters::AddOrFind(
 	);
 
 	registry.emplace<NEntity::NRenderable>(entity);
+
+	NEntity::NCharacterInfo info;
+	info.Type = character.Type;
+	if (character.Type == CharacterType::Character)
+	{
+		info.CharacterType = character.CharacterType;
+	}
+	else
+	{
+		info.MonsterType = character.MonsterType;
+	}
+	registry.emplace<NEntity::NCharacterInfo>(
+		entity,
+		info
+	);
 
 	registry.emplace<NEntity::NLight>(
 		entity,
@@ -436,7 +540,7 @@ const entt::entity NCharacters::AddOrFind(
 	registry.emplace<NEntity::NAttachment>(
 		entity,
 		NEntity::NAttachment{
-			.Skin = MUResourcesManager::GetTexture("dk_skin"),
+			.Character = (character.Type == CharacterType::Character ? MUCharactersManager::GetConfiguration(character.CharacterType.Class, character.CharacterType.SubClass) : nullptr),
 			.Base = MUResourcesManager::GetModel("player_ani"),
 		}
 	);
@@ -513,7 +617,7 @@ void NCharacters::RemoveAttachmentPart(const entt::entity entity, const NEntity:
 
 void NCharacters::ConfigureAnimationsMapping(const entt::entity entity)
 {
-	auto [animationsMapping, attachment] = Registry.get<NEntity::NAnimationsMapping, NEntity::NAttachment>(entity);
+	auto [info, animationsMapping, attachment] = Registry.get<NEntity::NCharacterInfo, NEntity::NAnimationsMapping, NEntity::NAttachment>(entity);
 	if (animationsMapping.Root == nullptr) return;
 	
 	animationsMapping.Normal.clear();
@@ -521,6 +625,8 @@ void NCharacters::ConfigureAnimationsMapping(const entt::entity entity)
 
 	NAnimationInput input;
 	input.Swimming = Environment->GetTerrain()->IsSwimming();
+	input.CharacterType = info.CharacterType;
+	input.Sex = (attachment.Character != nullptr ? attachment.Character->Sex : NCharacterSex::Male);
 
 	for (mu_uint32 n = 0; n < AnimationTypeMax; ++n)
 	{
@@ -549,8 +655,12 @@ void NCharacters::ConfigureAnimationsMapping(const entt::entity entity)
 
 void NCharacters::SetCharacterAction(const entt::entity entity, NAnimationType type)
 {
-	auto [position, animationsMapping, animation, attachment] = Registry.get<NEntity::NPosition, NEntity::NAnimationsMapping, NEntity::NAnimation, NEntity::NAttachment>(entity);
+	auto &action = Registry.get<NEntity::NAction>(entity);
+	action.Type = type;
+}
 
+void NCharacters::SetCharacterAnimation(NAnimationType type, NEntity::NPosition& position, NEntity::NAnimationsMapping &animationsMapping, NEntity::NAnimation &animation, NEntity::NAttachment &attachment)
+{
 	const auto terrain = Environment->GetTerrain();
 	const auto attribute = terrain->GetAttribute(GetPositionFromFloat(position.Position.x), GetPositionFromFloat(position.Position.y));
 	const auto safezone = (attribute & TerrainAttribute::SafeZone) != 0;

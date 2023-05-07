@@ -4,6 +4,7 @@
 #include "shared_binaryreader.h"
 #include "mu_textures.h"
 #include "mu_resourcesmanager.h"
+#include "mu_textureattachments.h"
 #include "mu_graphics.h"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -189,6 +190,11 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 		return false;
 	}
 
+	if (document.contains("hideBody"))
+	{
+		HideBody = document["hideBody"].get<mu_boolean>();
+	}
+
 	if (document.contains("boneHead"))
 	{
 		BoneHead = document["boneHead"].get<mu_int16>();
@@ -332,6 +338,12 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 
 			auto &animation = Animations[index];
 			animation.Id = id;
+
+			if (janimation.contains("loop"))
+			{
+				animation.Loop = janimation["loop"].get<mu_boolean>();
+			}
+
 			if (janimation.contains("play_speed"))
 			{
 				animation.PlaySpeed = janimation["play_speed"].get<mu_float>();
@@ -693,22 +705,55 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 		const auto &mesh = Meshes[m];
 
 		mu_utf8string filename = mesh.Texture.Filename;
-		if (filename.starts_with("ski") || filename.starts_with("level"))
+		mu_utf8string filenameLC = filename;
+		std::transform(filenameLC.begin(), filenameLC.end(), filenameLC.begin(), mu_utf8tolower);
+		/* Hard-coded attachments, in future these will be removed and configured directly in the jsons of models */
+		if (filename.starts_with("ski") || filename.starts_with("level_"))
 		{
 			Textures[m] = {
-				.Type = TextureAttachment::Skin,
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("skin"),
+			};
+		}
+		else if (filenameLC.starts_with("hqskin3"))
+		{
+			Textures[m] = {
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("skin_hq_alt2"),
+			};
+		}
+		else if (filenameLC.starts_with("hqskin2"))
+		{
+			Textures[m] = {
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("skin_hq_alt"),
+			};
+		}
+		else if (filenameLC.starts_with("hqskin") || filenameLC.starts_with("hqlevel_"))
+		{
+			Textures[m] = {
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("skin_hq"),
 			};
 		}
 		else if (filename.starts_with("hid"))
 		{
 			Textures[m] = {
-				.Type = TextureAttachment::Hide,
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("hide"),
 			};
 		}
 		else if (filename.starts_with("hair"))
 		{
 			Textures[m] = {
-				.Type = TextureAttachment::Hair,
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("hair"),
+			};
+		}
+		else if (filenameLC.starts_with("hqhair_"))
+		{
+			Textures[m] = {
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("hair_hq"),
+			};
+		}
+		else if (filename.starts_with("face_"))
+		{
+			Textures[m] = {
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("face"),
 			};
 		}
 		else
@@ -752,7 +797,7 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 			}
 
 			Textures[m] = {
-				.Type = TextureAttachment::Normal,
+				.Type = MUTextureAttachments::GetAttachmentTypeFromString("normal"),
 				.Texture = std::move(texture),
 			};
 		}

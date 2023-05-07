@@ -33,6 +33,7 @@ public:
 	void ConfigureAnimationsMapping(const entt::entity entity);
 
 	void SetCharacterAction(const entt::entity entity, NAnimationType type);
+	void SetCharacterAnimation(NAnimationType type, NEntity::NPosition &position, NEntity::NAnimationsMapping &animationsMapping, NEntity::NAnimation &animation, NEntity::NAttachment &attachment);
 	const mu_float GetAnimationModifier(const entt::entity entity, NAnimationModifierType type) const;
 
 private:

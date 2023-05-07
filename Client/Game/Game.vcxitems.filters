@@ -214,6 +214,12 @@
     <Filter Include="Animations">
       <UniqueIdentifier>{abec6bdc-e543-46a8-aa63-cd61236ead53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Attachments">
+      <UniqueIdentifier>{21f5f82c-a57e-43bf-ada2-f26193dade1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Characters">
+      <UniqueIdentifier>{41bc3d93-6e76-453f-8b16-f8f22c2dea33}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -452,6 +458,12 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_animationsmanager.cpp">
       <Filter>Animations</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_textureattachments.cpp">
+      <Filter>Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_charactersmanager.cpp">
+      <Filter>Characters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -770,9 +782,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h">
       <Filter>States\Render</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate_enums.h">
-      <Filter>States\Render</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_state.h">
       <Filter>States\Global</Filter>
     </ClInclude>
@@ -790,6 +799,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_model_enums.h">
       <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_textureattachments.h">
+      <Filter>Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_textureattachments.h">
+      <Filter>Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_charactersmanager.h">
+      <Filter>Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_charactersmanager_structs.h">
+      <Filter>Characters</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

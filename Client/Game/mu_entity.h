@@ -7,11 +7,13 @@
 #include "res_render.h"
 #include "nav_path.h"
 #include "t_model_enums.h"
+#include "t_character_structs.h"
 
 class NModel;
 class NSkeletonInstance;
 struct NRender;
 struct NAnimationsRoot;
+struct NCharacterConfiguration;
 
 enum class NAnimationType : mu_uint16
 {
@@ -42,6 +44,18 @@ namespace NEntity
 
 	struct NVisible
 	{};
+
+	struct NCharacterInfo
+	{
+		NCharacterInfo() : Type(CharacterType::Character), MonsterType(0) {}
+
+		CharacterType Type;
+		union
+		{
+			mu_uint32 MonsterType;
+			NCharacterType CharacterType;
+		};
+	};
 
 	struct NTerrainLight
 	{
@@ -108,12 +122,6 @@ namespace NEntity
 		mu_float Scale = 1.0f;
 	};
 
-	struct NAction
-	{
-		mu_uint16 Group = NInvalidUInt16;
-		mu_uint16 Index = NInvalidUInt16;
-	};
-
 	struct NMovement
 	{
 		mu_boolean Moving = false;
@@ -158,10 +166,13 @@ namespace NEntity
 		std::map<NAnimationType, mu_uint32> Safezone;
 	};
 
+	struct NAction
+	{
+		NAnimationType Type = NAnimationType::Stop;
+	};
+
 	enum class PartType : mu_uint32
 	{
-		CompleteBody,
-		Head,
 		Helm,
 		Armor,
 		Pants,
@@ -201,7 +212,7 @@ namespace NEntity
 
 	struct NAttachment
 	{
-		NGraphicsTexture *Skin = nullptr;
+		const NCharacterConfiguration *Character;
 		NModel *Base;
 		std::map<PartType, NRenderPart> Parts;
 	};

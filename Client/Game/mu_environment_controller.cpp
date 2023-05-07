@@ -91,32 +91,36 @@ void NController::Update()
 		auto terrain = Environment->GetTerrain();
 		if (terrain->GetTriangleIntersection(nearPoint, farPoint, rayDirection, intersection) == true)
 		{
-			if (MUInput::IsMousePressing(MOUSE_BUTTON_LEFT) == true)
+			if (MUInput::IsShiftPressing() == false && MUInput::IsMousePressing(MOUSE_BUTTON_LEFT) == true)
 			{
 				static NNavPolys navPolys;
 
 				auto characters = Environment->GetCharacters();
 				auto &registry = characters->GetRegistry();
-				auto [position, movement] = registry.get<NEntity::NPosition, NEntity::NMovement>(Character);
+				auto [position, movement, action] = registry.get<NEntity::NPosition, NEntity::NMovement, NEntity::NAction>(Character);
 
 				movement.Moving = MUNavigation::FindShortestPath(terrain->GetNavMesh(), terrain->GetNavMeshQuery(0), position.Position, intersection, &navPolys, &movement.Path, 0.0f);
 				if (movement.Moving)
 				{
 					characters->SetCharacterAction(Character, NAnimationType::Walk);
 				}
-			}
+				else if (action.Type == NAnimationType::Walk)
+				{
+					characters->SetCharacterAction(Character, NAnimationType::Stop);
+				}
 
-			const auto updateCount = MUState::GetUpdateCount();
-			if (updateCount > 0)
-			{
-				Environment->GetParticles()->Create(
-					NParticleData{
-						.Layer = 0,
-						.Type = ParticleType::TrueFire_V5,
-						.Position = intersection + glm::vec3(0.0f, 0.0f, 30.0f),
-						.Scale = 2.8f
-					}
-				);
+				const auto updateCount = MUState::GetUpdateCount();
+				if (updateCount > 0)
+				{
+					Environment->GetParticles()->Create(
+						NParticleData{
+							.Layer = 0,
+							.Type = ParticleType::TrueFire_V5,
+							.Position = intersection + glm::vec3(0.0f, 0.0f, 30.0f),
+							.Scale = 2.8f
+						}
+					);
+				}
 			}
 		}
 	}

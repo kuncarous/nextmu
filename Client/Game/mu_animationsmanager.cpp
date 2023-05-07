@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "mu_animationsmanager.h"
+#include "mu_charactersmanager.h"
 
 namespace MUAnimationsManager
 {
@@ -25,15 +26,9 @@ namespace MUAnimationsManager
 		return static_cast<mu_uint32>(value.compare("male") == 0 ? NCharacterSex::Male : NCharacterSex::Female);
 	}
 
-	const mu_uint32 GetCharacterClassFromString(const mu_utf8string value)
+	const NCharacterType GetCharacterClassFromString(const mu_utf8string value)
 	{
-		if (value.compare("dark_wizard") == 0) return NCharacterClass::DarkWizard;
-		if (value.compare("dark_knight") == 0) return NCharacterClass::DarkKnight;
-		if (value.compare("elf") == 0) return NCharacterClass::Elf;
-		if (value.compare("magic_gladiator") == 0) return NCharacterClass::MagicGladiator;
-		if (value.compare("dark_lord") == 0) return NCharacterClass::DarkLord;
-		if (value.compare("summoner") == 0) return NCharacterClass::Summoner;
-		return NCharacterClass::MaxClasses;
+		return MUCharactersManager::GetTypeFromString(value);
 	}
 
 	void GetRouteValue(const NAnimationCondition condition, const nlohmann::json &jroute, NAnimationValue &value)
@@ -47,7 +42,8 @@ namespace MUAnimationsManager
 		case NAnimationCondition::Swimming:
 		case NAnimationCondition::Wings: value.SetBool(jvalue.get<mu_boolean>()); return;
 		case NAnimationCondition::Sex: value.SetUInteger(GetCharacterSexFromString(jvalue.get<mu_utf8string>())); return;
-		case NAnimationCondition::Class: value.SetUInteger(GetCharacterClassFromString(jvalue.get<mu_utf8string>())); return;
+		case NAnimationCondition::Class:
+		case NAnimationCondition::SubClass: value.SetCharacterType(GetCharacterClassFromString(jvalue.get<mu_utf8string>())); return;
 		}
 
 		if (jvalue.is_boolean()) value.SetBool(jvalue.get<mu_boolean>());
@@ -205,8 +201,21 @@ namespace MUAnimationsManager
 					for (auto riter = node.Routes.begin(); riter != node.Routes.end(); ++riter)
 					{
 						const auto &route = *riter;
-						if (route.Value.Type != NAnimationRouteType::UInteger && route.Value.Type != NAnimationRouteType::Always) continue;
-						if (route.Value.Type == NAnimationRouteType::UInteger && route.Value.UInteger != input.Class) continue;
+						if (route.Value.Type != NAnimationRouteType::CharacterType && route.Value.Type != NAnimationRouteType::Always) continue;
+						if (route.Value.Type == NAnimationRouteType::CharacterType && route.Value.CharacterType.Class != input.CharacterType.Class) continue;
+						if (route.Animation.empty() == false) animation = route.Animation;
+						GetAnimationFromNodes(input, route.Nodes, animation);
+						return;
+					}
+				}
+				break;
+			case NAnimationCondition::SubClass:
+				{
+					for (auto riter = node.Routes.begin(); riter != node.Routes.end(); ++riter)
+					{
+						const auto &route = *riter;
+						if (route.Value.Type != NAnimationRouteType::CharacterType && route.Value.Type != NAnimationRouteType::Always) continue;
+						if (route.Value.Type == NAnimationRouteType::CharacterType && route.Value.CharacterType.Class != input.CharacterType.Class && route.Value.CharacterType.SubClass != input.CharacterType.SubClass) continue;
 						if (route.Animation.empty() == false) animation = route.Animation;
 						GetAnimationFromNodes(input, route.Nodes, animation);
 						return;

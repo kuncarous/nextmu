@@ -5,7 +5,7 @@
 
 #include "mu_model_mesh.h"
 #include "mu_model_skeleton.h"
-#include "mu_renderstate_enums.h"
+#include "t_textureattachments.h"
 
 class NGraphicsTexture;
 
@@ -13,7 +13,7 @@ constexpr mu_uint32 MaxBones = 200;
 
 struct NModelTexture
 {
-	TextureAttachment::Type Type = TextureAttachment::Normal;
+	NTextureAttachmentType Type = NInvalidAttachment;
 	std::unique_ptr<NGraphicsTexture> Texture;
 };
 
@@ -45,6 +45,11 @@ public:
 	NEXTMU_INLINE const mu_boolean HasMeshes() const
 	{
 		return !Meshes.empty();
+	}
+
+	NEXTMU_INLINE const mu_boolean ShouldHideBody() const
+	{
+		return HideBody;
 	}
 
 	NEXTMU_INLINE const mu_boolean HasGlobalBBox() const
@@ -86,7 +91,7 @@ public:
 		return Animations[index].Modifier;
 	}
 
-protected:
+public:
 	friend class NSkeletonInstance;
 	friend class MUModelRenderer;
 
@@ -105,6 +110,7 @@ protected:
 	std::map<mu_utf8string, mu_uint32> AnimationsById;
 
 	mu_utf8string Id;
+	mu_boolean HideBody = true;
 	mu_int16 BoneHead = NInvalidInt16;
 	mu_float BodyHeight = 0.0f;
 };
