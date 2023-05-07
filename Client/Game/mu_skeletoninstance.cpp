@@ -12,6 +12,7 @@ const mu_boolean NSkeletonInstance::PlayAnimation(
 	const mu_float PlaySpeed
 )
 {
+	if (glm::abs(PlaySpeed) < glm::epsilon<mu_float>()) return true;
 	const mu_uint32 numAnimations = static_cast<mu_uint32>(Model->Animations.size());
 
 	// Return true to keep original logic
@@ -21,14 +22,15 @@ const mu_boolean NSkeletonInstance::PlayAnimation(
 	const auto &currentFramesCount = static_cast<mu_uint32>(currentAnimation.Keys.size());
 	if (currentFramesCount <= 1) return true;
 
-	const mu_uint32 lastFrame = static_cast<mu_uint32>(CurrentFrame);
+	const mu_float tmpFrame = CurrentFrame;
+	const mu_uint32 lastFrame = static_cast<mu_uint32>(glm::floor(CurrentFrame));
 	CurrentFrame += PlaySpeed;
-	const mu_uint32 newFrame = static_cast<mu_uint32>(CurrentFrame);
+	const mu_uint32 newFrame = static_cast<mu_uint32>(glm::floor(CurrentFrame));
 
-	if (lastFrame != newFrame)
+	if (CurrentAction == PriorAction || lastFrame != newFrame)
 	{
 		PriorAction = CurrentAction;
-		PriorFrame = static_cast<mu_float>(lastFrame);
+		PriorFrame = tmpFrame;
 	}
 
 	mu_boolean loop = true;
@@ -42,7 +44,7 @@ const mu_boolean NSkeletonInstance::PlayAnimation(
 	}
 	else
 	{
-		const auto maxFrames = currentFramesCount - static_cast<mu_uint32>(currentAnimation.LockPositions);
+		const auto maxFrames = currentFramesCount - static_cast<mu_uint32>(!!currentAnimation.LockPositions);
 		if (newFrame >= maxFrames)
 		{
 			CurrentFrame = glm::mod(CurrentFrame, static_cast<mu_float>(maxFrames));

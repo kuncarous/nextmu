@@ -57,14 +57,16 @@ void NCamera::Update()
 	case NCameraMode::Directional:
 		{
 			Angle[0] = glm::mod(Angle[0], glm::radians(360.0f));
-			Angle[1] = glm::clamp(Angle[1], glm::radians(0.0f), glm::radians(180.0f));
+			// We need to limit the angle to avoid direction become exactly |up*inf|, this way we avoid the nand view issue
+			Angle[1] = glm::clamp(Angle[1], glm::radians(2.0f), glm::radians(178.0f));
 		}
 		break;
 
 	case NCameraMode::Positional:
 		{
 			Angle[0] = glm::mod(Angle[0], glm::radians(360.0f) - glm::pi<float>() * 0.5f);
-			Angle[1] = glm::clamp(Angle[1], glm::radians(80.0f) - glm::pi<float>() * 0.5f, glm::radians(180.0f) - glm::pi<float>() * 0.5f);
+			// We need to limit the angle to avoid direction become exactly |up*inf|, this way we avoid the nand view issue
+			Angle[1] = glm::clamp(Angle[1], glm::radians(90.0f), glm::radians(160.0f));
 		}
 		break;
 	}
