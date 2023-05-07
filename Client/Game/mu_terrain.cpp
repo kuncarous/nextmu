@@ -801,7 +801,20 @@ const mu_boolean NTerrain::LoadMappings(
 	SDL_RWread(fp, buffer.get(), fileLength, 1);
 	SDL_RWclose(fp);
 
-	XorDecrypt(buffer.get(), buffer.get(), static_cast<mu_uint32>(fileLength));
+	static const mu_char header[] = { 'M', 'A', 'P', '\x1' };
+	if (mu_memcmp(buffer.get(), header, mu_countof(header)) == 0)
+	{
+		mu_int32 encryptedSize = static_cast<mu_int32>(fileLength - mu_countof(header));
+		mu_uint32 decryptedSize = CryptoModulusDecrypt(buffer.get() + mu_countof(header), encryptedSize, nullptr);
+		std::unique_ptr<mu_uint8[]> decryptedBuffer(new_nothrow mu_uint8[decryptedSize]);
+		CryptoModulusDecrypt(buffer.get() + mu_countof(header), encryptedSize, decryptedBuffer.get());
+		buffer.swap(decryptedBuffer);
+		fileLength = static_cast<mu_isize>(decryptedSize);
+	}
+	else
+	{
+		XorDecrypt(buffer.get(), buffer.get(), static_cast<mu_uint32>(fileLength));
+	}
 
 	NBinaryReader reader(buffer.get(), static_cast<mu_uint32>(fileLength));
 	mu_uint8 version = reader.Read<mu_uint8>();
@@ -879,6 +892,25 @@ const mu_boolean NTerrain::LoadAttributes(mu_utf8string path, std::vector<Dilige
 
 	mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
 
+	std::unique_ptr<mu_uint8[]> buffer(new_nothrow mu_uint8[fileLength]);
+	SDL_RWread(fp, buffer.get(), fileLength, 1);
+	SDL_RWclose(fp);
+
+	static const mu_char header[] = { 'A', 'T', 'T', '\x1' };
+	if (mu_memcmp(buffer.get(), header, mu_countof(header)) == 0)
+	{
+		mu_int32 encryptedSize = static_cast<mu_int32>(fileLength - mu_countof(header));
+		mu_uint32 decryptedSize = CryptoModulusDecrypt(buffer.get() + mu_countof(header), encryptedSize, nullptr);
+		std::unique_ptr<mu_uint8[]> decryptedBuffer(new_nothrow mu_uint8[decryptedSize]);
+		CryptoModulusDecrypt(buffer.get() + mu_countof(header), encryptedSize, decryptedBuffer.get());
+		buffer.swap(decryptedBuffer);
+		fileLength = static_cast<mu_isize>(decryptedSize);
+	}
+	else
+	{
+		XorDecrypt(buffer.get(), buffer.get(), static_cast<mu_uint32>(fileLength));
+	}
+
 	// Well, what a shitty if
 	if (
 		fileLength != static_cast<mu_int64>(AttributeV1Size) &&
@@ -890,12 +922,6 @@ const mu_boolean NTerrain::LoadAttributes(mu_utf8string path, std::vector<Dilige
 	}
 
 	const mu_boolean isExtended = fileLength == static_cast<mu_int64>(AttributeV2Size);
-
-	std::unique_ptr<mu_uint8[]> buffer(new_nothrow mu_uint8[fileLength]);
-	SDL_RWread(fp, buffer.get(), fileLength, 1);
-	SDL_RWclose(fp);
-
-	XorDecrypt(buffer.get(), buffer.get(), static_cast<mu_uint32>(fileLength));
 	BuxConvert(buffer.get(), static_cast<mu_uint32>(fileLength));
 
 	NBinaryReader reader(buffer.get(), static_cast<mu_uint32>(fileLength));

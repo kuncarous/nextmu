@@ -827,7 +827,8 @@ namespace UINoesis
 		{
 			Diligent::TextureDesc textureDesc;
 #if NEXTMU_COMPILE_DEBUG == 1
-			textureDesc.Name = (textureLabel + "(MSAA)").c_str();
+			auto textureLabelMSAA = textureLabel + "(MSAA)";
+			textureDesc.Name = textureLabelMSAA.c_str();
 #endif
 			textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
 			textureDesc.Width = width;
@@ -837,8 +838,8 @@ namespace UINoesis
 			textureDesc.BindFlags = Diligent::BIND_RENDER_TARGET | Diligent::BIND_SHADER_RESOURCE;
 			textureDesc.SampleCount = sampleCount;
 
-			device->CreateTexture(textureDesc, nullptr, &colorTexture);
-			if (colorTexture == nullptr)
+			device->CreateTexture(textureDesc, nullptr, &colorMSAATexture);
+			if (colorMSAATexture == nullptr)
 			{
 				return nullptr;
 			}
@@ -848,30 +849,33 @@ namespace UINoesis
 		{
 			Diligent::TextureDesc textureDesc;
 #if NEXTMU_COMPILE_DEBUG == 1
-			textureDesc.Name = (textureLabel + "(MSAA)").c_str();
+			auto textureLabelDS = textureLabel + "(DS)";
+			textureDesc.Name = textureLabelDS.c_str();
 #endif
 			textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
 			textureDesc.Width = width;
 			textureDesc.Height = height;
 			textureDesc.Format = Diligent::TEX_FORMAT_D24_UNORM_S8_UINT;
 			textureDesc.Usage = Diligent::USAGE_DEFAULT;
-			textureDesc.BindFlags = Diligent::BIND_RENDER_TARGET;
+			textureDesc.BindFlags = Diligent::BIND_DEPTH_STENCIL;
 			textureDesc.SampleCount = sampleCount;
 
-			device->CreateTexture(textureDesc, nullptr, &colorTexture);
-			if (colorTexture == nullptr)
+			device->CreateTexture(textureDesc, nullptr, &stencilTexture);
+			if (stencilTexture == nullptr)
 			{
 				return nullptr;
 			}
 		}
 
+		const auto deviceType = MUGraphics::GetDeviceType();
+		const mu_boolean isGL = deviceType == Diligent::RENDER_DEVICE_TYPE_GL || deviceType == Diligent::RENDER_DEVICE_TYPE_GLES;
 		return Noesis::MakePtr<DERenderTarget>(
 			Noesis::MakePtr<DETexture>(
 				width,
 				height,
 				1,
 				sampleCount,
-				true,
+				isGL,
 				true,
 				colorFormat,
 				colorTexture
@@ -1062,7 +1066,7 @@ namespace UINoesis
 		auto color = RenderTarget->IsMSAA() ? RenderTarget->ColorMSAATexture.RawPtr() : RenderTarget->ColorTexture->GetTexture();
 		auto depthStencil = RenderTarget->HasDepthStencil() ? RenderTarget->DepthStencilTexture.RawPtr() : nullptr;
 		Diligent::ITextureView *textureViews[1] = { color->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET) };
-		immediateContext->SetRenderTargets(1, textureViews, depthStencil->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET), Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+		immediateContext->SetRenderTargets(1, textureViews, depthStencil != nullptr ? depthStencil->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET) : nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
 		FixedPipelineState.RTVFormat = color->GetDesc().Format;
 		FixedPipelineState.DSVFormat = depthStencil != nullptr ? depthStencil->GetDesc().Format : Diligent::TEX_FORMAT_UNKNOWN;

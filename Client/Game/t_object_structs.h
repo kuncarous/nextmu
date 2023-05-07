@@ -25,6 +25,7 @@ namespace TObject
 		mu_boolean Renderable;
 		mu_boolean Interactive;
 		mu_boolean LightEnable;
+		mu_boolean ShouldFade;
 		LightSettings Light;
 		glm::vec3 Position;
 		glm::vec3 Angle;

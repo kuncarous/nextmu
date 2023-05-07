@@ -77,11 +77,13 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 		NEntity::NBoundingBoxes
 	>();
 
+	const auto distanceToCharacter = Environment->GetController()->GetDistanceToCharacter();
+	const auto nearPoint = Environment->GetController()->GetNearPoint();
 	MUThreadsManager::Run(
 		std::unique_ptr<NThreadExecutorBase>(
 			new (std::nothrow) NThreadExecutorIterator(
 				view.begin(), view.end(),
-				[&view, environment, &renderSettings, updateTime](const entt::entity entity) -> void {
+				[&view, environment, &renderSettings, updateTime, distanceToCharacter, nearPoint](const entt::entity entity) -> void {
 					auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
 						NEntity::NAttachment,
 						NEntity::NLight,
@@ -248,6 +250,30 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 						);
 						link.SkeletonOffset = partSkeleton.Upload();
 					}
+
+					if (renderState.Flags.ShouldFade && distanceToCharacter > 0.0f)
+					{
+						auto &bboxMin = boundingBox.Calculated.Min;
+						auto &bboxMax = boundingBox.Calculated.Max;
+						Diligent::BoundBox bbox;
+						bbox.Min = Diligent::float3(bboxMin.x, bboxMin.y, bboxMin.z);
+						bbox.Max = Diligent::float3(bboxMax.x, bboxMax.y, bboxMax.z);
+						const mu_float distance = Diligent::GetPointToBoxDistance(bbox, nearPoint);
+						if (distance <= distanceToCharacter)
+						{
+							if (renderState.Fading.Current > renderState.Fading.Target)
+							{
+								renderState.Fading.Current = glm::max(renderState.Fading.Current - 0.1f * updateTime, renderState.Fading.Target);
+							}
+						}
+						else
+						{
+							if (renderState.Fading.Current < 1.0f)
+							{
+								renderState.Fading.Current = glm::min(renderState.Fading.Current + 0.1f * updateTime, 1.0f);
+							}
+						}
+					}
 				}
 			)
 		)
@@ -268,13 +294,14 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 				if (!renderState.Flags.Visible) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
 
-				const NRenderConfig config = {
+				NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
 					.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
 					.BodyScale = 1.0f,
 					.EnableLight = renderState.Flags.LightEnable,
 					.BodyLight = renderState.BodyLight,
 				};
+				if (renderState.Flags.ShouldFade) config.BodyLight.a *= renderState.Fading.Current;
 				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
 
 				for (auto &[type, part] : attachment.Parts)
@@ -311,13 +338,14 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 				if (!renderState.ShadowVisible[renderSettings.CurrentShadowMap]) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
 
-				const NRenderConfig config = {
+				NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
 					.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
 					.BodyScale = 1.0f,
 					.EnableLight = renderState.Flags.LightEnable,
 					.BodyLight = renderState.BodyLight,
 				};
+				if (renderState.Flags.ShouldFade) config.BodyLight.a *= renderState.Fading.Current;
 				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
 
 				for (auto &[type, part] : attachment.Parts)
@@ -400,15 +428,17 @@ const entt::entity NObjects::Add(
 		lightSettings
 	);
 
-	registry.emplace<NEntity::NRenderState>(
-		entity,
-		NEntity::NRenderState{
+	NEntity::NRenderState renderState{
 			.Flags = NEntity::NRenderFlags{
 				.Visible = false,
 				.LightEnable = object.LightEnable,
+				.ShouldFade = object.ShouldFade,
 			},
 			.BodyLight = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
-		}
+	};
+	registry.emplace<NEntity::NRenderState>(
+		entity,
+		renderState
 	);
 
 	NSkeletonInstance instance;

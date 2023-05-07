@@ -91,8 +91,16 @@ namespace NEntity
 
 	struct NRenderFlags
 	{
-		mu_boolean Visible : 1 = false;
-		mu_boolean LightEnable : 1 = false; // true : calculate light using normals, false : apply body light directly
+		mu_boolean Visible = false;
+		mu_boolean LightEnable = false; // true : calculate light using normals, false : apply body light directly
+		mu_boolean ShouldFade = false;
+	};
+
+	struct NRenderFading
+	{
+		mu_boolean Enabled = false;
+		mu_float Current = 1.0f;
+		mu_float Target = 0.2f;
 	};
 
 	struct NRenderState
@@ -100,6 +108,7 @@ namespace NEntity
 		NRenderFlags Flags;
 		std::array<mu_boolean, MAX_CASCADES> ShadowVisible = {};
 		glm::vec4 BodyLight = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		NRenderFading Fading;
 	};
 
 	struct NSkeleton

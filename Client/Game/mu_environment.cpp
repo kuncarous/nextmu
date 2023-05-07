@@ -233,8 +233,9 @@ void NEnvironment::Update()
 		Terrain->Update();
 	}
 
-	Objects->PreRender(RenderSettings);
 	Characters->PreRender(RenderSettings);
+	Controller->PreRender();
+	Objects->PreRender(RenderSettings);
 
 	Particles->Update();
 	Particles->Propagate();

@@ -51,7 +51,7 @@ void NController::Update()
 	const mu_boolean isGL = (
 		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GL ||
 		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GLES
-		);
+	);
 	Diligent::float4x4 projection = Diligent::float4x4::Projection(
 		glm::radians(35.0f),
 		aspect,
@@ -67,6 +67,17 @@ void NController::Update()
 
 	MURenderState::SetViewTransform(view, GLMFromFloat4x4(projection), GLMFromFloat4x4(projection));
 	MURenderState::AttachCamera(camera);
+	
+	auto centerNearPoint = (
+		isGL
+		? glm::unProjectNO(glm::vec3(windowWidth * 0.5f, windowHeight * 0.5f, 0.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
+		: glm::unProjectZO(glm::vec3(windowWidth * 0.5f, windowHeight * 0.5f, 0.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
+	);
+
+	// Since we use a left handed view we need to change sign in Y coord
+	centerNearPoint.y *= -1.0f;
+
+	NearPoint = Diligent::float3(centerNearPoint.x, centerNearPoint.y, centerNearPoint.z);
 
 	if (Character != entt::null)
 	{
@@ -75,12 +86,12 @@ void NController::Update()
 			isGL
 			? glm::unProjectNO(glm::vec3(mousePosition.x, windowHeight - mousePosition.y, 0.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
 			: glm::unProjectZO(glm::vec3(mousePosition.x, windowHeight - mousePosition.y, 0.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
-			);
+		);
 		auto farPoint = (
 			isGL
 			? glm::unProjectNO(glm::vec3(mousePosition.x, windowHeight - mousePosition.y, 1.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
 			: glm::unProjectZO(glm::vec3(mousePosition.x, windowHeight - mousePosition.y, 1.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
-			);
+		);
 
 		// Since we use a left handed view we need to change sign in Y coord
 		nearPoint.y *= -1.0f;
@@ -123,6 +134,24 @@ void NController::Update()
 				}
 			}
 		}
+	}
+}
+
+void NController::PreRender()
+{
+	DistanceToCharacter = 0.0f;
+	if (Character != entt::null)
+	{
+		auto characters = Environment->GetCharacters();
+		auto &registry = characters->GetRegistry();
+		auto [position, boundingBoxes] = registry.get<NEntity::NPosition, NEntity::NBoundingBoxes>(Character);
+		auto &bboxMin = boundingBoxes.Calculated.Min;
+		auto &bboxMax = boundingBoxes.Calculated.Max;
+
+		Diligent::BoundBox bbox;
+		bbox.Min = Diligent::float3(bboxMin.x, bboxMin.y, bboxMin.z);
+		bbox.Max = Diligent::float3(bboxMax.x, bboxMax.y, bboxMax.z);
+		DistanceToCharacter = Diligent::GetPointToBoxDistance(bbox, NearPoint);
 	}
 }
 

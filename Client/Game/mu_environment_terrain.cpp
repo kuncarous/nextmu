@@ -265,6 +265,9 @@ const mu_boolean NEnvironment::LoadObjects(mu_utf8string filename, const std::ma
 		object.Renderable = jobject["renderable"].get<mu_boolean>();
 		object.Interactive = jobject["interactive"].get<mu_boolean>();
 		object.LightEnable = jobject["light_enable"].get<mu_boolean>();
+		object.ShouldFade = false;
+		if (jobject.contains("should_fade"))
+			object.ShouldFade = jobject["should_fade"].get<mu_boolean>();
 
 		const auto &jlight = jobject["light"];
 		object.Light.Mode = LightModeFromString(jlight["mode"].get<mu_utf8string>());
