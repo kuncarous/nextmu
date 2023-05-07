@@ -643,7 +643,7 @@ namespace UINoesis
 	void BGFXRenderDevice::BeginTile(Noesis::RenderTarget* surface, const Noesis::Tile& tile)
 	{
 		auto texture = surface->GetTexture();
-		Scissor = bgfx::setScissor(tile.x, tile.y, tile.width, tile.height);
+		Scissor = bgfx::setScissor(tile.x, texture->GetHeight() - tile.y - tile.height, tile.width, tile.height);
 	}
 
 	/// Completes rendering to the tile specified by BeginTile()

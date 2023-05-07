@@ -22,20 +22,20 @@ float SRGBToLinear(float v)
 
 // BGFX is missing Uint16 support...
 vec4 Uint16UnormStep = vec4(
-	1.0,
-	1.0,
-	1.0,
-	1.0
+	0.0,
+	0.0,
+	0.0,
+	0.0
 );
 vec4 Int16x4SNormToUnorm(vec4 value)
 {
-	vec4 select = vec4(lessThanEqual(value, Uint16UnormStep));
+	vec4 select = vec4(lessThan(value, Uint16UnormStep));
 	// Why I didn't use a single mix? because it is only supported in OpenGL 4.0+ and OpenGLES 3.0+ only
 	return vec4(
-		mix(value.x * 0.5, 0.5 + (1.0 - value.x) * 0.5, select.x),
-		mix(value.y * 0.5, 0.5 + (1.0 - value.y) * 0.5, select.y),
-		mix(value.z * 0.5, 0.5 + (1.0 - value.z) * 0.5, select.z),
-		mix(value.w * 0.5, 0.5 + (1.0 - value.w) * 0.5, select.w)
+		mix(value.x * 0.5, 0.5 + (1.0 + value.x) * 0.5, select.x),
+		mix(value.y * 0.5, 0.5 + (1.0 + value.y) * 0.5, select.y),
+		mix(value.z * 0.5, 0.5 + (1.0 + value.z) * 0.5, select.z),
+		mix(value.w * 0.5, 0.5 + (1.0 + value.w) * 0.5, select.w)
 	);
 }
 

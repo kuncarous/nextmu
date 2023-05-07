@@ -34325,6 +34325,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				7612.87548828125,
 				15495.802734375,
@@ -34364,6 +34365,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				7616.771484375,
 				15089.9228515625,
@@ -39512,6 +39514,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				8017.88330078125,
 				15087.5166015625,
@@ -39551,6 +39554,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				8015.12158203125,
 				15484.90234375,
@@ -54566,6 +54570,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				12314.4248046875,
 				12312.9951171875,
@@ -54605,6 +54610,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				12719.33984375,
 				12312.9951171875,
@@ -54644,6 +54650,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				12714.40234375,
 				12719.556640625,
@@ -55268,6 +55275,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				12312.8232421875,
 				12714.2314453125,
@@ -57296,6 +57304,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				12311.1328125,
 				13116.2421875,
@@ -57335,6 +57344,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				12335.8232421875,
 				13512.9267578125,
@@ -57803,6 +57813,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				12716.19140625,
 				13120.7802734375,
@@ -57842,6 +57853,7 @@
 			"renderable": true,
 			"interactive": false,
 			"light_enable": true,
+			"should_fade": true,
 			"position": [
 				12718.4775390625,
 				13520.6220703125,
