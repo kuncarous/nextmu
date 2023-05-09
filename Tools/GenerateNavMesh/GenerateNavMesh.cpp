@@ -7,6 +7,7 @@
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
+#include "mu_crypt.h"
 
 #include <iostream>
 #include <nlohmann/fifo_map.hpp>
@@ -33,26 +34,6 @@ namespace TerrainAttribute
 	};
 };
 
-NEXTMU_INLINE void XorDecrypt(mu_uint8 *dest, const mu_uint8 *src, mu_uint32 size)
-{
-	static const std::array<mu_uint8, 16> XorKey = { { 0xD1, 0x73, 0x52, 0xF6, 0xD2, 0x9A, 0xCB, 0x27, 0x3E, 0xAF, 0x59, 0x31, 0x37, 0xB3, 0xE7, 0xA2 } };
-	mu_uint16 key = 0x5E;
-	for (mu_uint32 index = 0; index < size; ++index, ++src, ++dest)
-	{
-		const mu_uint8 s = *src;
-		*dest = (s ^ XorKey[index % XorKey.size()]) - static_cast<mu_uint8>(key);
-		key = static_cast<mu_uint8>(static_cast<mu_uint32>(s) + 0x3D);
-	}
-}
-
-NEXTMU_INLINE void BuxConvert(mu_uint8 *buffer, mu_uint32 size)
-{
-	static const std::array<mu_uint8, 3> BuxCode = { 0xfc,0xcf,0xab };
-	for (mu_uint32 index = 0; index < size; index++) {
-		buffer[index] ^= BuxCode[index % static_cast<mu_uint32>(BuxCode.size())];
-	}
-}
-
 const mu_boolean LoadTerrainAttributes(mu_utf8string filename, std::unique_ptr<TerrainAttribute::Type[]> &terrainAttributes)
 {
 	NormalizePath(filename);
@@ -71,6 +52,24 @@ const mu_boolean LoadTerrainAttributes(mu_utf8string filename, std::unique_ptr<T
 	}
 
 	mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
+	std::unique_ptr<mu_uint8[]> buffer(new_nothrow mu_uint8[fileLength]);
+	SDL_RWread(fp, buffer.get(), fileLength, 1);
+	SDL_RWclose(fp);
+
+	static const mu_char header[] = { 'A', 'T', 'T', '\x1' };
+	if (mu_memcmp(buffer.get(), header, mu_countof(header)) == 0)
+	{
+		mu_int32 encryptedSize = static_cast<mu_int32>(fileLength - mu_countof(header));
+		mu_uint32 decryptedSize = CryptoModulusDecrypt(buffer.get() + mu_countof(header), encryptedSize, nullptr);
+		std::unique_ptr<mu_uint8[]> decryptedBuffer(new_nothrow mu_uint8[decryptedSize]);
+		CryptoModulusDecrypt(buffer.get() + mu_countof(header), encryptedSize, decryptedBuffer.get());
+		buffer.swap(decryptedBuffer);
+		fileLength = static_cast<mu_isize>(decryptedSize);
+	}
+	else
+	{
+		XorDecrypt(buffer.get(), buffer.get(), static_cast<mu_uint32>(fileLength));
+	}
 
 	// Well, what a shitty if
 	if (
@@ -78,17 +77,10 @@ const mu_boolean LoadTerrainAttributes(mu_utf8string filename, std::unique_ptr<T
 		fileLength != static_cast<mu_int64>(AttributeV2Size)
 		)
 	{
-		mu_error("invalid attributes size ({})", filename);
 		return false;
 	}
 
 	const mu_boolean isExtended = fileLength == static_cast<mu_int64>(AttributeV2Size);
-
-	std::unique_ptr<mu_uint8[]> buffer(new_nothrow mu_uint8[fileLength]);
-	SDL_RWread(fp, buffer.get(), fileLength, 1);
-	SDL_RWclose(fp);
-
-	XorDecrypt(buffer.get(), buffer.get(), static_cast<mu_uint32>(fileLength));
 	BuxConvert(buffer.get(), static_cast<mu_uint32>(fileLength));
 
 	NBinaryReader reader(buffer.get(), static_cast<mu_uint32>(fileLength));

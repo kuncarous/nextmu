@@ -153,6 +153,7 @@
     <ClCompile Include="Detour\Source\DetourNavMeshQuery.cpp" />
     <ClCompile Include="Detour\Source\DetourNode.cpp" />
     <ClCompile Include="GenerateNavMesh.cpp" />
+    <ClCompile Include="mu_crypt.cpp" />
     <ClCompile Include="Recast\Source\Recast.cpp" />
     <ClCompile Include="Recast\Source\RecastAlloc.cpp" />
     <ClCompile Include="Recast\Source\RecastArea.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="Detour\Include\DetourNavMeshQuery.h" />
     <ClInclude Include="Detour\Include\DetourNode.h" />
     <ClInclude Include="Detour\Include\DetourStatus.h" />
+    <ClInclude Include="mu_crypt.h" />
     <ClInclude Include="Recast\Include\Recast.h" />
     <ClInclude Include="Recast\Include\RecastAlloc.h" />
     <ClInclude Include="Recast\Include\RecastAssert.h" />

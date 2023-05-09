@@ -1,16 +1,14 @@
 #include "stdafx.h"
 #include "mu_crypt.h"
 
-#include <tea.h>
-#include <3way.h>
-#include <cast.h>
-#include <rc5.h>
-#include <rc6.h>
-#include <mars.h>
-#include <idea.h>
-#include <gost.h>
-
-#pragma comment(lib, "CryptoPP.lib")
+#include <cryptopp/tea.h>
+#include <cryptopp/3way.h>
+#include <cryptopp/cast.h>
+#include <cryptopp/rc5.h>
+#include <cryptopp/rc6.h>
+#include <cryptopp/mars.h>
+#include <cryptopp/idea.h>
+#include <cryptopp/gost.h>
 
 class MCryptoCipherBase
 {

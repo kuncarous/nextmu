@@ -22,6 +22,9 @@
     <Filter Include="Recast">
       <UniqueIdentifier>{54d62727-594b-4250-876e-6fca6d745f33}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{27bf8999-3ee6-4eb9-846e-e5d18fd9a419}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GenerateNavMesh.cpp">
@@ -84,6 +87,9 @@
     <ClCompile Include="Recast\Source\RecastRegion.cpp">
       <Filter>Recast</Filter>
     </ClCompile>
+    <ClCompile Include="mu_crypt.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -124,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="Recast\Include\RecastAssert.h">
       <Filter>Recast</Filter>
+    </ClInclude>
+    <ClInclude Include="mu_crypt.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
