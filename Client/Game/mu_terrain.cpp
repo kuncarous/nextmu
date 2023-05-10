@@ -140,7 +140,7 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligen
 
 	/*
 		OZB file won't be loaded by free image, the image result will be moved by a few pixels,
-		instead we load it directly form the buffer.
+		instead we load it directly from the buffer.
 	*/
 	if (ext != "ozb")
 	{
@@ -150,7 +150,7 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligen
 			return false;
 		}
 
-		FIBITMAP *bitmap = FreeImage_LoadFromMemory(FREE_IMAGE_FORMAT::FIF_BMP, memory, PNG_IGNOREGAMMA);
+		FIBITMAP *bitmap = FreeImage_LoadFromMemory(FREE_IMAGE_FORMAT::FIF_UNKNOWN, memory, PNG_IGNOREGAMMA);
 		buffer.reset();
 		FreeImage_CloseMemory(memory);
 
@@ -345,10 +345,23 @@ const mu_boolean NTerrain::LoadLightmap(mu_utf8string path, std::vector<Diligent
 
 	mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
 
+	FREE_IMAGE_FORMAT imageFormat;
 	if (ext == "ozj")
 	{
+		imageFormat = FREE_IMAGE_FORMAT::FIF_JPEG;
 		fileLength -= 24;
 		SDL_RWseek(fp, 24, RW_SEEK_CUR);
+	}
+	else if (ext == "ozb")
+	{
+		imageFormat = FREE_IMAGE_FORMAT::FIF_BMP;
+		fileLength -= 4;
+		SDL_RWseek(fp, 4, RW_SEEK_CUR);
+	}
+	else
+	{
+		mu_error("invalid image format ({})", path);
+		return false;
 	}
 
 	std::unique_ptr<mu_uint8[]> buffer(new_nothrow mu_uint8[fileLength]);
@@ -361,7 +374,7 @@ const mu_boolean NTerrain::LoadLightmap(mu_utf8string path, std::vector<Diligent
 		return false;
 	}
 
-	FIBITMAP *bitmap = FreeImage_LoadFromMemory(FREE_IMAGE_FORMAT::FIF_JPEG, memory, PNG_IGNOREGAMMA);
+	FIBITMAP *bitmap = FreeImage_LoadFromMemory(imageFormat, memory, PNG_IGNOREGAMMA);
 	buffer.reset();
 	FreeImage_CloseMemory(memory);
 
