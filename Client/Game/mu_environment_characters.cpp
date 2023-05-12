@@ -89,7 +89,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 
 					skeleton.Instance.SetParent(
 						position.Angle,
-						position.Position,
+						glm::vec3(0.0f, 0.0f, 0.0f),
 						position.Scale
 					);
 
@@ -251,14 +251,14 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 
 void NCharacters::Render(const NRenderSettings &renderSettings)
 {
-	const auto view = Registry.view<NEntity::NRenderable, NEntity::NAttachment, NEntity::NRenderState, NEntity::NSkeleton>();
+	const auto view = Registry.view<NEntity::NRenderable, NEntity::NPosition, NEntity::NAttachment, NEntity::NRenderState, NEntity::NSkeleton>();
 
 	const auto renderMode = MURenderState::GetRenderMode();
 	switch (renderMode)
 	{
 	case NRenderMode::Normal:
 		{
-			for (auto [entity, attachment, renderState, skeleton] : view.each())
+			for (auto [entity, position, attachment, renderState, skeleton] : view.each())
 			{
 				if (!renderState.Flags.Visible) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
@@ -274,7 +274,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 
 				const NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
-					.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+					.BodyOrigin = position.Position,
 					.BodyScale = 1.0f,
 					.EnableLight = renderState.Flags.LightEnable,
 					.BodyLight = renderState.BodyLight,
@@ -290,7 +290,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 
 					const NRenderConfig config = {
 						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
-						.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+						.BodyOrigin = position.Position,
 						.BodyScale = 1.0f,
 						.EnableLight = renderState.Flags.LightEnable,
 						.BodyLight = renderState.BodyLight,
@@ -318,7 +318,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 						auto &skeletonInstance = skeleton.Instance;
 						const NRenderConfig config = {
 							.BoneOffset = skeleton.SkeletonOffset,
-							.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+							.BodyOrigin = position.Position,
 							.BodyScale = 1.0f,
 							.EnableLight = renderState.Flags.LightEnable,
 							.BodyLight = renderState.BodyLight,
@@ -346,7 +346,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 
 	case NRenderMode::ShadowMap:
 		{
-			for (auto [entity, attachment, renderState, skeleton] : view.each())
+			for (auto [entity, position, attachment, renderState, skeleton] : view.each())
 			{
 				if (!renderState.ShadowVisible[renderSettings.CurrentShadowMap]) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
@@ -362,7 +362,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 
 				const NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
-					.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+					.BodyOrigin = position.Position,
 					.BodyScale = 1.0f,
 					.EnableLight = renderState.Flags.LightEnable,
 					.BodyLight = renderState.BodyLight,
@@ -378,7 +378,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 
 					const NRenderConfig config = {
 						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
-						.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+						.BodyOrigin = position.Position,
 						.BodyScale = 1.0f,
 						.EnableLight = renderState.Flags.LightEnable,
 						.BodyLight = renderState.BodyLight,
@@ -406,7 +406,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 						auto &skeletonInstance = skeleton.Instance;
 						const NRenderConfig config = {
 							.BoneOffset = skeleton.SkeletonOffset,
-							.BodyOrigin = glm::vec3(0.0f, 0.0f, 0.0f),
+							.BodyOrigin = position.Position,
 							.BodyScale = 1.0f,
 							.EnableLight = renderState.Flags.LightEnable,
 							.BodyLight = renderState.BodyLight,

@@ -8,7 +8,7 @@
 
 namespace MURenderState
 {
-	glm::mat4 FrustomProjection, Projection, View, ViewProjection;
+	glm::mat4 FrustomProjection, Projection, View, ViewProjection, ViewProjectionTransposed;
 	NCamera *Camera = nullptr;
 	NEnvironment *Environment = nullptr;
 	std::vector<NGraphicsTexture *> TextureAttachments;
@@ -145,16 +145,23 @@ namespace MURenderState
 		Projection = projection;
 		View = view;
 		ViewProjection = Projection * View;
+		ViewProjectionTransposed = glm::transpose(ViewProjection);
 	}
 
 	void SetViewProjection(glm::mat4 viewProj)
 	{
 		ViewProjection = viewProj;
+		ViewProjectionTransposed = glm::transpose(ViewProjection);
 	}
 
 	glm::mat4 &GetViewProjection()
 	{
 		return ViewProjection;
+	}
+
+	glm::mat4 &GetViewProjectionTransposed()
+	{
+		return ViewProjectionTransposed;
 	}
 
 	glm::mat4 &GetFrustumProjection()

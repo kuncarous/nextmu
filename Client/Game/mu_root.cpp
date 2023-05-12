@@ -37,7 +37,7 @@ constexpr mu_double GameCycleTime = 1000.0 / 25.0; // 25 FPS
 
 struct DemoSettings
 {
-	mu_utf8string Map = "data/worlds/lorencia";
+	mu_utf8string Map = "data/worlds/areniltemple";
 	mu_float X = 160.0f;
 	mu_float Y = 116.5f;
 	mu_float Z = 1282.0f;

@@ -847,6 +847,7 @@ const mu_boolean NModel::GenerateBuffers()
 
 				dest->Bone[0] = static_cast<mu_uint8>(vertex.Node);
 				dest->Bone[1] = static_cast<mu_uint8>(normal.Node);
+				dest->Vertex = static_cast<mu_uint16>(triangle.Vertices[n]);
 
 				++dest;
 			}

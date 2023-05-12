@@ -4,6 +4,7 @@
 #include "mu_skeletoninstance.h"
 #include "mu_config.h"
 #include "mu_graphics.h"
+#include "mu_state.h"
 #include "mu_renderstate.h"
 #include "mu_resourcesmanager.h"
 #include "mu_resizablequeue.h"
@@ -11,16 +12,23 @@
 #include <MapHelper.hpp>
 
 #pragma pack(4)
+struct NModelViewSettings
+{
+	glm::mat4 Model;
+	glm::mat4 ViewProj;
+};
+
 struct NModelSettings
 {
 	glm::vec4 LightPosition;
 	glm::vec4 BodyLight;
+	glm::vec4 BodyOrigin;
 	mu_float BoneOffset;
 	mu_float NormalScale;
 	mu_float EnableLight;
 	mu_float AlphaTest;
 	mu_float PremultiplyAlpha;
-	mu_float Dummy1;
+	mu_float WorldTime;
 	mu_float Dummy2;
 	mu_float Dummy3;
 };
@@ -28,7 +36,7 @@ struct NModelSettings
 
 Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelViewUniform;
 Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelSettingsUniform;
-NResizableQueue<glm::mat4> ModelViewBuffer;
+NResizableQueue<NModelViewSettings> ModelViewBuffer;
 NResizableQueue<NModelSettings> ModelSettingsBuffer;
 
 const mu_boolean MUModelRenderer::Initialize()
@@ -41,7 +49,7 @@ const mu_boolean MUModelRenderer::Initialize()
 		bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
 		bufferDesc.BindFlags = Diligent::BIND_UNIFORM_BUFFER;
 		bufferDesc.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
-		bufferDesc.Size = sizeof(glm::mat4);
+		bufferDesc.Size = sizeof(NModelViewSettings);
 
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
 		device->CreateBuffer(bufferDesc, nullptr, &buffer);
@@ -90,7 +98,7 @@ void MUModelRenderer::RenderMesh(
 	NModel *model,
 	const mu_uint32 meshIndex,
 	const NRenderConfig &config,
-	const glm::mat4 modelViewProj,
+	const glm::mat4 modelMatrix,
 	const NMeshRenderSettings *settings
 )
 {
@@ -187,13 +195,14 @@ void MUModelRenderer::RenderMesh(
 	// Update Model View
 	{
 		auto uniform = ModelViewBuffer.Allocate();
-		*uniform = glm::transpose(modelViewProj);
+		uniform->Model = modelMatrix;
+		uniform->ViewProj = MURenderState::GetViewProjectionTransposed();
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
 				.ShouldReleaseMemory = false,
 				.Buffer = ModelViewUniform,
 				.Data = uniform,
-				.Size = sizeof(Diligent::float4x4),
+				.Size = sizeof(NModelViewSettings),
 				.MapType = Diligent::MAP_WRITE,
 				.MapFlags = Diligent::MAP_FLAG_DISCARD,
 			}
@@ -205,6 +214,7 @@ void MUModelRenderer::RenderMesh(
 		auto uniform = ModelSettingsBuffer.Allocate();
 		uniform->LightPosition = terrain->GetLightPosition();
 		uniform->BodyLight = config.BodyLight;
+		uniform->BodyOrigin = glm::vec4(config.BodyOrigin, 0.0f);
 		uniform->BoneOffset = static_cast<mu_float>(config.BoneOffset);
 		uniform->NormalScale = 0.0f;
 		uniform->EnableLight = static_cast<mu_float>(config.EnableLight);
@@ -222,6 +232,7 @@ void MUModelRenderer::RenderMesh(
 				)
 			)
 		);
+		uniform->WorldTime = MUState::GetWorldTime();
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
 				.ShouldReleaseMemory = false,
@@ -274,16 +285,16 @@ void MUModelRenderer::RenderBody(
 	auto terrain = MURenderState::GetTerrain();
 	if (terrain == nullptr) return;
 
-	glm::mat4 modelViewProj = MURenderState::GetViewProjection() * glm::translate(
+	glm::mat4 modelMatrix = glm::transpose(glm::translate(
 		glm::scale(glm::mat4(1.0f), glm::vec3(config.BodyScale)),
 		config.BodyOrigin
-	);
+	));
 
 	if (model->VirtualMeshes.size() > 0)
 	{
 		for (const auto &virtualMesh : model->VirtualMeshes)
 		{
-			RenderMesh(model, virtualMesh.Mesh, config, modelViewProj, &virtualMesh.Settings);
+			RenderMesh(model, virtualMesh.Mesh, config, modelMatrix, &virtualMesh.Settings);
 		}
 	}
 	else
@@ -291,7 +302,7 @@ void MUModelRenderer::RenderBody(
 		const mu_uint32 numMeshes = static_cast<mu_uint32>(model->Meshes.size());
 		for (mu_uint32 m = 0; m < numMeshes; ++m)
 		{
-			RenderMesh(model, m, config, modelViewProj);
+			RenderMesh(model, m, config, modelMatrix);
 		}
 	}
 }

@@ -176,7 +176,6 @@ private:
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> IndexBuffer;
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> SettingsUniform;
 
-	std::unique_ptr<mu_uint8[]> LightmapMemory;
 	std::unique_ptr<mu_uint8[]> NormalMemory;
 
 	mu_float HeightMultiplier = 1.0f;
@@ -192,8 +191,8 @@ private:
 	NRunMode RunMode = NRunMode::Normal;
 
 	std::unique_ptr<mu_float[]> TerrainHeight;
-	std::unique_ptr<glm::vec3[]> TerrainLight;
-	std::unique_ptr<glm::vec3[]> TerrainPrimaryLight;
+	std::unique_ptr<glm::vec4[]> TerrainLight;
+	std::unique_ptr<glm::vec4[]> TerrainPrimaryLight;
 	std::unique_ptr<glm::vec3[]> TerrainNormal;
 	std::unique_ptr<TerrainAttribute::Type[]> TerrainAttributes;
 

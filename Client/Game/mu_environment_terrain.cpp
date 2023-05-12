@@ -89,13 +89,6 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 		return false;
 	}
 
-	const auto lightmap = document["lightmap"].get<mu_utf8string>();
-	if (terrain->LoadLightmap(path + lightmap, barriers) == false)
-	{
-		mu_error("failed to load lightmap ({})", path + lightmap);
-		return false;
-	}
-
 	const auto light = document["light"];
 	if (light.is_array() == false || light.size() != 3)
 	{
@@ -106,6 +99,13 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 	for (mu_uint32 n = 0; n < 3; ++n)
 	{
 		terrain->Light[n] = light[n].get<mu_float>();
+	}
+
+	const auto lightmap = document["lightmap"].get<mu_utf8string>();
+	if (terrain->LoadLightmap(path + lightmap, barriers) == false)
+	{
+		mu_error("failed to load lightmap ({})", path + lightmap);
+		return false;
 	}
 
 	if (document.contains("light_position"))

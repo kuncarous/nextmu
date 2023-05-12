@@ -32,6 +32,7 @@ namespace MURenderState
 	void SetViewTransform(glm::mat4 view, glm::mat4 projection, glm::mat4 frustumProjection);
 	void SetViewProjection(glm::mat4 viewProj);
 	glm::mat4 &GetViewProjection();
+	glm::mat4 &GetViewProjectionTransposed();
 	glm::mat4 &GetFrustumProjection();
 	glm::mat4 &GetProjection();
 	glm::mat4 &GetView();

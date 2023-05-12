@@ -80,6 +80,17 @@ void CreateInputLayouts()
 				sizeof(NMeshVertex)
 			)
 		);
+		inputLayout.Add(
+			Diligent::LayoutElement(
+				4,
+				0,
+				1,
+				Diligent::VALUE_TYPE::VT_UINT16,
+				false,
+				offsetof(NMeshVertex, Vertex),
+				sizeof(NMeshVertex)
+			)
+		);
 
 		InputLayouts.insert(std::make_pair("mesh", inputLayout));
 	}

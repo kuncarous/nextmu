@@ -15,6 +15,7 @@ struct NMeshVertex
 	glm::vec2 TexCoords;
 #endif
 	mu_uint8 Bone[2];
+	mu_uint16 Vertex;
 };
 #pragma pack()
 

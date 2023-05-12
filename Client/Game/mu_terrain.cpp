@@ -112,6 +112,11 @@ void NTerrain::Destroy()
 	RELEASE_HANDLER(SettingsUniform);
 }
 
+NEXTMU_INLINE mu_uint32 MakeHeightFromRGB(mu_uint8 r, mu_uint8 g, mu_uint8 b)
+{
+	return static_cast<mu_uint32>(r) | (static_cast<mu_uint32>(g) << 8) | (static_cast<mu_uint32>(b) << 16);
+}
+
 const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligent::StateTransitionDesc> &barriers)
 {
 	NormalizePath(path);
@@ -126,31 +131,43 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligen
 		return false;
 	}
 
-	mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
 
+	mu_isize fileLength = static_cast<mu_isize>(SDL_RWsize(fp));
+	FREE_IMAGE_FORMAT imageFormat = FREE_IMAGE_FORMAT::FIF_UNKNOWN;
 	if (ext == "ozb")
 	{
-		fileLength -= 4 + 1080;
-		SDL_RWseek(fp, 4 + 1080, RW_SEEK_CUR);
+		fileLength -= 4 ;
+		SDL_RWseek(fp, 4, RW_SEEK_CUR);
+		imageFormat = FREE_IMAGE_FORMAT::FIF_BMP;
 	}
 
 	std::unique_ptr<mu_uint8[]> buffer(new_nothrow mu_uint8[fileLength]);
 	SDL_RWread(fp, buffer.get(), fileLength, 1);
 	SDL_RWclose(fp);
 
-	/*
-		OZB file won't be loaded by free image, the image result will be moved by a few pixels,
-		instead we load it directly from the buffer.
-	*/
-	if (ext != "ozb")
+	static mu_char TerrainV1Header[] = { 'B', 'M', '8' };
+	constexpr mu_isize TerrainV1Size = 66616;
+	if (fileLength == TerrainV1Size && mu_memcmp(buffer.get(), TerrainV1Header, mu_countof(TerrainV1Header)) == 0)
 	{
+		if (!TerrainHeight) TerrainHeight.reset(new_nothrow mu_float[TerrainSize * TerrainSize]);
+		for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
+		{
+			TerrainHeight[index] = static_cast<mu_float>(buffer[1080 + index]) * HeightMultiplier;
+		}
+	}
+	else
+	{
+		/*
+			OZB file won't be loaded by free image, the image result will be moved by a few pixels,
+			instead we load it directly from the buffer.
+		*/
 		FIMEMORY *memory = FreeImage_OpenMemory(buffer.get(), static_cast<DWORD>(fileLength));
 		if (memory == nullptr)
 		{
 			return false;
 		}
 
-		FIBITMAP *bitmap = FreeImage_LoadFromMemory(FREE_IMAGE_FORMAT::FIF_UNKNOWN, memory, PNG_IGNOREGAMMA);
+		FIBITMAP *bitmap = FreeImage_LoadFromMemory(imageFormat, memory);
 		buffer.reset();
 		FreeImage_CloseMemory(memory);
 
@@ -177,38 +194,49 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligen
 		}
 
 		const mu_uint32 pitch = FreeImage_GetPitch(bitmap);
-		if (pitch != TerrainSize) // Pitch should be same as TerrainSize since it is a grayscale texture
-		{
-			FreeImage_Unload(bitmap);
-			return false;
-		}
-
 		const mu_uint32 bpp = FreeImage_GetBPP(bitmap);
-		if (bpp != 8) // Only 8 bits per pixel is supported
+		switch (bpp)
 		{
-			FreeImage_Unload(bitmap);
+		case 8:
+			{
+				const mu_uint8 *bitmapBuffer = FreeImage_GetBits(bitmap);
+				if (!TerrainHeight) TerrainHeight.reset(new_nothrow mu_float[TerrainSize * TerrainSize]);
+				for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
+				{
+					TerrainHeight[index] = static_cast<mu_float>(bitmapBuffer[index]) * HeightMultiplier;
+				}
+			}
+			break;
+
+		case 24:
+			{
+				const mu_uint8 *bitmapBuffer = FreeImage_GetBits(bitmap);
+				if (!TerrainHeight) TerrainHeight.reset(new_nothrow mu_float[TerrainSize * TerrainSize]);
+				for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
+				{
+					mu_uint32 rgbIndex = index * 3;
+					mu_uint32 height = MakeHeightFromRGB(bitmapBuffer[rgbIndex + 2], bitmapBuffer[rgbIndex + 1], bitmapBuffer[rgbIndex + 0]);
+					TerrainHeight[index] = static_cast<mu_float>(height) - 500.0f;
+				}
+			}
+			break;
+
+		default:
+			{
+				FreeImage_Unload(bitmap);
+			}
 			return false;
 		}
-
-		const mu_uint8 *bitmapBuffer = FreeImage_GetBits(bitmap);
-		buffer.reset(new_nothrow mu_uint8[TerrainSize * TerrainSize]);
-		mu_memcpy(buffer.get(), bitmapBuffer, TerrainSize * TerrainSize);
 
 		FreeImage_Unload(bitmap);
-	}
-
-	if (!TerrainHeight) TerrainHeight.reset(new_nothrow mu_float[TerrainSize * TerrainSize]);
-	for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
-	{
-		TerrainHeight[index] = static_cast<mu_float>(buffer[index]) * HeightMultiplier;
 	}
 
 	const auto device = MUGraphics::GetDevice();
 
 	std::vector<Diligent::TextureSubResData> subresources;
 	Diligent::TextureSubResData subresource;
-	subresource.pData = buffer.get();
-	subresource.Stride = TerrainSize;
+	subresource.pData = TerrainHeight.get();
+	subresource.Stride = TerrainSize * sizeof(mu_float);
 	subresources.push_back(subresource);
 
 	Diligent::TextureDesc textureDesc;
@@ -218,7 +246,7 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligen
 	textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
 	textureDesc.Width = TerrainSize;
 	textureDesc.Height = TerrainSize;
-	textureDesc.Format = Diligent::TEX_FORMAT_R8_UINT;
+	textureDesc.Format = Diligent::TEX_FORMAT_R32_FLOAT;
 	textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
 	textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
 
@@ -413,27 +441,26 @@ const mu_boolean NTerrain::LoadLightmap(mu_utf8string path, std::vector<Diligent
 		bitmap = newBitmap;
 	}
 
+	const mu_uint32 newPitch = FreeImage_GetPitch(bitmap);
+	const mu_uint32 newBPP = FreeImage_GetBPP(bitmap);
 	const mu_uint8 *bitmapBuffer = FreeImage_GetBits(bitmap);
-	if (!LightmapMemory) LightmapMemory.reset(new_nothrow mu_uint8[sizeof(mu_uint8) * 4 * TerrainSize * TerrainSize]);
-	mu_memcpy(LightmapMemory.get(), bitmapBuffer, sizeof(mu_uint8) * 4 * TerrainSize * TerrainSize);
-	FreeImage_Unload(bitmap);
 
-	if (!TerrainLight) TerrainLight.reset(new_nothrow glm::vec3[TerrainSize * TerrainSize]);
-	if (!TerrainPrimaryLight) TerrainPrimaryLight.reset(new_nothrow glm::vec3[TerrainSize * TerrainSize]);
-	const mu_uint32 *lightBuffer = reinterpret_cast<const mu_uint32 *>(LightmapMemory.get());
+	if (!TerrainLight) TerrainLight.reset(new_nothrow glm::vec4[TerrainSize * TerrainSize]);
+	if (!TerrainPrimaryLight) TerrainPrimaryLight.reset(new_nothrow glm::vec4[TerrainSize * TerrainSize]);
 	const glm::vec3 *normalBuffer = TerrainNormal.get();
-	for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index, ++lightBuffer, ++normalBuffer)
+	for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index, bitmapBuffer += 4, ++normalBuffer)
 	{
-		glm::vec3 light(glm::unpackUnorm4x8(*lightBuffer));
-		TerrainLight[index] = light * glm::clamp(glm::dot(*normalBuffer, Light) + 0.5f, 0.0f, 1.0f);
+		glm::vec3 light(bitmapBuffer[FI_RGBA_RED] / 255.0f, bitmapBuffer[FI_RGBA_GREEN] / 255.0f, bitmapBuffer[FI_RGBA_BLUE] / 255.0f);
+		TerrainPrimaryLight[index] = TerrainLight[index] = glm::vec4(glm::vec3(light) * glm::clamp(glm::dot(*normalBuffer, Light) + 0.5f, 0.0f, 1.0f), 1.0f);
 	}
+	FreeImage_Unload(bitmap);
 
 	const auto device = MUGraphics::GetDevice();
 
 	std::vector<Diligent::TextureSubResData> subresources;
 	Diligent::TextureSubResData subresource;
-	subresource.pData = LightmapMemory.get();
-	subresource.Stride = TerrainSize * sizeof(mu_uint8) * 4;
+	subresource.pData = TerrainPrimaryLight.get();
+	subresource.Stride = TerrainSize * sizeof(glm::vec4);
 	subresources.push_back(subresource);
 
 	Diligent::TextureDesc textureDesc;
@@ -443,7 +470,7 @@ const mu_boolean NTerrain::LoadLightmap(mu_utf8string path, std::vector<Diligent
 	textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
 	textureDesc.Width = TerrainSize;
 	textureDesc.Height = TerrainSize;
-	textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM;
+	textureDesc.Format = Diligent::TEX_FORMAT_RGBA32_FLOAT;
 	textureDesc.Usage = Diligent::USAGE_DEFAULT;
 	textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
 
@@ -1140,7 +1167,7 @@ void NTerrain::Update()
 		LightmapTexture,
 		0, 0,
 		Diligent::Box(0, TerrainSize, 0, TerrainSize),
-		Diligent::TextureSubResData(LightmapMemory.get(), TerrainSize * sizeof(mu_uint8) * 4),
+		Diligent::TextureSubResData(TerrainPrimaryLight.get(), TerrainSize * sizeof(glm::vec4)),
 		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE,
 		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
