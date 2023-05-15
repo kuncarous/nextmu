@@ -10,18 +10,3 @@ std::array<const mu_utf8string, AnimationTypeMax> AnimationTypeStrings = {
 	"shock",
 	"die"
 };
-
-namespace NEntity
-{
-	std::array<mu_utf8string, MaxPartType> PartTypeIds = {
-		"helm",
-		"armor",
-		"pants",
-		"gloves",
-		"boots",
-		"item_left",
-		"item_right",
-		"wings",
-		"helper",
-	};
-}

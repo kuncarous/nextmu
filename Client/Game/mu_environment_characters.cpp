@@ -137,7 +137,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 					for (auto &[type, part] : attachment.Parts)
 					{
 						const auto model = part.Model;
-						const auto bone = part.IsLinked ? part.Link.Bone : 0;
+						const auto bone = part.IsLinked ? part.Link.RenderAnimation.Bone : 0;
 
 						if (part.IsLinked == true)
 						{
@@ -220,7 +220,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 						auto &partSkeleton = link.Skeleton;
 						const auto &renderAnimation = link.RenderAnimation;
 
-						const auto boneMatrix = skeleton.Instance.GetBone(link.Bone);
+						const auto boneMatrix = skeleton.Instance.GetBone(renderAnimation.Bone);
 						NCompressedMatrix transformMatrix{
 							.Rotation = glm::quat(glm::radians(renderAnimation.Angle)),
 							.Position = renderAnimation.Position,
@@ -281,7 +281,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 				};
 				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
 
-				mu_boolean hideBody[NEntity::MaxPartType] = {};
+				mu_boolean hideBody[MaxPartType] = {};
 				for (auto &[type, part] : attachment.Parts)
 				{
 					const auto model = part.Model;
@@ -300,18 +300,18 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 
 				if (character != nullptr)
 				{
-					for (mu_uint32 n = 0; n < NEntity::MaxPartType; ++n)
+					for (mu_uint32 n = 0; n < MaxPartType; ++n)
 					{
 						if (hideBody[n]) continue;
-						NEntity::PartType type = static_cast<NEntity::PartType>(n);
+						NPartType type = static_cast<NPartType>(n);
 						NModel *model = nullptr;
 						switch (type)
 						{
-						case NEntity::PartType::Helm: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Head)]; break;
-						case NEntity::PartType::Armor: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Chest)]; break;
-						case NEntity::PartType::Pants: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Lower)]; break;
-						case NEntity::PartType::Gloves: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Arms)]; break;
-						case NEntity::PartType::Boots: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Legs)]; break;
+						case NPartType::Helm: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Head)]; break;
+						case NPartType::Armor: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Chest)]; break;
+						case NPartType::Pants: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Lower)]; break;
+						case NPartType::Gloves: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Arms)]; break;
+						case NPartType::Boots: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Legs)]; break;
 						}
 						if (model == nullptr) continue;
 
@@ -369,7 +369,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 				};
 				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
 
-				mu_boolean hideBody[NEntity::MaxPartType] = {};
+				mu_boolean hideBody[MaxPartType] = {};
 				for (auto &[type, part] : attachment.Parts)
 				{
 					const auto model = part.Model;
@@ -388,18 +388,18 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 
 				if (character != nullptr)
 				{
-					for (mu_uint32 n = 0; n < NEntity::MaxPartType; ++n)
+					for (mu_uint32 n = 0; n < MaxPartType; ++n)
 					{
 						if (hideBody[n]) continue;
-						NEntity::PartType type = static_cast<NEntity::PartType>(n);
+						NPartType type = static_cast<NPartType>(n);
 						NModel *model = nullptr;
 						switch (type)
 						{
-						case NEntity::PartType::Helm: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Head)]; break;
-						case NEntity::PartType::Armor: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Chest)]; break;
-						case NEntity::PartType::Pants: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Lower)]; break;
-						case NEntity::PartType::Gloves: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Arms)]; break;
-						case NEntity::PartType::Boots: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Legs)]; break;
+						case NPartType::Helm: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Head)]; break;
+						case NPartType::Armor: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Chest)]; break;
+						case NPartType::Pants: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Lower)]; break;
+						case NPartType::Gloves: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Arms)]; break;
+						case NPartType::Boots: model = character->Parts[static_cast<mu_uint32>(CharacterBodyPart::Legs)]; break;
 						}
 						if (model == nullptr) continue;
 
@@ -574,7 +574,7 @@ void NCharacters::ClearAttachmentParts(const entt::entity entity)
 	attachment.Parts.clear();
 }
 
-void NCharacters::AddAttachmentPartFromItem(const entt::entity entity, const NEntity::PartType partType, const NItemCategory category, const mu_uint16 index)
+void NCharacters::AddAttachmentPartFromItem(const entt::entity entity, const NPartType partType, const NItemCategory category, const mu_uint16 index)
 {
 	NItem *item = MUItemsManager::GetItem(static_cast<mu_uint16>(category), index);
 	if (item == nullptr) return;
@@ -582,7 +582,7 @@ void NCharacters::AddAttachmentPartFromItem(const entt::entity entity, const NEn
 	AddAttachmentPart(entity, partType, render);
 }
 
-void NCharacters::AddAttachmentPart(const entt::entity entity, const NEntity::PartType partType, NRender *render)
+void NCharacters::AddAttachmentPart(const entt::entity entity, const NPartType partType, NRender *render)
 {
 	NEntity::NRenderPart part;
 	part.Type = partType;
@@ -596,20 +596,21 @@ void NCharacters::AddAttachmentPart(const entt::entity entity, const NEntity::Pa
 		const NModel *model = attachment.Base;
 		const auto &animation = Registry.get<NEntity::NAnimation>(entity);
 		const auto animationId = model->GetAnimationId(animation.CurrentAction);
-		const auto partTypeId = NEntity::GetPartTypeId(partType);
 		const auto renderAnimation = render->GetAnimationById(animationId);
-		const auto renderAttachment = renderAnimation->GetAttachmentById(partTypeId);
+		const auto renderAttachment = renderAnimation->GetAttachmentByPartType(partType);
 
 		auto &link = part.Link;
 		link.Render = render;
-		link.RenderAnimation = *renderAnimation;
-		link.Bone = model->GetBoneById(renderAttachment->Bone);
+		link.RenderAnimation.Bone = model->GetBoneById(renderAttachment->Bone);
+		link.RenderAnimation.Position = renderAttachment->Position;
+		link.RenderAnimation.Angle = renderAttachment->Angle;
+		link.RenderAnimation.Scale = renderAttachment->Scale;
 	}
 
 	attachment.Parts.insert(std::make_pair(partType, part));
 }
 
-void NCharacters::RemoveAttachmentPart(const entt::entity entity, const NEntity::PartType partType)
+void NCharacters::RemoveAttachmentPart(const entt::entity entity, const NPartType partType)
 {
 	auto &attachment = Registry.get<NEntity::NAttachment>(entity);
 	attachment.Parts.erase(partType);
@@ -677,6 +678,26 @@ void NCharacters::SetCharacterAnimation(NAnimationType type, NEntity::NPosition&
 	animation.PriorFrame = animation.CurrentFrame;
 	animation.CurrentAction = action;
 	animation.CurrentFrame = 0.0f;
+
+	const NModel *model = attachment.Base;
+	const auto animationId = model->GetAnimationId(animation.CurrentAction);
+
+	for (auto &[partType, part] : attachment.Parts)
+	{
+		if (part.IsLinked == false) continue;
+		const auto *render = part.Link.Render;
+		if (!render) continue;
+
+		const auto renderAnimation = render->GetAnimationById(animationId);
+		const auto renderAttachment = renderAnimation->GetAttachmentByPartType(partType);
+
+		auto &link = part.Link;
+		link.Render = render;
+		link.RenderAnimation.Bone = model->GetBoneById(renderAttachment->Bone);
+		link.RenderAnimation.Position = renderAttachment->Position;
+		link.RenderAnimation.Angle = renderAttachment->Angle;
+		link.RenderAnimation.Scale = renderAttachment->Scale;
+	}
 }
 
 const mu_float NCharacters::GetAnimationModifier(const entt::entity entity, NAnimationModifierType type) const

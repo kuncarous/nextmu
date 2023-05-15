@@ -147,7 +147,7 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligen
 
 	static mu_char TerrainV1Header[] = { 'B', 'M', '8' };
 	constexpr mu_isize TerrainV1Size = 66616;
-	if (fileLength == TerrainV1Size && mu_memcmp(buffer.get(), TerrainV1Header, mu_countof(TerrainV1Header)) == 0)
+	if (ext == "ozb" && fileLength == TerrainV1Size && mu_memcmp(buffer.get(), TerrainV1Header, mu_countof(TerrainV1Header)) == 0)
 	{
 		if (!TerrainHeight) TerrainHeight.reset(new_nothrow mu_float[TerrainSize * TerrainSize]);
 		for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
@@ -215,7 +215,7 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligen
 				for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
 				{
 					mu_uint32 rgbIndex = index * 3;
-					mu_uint32 height = MakeHeightFromRGB(bitmapBuffer[rgbIndex + 2], bitmapBuffer[rgbIndex + 1], bitmapBuffer[rgbIndex + 0]);
+					mu_uint32 height = MakeHeightFromRGB(bitmapBuffer[rgbIndex + FI_RGBA_RED], bitmapBuffer[rgbIndex + FI_RGBA_GREEN], bitmapBuffer[rgbIndex + FI_RGBA_BLUE]);
 					TerrainHeight[index] = static_cast<mu_float>(height) - 500.0f;
 				}
 			}

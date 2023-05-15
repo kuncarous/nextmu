@@ -180,40 +180,26 @@ namespace NEntity
 		NAnimationType Type = NAnimationType::Stop;
 	};
 
-	enum class PartType : mu_uint32
+	struct NLinkAnimation
 	{
-		Helm,
-		Armor,
-		Pants,
-		Gloves,
-		Boots,
-		ItemLeft,
-		ItemRight,
-		Wings,
-		Helper,
-		Max,
+		mu_uint32 Bone = NInvalidUInt32;
+		glm::vec3 Position = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 Angle = glm::vec3(0.0f, 0.0f, 0.0f);
+		mu_float Scale = 1.0f;
 	};
-	constexpr mu_uint32 MaxPartType = static_cast<mu_uint32>(PartType::Max);
-
-	extern std::array<mu_utf8string, MaxPartType> PartTypeIds;
-	NEXTMU_INLINE const mu_utf8string GetPartTypeId(const PartType type)
-	{
-		return PartTypeIds[static_cast<mu_uint32>(type)];
-	}
 
 	struct NRenderLink
 	{
 		const NRender *Render = nullptr;
-		NRenderAnimation RenderAnimation;
+		NLinkAnimation RenderAnimation;
 		NAnimation Animation;
 		NSkeletonInstance Skeleton;
-		mu_uint32 Bone = NInvalidUInt32;
 		mu_uint32 SkeletonOffset = NInvalidUInt32;
 	};
 
 	struct NRenderPart
 	{
-		PartType Type;
+		NPartType Type;
 		NModel *Model;
 		mu_boolean IsLinked;
 		NRenderLink Link;
@@ -223,7 +209,7 @@ namespace NEntity
 	{
 		const NCharacterConfiguration *Character;
 		NModel *Base;
-		std::map<PartType, NRenderPart> Parts;
+		std::map<NPartType, NRenderPart> Parts;
 	};
 };
 

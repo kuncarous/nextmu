@@ -3,6 +3,18 @@
 #include "res_render.h"
 #include "mu_resourcesmanager.h"
 
+std::map<mu_utf8string, NPartType> PartTypeIds({
+	std::pair("helm", NPartType::Helm),
+	std::pair("armor", NPartType::Armor),
+	std::pair("pants", NPartType::Pants),
+	std::pair("gloves", NPartType::Gloves),
+	std::pair("boots", NPartType::Boots),
+	std::pair("item_left", NPartType::ItemLeft),
+	std::pair("item_right", NPartType::ItemRight),
+	std::pair("wings", NPartType::Wings),
+	std::pair("helper", NPartType::Helper),
+});
+
 namespace MURendersManager
 {
 	std::map<mu_utf8string, NRender> Renders;
@@ -52,28 +64,28 @@ namespace MURendersManager
 					NRenderAnimation animation;
 					animation.Visible = janimation["visible"].get<mu_boolean>();
 
-					const auto &jposition = janimation["position"];
-					animation.Position = glm::vec3(jposition[0].get<mu_float>(), jposition[1].get<mu_float>(), jposition[2].get<mu_float>());
-					const auto &jangle = janimation["angle"];
-					animation.Angle = glm::vec3(jangle[0].get<mu_float>(), jangle[1].get<mu_float>(), jangle[2].get<mu_float>());
-					animation.Scale = janimation["scale"].get<mu_float>();
-
 					if (janimation.contains("attachments"))
 					{
 						for (const auto &jattachment : janimation["attachments"])
 						{
 							const auto id = jattachment["id"].get<mu_utf8string>();
+							const auto partType = GetPartTypeById(id);
 
 							NRenderAttachment attachment;
 							attachment.Bone = jattachment["bone"].get<mu_utf8string>();
+							const auto &jposition = jattachment["position"];
+							attachment.Position = glm::vec3(jposition[0].get<mu_float>(), jposition[1].get<mu_float>(), jposition[2].get<mu_float>());
+							const auto &jangle = jattachment["angle"];
+							attachment.Angle = glm::vec3(jangle[0].get<mu_float>(), jangle[1].get<mu_float>(), jangle[2].get<mu_float>());
+							attachment.Scale = jattachment["scale"].get<mu_float>();
 
-							if (id.compare("default") == 0)
+							if (partType == NPartType::Max)
 							{
 								animation.Attachments.Default = attachment;
 							}
 							else
 							{
-								animation.Attachments.Customs.insert(std::make_pair(id, attachment));
+								animation.Attachments.Customs.insert(std::make_pair(partType, attachment));
 							}
 						}
 					}

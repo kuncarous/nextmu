@@ -144,7 +144,7 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 					for (auto &[type, part] : attachment.Parts)
 					{
 						const auto model = part.Model;
-						const auto bone = part.IsLinked ? part.Link.Bone : 0;
+						const auto bone = part.IsLinked ? part.Link.RenderAnimation.Bone : 0;
 
 						if (part.IsLinked == true)
 						{
@@ -227,7 +227,7 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 						auto &partSkeleton = link.Skeleton;
 						const auto &renderAnimation = link.RenderAnimation;
 
-						const auto boneMatrix = skeleton.Instance.GetBone(link.Bone);
+						const auto boneMatrix = skeleton.Instance.GetBone(renderAnimation.Bone);
 						NCompressedMatrix transformMatrix{
 							.Rotation = glm::quat(glm::radians(renderAnimation.Angle)),
 							.Position = renderAnimation.Position,
