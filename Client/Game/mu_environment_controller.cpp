@@ -9,6 +9,7 @@
 #include "mu_renderstate.h"
 #include "mu_input.h"
 #include "mu_navigation.h"
+#include <glm/gtx/vec_swizzle.hpp>
 
 NController::NController(const NEnvironment *environment) : Environment(environment), Camera(new (std::nothrow) NCamera()), Character(entt::null)
 {
@@ -16,7 +17,6 @@ NController::NController(const NEnvironment *environment) : Environment(environm
 	camera.SetMode(NCameraMode::Directional);
 	camera.SetEye(glm::vec3(123.0f * TerrainScale, 123.0f * TerrainScale, 1400.0f));
 	camera.SetAngle(glm::vec3(glm::radians(30.0f), glm::radians(107.0f), glm::radians(0.0f)));
-	camera.SetUp(glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 NController::~NController()
@@ -52,18 +52,22 @@ void NController::Update()
 		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GL ||
 		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GLES
 	);
+	const mu_float nearZ = 50.0f;
+	const mu_float farZ = (
+		MUCapabilities::IsHomogeneousDepth()
+		? HomogeneousFar
+		: NonHomogeneousFar
+	);
 	Diligent::float4x4 projection = Diligent::float4x4::Projection(
 		glm::radians(35.0f),
 		aspect,
-		50.0f,
-		MUCapabilities::IsHomogeneousDepth()
-		? HomogeneousFar
-		: NonHomogeneousFar,
+		nearZ,
+		farZ,
 		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GL ||
 		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GLES
 	);
 
-	camera->GenerateFrustum(view, GLMFromFloat4x4(projection));
+	camera->GenerateFrustum(view, GLMFromFloat4x4(projection), nearZ, farZ);
 
 	MURenderState::SetViewTransform(view, GLMFromFloat4x4(projection), GLMFromFloat4x4(projection));
 	MURenderState::AttachCamera(camera);
@@ -74,10 +78,8 @@ void NController::Update()
 		: glm::unProjectZO(glm::vec3(windowWidth * 0.5f, windowHeight * 0.5f, 0.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
 	);
 
-	// Since we use a left handed view we need to change sign in Y coord
-	centerNearPoint.y *= -1.0f;
-
-	NearPoint = Diligent::float3(centerNearPoint.x, centerNearPoint.y, centerNearPoint.z);
+	// Since we use a left handed view we need to change sign in Z
+	NearPoint = Diligent::float3(centerNearPoint.x, -centerNearPoint.y, centerNearPoint.z);
 
 	if (Character != entt::null)
 	{

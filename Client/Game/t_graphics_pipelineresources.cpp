@@ -60,6 +60,14 @@ void CreatePipelineResources()
 
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
+				Diligent::SHADER_TYPE_VERTEX,
+				"g_VertexTexture",
+				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
+			)
+		);
+
+		resource.Variables.push_back(
+			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_PIXEL,
 				"g_Texture",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE

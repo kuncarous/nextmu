@@ -29,6 +29,9 @@ struct NModelSettings
 	mu_float AlphaTest;
 	mu_float PremultiplyAlpha;
 	mu_float WorldTime;
+	mu_float ZTestRef;
+	mu_float Dummy1;
+	glm::vec2 BlendTexCoord;
 	mu_float Dummy2;
 	mu_float Dummy3;
 };
@@ -157,17 +160,20 @@ void MUModelRenderer::RenderMesh(
 		pipelineState->StaticInitialized = true;
 	}
 
+	NResourceId vertexTextureId = settings->VertexTexture != nullptr ? settings->VertexTexture->GetId() : NInvalidUInt32;
+	mu_boolean isVertexTextureInvalid = vertexTextureId == NInvalidUInt32;
+
 	auto shadowMap = MURenderState::GetShadowMap();
 	NShaderResourcesBinding *binding;
 	if (renderMode == NRenderMode::Normal && shadowMap != nullptr)
 	{
-		NResourceId resourceIds[2] = { texture->GetId(), MURenderState::GetShadowResourceId() };
-		binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
+		NResourceId resourceIds[3] = { texture->GetId(), MURenderState::GetShadowResourceId(), settings->VertexTexture != nullptr ? settings->VertexTexture->GetId() : NInvalidUInt32 };
+		binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds) - static_cast<mu_uint32>(isVertexTextureInvalid), resourceIds);
 	}
 	else
 	{
-		NResourceId resourceIds[1] = { texture->GetId() };
-		binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
+		NResourceId resourceIds[2] = { texture->GetId(), settings->VertexTexture != nullptr ? settings->VertexTexture->GetId() : NInvalidUInt32 };
+		binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds) - static_cast<mu_uint32>(isVertexTextureInvalid), resourceIds);
 	}
 
 	if (binding->Initialized == false)
@@ -185,8 +191,16 @@ void MUModelRenderer::RenderMesh(
 				if (variable) variable->Set(shadowMap->GetFilterableSRV());
 			}
 		}
+
+		if (settings->VertexTexture)
+		{
+			auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_VERTEX, "g_VertexTexture");
+			if (variable) variable->Set(settings->VertexTexture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		}
+
 		auto variable = binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Texture");
 		if (variable) variable->Set(texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+
 		binding->Initialized = true;
 	}
 
@@ -213,26 +227,36 @@ void MUModelRenderer::RenderMesh(
 	{
 		auto uniform = ModelSettingsBuffer.Allocate();
 		uniform->LightPosition = terrain->GetLightPosition();
-		uniform->BodyLight = config.BodyLight;
+		uniform->BodyLight = (
+			settings->PremultiplyLight
+			? glm::vec4(config.BodyLight.r * config.BodyLight.a, config.BodyLight.g * config.BodyLight.a, config.BodyLight.b * config.BodyLight.a, 1.0f)
+			: config.BodyLight
+		);
 		uniform->BodyOrigin = glm::vec4(config.BodyOrigin, 0.0f);
 		uniform->BoneOffset = static_cast<mu_float>(config.BoneOffset);
 		uniform->NormalScale = 0.0f;
 		uniform->EnableLight = static_cast<mu_float>(config.EnableLight);
 		uniform->AlphaTest = settings->AlphaTest;
 		uniform->PremultiplyAlpha = static_cast<mu_float>(
+			settings->PremultiplyAlpha &&
 			(
-				!texture->HasAlpha() &&
-				dynamicState->SrcBlend != Diligent::BLEND_FACTOR_UNDEFINED
-			) ||
-			(
-				texture->HasAlpha() &&
-				!(
-					dynamicState->SrcBlend == Diligent::BLEND_FACTOR_SRC_ALPHA ||
-					dynamicState->SrcBlend == Diligent::BLEND_FACTOR_SRC_ALPHA_SAT
+				(
+					!texture->HasAlpha() &&
+					dynamicState->SrcBlend != Diligent::BLEND_FACTOR_UNDEFINED
+				) ||
+				(
+					texture->HasAlpha() &&
+					!(
+						dynamicState->SrcBlend == Diligent::BLEND_FACTOR_SRC_ALPHA ||
+						dynamicState->SrcBlend == Diligent::BLEND_FACTOR_SRC_ALPHA_SAT
+					)
 				)
 			)
 		);
 		uniform->WorldTime = MUState::GetWorldTime();
+		uniform->ZTestRef = -3000.0f;
+		uniform->Dummy1 = 0.0f;
+		uniform->BlendTexCoord = glm::vec2(0.0f, 0.0f);
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
 				.ShouldReleaseMemory = false,

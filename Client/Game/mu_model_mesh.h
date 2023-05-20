@@ -61,12 +61,15 @@ struct NMeshRenderSettings
 	mu_shader Program = NInvalidShader;
 	mu_shader ShadowProgram = NInvalidShader;
 	NGraphicsTexture *Texture = nullptr;
+	NGraphicsTexture *VertexTexture = nullptr;
 	NDynamicPipelineState RenderState[ModelRenderMode::Count] = { DefaultDynamicPipelineState, DefaultAlphaDynamicPipelineState };
 	NDynamicPipelineState ShadowRenderState[ModelRenderMode::Count] = { DefaultShadowDynamicPipelineState, DefaultShadowDynamicPipelineState };
 	NRenderClassify ClassifyMode = NRenderClassify::None;
 	mu_uint32 ClassifyIndex = 0;
 	mu_float Light = 1.0f;
 	mu_float AlphaTest = 0.25f;
+	mu_boolean PremultiplyLight = false;
+	mu_boolean PremultiplyAlpha = false;
 };
 
 class NMesh

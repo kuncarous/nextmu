@@ -103,6 +103,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_terrain_cullingtree.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_threading_helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_renderdevice.cpp" />
@@ -133,6 +134,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_animationsmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_charactersmanager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_consts.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_cullingtree.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_textureattachments.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_bboxrenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_camera.h" />
@@ -219,6 +222,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_render.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_structs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_textureattachments.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_threading_helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui.h" />

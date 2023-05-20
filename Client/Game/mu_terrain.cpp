@@ -9,6 +9,7 @@
 #include "mu_renderstate.h"
 #include "mu_crypt.h"
 #include "mu_navigation.h"
+#include "mu_camera.h"
 #include "shared_binaryreader.h"
 #include "DetourCommon.h"
 #include "DetourNavMesh.h"
@@ -18,8 +19,65 @@
 #include <glm/gtx/intersect.hpp>
 #include <MapHelper.hpp>
 
-NTerrainVertex TerrainVertices[4 * TerrainSize * TerrainSize] = {};
+NEXTMU_INLINE Diligent::float2 GetPosition2D(Diligent::float3 p)
+{
+	return Diligent::float2(p.x, p.y);
+}
 
+NEXTMU_INLINE Diligent::float2 GetPosition2DWithFixedY(Diligent::float3 p)
+{
+	return Diligent::float2(p.x, -p.y);
+}
+
+NEXTMU_INLINE Diligent::float3 GetPosition3DWithFixedY(Diligent::float3 p)
+{
+	return Diligent::float3(p.x, -p.y, p.z);
+}
+
+template <class T>
+constexpr Diligent::Vector2<T>(MinVector)(const Diligent::Vector2<T> &a, const Diligent::Vector2<T> &b)
+{
+	return Diligent::Vector2<T>((std::min)(a.x, b.x), (std::min)(a.y, b.y));
+}
+
+template <class T>
+constexpr Diligent::Vector2<T>(MaxVector)(const Diligent::Vector2<T> &a, const Diligent::Vector2<T> &b)
+{
+	return Diligent::Vector2<T>((std::max)(a.x, b.x), (std::max)(a.y, b.y));
+}
+
+NEXTMU_INLINE void ClampPoint(Diligent::float2 &point, const mu_float xratio, const mu_float yratio)
+{
+	constexpr mu_float scaledSize = static_cast<mu_float>(TerrainSize) * TerrainScale;
+
+	if (point.x < 0.0f)
+	{
+		const mu_float d = -point.x;
+		point.x += d;
+		point.y += d * yratio;
+	}
+	else if (point.x > scaledSize)
+	{
+		const mu_float d = scaledSize - point.x;
+		point.x += d;
+		point.y += d * yratio;
+	}
+
+	if (point.y < 0.0f)
+	{
+		const mu_float d = -point.y;
+		point.y += d;
+		point.x += d * xratio;
+	}
+	else if (point.y > scaledSize)
+	{
+		const mu_float d = scaledSize - point.y;
+		point.y += d;
+		point.x += d * xratio;
+	}
+}
+
+NTerrainVertex TerrainVertices[TerrainSize * TerrainSize * 6u] = {};
 void InitializeTerrainVertices()
 {
 	static mu_boolean initialized = false;
@@ -32,61 +90,42 @@ void InitializeTerrainVertices()
 		for (mu_uint32 x = 0; x < TerrainSize; ++x)
 		{
 			NTerrainVertex *vert = &TerrainVertices[vertex++];
-			vert->x = 0;
-			vert->y = 0;
-			vert->rx = x;
-			vert->ry = y;
+			vert->X = 0;
+			vert->Y = 0;
+			vert->RX = x;
+			vert->RY = y;
 
 			vert = &TerrainVertices[vertex++];
-			vert->x = 1;
-			vert->y = 0;
-			vert->rx = x;
-			vert->ry = y;
+			vert->X = 1;
+			vert->Y = 0;
+			vert->RX = x;
+			vert->RY = y;
 
 			vert = &TerrainVertices[vertex++];
-			vert->x = 1;
-			vert->y = 1;
-			vert->rx = x;
-			vert->ry = y;
+			vert->X = 1;
+			vert->Y = 1;
+			vert->RX = x;
+			vert->RY = y;
 
 			vert = &TerrainVertices[vertex++];
-			vert->x = 0;
-			vert->y = 1;
-			vert->rx = x;
-			vert->ry = y;
+			vert->X = 0;
+			vert->Y = 0;
+			vert->RX = x;
+			vert->RY = y;
+
+			vert = &TerrainVertices[vertex++];
+			vert->X = 1;
+			vert->Y = 1;
+			vert->RX = x;
+			vert->RY = y;
+
+			vert = &TerrainVertices[vertex++];
+			vert->X = 0;
+			vert->Y = 1;
+			vert->RX = x;
+			vert->RY = y;
 		}
 	}
-}
-
-constexpr mu_uint32 NumTerrainIndexes = (TerrainSize - 1) * (TerrainSize - 1) * 6;
-mu_uint32 TerrainIndexes[NumTerrainIndexes] = {};
-
-void InitializeTerrainIndexes()
-{
-	static mu_boolean initialized = false;
-	if (initialized) return;
-	initialized = true;
-
-	mu_uint32 index = 0, vertex = 0;
-	for (mu_uint32 y = 0; y < (TerrainSize - 1); ++y)
-	{
-		for (mu_uint32 x = 0; x < (TerrainSize - 1); ++x)
-		{
-			TerrainIndexes[index + 0] = vertex + 0;
-			TerrainIndexes[index + 1] = vertex + 1;
-			TerrainIndexes[index + 2] = vertex + 2;
-			TerrainIndexes[index + 3] = vertex + 0;
-			TerrainIndexes[index + 4] = vertex + 2;
-			TerrainIndexes[index + 5] = vertex + 3;
-
-			index += 6;
-			vertex += 4;
-		}
-
-		vertex += 4; // Since we are only calculating one less
-	}
-
-	index = 0;
 }
 
 NTerrain::~NTerrain()
@@ -108,7 +147,6 @@ void NTerrain::Destroy()
 	RELEASE_HANDLER(UVTexture);
 	RELEASE_HANDLER(GrassUVTexture);
 	RELEASE_HANDLER(VertexBuffer);
-	RELEASE_HANDLER(IndexBuffer);
 	RELEASE_HANDLER(SettingsUniform);
 }
 
@@ -291,8 +329,8 @@ const mu_boolean NTerrain::GenerateNormal(std::vector<Diligent::StateTransitionD
 		}
 	}
 
-	if (!NormalMemory) NormalMemory.reset(new_nothrow mu_uint8[sizeof(mu_uint16) * 4 * TerrainSize * TerrainSize]);
-	mu_uint64 *data = reinterpret_cast<mu_uint64 *>(NormalMemory.get());
+	if (!PackedNormals) PackedNormals.reset(new_nothrow mu_uint8[sizeof(mu_uint16) * 4 * TerrainSize * TerrainSize]);
+	mu_uint64 *data = reinterpret_cast<mu_uint64 *>(PackedNormals.get());
 	glm::vec3 *src = TerrainNormal.get();
 	for (mu_uint32 y = 0; y < TerrainSize; ++y)
 	{
@@ -306,7 +344,7 @@ const mu_boolean NTerrain::GenerateNormal(std::vector<Diligent::StateTransitionD
 
 	std::vector<Diligent::TextureSubResData> subresources;
 	Diligent::TextureSubResData subresource;
-	subresource.pData = NormalMemory.get();
+	subresource.pData = PackedNormals.get();
 	subresource.Stride = TerrainSize * sizeof(mu_uint16) * 4;
 	subresources.push_back(subresource);
 
@@ -1071,26 +1109,20 @@ const mu_boolean NTerrain::PrepareSettings(const mu_utf8string path, const nlohm
 
 const mu_boolean NTerrain::GenerateBuffers(std::vector<Diligent::StateTransitionDesc> &barriers)
 {
-	/*
-		TODO:
-		Since all terrains are 256x256 we can make the vertex and index buffer static to use it for all terrains.
-		After implement occlussion culling the index buffer should be dynamic.
-	*/
 	InitializeTerrainVertices();
-	InitializeTerrainIndexes();
 
 	const auto device = MUGraphics::GetDevice();
 
 	// Vertex Buffer
 	{
 		Diligent::BufferDesc bufferDesc;
-		bufferDesc.Usage = Diligent::USAGE_DEFAULT;
-		bufferDesc.BindFlags = Diligent::BIND_VERTEX_BUFFER; // We do not really bind the buffer, but D3D11 wants at least one bind flag bit
-		bufferDesc.Size = sizeof(TerrainVertices);
+		bufferDesc.Usage = Diligent::USAGE_IMMUTABLE;
+		bufferDesc.BindFlags = Diligent::BIND_VERTEX_BUFFER;
+		bufferDesc.Size = sizeof(NTerrainVertex) * TerrainSize * TerrainSize * 6;
 
 		Diligent::BufferData bufferData;
 		bufferData.pData = TerrainVertices;
-		bufferData.DataSize = sizeof(TerrainVertices);
+		bufferData.DataSize = sizeof(NTerrainVertex) * TerrainSize * TerrainSize * 6;
 
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
 		device->CreateBuffer(bufferDesc, &bufferData, &buffer);
@@ -1103,26 +1135,22 @@ const mu_boolean NTerrain::GenerateBuffers(std::vector<Diligent::StateTransition
 		VertexBuffer = buffer;
 	}
 
-	// Index Buffer
+	RenderSettings.Ranges.resize(TerrainSize);
+
+	return true;
+}
+
+const mu_boolean NTerrain::GenerateCullingTree()
+{
+	CullingTree.reset(new (std::nothrow) NTerrainCullingTree());
+	if (CullingTree == nullptr)
 	{
-		Diligent::BufferDesc bufferDesc;
-		bufferDesc.Usage = Diligent::USAGE_DEFAULT;
-		bufferDesc.BindFlags = Diligent::BIND_INDEX_BUFFER; // We do not really bind the buffer, but D3D11 wants at least one bind flag bit
-		bufferDesc.Size = sizeof(TerrainIndexes);
+		return false;
+	}
 
-		Diligent::BufferData bufferData;
-		bufferData.pData = TerrainIndexes;
-		bufferData.DataSize = sizeof(TerrainIndexes);
-
-		Diligent::RefCntAutoPtr<Diligent::IBuffer> buffer;
-		device->CreateBuffer(bufferDesc, &bufferData, &buffer);
-		if (buffer == nullptr)
-		{
-			return false;
-		}
-
-		barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
-		IndexBuffer = buffer;
+	if (CullingTree->Initialize(TerrainHeight.get()) == false)
+	{
+		return false;
 	}
 
 	return true;
@@ -1151,6 +1179,12 @@ void NTerrain::ConfigureUniforms()
 	}
 }
 
+void NTerrain::GenerateTerrain()
+{
+	RenderSettings.Lines.clear();
+	CullingTree->GenerateRenderRanges(RenderSettings);
+}
+
 void NTerrain::Update()
 {
 	const auto immediateContext = MUGraphics::GetImmediateContext();
@@ -1175,7 +1209,7 @@ void NTerrain::Update()
 		NormalTexture,
 		0, 0,
 		Diligent::Box(0, TerrainSize, 0, TerrainSize),
-		Diligent::TextureSubResData(NormalMemory.get(), TerrainSize * sizeof(mu_uint16) * 4),
+		Diligent::TextureSubResData(PackedNormals.get(), TerrainSize * sizeof(mu_uint16) * 4),
 		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE,
 		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
@@ -1188,6 +1222,8 @@ void NTerrain::Update()
 		Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
 	);
 
+	GenerateTerrain();
+
 	Diligent::StateTransitionDesc restoreBarriers[3] = {
 		Diligent::StateTransitionDesc(LightmapTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
 		Diligent::StateTransitionDesc(NormalTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
@@ -1198,6 +1234,8 @@ void NTerrain::Update()
 
 void NTerrain::Render(const NRenderSettings &renderSettings)
 {
+	if (RenderSettings.Lines.empty() == true) return;
+
 	const auto renderManager = MUGraphics::GetRenderManager();
 	const auto immediateContext = MUGraphics::GetImmediateContext();
 	const auto &renderTargetDesc = MUGraphics::GetRenderTargetDesc();
@@ -1281,30 +1319,27 @@ void NTerrain::Render(const NRenderSettings &renderSettings)
 				.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
 			}
 		);
-		renderManager->SetIndexBuffer(
-			RSetIndexBuffer{
-				.IndexBuffer = IndexBuffer,
-				.ByteOffset = 0,
-				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
-			}
-		);
 		renderManager->SetPipelineState(pipelineState);
 		renderManager->CommitShaderResources(
 			RCommitShaderResources{
 				.ShaderResourceBinding = binding,
 			}
 		);
-		renderManager->DrawIndexed(
-			RDrawIndexed{
-				.Attribs = Diligent::DrawIndexedAttribs(NumTerrainIndexes, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL)
-			},
-			RCommandListInfo{
-				.Type = NDrawOrderType::Classifier,
-				.Classify = NRenderClassify::Opaque,
-				.View = 0,
-				.Index = 1,
-			}
-		);
+		for (const auto y : RenderSettings.Lines)
+		{
+			const auto &range = RenderSettings.Ranges[y];
+			renderManager->Draw(
+				RDraw{
+					.Attribs = Diligent::DrawAttribs(range.End - range.Start, Diligent::DRAW_FLAG_VERIFY_ALL, 1, range.Start)
+				},
+				RCommandListInfo{
+					.Type = NDrawOrderType::Classifier,
+					.Classify = NRenderClassify::Opaque,
+					.View = 0,
+					.Index = 1,
+				}
+			);
+		}
 	}
 
 	// Grass
@@ -1398,30 +1433,27 @@ void NTerrain::Render(const NRenderSettings &renderSettings)
 				.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
 			}
 		);
-		renderManager->SetIndexBuffer(
-			RSetIndexBuffer{
-				.IndexBuffer = IndexBuffer,
-				.ByteOffset = 0,
-				.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
-			}
-		);
 		renderManager->SetPipelineState(pipelineState);
 		renderManager->CommitShaderResources(
 			RCommitShaderResources{
 				.ShaderResourceBinding = binding,
 			}
 		);
-		renderManager->DrawIndexed(
-			RDrawIndexed{
-				.Attribs = Diligent::DrawIndexedAttribs(NumTerrainIndexes, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL)
-			},
-			RCommandListInfo{
-				.Type = NDrawOrderType::Classifier,
-				.Classify = NRenderClassify::PreAlpha,
-				.View = 0,
-				.Index = 1,
-			}
-		);
+		for (const auto y : RenderSettings.Lines)
+		{
+			const auto &range = RenderSettings.Ranges[y];
+			renderManager->Draw(
+				RDraw{
+					.Attribs = Diligent::DrawAttribs(range.End - range.Start, Diligent::DRAW_FLAG_VERIFY_ALL, 1, range.Start)
+				},
+				RCommandListInfo{
+					.Type = NDrawOrderType::Classifier,
+					.Classify = NRenderClassify::PreAlpha,
+					.View = 0,
+					.Index = 1,
+				}
+			);
+		}
 	}
 }
 
@@ -1544,37 +1576,6 @@ const glm::vec3 NTerrain::CalculateBackLight(mu_float x, mu_float y) const
 	}
 
 	return light;
-}
-
-NEXTMU_INLINE void ClampPoint(Diligent::float2 &point, const mu_float xratio, const mu_float yratio)
-{
-	constexpr mu_float scaledSize = static_cast<mu_float>(TerrainSize) * TerrainScale;
-
-	if (point.x < 0.0f)
-	{
-		const mu_float d = -point.x;
-		point.x += d;
-		point.y += d * yratio;
-	}
-	else if (point.x > scaledSize)
-	{
-		const mu_float d = scaledSize - point.x;
-		point.x += d;
-		point.y += d * yratio;
-	}
-
-	if (point.y < 0.0f)
-	{
-		const mu_float d = -point.y;
-		point.y += d;
-		point.x += d * xratio;
-	}
-	else if (point.y > scaledSize)
-	{
-		const mu_float d = scaledSize - point.y;
-		point.y += d;
-		point.x += d * xratio;
-	}
 }
 
 const mu_boolean NTerrain::GetTriangleIntersection(const glm::vec3 nearPoint, const glm::vec3 farPoint, const glm::vec3 direction, glm::vec3 &intersection) const

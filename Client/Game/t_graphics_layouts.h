@@ -29,8 +29,8 @@ struct NBBoxVertex
 #pragma pack(4)
 struct NTerrainVertex
 {
-	mu_uint8 x, y;
-	mu_uint8 rx, ry;
+	mu_uint8 X, Y;
+	mu_uint8 RX, RY;
 };
 #pragma pack()
 

@@ -153,15 +153,17 @@ void NCamera::Update()
 	}
 }
 
-void NCamera::GenerateFrustum(glm::mat4 view, glm::mat4 projection)
+void NCamera::GenerateFrustum(glm::mat4 view, glm::mat4 projection, const mu_float nearZ, const mu_float farZ)
 {
 	const auto deviceType = MUGraphics::GetDeviceType();
+	const auto proj = Float4x4FromGLM(projection);
 	glm::mat4 viewProj = projection * view;
 	Diligent::ExtractViewFrustumPlanesFromMatrix(Float4x4FromGLM(viewProj), Frustum, deviceType == Diligent::RENDER_DEVICE_TYPE_GL || deviceType == Diligent::RENDER_DEVICE_TYPE_GLES);
 	Diligent::BoundBox bbox{
 		.Min = Diligent::float3(FLT_MAX, FLT_MAX, FLT_MAX),
 		.Max = Diligent::float3(FLT_MIN, FLT_MIN, FLT_MIN),
 	};
+
 	for (mu_uint32 n = 0; n < 8; ++n)
 	{
 		auto &point = Frustum.FrustumCorners[n];
@@ -199,11 +201,6 @@ void NCamera::SetTarget(glm::vec3 target)
 void NCamera::SetAngle(glm::vec3 angle)
 {
 	Angle = angle;
-}
-
-void NCamera::SetUp(glm::vec3 up)
-{
-	Up = up;
 }
 
 void NCamera::SetDistance(const mu_float distance)

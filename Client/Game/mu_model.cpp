@@ -231,8 +231,20 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 						settings.ShadowProgram = shadowProgram;
 				}
 
+				if (mesh.contains("vertex_texture"))
+					settings.VertexTexture = MUResourcesManager::GetTexture(mesh["vertex_texture"].get<mu_utf8string>());
+
 				if (mesh.contains("texture"))
 					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
+
+				if (mesh.contains("classify"))
+				{
+					const auto classify = mesh["classify"];
+					if (classify.contains("mode"))
+						settings.ClassifyMode = ClassifyFromString(classify["mode"].get<mu_utf8string>());
+					if (classify.contains("index"))
+						settings.ClassifyIndex = classify["index"].get<mu_uint32>();
+				}
 
 				if (mesh.contains("normal")) {
 					auto &renderState = settings.RenderState[ModelRenderMode::Normal];
@@ -250,6 +262,15 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 
 				if (mesh.contains("light"))
 					settings.Light = mesh["light"].get<mu_float>();
+
+				if (mesh.contains("alpha_test"))
+					settings.AlphaTest = mesh["alpha_test"].get<mu_float>();
+
+				if (mesh.contains("premultiply_light"))
+					settings.PremultiplyLight = mesh["premultiply_light"].get<mu_boolean>();
+
+				if (mesh.contains("premultiply_alpha"))
+					settings.PremultiplyAlpha = !mesh["premultiply_alpha"].get<mu_boolean>();
 			}
 		}
 
@@ -287,6 +308,9 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 				if (settings.ShadowProgram == NInvalidShader)
 					settings.ShadowProgram = shadowProgram;
 
+				if (mesh.contains("vertex_texture"))
+					settings.VertexTexture = MUResourcesManager::GetTexture(mesh["vertex_texture"].get<mu_utf8string>());
+
 				if (mesh.contains("texture"))
 					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
 
@@ -299,17 +323,31 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 						settings.ClassifyIndex = classify["index"].get<mu_uint32>();
 				}
 
-				if (mesh.contains("normal"))
-					settings.RenderState[ModelRenderMode::Normal] = CalculateStateFromObject(mesh["normal"]);
+				if (mesh.contains("normal")) {
+					auto &renderState = settings.RenderState[ModelRenderMode::Normal];
+					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Normal];
+					renderState = CalculateStateFromObject(mesh["normal"]);
+					shadowRenderState = NormalizeShadowRenderState(renderState);
+				}
 
-				if (mesh.contains("alpha"))
-					settings.RenderState[ModelRenderMode::Alpha] = CalculateStateFromObject(mesh["alpha"]);
+				if (mesh.contains("alpha")) {
+					auto &renderState = settings.RenderState[ModelRenderMode::Alpha];
+					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Alpha];
+					renderState = CalculateStateFromObject(mesh["alpha"]);
+					shadowRenderState = NormalizeShadowRenderState(renderState);
+				}
 
 				if (mesh.contains("light"))
 					settings.Light = mesh["light"].get<mu_float>();
 
 				if (mesh.contains("alpha_test"))
 					settings.AlphaTest = mesh["alpha_test"].get<mu_float>();
+
+				if (mesh.contains("premultiply_light"))
+					settings.PremultiplyLight = mesh["premultiply_light"].get<mu_boolean>();
+
+				if (mesh.contains("premultiply_alpha"))
+					settings.PremultiplyAlpha = !mesh["premultiply_alpha"].get<mu_boolean>();
 
 				VirtualMeshes.push_back(virtualMesh);
 			}

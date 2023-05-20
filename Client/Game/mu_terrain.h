@@ -3,14 +3,11 @@
 
 #pragma once
 
+#include "t_terrain_consts.h"
+#include "t_terrain_cullingtree.h"
+
 class dtNavMesh;
 class dtNavMeshQuery;
-
-constexpr mu_float TerrainScale = 100.0f;
-constexpr mu_float TerrainScaleInv = 1.0f / TerrainScale;
-constexpr mu_uint32 TerrainSize = 256u; // MU has a fixed terrain size of 256x256
-constexpr mu_uint32 TerrainMask = TerrainSize - 1;
-constexpr mu_float TerrainSizeInv = 1.0f / static_cast<mu_float>(TerrainSize);
 
 NEXTMU_INLINE mu_uint32 GetTerrainIndex(const mu_uint32 x, const mu_uint32 y)
 {
@@ -103,10 +100,12 @@ protected:
 	const mu_boolean LoadAttributes(mu_utf8string path, std::vector<Diligent::StateTransitionDesc> &barriers);
 	const mu_boolean PrepareSettings(const mu_utf8string path, const nlohmann::json document, std::vector<Diligent::StateTransitionDesc> &barriers);
 	const mu_boolean GenerateBuffers(std::vector<Diligent::StateTransitionDesc> &barriers);
+	const mu_boolean GenerateCullingTree();
 
 public:
 	void Reset();
 	void ConfigureUniforms();
+	void GenerateTerrain();
 	void Update();
 	void Render(const NRenderSettings &renderSettings);
 
@@ -173,10 +172,10 @@ private:
 	Diligent::RefCntAutoPtr<Diligent::ITexture> UVTexture;
 	Diligent::RefCntAutoPtr<Diligent::ITexture> GrassUVTexture;
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
-	Diligent::RefCntAutoPtr<Diligent::IBuffer> IndexBuffer;
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> SettingsUniform;
 
-	std::unique_ptr<mu_uint8[]> NormalMemory;
+	std::unique_ptr<mu_uint8[]> PackedNormals;
+	NTerrainRenderSettings RenderSettings;
 
 	mu_float HeightMultiplier = 1.0f;
 	glm::vec3 Light = glm::vec3();
@@ -190,6 +189,7 @@ private:
 	mu_float WindMultiplier = 1.0f;
 	NRunMode RunMode = NRunMode::Normal;
 
+	std::unique_ptr<NTerrainCullingTree> CullingTree;
 	std::unique_ptr<mu_float[]> TerrainHeight;
 	std::unique_ptr<glm::vec4[]> TerrainLight;
 	std::unique_ptr<glm::vec4[]> TerrainPrimaryLight;

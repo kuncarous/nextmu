@@ -123,7 +123,7 @@ void CreateInputLayouts()
 				2,
 				Diligent::VALUE_TYPE::VT_UINT8,
 				false,
-				offsetof(NTerrainVertex, x),
+				offsetof(NTerrainVertex, X),
 				sizeof(NTerrainVertex)
 			)
 		);
@@ -135,7 +135,7 @@ void CreateInputLayouts()
 				2,
 				Diligent::VALUE_TYPE::VT_UINT8,
 				false,
-				offsetof(NTerrainVertex, rx),
+				offsetof(NTerrainVertex, RX),
 				sizeof(NTerrainVertex)
 			)
 		);

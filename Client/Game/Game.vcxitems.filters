@@ -465,6 +465,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_charactersmanager.cpp">
       <Filter>Characters</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_terrain_cullingtree.cpp">
+      <Filter>Terrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
@@ -811,6 +814,15 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_charactersmanager_structs.h">
       <Filter>Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_cullingtree.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_consts.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_structs.h">
+      <Filter>Terrain</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

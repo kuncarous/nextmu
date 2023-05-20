@@ -18,7 +18,7 @@ struct NCameraDistance
 
 struct NCameraDefault
 {
-	glm::vec3 Eye, Target, Angle, Up;
+	glm::vec3 Eye, Target, Angle;
 	NCameraDistance Distance;
 };
 
@@ -26,7 +26,7 @@ class NCamera
 {
 public:
 	void Update();
-	void GenerateFrustum(glm::mat4 view, glm::mat4 projection);
+	void GenerateFrustum(glm::mat4 view, glm::mat4 projection, const mu_float nearZ, const mu_float farZ);
 
 	glm::mat4 GetView();
 
@@ -34,7 +34,6 @@ public:
 	void SetEye(glm::vec3 eye);
 	void SetTarget(glm::vec3 target);
 	void SetAngle(glm::vec3 angle);
-	void SetUp(glm::vec3 up);
 	void SetDistance(const mu_float distance);
 	void SetMinDistance(const mu_float minDistance);
 	void SetMaxDistance(const mu_float maxDistance);
@@ -64,7 +63,6 @@ public:
 		Default.Eye = Eye;
 		Default.Target = Target;
 		Default.Angle = Angle;
-		Default.Up = Up;
 		Default.Distance = Distance;
 	}
 
@@ -76,7 +74,6 @@ public:
 		}
 
 		Angle = Default.Angle;
-		Up = Default.Up;
 		Distance = Default.Distance;
 	}
 
@@ -87,7 +84,7 @@ private:
 	glm::vec3 Eye;
 	glm::vec3 Target;
 	glm::vec3 Angle;
-	glm::vec3 Up;
+	const glm::vec3 Up = glm::vec3(0.0f, 0.0f, 1.0f);
 	NCameraDistance Distance;
 	NCameraDefault Default;
 

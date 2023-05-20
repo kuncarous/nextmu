@@ -86,7 +86,7 @@ private:
 	NRenderSettings RenderSettings;
 	Diligent::LightAttribs LightAttribs;
 
-	Diligent::float4 LightDirection = Diligent::float4(-1.3f, 0.0f, -2.0f, 0.0f);//Diligent::float3(-0.554699242f, -0.0599640049f, -0.829887390f, 0.0f);
+	Diligent::float4 LightDirection = Diligent::float4(-0.544988f, 0.0f, -0.838444f, 0.0f);
 	NResourceId ShadowResourceId = NInvalidUInt32;
 	NShadowMapPtr ShadowMap;
 	std::vector<Diligent::ViewFrustumExt> ShadowFrustums;

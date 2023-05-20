@@ -128,6 +128,11 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 		return false;
 	}
 
+	if (terrain->GenerateCullingTree() == false)
+	{
+		return false;
+	}
+
 	const auto uv = document["uv"];
 	if (uv.is_object() == false)
 	{

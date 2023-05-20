@@ -193,6 +193,9 @@ namespace MUResourcesManager
 		macros.AddShaderMacro("SKELETON_TEXTURE_HEIGHT", MUSkeletonManager::BonesTextureHeight);
 		macros.AddShaderMacro("USE_SHADOW", MUConfig::GetEnableShadows() ? 1 : 0);
 		macros.AddShaderMacro("SHADOW_MODE", static_cast<mu_int32>(ShadowMapMode));
+#if 0
+		macros.AddShaderMacro("DSHADOW_COLOR", 1);
+#endif
 
 		for (const auto jmacro : jmacros)
 		{

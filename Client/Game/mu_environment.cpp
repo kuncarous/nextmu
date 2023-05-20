@@ -149,8 +149,7 @@ void NEnvironment::Update()
 
 	if (ShadowMap != nullptr)
 	{
-		LightAttribs.f4Direction = LightDirection;// Diligent::float4(0.0f, 0.0f, -1.0f, 0.0f);// LightDirection;
-		//LightAttribs.f4Direction.w = 0;
+		LightAttribs.f4Direction = LightDirection;
 
 		Diligent::float4 f4ExtraterrestrialSunColor = Diligent::float4(1.0f, 1.0f, 1.0f, 1.0f);
 		LightAttribs.f4Intensity = f4ExtraterrestrialSunColor; // *m_fScatteringScale;
@@ -164,14 +163,11 @@ void NEnvironment::Update()
 		else
 			LightAttribs.ShadowAttribs.fFixedDepthBias = 0.0075f;
 
-		LightAttribs.ShadowAttribs.iFixedFilterSize = 0;
-		LightAttribs.ShadowAttribs.fFilterWorldSize = 0.1f;
-
 		Diligent::float4x4 cameraView = Float4x4FromGLM(MURenderState::GetView());
-		Diligent::float4x4 cameraProj = Float4x4FromGLM(MURenderState::GetFrustumProjection());
+		Diligent::float4x4 cameraProj = Float4x4FromGLM(MURenderState::GetProjection());
 
 		Diligent::ShadowMapManager::DistributeCascadeInfo DistrInfo;
-		DistrInfo.UseRightHandedLightViewTransform = false;
+		DistrInfo.UseRightHandedLightViewTransform = true;
 		DistrInfo.pCameraView = &cameraView;
 		DistrInfo.pCameraProj = &cameraProj;
 		Diligent::float3 lightDirection(LightAttribs.f4Direction.x, LightAttribs.f4Direction.y, LightAttribs.f4Direction.z);
@@ -232,6 +228,8 @@ void NEnvironment::Update()
 	{
 		Terrain->Update();
 	}
+
+	Terrain->GenerateTerrain();
 
 	Characters->PreRender(RenderSettings);
 	Controller->PreRender();
