@@ -13,7 +13,7 @@ struct NTerrainRenderRange
 
 struct NTerrainRenderSettings
 {
-	std::set<mu_uint8> Lines;
+	std::set<mu_uint16> Lines;
 	std::vector<NTerrainRenderRange> Ranges;
 };
 

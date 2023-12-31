@@ -3,18 +3,16 @@
 
 #pragma once
 
-#include "mu_rendererconfig.h"
-#include "mu_math_aabb.h"
+#include "mu_math_obb.h"
 
 namespace MUBBoxRenderer
 {
-	const mu_boolean Initialize();
+	mu_boolean Initialize();
 	void Destroy();
 
 	void Reset();
-	void Render(
-		NBoundingBox &bbox
-	);
+	void Render(const NBoundingBox &aabb);
+	void Render(const NOrientedBoundingBox &obb);
 }
 
 #endif

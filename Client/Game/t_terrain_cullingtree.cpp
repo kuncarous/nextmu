@@ -112,8 +112,8 @@ void NTerrainCullingTree::TraverseBlocks(
 	const auto roffset = offset + ry * size + rx;
 	const auto &block = Blocks[roffset];
 	Diligent::BoundBox box;
-	box.Min = Diligent::float3(static_cast<mu_float>(block.SX) * TerrainScale - TerrainScale * 0.5f, -static_cast<mu_float>(block.EY) * TerrainScale - TerrainScale * 0.5f, block.SZ - 2.0f);
-	box.Max = Diligent::float3(static_cast<mu_float>(block.EX) * TerrainScale + TerrainScale * 0.5f, -static_cast<mu_float>(block.SY) * TerrainScale + TerrainScale * 0.5f, block.EZ + 2.0f);
+	box.Min = Diligent::float3(static_cast<mu_float>(block.SX) * TerrainScale - TerrainScale * 0.5f, block.SZ - 2.0f, static_cast<mu_float>(block.SY) * TerrainScale - TerrainScale * 0.5f);
+	box.Max = Diligent::float3(static_cast<mu_float>(block.EX) * TerrainScale + TerrainScale * 0.5f, block.EZ + 2.0f, static_cast<mu_float>(block.EY) * TerrainScale + TerrainScale * 0.5f);
 	const auto visibility = Diligent::GetBoxVisibility(
 		*frustum,
 		box

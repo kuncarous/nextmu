@@ -27,9 +27,10 @@ public:
 	void Remove(const entt::entity entity);
 
 	void ClearAttachmentParts(const entt::entity entity);
-	void AddAttachmentPartFromItem(const entt::entity entity, const NPartType partType, const NItemCategory category, const mu_uint16 index);
+	void AddAttachmentPartFromItem(const entt::entity entity, const NPartType partType, const EItemCategory category, const mu_uint16 index);
 	void AddAttachmentPart(const entt::entity entity, const NPartType partType, NRender *render);
 	void RemoveAttachmentPart(const entt::entity entity, const NPartType partType);
+	void GenerateVirtualMeshToggle(const entt::entity entity);
 	void ConfigureAnimationsMapping(const entt::entity entity);
 
 	void SetCharacterAction(const entt::entity entity, NAnimationType type);

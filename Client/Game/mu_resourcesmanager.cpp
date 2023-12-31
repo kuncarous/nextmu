@@ -192,7 +192,10 @@ namespace MUResourcesManager
 		macros.AddShaderMacro("SKELETON_TEXTURE_WIDTH", MUSkeletonManager::BonesTextureWidth);
 		macros.AddShaderMacro("SKELETON_TEXTURE_HEIGHT", MUSkeletonManager::BonesTextureHeight);
 		macros.AddShaderMacro("USE_SHADOW", MUConfig::GetEnableShadows() ? 1 : 0);
-		macros.AddShaderMacro("SHADOW_MODE", static_cast<mu_int32>(ShadowMapMode));
+		macros.AddShaderMacro("SHADOW_MODE", static_cast<mu_int32>(MUConfig::GetShadowMode()));
+		macros.AddShaderMacro("SHADOW_FILTER_SIZE", static_cast<mu_int32>(MUConfig::GetShadowFilterSize()));
+		macros.AddShaderMacro("FILTER_ACROSS_CASCADES", static_cast<mu_int32>(MUConfig::GetShadowFilterAcrossCascades()));
+		macros.AddShaderMacro("BEST_CASCADE_SEARCH", static_cast<mu_int32>(MUConfig::GetShadowBestCascadeSearch()));
 #if 0
 		macros.AddShaderMacro("DSHADOW_COLOR", 1);
 #endif
@@ -291,44 +294,6 @@ namespace MUResourcesManager
 			std::unique_ptr<NModel> model(new_nothrow NModel());
 			if (model->Load(id, basePath + path) == false)
 			{
-				mu_info("{}", path);
-				for (const auto &mesh : model->Meshes)
-				{
-					mu_utf8string filename = mesh.Texture.Filename;
-					mu_utf8string filenameLC = mesh.Texture.Filename;
-					std::transform(filenameLC.begin(), filenameLC.end(), filenameLC.begin(), mu_utf8tolower);
-					/* Hard-coded attachments, in future these will be removed and configured directly in the jsons of models */
-					if (filename.starts_with("ski") || filename.starts_with("level_"))
-					{
-					}
-					else if (filenameLC.starts_with("hqskin3"))
-					{
-					}
-					else if (filenameLC.starts_with("hqskin2"))
-					{
-					}
-					else if (filenameLC.starts_with("hqskin") || filenameLC.starts_with("hqlevel_"))
-					{
-					}
-					else if (filename.starts_with("hid"))
-					{
-					}
-					else if (filename.starts_with("hair"))
-					{
-					}
-					else if (filenameLC.starts_with("hqhair_"))
-					{
-					}
-					else if (filename.starts_with("face_"))
-					{
-					}
-					else
-					{
-						mu_info("{}", mesh.Texture.Filename);
-					}
-				}
-				//mu_error("failed to load model ({})", path);
-				continue;
 				mu_error("failed to load model ({})", path);
 				return false;
 			}

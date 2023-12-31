@@ -4,6 +4,7 @@
 #pragma once
 
 #include "mu_math_aabb.h"
+#include "mu_math_obb.h"
 #include "t_model_enums.h"
 
 class NBone
@@ -47,8 +48,8 @@ class NModelBoundingBoxes
 {
 public:
 	mu_boolean Valid = false;
-	NBoundingBox Global;
-	std::vector<NBoundingBox> PerAnimation;
+	NOrientedBoundingBox Global;
+	std::vector<NOrientedBoundingBox> PerAnimation;
 };
 
 #endif

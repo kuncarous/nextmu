@@ -111,17 +111,16 @@ const mu_boolean NEnvironment::CreateShadowMap()
 
 	Diligent::ShadowMapManager::InitInfo initInfo;
 	initInfo.Format = ShadowMapDepthFormat;
-	initInfo.Resolution = ShadowMapResolution;
-	initInfo.NumCascades = ShadowMapCascadesCount;
-	initInfo.ShadowMode = static_cast<mu_int32>(ShadowMapMode);
+	initInfo.Resolution = MUConfig::GetShadowResolution();
+	initInfo.NumCascades = MUConfig::GetShadowCascadesCount();
+	initInfo.ShadowMode = static_cast<mu_int32>(MUConfig::GetShadowMode());
 	initInfo.pComparisonSampler = comparisonSampler->Sampler;
 	initInfo.pFilterableShadowMapSampler = filterableSampler->Sampler;
 	initInfo.Is32BitFilterableFmt = ShadowMapDepthFormat == Diligent::TEX_FORMAT_D32_FLOAT;
 	ShadowMap->Initialize(device, nullptr, initInfo);
 
-	ShadowFrustums.resize(ShadowMapCascadesCount);
-	ShadowFrustumVisible.resize(ShadowMapCascadesCount);
-	RenderSettings.ShadowFrustumsNum = ShadowMapCascadesCount;
+	ShadowFrustums.resize(initInfo.NumCascades);
+	RenderSettings.ShadowFrustumsNum = initInfo.NumCascades;
 	RenderSettings.ShadowFrustums = ShadowFrustums.data();
 
 	return true;
@@ -155,27 +154,28 @@ void NEnvironment::Update()
 		LightAttribs.f4Intensity = f4ExtraterrestrialSunColor; // *m_fScatteringScale;
 		LightAttribs.f4AmbientLight = Diligent::float4(0.2f, 0.2f, 0.2f, ShadowMapMinimumValue);
 
-		LightAttribs.ShadowAttribs.iNumCascades = ShadowMapCascadesCount;
-		if (ShadowMapResolution >= 2048)
+		const auto cascadesCount = MUConfig::GetShadowCascadesCount();
+		const auto resolution = MUConfig::GetShadowResolution();
+
+		LightAttribs.ShadowAttribs.iNumCascades = cascadesCount;
+		if (resolution >= 2048)
 			LightAttribs.ShadowAttribs.fFixedDepthBias = 0.0025f;
-		else if (ShadowMapResolution >= 1024)
+		else if (resolution >= 1024)
 			LightAttribs.ShadowAttribs.fFixedDepthBias = 0.0050f;
 		else
 			LightAttribs.ShadowAttribs.fFixedDepthBias = 0.0075f;
 
 		Diligent::float4x4 cameraView = Float4x4FromGLM(MURenderState::GetView());
-		Diligent::float4x4 cameraProj = Float4x4FromGLM(MURenderState::GetProjection());
+		Diligent::float4x4 cameraProj = Float4x4FromGLM(MURenderState::GetShadowProjection());
 
 		Diligent::ShadowMapManager::DistributeCascadeInfo DistrInfo;
-		DistrInfo.UseRightHandedLightViewTransform = true;
+		DistrInfo.UseRightHandedLightViewTransform = MUConfig::GetShadowRightHanded();
 		DistrInfo.pCameraView = &cameraView;
+		//DistrInfo.pCameraWorld = &cameraWorld;
 		DistrInfo.pCameraProj = &cameraProj;
 		Diligent::float3 lightDirection(LightAttribs.f4Direction.x, LightAttribs.f4Direction.y, LightAttribs.f4Direction.z);
 		DistrInfo.pLightDir = &lightDirection;
-		DistrInfo.fPartitioningFactor = 0.95f;
-		DistrInfo.SnapCascades = true;
-		DistrInfo.EqualizeExtents = true;
-		DistrInfo.StabilizeExtents = true;
+		DistrInfo.fPartitioningFactor = MUConfig::GetShadowPartitioning();
 		DistrInfo.AdjustCascadeRange =
 			[this](int iCascade, float &MinZ, float &MaxZ) {
 			if (iCascade < 0)
@@ -186,22 +186,15 @@ void NEnvironment::Update()
 				MinZ = std::max(MinZ, 10.f);
 				MaxZ = std::pow(pw, std::ceil(std::log(std::max(MaxZ, 1.f)) / std::log(pw)));
 			}
-			else if (iCascade == FirstCascadeToRayMarch)
-			{
-				// Ray marching always starts at the camera position, not at the near plane.
-				// So we must make sure that the first cascade used for ray marching covers the camera position
-				MinZ = 10.f;
-			}
 		};
 		ShadowMap->DistributeCascades(DistrInfo, LightAttribs.ShadowAttribs);
 
-		const auto camerBBox = MURenderState::GetCamera()->GetFrustumBBox();
 		const auto deviceType = MUGraphics::GetDeviceType();
 		const mu_boolean isGL = (
 			deviceType == Diligent::RENDER_DEVICE_TYPE_GL ||
 			deviceType == Diligent::RENDER_DEVICE_TYPE_GLES
-		);
-		for (mu_uint32 n = 0; n < ShadowMapCascadesCount; ++n)
+			);
+		for (mu_uint32 n = 0; n < cascadesCount; ++n)
 		{
 			const auto &cascadeProj = ShadowMap->GetCascadeTranform(n).Proj;
 
@@ -209,13 +202,8 @@ void NEnvironment::Update()
 			auto worldToLightProjSpaceMatr = worldToLightViewSpaceMatr * cascadeProj;
 
 			Diligent::ExtractViewFrustumPlanesFromMatrix(worldToLightProjSpaceMatr, ShadowFrustums[n], isGL);
-			ShadowFrustumVisible[n] = Diligent::GetBoxVisibility(
-				ShadowFrustums[n],
-				camerBBox,
-				Diligent::FRUSTUM_PLANE_FLAG_OPEN_NEAR
-			) != Diligent::BoxVisibility::Invisible;
 		}
-		
+
 		// Update Light Attribs
 		{
 			const auto immediateContext = MUGraphics::GetImmediateContext();
@@ -267,7 +255,7 @@ void NEnvironment::Render()
 			const auto enabledShadows = MUConfig::GetEnableShadows();
 			if (enabledShadows)
 			{
-				MURenderState::SetShadowMode(ShadowMapMode);
+				MURenderState::SetShadowMode(MUConfig::GetShadowMode());
 				MURenderState::SetShadowResourceId(ShadowResourceId);
 				MURenderState::SetShadowMap(ShadowMap.get());
 			}
@@ -297,7 +285,9 @@ void NEnvironment::Render()
 				}
 			);
 
-			for (mu_uint32 n = 0; n < ShadowMapCascadesCount; ++n)
+			const auto cascadesCount = MUConfig::GetShadowCascadesCount();
+			const auto resolution = MUConfig::GetShadowResolution();
+			for (mu_uint32 n = 0; n < cascadesCount; ++n)
 			{
 				//if (ShadowFrustumVisible[n] == false) continue;
 				const auto &cascadeProj = ShadowMap->GetCascadeTranform(n).Proj;
@@ -312,8 +302,8 @@ void NEnvironment::Render()
 				shadowCameraAttribs.mViewProjT = worldToLightProjSpaceMatr.Transpose();
 				MURenderState::SetViewProjection(GLMFromFloat4x4(worldToLightProjSpaceMatr));
 
-				shadowCameraAttribs.f4ViewportSize.x = static_cast<mu_float>(ShadowMapResolution);
-				shadowCameraAttribs.f4ViewportSize.y = static_cast<mu_float>(ShadowMapResolution);
+				shadowCameraAttribs.f4ViewportSize.x = static_cast<mu_float>(resolution);
+				shadowCameraAttribs.f4ViewportSize.y = static_cast<mu_float>(resolution);
 				shadowCameraAttribs.f4ViewportSize.z = 1.f / shadowCameraAttribs.f4ViewportSize.x;
 				shadowCameraAttribs.f4ViewportSize.w = 1.f / shadowCameraAttribs.f4ViewportSize.y;
 
@@ -345,7 +335,7 @@ void NEnvironment::Render()
 			Diligent::StateTransitionDesc barrier(ShadowMap->GetCascadeDSV(0)->GetTexture(), Diligent::RESOURCE_STATE_UNKNOWN, destState, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
 			immediateContext->TransitionResourceStates(1, &barrier);
 
-			if constexpr (ShadowMapMode != NShadowMode::PCF)
+			if (MUConfig::GetShadowMode() != NShadowMode::PCF)
 			{
 				ShadowMap->ConvertToFilterable(immediateContext, LightAttribs.ShadowAttribs);
 

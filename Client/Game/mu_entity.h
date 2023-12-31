@@ -5,6 +5,7 @@
 
 #include "mu_entity_light.h"
 #include "res_render.h"
+#include "res_item.h"
 #include "nav_path.h"
 #include "t_model_enums.h"
 #include "t_character_structs.h"
@@ -14,6 +15,7 @@ class NSkeletonInstance;
 struct NRender;
 struct NAnimationsRoot;
 struct NCharacterConfiguration;
+class NFadingGroup;
 
 enum class NAnimationType : mu_uint16
 {
@@ -43,6 +45,9 @@ namespace NEntity
 	{};
 
 	struct NVisible
+	{};
+
+	struct NFading
 	{};
 
 	struct NCharacterInfo
@@ -93,20 +98,18 @@ namespace NEntity
 	{
 		mu_boolean Visible = false;
 		mu_boolean LightEnable = false; // true : calculate light using normals, false : apply body light directly
-		mu_boolean ShouldFade = false;
 	};
 
 	struct NRenderFading
 	{
-		mu_boolean Enabled = false;
+		NFadingGroup *Group = nullptr;
 		mu_float Current = 1.0f;
-		mu_float Target = 0.2f;
 	};
 
 	struct NRenderState
 	{
 		NRenderFlags Flags;
-		std::array<mu_boolean, MAX_CASCADES> ShadowVisible = {};
+		mu_uint8 ShadowVisible = NInvalidUInt8;
 		glm::vec4 BodyLight = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		NRenderFading Fading;
 	};
@@ -119,8 +122,13 @@ namespace NEntity
 
 	struct NBoundingBoxes
 	{
-		NBoundingBox Configured;
-		NBoundingBox Calculated;
+		struct {
+			NBoundingBox Calculated;
+		} AABB;
+		struct {
+			NOrientedBoundingBox Configured;
+			NOrientedBoundingBox Calculated;
+		} OBB;
 	};
 
 	struct NPosition // Rename
@@ -200,9 +208,15 @@ namespace NEntity
 	struct NRenderPart
 	{
 		NPartType Type;
+		mu_uint8 Level;
+		EItemRank Rank;
+		NItemOptions Options;
+
 		NModel *Model;
 		mu_boolean IsLinked;
 		NRenderLink Link;
+		NRenderVirtualMeshToggle Toggles;
+		NRenderVirtualMeshLightIndex Lights;
 	};
 
 	struct NAttachment

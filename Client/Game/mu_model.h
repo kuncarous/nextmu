@@ -8,6 +8,9 @@
 #include "t_textureattachments.h"
 
 class NGraphicsTexture;
+typedef std::vector<NVirtualMesh> NVirtualMeshVector;
+typedef std::vector<mu_boolean> NRenderVirtualMeshToggle;
+typedef std::vector<mu_uint32> NRenderVirtualMeshLightIndex;
 
 constexpr mu_uint32 MaxBones = 200;
 
@@ -41,6 +44,9 @@ public:
 		const mu_float PlaySpeed
 	) const;
 
+	NRenderVirtualMeshToggle GenerateVirtualMeshToggle(const NMeshRenderConditionInput &input);
+	NRenderVirtualMeshLightIndex GenerateVirtualMeshLightIndex(const NMeshRenderConditionInput &input);
+
 public:
 	NEXTMU_INLINE const mu_boolean HasMeshes() const
 	{
@@ -57,7 +63,7 @@ public:
 		return BBoxes.Valid;
 	}
 
-	NEXTMU_INLINE const NBoundingBox &GetGlobalBBox() const
+	NEXTMU_INLINE const NOrientedBoundingBox &GetGlobalBBox() const
 	{
 		return BBoxes.Global;
 	}
@@ -98,7 +104,7 @@ public:
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
 	std::vector<NModelTexture> Textures;
 
-	std::vector<NVirtualMesh> VirtualMeshes;
+	NVirtualMeshVector VirtualMeshes;
 	std::vector<NMesh> Meshes;
 	std::vector<mu_utf8string> BoneName; // Per Bone (separated for better cache ratio)
 	std::vector<NBoneInfo> BoneInfo; // Per Bone (separated for better cache ratio)

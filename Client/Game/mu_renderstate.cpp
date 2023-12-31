@@ -9,6 +9,7 @@
 namespace MURenderState
 {
 	glm::mat4 FrustomProjection, Projection, View, ViewProjection, ViewProjectionTransposed;
+	glm::mat4 ShadowView, ShadowProjection;
 	NCamera *Camera = nullptr;
 	NEnvironment *Environment = nullptr;
 	std::vector<NGraphicsTexture *> TextureAttachments;
@@ -19,7 +20,7 @@ namespace MURenderState
 	NRenderMode RenderMode = NRenderMode::Normal;
 
 	NResourceId ShadowResourceId = NInvalidUInt32;
-	NShadowMode ShadowMode = ShadowMapMode;
+	NShadowMode ShadowMode = NShadowMode::PCF;
 	Diligent::ShadowMapManager *ShadowMap = nullptr;
 
 	const mu_boolean Initialize()
@@ -139,13 +140,16 @@ namespace MURenderState
 		return LightUniform.RawPtr();
 	}
 
-	void SetViewTransform(glm::mat4 view, glm::mat4 projection, glm::mat4 frustumProjection)
+	void SetViewTransform(glm::mat4 view, glm::mat4 projection, glm::mat4 frustumProjection, glm::mat4 shadowView, glm::mat4 shadowProjection)
 	{
 		FrustomProjection = frustumProjection;
 		Projection = projection;
 		View = view;
 		ViewProjection = Projection * View;
 		ViewProjectionTransposed = glm::transpose(ViewProjection);
+
+		ShadowView = shadowView;
+		ShadowProjection = shadowProjection;
 	}
 
 	void SetViewProjection(glm::mat4 viewProj)
@@ -177,6 +181,16 @@ namespace MURenderState
 	glm::mat4 &GetView()
 	{
 		return View;
+	}
+
+	glm::mat4 &GetShadowProjection()
+	{
+		return ShadowProjection;
+	}
+
+	glm::mat4 &GetShadowView()
+	{
+		return ShadowView;
 	}
 
 	void AttachCamera(NCamera *camera)

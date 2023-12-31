@@ -60,6 +60,42 @@ std::map<mu_utf8string, NAnimationModifierType> AnimationModifierMap = {
 	{ "attack_speed", NAnimationModifierType::AttackSpeed },
 };
 
+std::map<mu_utf8string, EMeshRenderConditionType> RenderConditionTypeMap = {
+	{ "item_level", EMeshRenderConditionType::ItemLevel },
+	{ "item_level_by_formula", EMeshRenderConditionType::ItemLevelByFormula },
+	{ "item_rank", EMeshRenderConditionType::ItemRank },
+	{ "options_count", EMeshRenderConditionType::ItemOptionsCount },
+	{ "option_type", EMeshRenderConditionType::ItemOption },
+	{ "option_min_rank", EMeshRenderConditionType::ItemOptionsMinRank },
+	{ "option_max_rank", EMeshRenderConditionType::ItemOptionsMaxRank },
+	{ "option_avg_rank", EMeshRenderConditionType::ItemOptionsAvgRank },
+};
+
+std::map<mu_utf8string, EMeshRenderConditionOperator> RenderConditionOperatorMap = {
+	{ "equal", EMeshRenderConditionOperator::Equal },
+	{ "not_equal", EMeshRenderConditionOperator::NotEqual },
+	{ "less", EMeshRenderConditionOperator::Less },
+	{ "less_equal", EMeshRenderConditionOperator::LessOrEqual },
+	{ "greater", EMeshRenderConditionOperator::Greater },
+	{ "greater_equal", EMeshRenderConditionOperator::GreaterOrEqual }
+};
+
+std::map<mu_utf8string, EMeshRenderLightType> RenderLightTypeMap = {
+	{ "add", EMeshRenderLightType::BlendAdd },
+	{ "subtract", EMeshRenderLightType::BlendSubtract },
+	{ "multiply", EMeshRenderLightType::BlendMultiply },
+	{ "divide", EMeshRenderLightType::BlendDivide },
+	{ "inv_divide", EMeshRenderLightType::BlendInverseDivide },
+	{ "source_set", EMeshRenderLightType::SourceSet },
+	{ "target_set", EMeshRenderLightType::TargetSet },
+};
+
+std::map<mu_utf8string, EMeshRenderLightSource> RenderLightSourceMap = {
+	{ "none", EMeshRenderLightSource::None },
+	{ "light", EMeshRenderLightSource::Light },
+	{ "luminosity", EMeshRenderLightSource::Luminosity },
+};
+
 #define MAPPING_VALUE_FROM_STRING(name, map, default_value) \
 constexpr auto name##Default = default_value; \
 NEXTMU_INLINE const auto name##FromString(const mu_utf8string value) \
@@ -69,12 +105,16 @@ NEXTMU_INLINE const auto name##FromString(const mu_utf8string value) \
 	return iter->second; \
 }
 
-MAPPING_VALUE_FROM_STRING(DepthTest, DepthTestMap, Diligent::COMPARISON_FUNC_LESS)
+MAPPING_VALUE_FROM_STRING(DepthTest, DepthTestMap, Diligent::COMPARISON_FUNC_LESS_EQUAL)
 MAPPING_VALUE_FROM_STRING(BlendFunction, BlendFunctionMap, Diligent::BLEND_FACTOR_UNDEFINED)
 MAPPING_VALUE_FROM_STRING(BlendEquation, BlendEquationMap, Diligent::BLEND_OPERATION_ADD)
 MAPPING_VALUE_FROM_STRING(Cull, CullMap, Diligent::CULL_MODE_NONE)
 MAPPING_VALUE_FROM_STRING(Classify, ClassifyMap, NRenderClassify::None)
 MAPPING_VALUE_FROM_STRING(AnimationModifier, AnimationModifierMap, NAnimationModifierType::None)
+MAPPING_VALUE_FROM_STRING(RenderConditionType, RenderConditionTypeMap, EMeshRenderConditionType::ItemLevel)
+MAPPING_VALUE_FROM_STRING(RenderConditionOperator, RenderConditionOperatorMap, EMeshRenderConditionOperator::Equal)
+MAPPING_VALUE_FROM_STRING(RenderLightType, RenderLightTypeMap, EMeshRenderLightType::SourceSet)
+MAPPING_VALUE_FROM_STRING(RenderLightSource, RenderLightSourceMap, EMeshRenderLightSource::None)
 
 const mu_utf8string ProgramDefault = "mesh_normal";
 
@@ -190,108 +230,80 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 		return false;
 	}
 
-	if (document.contains("hideBody"))
+	if (document.contains("hide_body"))
 	{
-		HideBody = document["hideBody"].get<mu_boolean>();
+		HideBody = document["hide_body"].get<mu_boolean>();
 	}
 
-	if (document.contains("boneHead"))
+	if (document.contains("bone_head"))
 	{
-		BoneHead = document["boneHead"].get<mu_int16>();
+		BoneHead = document["bone_head"].get<mu_int16>();
 	}
 
-	if (document.contains("bodyHeight"))
+	if (document.contains("body_height"))
 	{
-		BodyHeight = document["bodyHeight"].get<mu_float>();
+		BodyHeight = document["body_height"].get<mu_float>();
 	}
 
 	if (document.contains("settings"))
 	{
 		const auto &settings = document["settings"];
-		if (settings.contains("meshes"))
-		{
-			const auto &meshes = settings["meshes"];
-			for (const auto &mesh : meshes)
-			{
-				const auto id = mesh["id"].get<mu_uint32>();
-				if (id >= Meshes.size()) continue;
-
-				auto &settings = Meshes[id].Settings;
-
-				if (mesh.contains("program"))
-				{
-					const auto shaderId = mesh["program"].get<mu_utf8string>();
-
-					const auto program = MUResourcesManager::GetProgram(shaderId);
-					if (program != NInvalidShader)
-						settings.Program = program;
-
-					const auto shadowProgram = MUResourcesManager::GetProgram(shaderId + "_shadow");
-					if (shadowProgram != NInvalidShader)
-						settings.ShadowProgram = shadowProgram;
-				}
-
-				if (mesh.contains("vertex_texture"))
-					settings.VertexTexture = MUResourcesManager::GetTexture(mesh["vertex_texture"].get<mu_utf8string>());
-
-				if (mesh.contains("texture"))
-					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
-
-				if (mesh.contains("classify"))
-				{
-					const auto classify = mesh["classify"];
-					if (classify.contains("mode"))
-						settings.ClassifyMode = ClassifyFromString(classify["mode"].get<mu_utf8string>());
-					if (classify.contains("index"))
-						settings.ClassifyIndex = classify["index"].get<mu_uint32>();
-				}
-
-				if (mesh.contains("normal")) {
-					auto &renderState = settings.RenderState[ModelRenderMode::Normal];
-					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Normal];
-					renderState = CalculateStateFromObject(mesh["normal"]);
-					shadowRenderState = NormalizeShadowRenderState(renderState);
-				}
-
-				if (mesh.contains("alpha")) {
-					auto &renderState = settings.RenderState[ModelRenderMode::Alpha];
-					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Alpha];
-					renderState = CalculateStateFromObject(mesh["alpha"]);
-					shadowRenderState = NormalizeShadowRenderState(renderState);
-				}
-
-				if (mesh.contains("light"))
-					settings.Light = mesh["light"].get<mu_float>();
-
-				if (mesh.contains("alpha_test"))
-					settings.AlphaTest = mesh["alpha_test"].get<mu_float>();
-
-				if (mesh.contains("premultiply_light"))
-					settings.PremultiplyLight = mesh["premultiply_light"].get<mu_boolean>();
-
-				if (mesh.contains("premultiply_alpha"))
-					settings.PremultiplyAlpha = !mesh["premultiply_alpha"].get<mu_boolean>();
-			}
-		}
-
 		if (settings.contains("virtual_meshes"))
 		{
 			const auto program = MUResourcesManager::GetProgram(ProgramDefault);
 			const auto shadowProgram = MUResourcesManager::GetProgram(ProgramDefault + "_shadow");
 
-			const auto &virtualMeshes = settings["virtual_meshes"];
-			for (const auto &mesh : virtualMeshes)
+			const auto &jvirtualMeshes = settings["virtual_meshes"];
+			for (const auto &jmesh : jvirtualMeshes)
 			{
-				const auto id = mesh["id"].get<mu_uint32>();
+				const auto id = jmesh["id"].get<mu_uint32>();
 				if (id >= Meshes.size()) continue;
 
 				NVirtualMesh virtualMesh;
 				virtualMesh.Mesh = id;
 				auto &settings = virtualMesh.Settings;
 
-				if (mesh.contains("program"))
+				if (jmesh.contains("conditions"))
 				{
-					const auto shaderId = mesh["program"].get<mu_utf8string>();
+					const auto &jconditionsGroup = jmesh["conditions"];
+					for (const auto &jconditions : jconditionsGroup)
+					{
+						NMeshRenderConditions conditions;
+
+						for (const auto &jcondition : jconditions)
+						{
+							NMeshRenderCondition condition = {};
+							condition.Type = RenderConditionTypeFromString(jcondition["type"].get<mu_utf8string>());
+							condition.Operator = RenderConditionOperatorFromString(jcondition["operator"].get<mu_utf8string>());
+
+							switch (condition.Type)
+							{
+							case EMeshRenderConditionType::ItemLevel:
+							case EMeshRenderConditionType::ItemLevelByFormula:
+							case EMeshRenderConditionType::ItemRank:
+							case EMeshRenderConditionType::ItemOptionsCount:
+							case EMeshRenderConditionType::ItemOption:
+							case EMeshRenderConditionType::ItemOptionsMinRank:
+							case EMeshRenderConditionType::ItemOptionsMaxRank:
+							case EMeshRenderConditionType::ItemOptionsAvgRank:
+								condition.UValue = jcondition["value"].get<mu_uint32>(); break;
+							default:
+								goto continue_virtualmesh_conditions;
+							}
+
+							conditions.push_back(condition);
+						}
+
+						if (conditions.empty()) continue;
+						virtualMesh.Conditions.push_back(std::move(conditions));
+continue_virtualmesh_conditions:
+						continue;
+					}
+				}
+
+				if (jmesh.contains("program"))
+				{
+					const auto shaderId = jmesh["program"].get<mu_utf8string>();
 
 					const auto program = MUResourcesManager::GetProgram(shaderId);
 					if (program != NInvalidShader)
@@ -308,48 +320,227 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 				if (settings.ShadowProgram == NInvalidShader)
 					settings.ShadowProgram = shadowProgram;
 
-				if (mesh.contains("vertex_texture"))
-					settings.VertexTexture = MUResourcesManager::GetTexture(mesh["vertex_texture"].get<mu_utf8string>());
+				if (jmesh.contains("vertex_texture"))
+					settings.VertexTexture = MUResourcesManager::GetTexture(jmesh["vertex_texture"].get<mu_utf8string>());
 
-				if (mesh.contains("texture"))
-					settings.Texture = MUResourcesManager::GetTexture(mesh["texture"].get<mu_utf8string>());
+				if (jmesh.contains("texture"))
+					settings.Texture = MUResourcesManager::GetTexture(jmesh["texture"].get<mu_utf8string>());
 
-				if (mesh.contains("classify"))
+				if (jmesh.contains("classify"))
 				{
-					const auto classify = mesh["classify"];
+					const auto &classify = jmesh["classify"];
 					if (classify.contains("mode"))
 						settings.ClassifyMode = ClassifyFromString(classify["mode"].get<mu_utf8string>());
 					if (classify.contains("index"))
 						settings.ClassifyIndex = classify["index"].get<mu_uint32>();
 				}
 
-				if (mesh.contains("normal")) {
+				if (jmesh.contains("normal")) {
 					auto &renderState = settings.RenderState[ModelRenderMode::Normal];
 					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Normal];
-					renderState = CalculateStateFromObject(mesh["normal"]);
+					renderState = CalculateStateFromObject(jmesh["normal"]);
 					shadowRenderState = NormalizeShadowRenderState(renderState);
 				}
 
-				if (mesh.contains("alpha")) {
+				if (jmesh.contains("alpha")) {
 					auto &renderState = settings.RenderState[ModelRenderMode::Alpha];
 					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Alpha];
-					renderState = CalculateStateFromObject(mesh["alpha"]);
+					renderState = CalculateStateFromObject(jmesh["alpha"]);
 					shadowRenderState = NormalizeShadowRenderState(renderState);
 				}
 
-				if (mesh.contains("light"))
-					settings.Light = mesh["light"].get<mu_float>();
+				if (jmesh.contains("lights")) {
+					const auto &jlights = jmesh["lights"];
+					for (const auto &jlight : jlights)
+					{
+						NRenderVirtualMeshLight light = {};
 
-				if (mesh.contains("alpha_test"))
-					settings.AlphaTest = mesh["alpha_test"].get<mu_float>();
+						light.ShouldClamp = jlight["clamp"].get<mu_boolean>();
 
-				if (mesh.contains("premultiply_light"))
-					settings.PremultiplyLight = mesh["premultiply_light"].get<mu_boolean>();
+						light.PreType = RenderLightTypeFromString(jlight["pre_type"].get<mu_utf8string>());
+						light.PreSource = RenderLightSourceFromString(jlight["pre_source"].get<mu_utf8string>());
+						
+						const auto &jpreValue = jlight["pre_value"];
+						light.PreValue[0] = jpreValue[0].get<mu_float>();
+						light.PreValue[1] = jpreValue[1].get<mu_float>();
+						light.PreValue[2] = jpreValue[2].get<mu_float>();
 
-				if (mesh.contains("premultiply_alpha"))
-					settings.PremultiplyAlpha = !mesh["premultiply_alpha"].get<mu_boolean>();
+						light.PreType = RenderLightTypeFromString(jlight["post_type"].get<mu_utf8string>());
+						light.PreSource = RenderLightSourceFromString(jlight["post_source"].get<mu_utf8string>());
+
+						const auto &jpostValue = jlight["post_value"];
+						light.PostValue[0] = jpostValue[0].get<mu_float>();
+						light.PostValue[1] = jpostValue[1].get<mu_float>();
+						light.PostValue[2] = jpostValue[2].get<mu_float>();
+
+						if (jlight.contains("conditions"))
+						{
+							const auto &jconditionsGroup = jlight["conditions"];
+							for (const auto &jconditions : jconditionsGroup)
+							{
+								NMeshRenderConditions conditions;
+
+								for (const auto &jcondition : jconditions)
+								{
+									NMeshRenderCondition condition = {};
+									condition.Type = RenderConditionTypeFromString(jcondition["type"].get<mu_utf8string>());
+									condition.Operator = RenderConditionOperatorFromString(jcondition["operator"].get<mu_utf8string>());
+
+									switch (condition.Type)
+									{
+									case EMeshRenderConditionType::ItemLevel:
+									case EMeshRenderConditionType::ItemLevelByFormula:
+									case EMeshRenderConditionType::ItemRank:
+									case EMeshRenderConditionType::ItemOptionsCount:
+									case EMeshRenderConditionType::ItemOption:
+									case EMeshRenderConditionType::ItemOptionsMinRank:
+									case EMeshRenderConditionType::ItemOptionsMaxRank:
+									case EMeshRenderConditionType::ItemOptionsAvgRank:
+										condition.UValue = jcondition["value"].get<mu_uint32>(); break;
+									default:
+										goto continue_virtualmesh_light_conditions;
+									}
+
+									conditions.push_back(condition);
+								}
+
+								if (conditions.empty()) continue;
+								light.Conditions.push_back(std::move(conditions));
+continue_virtualmesh_light_conditions:
+								continue;
+							}
+						}
+
+						virtualMesh.Settings.Lights.push_back((light));
+					}
+				}
+
+				if (jmesh.contains("alpha_test"))
+					settings.AlphaTest = jmesh["alpha_test"].get<mu_float>();
+
+				if (jmesh.contains("premultiply_light"))
+					settings.PremultiplyLight = jmesh["premultiply_light"].get<mu_boolean>();
+
+				if (jmesh.contains("premultiply_alpha"))
+					settings.PremultiplyAlpha = jmesh["premultiply_alpha"].get<mu_boolean>();
 
 				VirtualMeshes.push_back(virtualMesh);
+			}
+		}
+		else if (settings.contains("meshes"))
+		{
+			const auto &meshes = settings["meshes"];
+			for (const auto &jmesh : meshes)
+			{
+				const auto id = jmesh["id"].get<mu_uint32>();
+				if (id >= Meshes.size()) continue;
+
+				auto &settings = Meshes[id].Settings;
+
+				if (jmesh.contains("program"))
+				{
+					const auto shaderId = jmesh["program"].get<mu_utf8string>();
+
+					const auto program = MUResourcesManager::GetProgram(shaderId);
+					if (program != NInvalidShader)
+						settings.Program = program;
+
+					const auto shadowProgram = MUResourcesManager::GetProgram(shaderId + "_shadow");
+					if (shadowProgram != NInvalidShader)
+						settings.ShadowProgram = shadowProgram;
+				}
+
+				if (jmesh.contains("vertex_texture"))
+					settings.VertexTexture = MUResourcesManager::GetTexture(jmesh["vertex_texture"].get<mu_utf8string>());
+
+				if (jmesh.contains("texture"))
+					settings.Texture = MUResourcesManager::GetTexture(jmesh["texture"].get<mu_utf8string>());
+
+				if (jmesh.contains("classify"))
+				{
+					const auto &classify = jmesh["classify"];
+					if (classify.contains("mode"))
+						settings.ClassifyMode = ClassifyFromString(classify["mode"].get<mu_utf8string>());
+					if (classify.contains("index"))
+						settings.ClassifyIndex = classify["index"].get<mu_uint32>();
+				}
+
+				if (jmesh.contains("normal")) {
+					auto &renderState = settings.RenderState[ModelRenderMode::Normal];
+					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Normal];
+					renderState = CalculateStateFromObject(jmesh["normal"]);
+					shadowRenderState = NormalizeShadowRenderState(renderState);
+				}
+
+				if (jmesh.contains("alpha")) {
+					auto &renderState = settings.RenderState[ModelRenderMode::Alpha];
+					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Alpha];
+					renderState = CalculateStateFromObject(jmesh["alpha"]);
+					shadowRenderState = NormalizeShadowRenderState(renderState);
+				}
+
+				if (jmesh.contains("lights")) {
+					const auto &jlights = jmesh["lights"];
+					for (const auto &jlight : jlights)
+					{
+						NRenderVirtualMeshLight light = {};
+
+						light.ShouldClamp = jlight["clamp"].get<mu_boolean>();
+
+						light.PreType = RenderLightTypeFromString(jlight["pre_type"].get<mu_utf8string>());
+						light.PreSource = RenderLightSourceFromString(jlight["pre_source"].get<mu_utf8string>());
+
+						light.PreType = RenderLightTypeFromString(jlight["post_type"].get<mu_utf8string>());
+						light.PreSource = RenderLightSourceFromString(jlight["post_source"].get<mu_utf8string>());
+
+						if (jlight.contains("conditions"))
+						{
+							const auto &jconditionsGroup = jlight["conditions"];
+							for (const auto &jconditions : jconditionsGroup)
+							{
+								NMeshRenderConditions conditions;
+
+								for (const auto &jcondition : jconditions)
+								{
+									NMeshRenderCondition condition = {};
+									condition.Type = RenderConditionTypeFromString(jcondition["type"].get<mu_utf8string>());
+									condition.Operator = RenderConditionOperatorFromString(jcondition["operator"].get<mu_utf8string>());
+
+									switch (condition.Type)
+									{
+									case EMeshRenderConditionType::ItemLevel:
+									case EMeshRenderConditionType::ItemLevelByFormula:
+									case EMeshRenderConditionType::ItemRank:
+									case EMeshRenderConditionType::ItemOptionsCount:
+									case EMeshRenderConditionType::ItemOption:
+									case EMeshRenderConditionType::ItemOptionsMinRank:
+									case EMeshRenderConditionType::ItemOptionsMaxRank:
+									case EMeshRenderConditionType::ItemOptionsAvgRank:
+										condition.UValue = jcondition["value"].get<mu_uint32>(); break;
+									default:
+										goto continue_mesh_light_conditions;
+									}
+
+									conditions.push_back(condition);
+								}
+
+								if (conditions.empty()) continue;
+								light.Conditions.push_back(std::move(conditions));
+continue_mesh_light_conditions:
+								continue;
+							}
+						}
+					}
+				}
+
+				if (jmesh.contains("alpha_test"))
+					settings.AlphaTest = jmesh["alpha_test"].get<mu_float>();
+
+				if (jmesh.contains("premultiply_light"))
+					settings.PremultiplyLight = jmesh["premultiply_light"].get<mu_boolean>();
+
+				if (jmesh.contains("premultiply_alpha"))
+					settings.PremultiplyAlpha = jmesh["premultiply_alpha"].get<mu_boolean>();
 			}
 		}
 	}
@@ -569,7 +760,7 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 		auto &info = BoneInfo[b];
 		info.Dummy = reader.Read<mu_boolean>();
 		if (info.Dummy) continue;
-		
+
 		reader.ReadLine(filename, 32);
 		BoneName[b] = filename;
 
@@ -646,33 +837,37 @@ void NModel::LoadBoundingBoxes(mu_utf8string path)
 	{
 		const auto &bbox = document["bbox"];
 		const auto &min = bbox["min"];
-		BBoxes.Global.Min[0] = min[0].get<mu_float>();
-		BBoxes.Global.Min[1] = min[1].get<mu_float>();
-		BBoxes.Global.Min[2] = min[2].get<mu_float>();
-
 		const auto &max = bbox["max"];
-		BBoxes.Global.Max[0] = max[0].get<mu_float>();
-		BBoxes.Global.Max[1] = max[1].get<mu_float>();
-		BBoxes.Global.Max[2] = max[2].get<mu_float>();
+
+		NBoundingBox b;
+		b.Min[0] = min[0].get<mu_float>();
+		b.Min[1] = min[1].get<mu_float>();
+		b.Min[2] = min[2].get<mu_float>();
+		b.Max[0] = max[0].get<mu_float>();
+		b.Max[1] = max[1].get<mu_float>();
+		b.Max[2] = max[2].get<mu_float>();
+
+		BBoxes.Global = NOrientedBoundingBox(b);
 	}
 
 	if (document.contains("animations"))
 	{
-		NBoundingBox box;
+		NBoundingBox box = {};
 		const auto &animations = document["animations"];
 		for (const auto &bbox : animations)
 		{
 			const auto &min = bbox["min"];
-			box.Min[0] = min[0].get<mu_float>();
-			box.Min[1] = min[1].get<mu_float>();
-			box.Min[2] = min[2].get<mu_float>();
-
 			const auto &max = bbox["max"];
-			box.Max[0] = max[0].get<mu_float>();
-			box.Max[1] = max[1].get<mu_float>();
-			box.Max[2] = max[2].get<mu_float>();
 
-			BBoxes.PerAnimation.push_back(box);
+			NBoundingBox b;
+			b.Min[0] = min[0].get<mu_float>();
+			b.Min[1] = min[1].get<mu_float>();
+			b.Min[2] = min[2].get<mu_float>();
+			b.Max[0] = max[0].get<mu_float>();
+			b.Max[1] = max[1].get<mu_float>();
+			b.Max[2] = max[2].get<mu_float>();
+
+			BBoxes.PerAnimation.push_back(NOrientedBoundingBox(b));
 		}
 	}
 
@@ -685,7 +880,7 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 		document.contains("textures_dir")
 		? document["textures_dir"].get<mu_utf8string>()
 		: "textures/"
-	);
+		);
 
 	if (document.contains("textures"))
 	{
@@ -807,7 +1002,7 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 			if (
 				mesh.Texture.ForceFilter == false &&
 				ext.starts_with(".t")
-			)
+				)
 			{
 				filter = "nearest";
 			}
@@ -992,4 +1187,119 @@ const mu_boolean NModel::PlayAnimation(
 	}
 
 	return loop;
+}
+
+template<typename Type, typename InputType>
+mu_boolean CheckRenderCondition(const EMeshRenderConditionOperator operatorType, const Type compareValue, const InputType value)
+{
+	switch (operatorType)
+	{
+	case EMeshRenderConditionOperator::Equal: return compareValue == static_cast<Type>(value);
+	case EMeshRenderConditionOperator::NotEqual: return compareValue != static_cast<Type>(value);
+	case EMeshRenderConditionOperator::Less: return compareValue < static_cast<Type>(value);
+	case EMeshRenderConditionOperator::LessOrEqual: return compareValue <= static_cast<Type>(value);
+	case EMeshRenderConditionOperator::Greater: return compareValue > static_cast<Type>(value);
+	case EMeshRenderConditionOperator::GreaterOrEqual: return compareValue >= static_cast<Type>(value);
+	default: return false;
+	}
+}
+
+template<typename Type, typename InputType>
+mu_boolean CheckRenderConditionWithVector(const Type findValue, const std::vector<InputType> values)
+{
+	return std::find(values.cbegin(), values.cend(), static_cast<InputType>(findValue)) != values.cend();
+}
+
+NRenderVirtualMeshToggle NModel::GenerateVirtualMeshToggle(const NMeshRenderConditionInput &input)
+{
+	const auto virtualMeshCount = VirtualMeshes.size();
+	if (virtualMeshCount == 0u) return NRenderVirtualMeshToggle();
+
+	NRenderVirtualMeshToggle toggles(virtualMeshCount, false);
+	for (auto index = 0u; index < virtualMeshCount; ++index)
+	{
+		const auto &mesh = VirtualMeshes[index];
+
+		if (mesh.Conditions.empty())
+		{
+			toggles[index] = true;
+			continue;
+		}
+
+		for (const auto &conditions : mesh.Conditions)
+		{
+			mu_boolean isSelected = true;
+			for (const auto &condition : conditions)
+			{
+				switch (condition.Type) {
+				case EMeshRenderConditionType::ItemLevel: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.Level); break;
+				case EMeshRenderConditionType::ItemLevelByFormula: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.LevelByFormula); break;
+				case EMeshRenderConditionType::ItemRank: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.Rank); break;
+				case EMeshRenderConditionType::ItemOptionsCount: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.OptionsCount); break;
+				case EMeshRenderConditionType::ItemOption: isSelected = CheckRenderConditionWithVector(condition.UValue, input.OptionsType); break;
+				case EMeshRenderConditionType::ItemOptionsMinRank: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.OptionsMinRank); break;
+				case EMeshRenderConditionType::ItemOptionsMaxRank: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.OptionsMaxRank); break;
+				case EMeshRenderConditionType::ItemOptionsAvgRank: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.OptionsAvgRank); break;
+				}
+				if (isSelected) break;
+			}
+			if (!isSelected) continue;
+			toggles[index] = true;
+			break;
+		}
+	}
+
+	return toggles;
+}
+
+NRenderVirtualMeshLightIndex NModel::GenerateVirtualMeshLightIndex(const NMeshRenderConditionInput &input)
+{
+	const auto virtualMeshCount = VirtualMeshes.size();
+	if (virtualMeshCount == 0u) return NRenderVirtualMeshLightIndex();
+
+	NRenderVirtualMeshLightIndex selectedLights(virtualMeshCount, NInvalidUInt32);
+	for (auto index = 0u; index < virtualMeshCount; ++index)
+	{
+		const auto &mesh = VirtualMeshes[index];
+		const auto &lights = mesh.Settings.Lights;
+		const auto lightsCount = lights.size();
+
+		for (auto lindex = 0u; lindex < lightsCount; ++lindex)
+		{
+			const auto &light = lights[lindex];
+
+			if (light.Conditions.empty())
+			{
+				selectedLights[index] = lindex;
+				goto continue_meshes;
+			}
+
+			for (const auto &conditions : mesh.Conditions)
+			{
+				mu_boolean isSelected = true;
+				for (const auto &condition : conditions)
+				{
+					switch (condition.Type) {
+					case EMeshRenderConditionType::ItemLevel: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.Level); break;
+					case EMeshRenderConditionType::ItemLevelByFormula: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.LevelByFormula); break;
+					case EMeshRenderConditionType::ItemRank: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.Rank); break;
+					case EMeshRenderConditionType::ItemOptionsCount: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.OptionsCount); break;
+					case EMeshRenderConditionType::ItemOption: isSelected = CheckRenderConditionWithVector(condition.UValue, input.OptionsType); break;
+					case EMeshRenderConditionType::ItemOptionsMinRank: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.OptionsMinRank); break;
+					case EMeshRenderConditionType::ItemOptionsMaxRank: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.OptionsMaxRank); break;
+					case EMeshRenderConditionType::ItemOptionsAvgRank: isSelected = CheckRenderCondition(condition.Operator, condition.UValue, input.OptionsAvgRank); break;
+					}
+					if (isSelected) break;
+				}
+				if (!isSelected) continue;
+				selectedLights[index] = lindex;
+				goto continue_meshes;
+			}
+		}
+
+continue_meshes:
+		continue;
+	}
+
+	return selectedLights;
 }

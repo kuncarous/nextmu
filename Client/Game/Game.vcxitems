@@ -61,6 +61,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_graphics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_input.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_aabb.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_obb.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_modelrenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_particles.cpp" />
@@ -134,6 +136,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_angelscript.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_animationsmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_charactersmanager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_obb.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_consts.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_cullingtree.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_textureattachments.h" />

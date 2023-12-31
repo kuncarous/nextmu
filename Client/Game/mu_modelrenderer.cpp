@@ -102,7 +102,8 @@ void MUModelRenderer::RenderMesh(
 	const mu_uint32 meshIndex,
 	const NRenderConfig &config,
 	const glm::mat4 modelMatrix,
-	const NMeshRenderSettings *settings
+	const NMeshRenderSettings *settings,
+	const NRenderVirtualMeshLightIndex *virtualMeshLights
 )
 {
 	const auto &mesh = model->Meshes[meshIndex];
@@ -119,6 +120,67 @@ void MUModelRenderer::RenderMesh(
 	if (texture == nullptr)
 		texture = textureInfo.Texture.get();
 	if (texture == nullptr || texture->IsValid() == false) return;
+
+	glm::vec3 bodyLight = glm::vec3(config.BodyLight);
+
+	const auto meshLight = virtualMeshLights != nullptr ? virtualMeshLights->at(meshIndex) : NInvalidUInt32;
+	if (meshLight != NInvalidUInt32)
+	{
+		const auto &light = mesh.Settings.Lights[meshLight];
+		glm::vec3 outputLight = bodyLight;
+
+		// Pre Light
+		{
+			glm::vec3 targetLight(1.0f, 1.0f, 1.0f);
+
+			switch (light.PreSource)
+			{
+			case EMeshRenderLightSource::Light: targetLight = outputLight; break;
+			case EMeshRenderLightSource::Luminosity: targetLight = MUState::GetLuminosityVector3(); break;
+			default: break;
+			}
+
+			switch (light.PreType)
+			{
+			case EMeshRenderLightType::BlendAdd: outputLight = light.PreValue + targetLight; break;
+			case EMeshRenderLightType::BlendSubtract: outputLight = light.PreValue - targetLight; break;
+			case EMeshRenderLightType::BlendMultiply: outputLight = light.PreValue * targetLight; break;
+			case EMeshRenderLightType::BlendDivide: outputLight = targetLight / light.PreValue; break;
+			case EMeshRenderLightType::BlendInverseDivide: outputLight = light.PreValue / targetLight; break;
+			case EMeshRenderLightType::TargetSet: outputLight = targetLight; break;
+			default: outputLight = light.PreValue; break;
+			}
+
+			outputLight = targetLight;
+		}
+
+		// Post Light
+		{
+			glm::vec3 targetLight(1.0f, 1.0f, 1.0f);
+
+			switch (light.PostSource)
+			{
+			case EMeshRenderLightSource::Light: targetLight = outputLight; break;
+			case EMeshRenderLightSource::Luminosity: targetLight = MUState::GetLuminosityVector3(); break;
+			default: break;
+			}
+
+			switch (light.PostType)
+			{
+			case EMeshRenderLightType::BlendAdd: outputLight = light.PostValue + targetLight; break;
+			case EMeshRenderLightType::BlendSubtract: outputLight = light.PostValue - targetLight; break;
+			case EMeshRenderLightType::BlendMultiply: outputLight = light.PostValue * targetLight; break;
+			case EMeshRenderLightType::BlendDivide: outputLight = targetLight / light.PostValue; break;
+			case EMeshRenderLightType::BlendInverseDivide: outputLight = light.PostValue / targetLight; break;
+			case EMeshRenderLightType::TargetSet: outputLight = targetLight; break;
+			default: outputLight = light.PostValue; break;
+			}
+
+			outputLight = targetLight;
+		}
+
+		bodyLight = outputLight;
+	}
 
 	const auto &renderTargetDesc = MUGraphics::GetRenderTargetDesc();
 
@@ -229,8 +291,8 @@ void MUModelRenderer::RenderMesh(
 		uniform->LightPosition = terrain->GetLightPosition();
 		uniform->BodyLight = (
 			settings->PremultiplyLight
-			? glm::vec4(config.BodyLight.r * config.BodyLight.a, config.BodyLight.g * config.BodyLight.a, config.BodyLight.b * config.BodyLight.a, 1.0f)
-			: config.BodyLight
+			? glm::vec4(bodyLight.r * config.BodyLight.a, bodyLight.g * config.BodyLight.a, bodyLight.b * config.BodyLight.a, 1.0f)
+			: glm::vec4(bodyLight, config.BodyLight.a)
 		);
 		uniform->BodyOrigin = glm::vec4(config.BodyOrigin, 0.0f);
 		uniform->BoneOffset = static_cast<mu_float>(config.BoneOffset);
@@ -301,7 +363,9 @@ void MUModelRenderer::RenderMesh(
 void MUModelRenderer::RenderBody(
 	const NSkeletonInstance &skeleton,
 	NModel *model,
-	const NRenderConfig &config
+	const NRenderConfig &config,
+	const NRenderVirtualMeshToggle *virtualMeshToggle,
+	const NRenderVirtualMeshLightIndex *virtualMeshLights
 )
 {
 	if (model->HasMeshes() == false) return;
@@ -316,9 +380,25 @@ void MUModelRenderer::RenderBody(
 
 	if (model->VirtualMeshes.size() > 0)
 	{
-		for (const auto &virtualMesh : model->VirtualMeshes)
+		const auto &virtualMeshes = model->VirtualMeshes;
+		const mu_uint32 virtualMeshCount = static_cast<mu_uint32>(virtualMeshes.size());
+
+		if (virtualMeshToggle != nullptr && !virtualMeshToggle->empty())
 		{
-			RenderMesh(model, virtualMesh.Mesh, config, modelMatrix, &virtualMesh.Settings);
+			const auto &toggles = *virtualMeshToggle;
+			for (mu_uint32 index = 0u; index < virtualMeshCount; ++index)
+			{
+				if (!toggles[index]) continue;
+				const auto &virtualMesh = virtualMeshes[index];
+				RenderMesh(model, virtualMesh.Mesh, config, modelMatrix, &virtualMesh.Settings, virtualMeshLights);
+			}
+		}
+		else
+		{
+			for (const auto &virtualMesh : virtualMeshes)
+			{
+				RenderMesh(model, virtualMesh.Mesh, config, modelMatrix, &virtualMesh.Settings, virtualMeshLights);
+			}
 		}
 	}
 	else

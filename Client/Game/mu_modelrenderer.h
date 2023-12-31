@@ -23,12 +23,15 @@ public:
 		const mu_uint32 meshIndex,
 		const NRenderConfig &config,
 		const glm::mat4 modelMatrix,
-		const NMeshRenderSettings *settings = nullptr
+		const NMeshRenderSettings *settings = nullptr,
+		const NRenderVirtualMeshLightIndex *virtualMeshLights = nullptr
 	);
 	static void RenderBody(
 		const NSkeletonInstance &skeleton,
 		NModel *model,
-		const NRenderConfig &config
+		const NRenderConfig &config,
+		const NRenderVirtualMeshToggle *virtualMeshToggle = nullptr,
+		const NRenderVirtualMeshLightIndex *virtualMeshLights = nullptr
 	);
 };
 

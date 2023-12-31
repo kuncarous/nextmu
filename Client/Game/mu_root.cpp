@@ -301,13 +301,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 1);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 1);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 1);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 1);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 1);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Maces, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Maces, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 5);
+				characters->GenerateVirtualMeshToggle(entity);
 
 				environment->GetController()->SetCharacter(entity);
 			}
@@ -328,13 +329,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Elf
@@ -353,13 +355,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Magic Gladiator
@@ -378,13 +381,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Dark Lord
@@ -403,13 +407,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Summoner
@@ -428,13 +433,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Rage Fighter
@@ -453,13 +459,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Grow Lancer
@@ -478,13 +485,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Rune Mage
@@ -503,13 +511,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Slayer
@@ -528,13 +537,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Gun Crasher
@@ -553,13 +563,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// White Wizard
@@ -578,13 +589,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Mage
@@ -603,13 +615,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 
 			// Illusion Knight
@@ -628,13 +641,14 @@ namespace MURoot
 						.Rotation = 0.0f,
 					}
 				);
-				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, NItemCategory::Helm, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, NItemCategory::Armor, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, NItemCategory::Pants, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, NItemCategory::Gloves, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, NItemCategory::Boots, 3);
-				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, NItemCategory::Staffs, 5);
-				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, NItemCategory::Wings, 4);*/
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
 			}
 		}
 
@@ -664,8 +678,8 @@ namespace MURoot
 
 			if (updateCount > 0)
 			{
-				auto *joints = environment->GetJoints();
-				/*for (mu_uint32 n = 0; n < 60; ++n)
+				/*auto *joints = environment->GetJoints();
+				for (mu_uint32 n = 0; n < 60; ++n)
 				{
 					const glm::vec3 position = glm::vec3(
 						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
@@ -685,10 +699,10 @@ namespace MURoot
 							.Scale = glm::linearRand(60.0f, 70.0f),
 						}
 					);
-				}*/
+				}
 
 				auto *particles = environment->GetParticles();
-				/*for (mu_uint32 n = 0; n < 200; ++n)
+				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {

@@ -2,7 +2,6 @@
 #include "mu_environment_characters.h"
 #include "mu_environment.h"
 #include "mu_entity.h"
-#include "mu_camera.h"
 #include "mu_modelrenderer.h"
 #include "mu_bboxrenderer.h"
 #include "mu_state.h"
@@ -102,20 +101,20 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 
 					const auto model = attachment.Base;
 					model->PlayAnimation(animation.CurrentAction, animation.PriorAction, animation.CurrentFrame, animation.PriorFrame, model->GetPlaySpeed(animation.CurrentAction) * characters->GetAnimationModifier(entity, animation.ModifierType) * updateTime);
-
-					auto &bbox = boundingBox.Calculated;
+					
+					auto &obb = boundingBox.OBB.Calculated;
 					if (model->HasMeshes() && model->HasGlobalBBox())
 					{
 						const auto &globalBBox = model->GetGlobalBBox();
-						bbox.Min = Transform(globalBBox.Min, viewModel);
-						bbox.Max = Transform(globalBBox.Max, viewModel);
+						obb = globalBBox.Transform(viewModel);
 					}
 					else
 					{
-						bbox.Min = Transform(boundingBox.Configured.Min, viewModel);
-						bbox.Max = Transform(boundingBox.Configured.Max, viewModel);
+						obb = boundingBox.OBB.Configured.Transform(viewModel);
 					}
-					bbox.Order();
+
+					auto &bbox = boundingBox.AABB.Calculated;
+					bbox = NBoundingBox(obb);
 
 					/* If we have parts to be processed then we animate the skeleton before checking if the object is visible */
 					if (attachment.Parts.size() > 0)
@@ -131,7 +130,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 								.Frame = animation.PriorFrame,
 							},
 							position.HeadAngle
-						);
+							);
 					}
 
 					for (auto &[type, part] : attachment.Parts)
@@ -148,13 +147,11 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 
 						if (model->HasMeshes() && model->HasGlobalBBox())
 						{
-							const auto viewModel = skeleton.Instance.GetBone(bone);
-
-							NBoundingBox tmpBBox;
-							const auto &globalBBox = model->GetGlobalBBox();
-							tmpBBox.Min = Transform(globalBBox.Min, viewModel);
-							tmpBBox.Max = Transform(globalBBox.Max, viewModel);
-							tmpBBox.Order();
+							auto boneMatrix = skeleton.Instance.GetBone(bone);
+							MixBones(viewModel, boneMatrix);
+							
+							const NOrientedBoundingBox globalBBox = model->GetGlobalBBox().Transform(boneMatrix);
+							NBoundingBox tmpBBox(globalBBox);
 
 							bbox.Min = glm::min(bbox.Min, tmpBBox.Min);
 							bbox.Max = glm::max(bbox.Max, tmpBBox.Max);
@@ -165,25 +162,32 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 					const mu_boolean isVisible = Diligent::GetBoxVisibility(
 						*renderSettings.Frustum,
 						Diligent::BoundBox{
-							.Min = Diligent::float3(bbox.Min.x, -bbox.Max.y, bbox.Min.z),
-							.Max = Diligent::float3(bbox.Max.x, -bbox.Min.y, bbox.Max.z),
+							.Min = Diligent::float3(bbox.Min.x, bbox.Min.z, bbox.Min.y),
+							.Max = Diligent::float3(bbox.Max.x, bbox.Max.z, bbox.Max.y),
 						}
 					) != Diligent::BoxVisibility::Invisible;
 
 					mu_boolean shadowVisible = false;
 					if (renderSettings.ShadowFrustums != nullptr)
 					{
-						for (mu_uint32 n = 0; n < renderSettings.ShadowFrustumsNum; ++n)
+						renderState.ShadowVisible = NInvalidUInt8;
+						mu_uint32 shadowIndex = 0;
+						for (shadowIndex; shadowIndex < renderSettings.ShadowFrustumsNum; ++shadowIndex)
 						{
-							renderState.ShadowVisible[n] = Diligent::GetBoxVisibility(
-								renderSettings.ShadowFrustums[n],
+							const auto isVisible = Diligent::GetBoxVisibility(
+								renderSettings.ShadowFrustums[shadowIndex],
 								Diligent::BoundBox{
-									.Min = Diligent::float3(bbox.Min.x, -bbox.Max.y, bbox.Min.z),
-									.Max = Diligent::float3(bbox.Max.x, -bbox.Min.y, bbox.Max.z),
+									.Min = Diligent::float3(bbox.Min.x, bbox.Min.z, bbox.Min.y),
+									.Max = Diligent::float3(bbox.Max.x, bbox.Max.z, bbox.Max.y),
 								},
 								Diligent::FRUSTUM_PLANE_FLAG_OPEN_NEAR
 								) != Diligent::BoxVisibility::Invisible;
-							shadowVisible |= renderState.ShadowVisible[n];
+							if (isVisible) break;
+						}
+						if (shadowIndex < renderSettings.ShadowFrustumsNum)
+						{
+							renderState.ShadowVisible = static_cast<mu_uint8>(shadowIndex);
+							shadowVisible = true;
 						}
 					}
 
@@ -295,7 +299,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 						.EnableLight = renderState.Flags.LightEnable,
 						.BodyLight = renderState.BodyLight,
 					};
-					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
+					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config, &part.Toggles, &part.Lights);
 				}
 
 				if (character != nullptr)
@@ -338,7 +342,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 			for (auto [entity, renderState, boundingBox] : bboxView.each())
 			{
 				if (!renderState.Flags.Visible) continue;
-				MUBBoxRenderer::Render(boundingBox.Calculated);
+				MUBBoxRenderer::Render(boundingBox.AABB.Calculated);
 			}
 #endif
 		}
@@ -346,9 +350,10 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 
 	case NRenderMode::ShadowMap:
 		{
+			const auto shadowMapIndex = renderSettings.CurrentShadowMap;
 			for (auto [entity, position, attachment, renderState, skeleton] : view.each())
 			{
-				if (!renderState.ShadowVisible[renderSettings.CurrentShadowMap]) continue;
+				if (renderState.ShadowVisible > shadowMapIndex) continue;
 				if (skeleton.SkeletonOffset == NInvalidUInt32) continue;
 
 				const auto character = attachment.Character;
@@ -383,7 +388,7 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 						.EnableLight = renderState.Flags.LightEnable,
 						.BodyLight = renderState.BodyLight,
 					};
-					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config);
+					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config, &part.Toggles, &part.Lights);
 				}
 
 				if (character != nullptr)
@@ -544,13 +549,14 @@ const entt::entity NCharacters::AddOrFind(
 			.Base = MUResourcesManager::GetModel("player_ani"),
 		}
 	);
-
+	
 	registry.emplace<NEntity::NBoundingBoxes>(
 		entity,
 		NEntity::NBoundingBoxes{
-			.Configured = NBoundingBox{
-				.Min = glm::vec3(-60.0f, -60.0f, 0.0f),
-				.Max = glm::vec3(40.0f, 40.0f, 120.0f),
+			.OBB = {
+				.Configured = NOrientedBoundingBox(
+					NBoundingBox(glm::vec3(-60.0f, -60.0f, 0.0f), glm::vec3(40.0f, 40.0f, 120.0f))
+				)
 			}
 		}
 	);
@@ -565,7 +571,10 @@ void NCharacters::Remove(const entt::entity entity)
 	if (Registry.valid(entity) == false) return;
 	const auto &identifier = Registry.get<NEntity::NIdentifier>(entity);
 	RegistryMap.erase(identifier.Key);
-	Registry.release(entity);
+	if (Registry.orphan(entity) == false)
+	{
+		Registry.storage<entt::entity>().erase(entity);
+	}
 }
 
 void NCharacters::ClearAttachmentParts(const entt::entity entity)
@@ -574,7 +583,7 @@ void NCharacters::ClearAttachmentParts(const entt::entity entity)
 	attachment.Parts.clear();
 }
 
-void NCharacters::AddAttachmentPartFromItem(const entt::entity entity, const NPartType partType, const NItemCategory category, const mu_uint16 index)
+void NCharacters::AddAttachmentPartFromItem(const entt::entity entity, const NPartType partType, const EItemCategory category, const mu_uint16 index)
 {
 	NItem *item = MUItemsManager::GetItem(static_cast<mu_uint16>(category), index);
 	if (item == nullptr) return;
@@ -614,6 +623,50 @@ void NCharacters::RemoveAttachmentPart(const entt::entity entity, const NPartTyp
 {
 	auto &attachment = Registry.get<NEntity::NAttachment>(entity);
 	attachment.Parts.erase(partType);
+}
+
+void NCharacters::GenerateVirtualMeshToggle(const entt::entity entity)
+{
+	auto &attachment = Registry.get<NEntity::NAttachment>(entity);
+
+	for (auto &[type, part] : attachment.Parts)
+	{
+		const auto model = part.Model;
+
+		mu_uint32 optionsCount = static_cast<mu_uint32>(part.Options.size());
+
+		std::vector<EItemOption> optionsType(optionsCount, optionsCount > 0 ? part.Options[0].Type : EItemOption::eMax);
+
+		mu_float firstOptionRank = optionsCount > 0 ? ItemRankToFloat(part.Options[0].Rank) : 0.0f;
+		mu_float optionsMinRank = firstOptionRank;
+		mu_float optionsMaxRank = firstOptionRank;
+		mu_float optionsAvgRank = firstOptionRank;
+
+		for (mu_uint32 index = 1u; index < optionsCount; ++optionsCount)
+		{
+			auto &option = part.Options[index];
+			optionsType[index] = option.Type;
+			mu_float optionRank = ItemRankToFloat(option.Rank);
+			if (optionRank < optionsMinRank) optionsMinRank = optionRank;
+			if (optionRank > optionsMaxRank) optionsMaxRank = optionRank;
+			optionsAvgRank += optionRank;
+		}
+
+		optionsAvgRank /= static_cast<mu_float>(optionsCount);
+
+		NMeshRenderConditionInput input = {
+			.Level = part.Level,
+			.LevelByFormula = static_cast<mu_uint8>(ItemGlowToLevelFormula(part.Level)),
+			.OptionsCount = static_cast<mu_uint8>(optionsCount),
+			.Rank = part.Rank,
+			.OptionsMinRank = ItemRankToSimpleRank(optionsMinRank),
+			.OptionsMaxRank = ItemRankToSimpleRank(optionsMaxRank),
+			.OptionsAvgRank = ItemRankToSimpleRank(optionsAvgRank),
+		};
+
+		part.Toggles = std::move(model->GenerateVirtualMeshToggle(input));
+		part.Lights = std::move(model->GenerateVirtualMeshLightIndex(input));
+	}
 }
 
 void NCharacters::ConfigureAnimationsMapping(const entt::entity entity)

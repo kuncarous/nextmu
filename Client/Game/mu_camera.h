@@ -28,12 +28,13 @@ public:
 	void Update();
 	void GenerateFrustum(glm::mat4 view, glm::mat4 projection, const mu_float nearZ, const mu_float farZ);
 
-	glm::mat4 GetView();
+	glm::mat4 GetView() const;
+	glm::mat4 GetShadowView() const;
 
-	void SetMode(NCameraMode mode);
-	void SetEye(glm::vec3 eye);
-	void SetTarget(glm::vec3 target);
-	void SetAngle(glm::vec3 angle);
+	void SetMode(const NCameraMode mode);
+	void SetEye(const glm::vec3 eye);
+	void SetTarget(const glm::vec3 target);
+	void SetAngle(const glm::vec3 angle);
 	void SetDistance(const mu_float distance);
 	void SetMinDistance(const mu_float minDistance);
 	void SetMaxDistance(const mu_float maxDistance);
@@ -84,7 +85,7 @@ private:
 	glm::vec3 Eye;
 	glm::vec3 Target;
 	glm::vec3 Angle;
-	const glm::vec3 Up = glm::vec3(0.0f, 0.0f, 1.0f);
+	const glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 	NCameraDistance Distance;
 	NCameraDefault Default;
 

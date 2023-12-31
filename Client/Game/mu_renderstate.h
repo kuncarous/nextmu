@@ -29,13 +29,15 @@ namespace MURenderState
 	Diligent::IBuffer *GetCameraUniform();
 	Diligent::IBuffer *GetLightUniform();
 
-	void SetViewTransform(glm::mat4 view, glm::mat4 projection, glm::mat4 frustumProjection);
+	void SetViewTransform(glm::mat4 view, glm::mat4 projection, glm::mat4 frustumProjection, glm::mat4 shadowView, glm::mat4 shadowProjection);
 	void SetViewProjection(glm::mat4 viewProj);
 	glm::mat4 &GetViewProjection();
 	glm::mat4 &GetViewProjectionTransposed();
 	glm::mat4 &GetFrustumProjection();
 	glm::mat4 &GetProjection();
 	glm::mat4 &GetView();
+	glm::mat4 &GetShadowProjection();
+	glm::mat4 &GetShadowView();
 
 	void AttachCamera(NCamera *camera);
 	void DetachCamera();

@@ -220,6 +220,9 @@
     <Filter Include="Characters">
       <UniqueIdentifier>{41bc3d93-6e76-453f-8b16-f8f22c2dea33}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Math\OBB">
+      <UniqueIdentifier>{db6ea670-9a27-4ad6-af25-b3cec2d553c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -467,6 +470,12 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_terrain_cullingtree.cpp">
       <Filter>Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_aabb.cpp">
+      <Filter>Math\AABB</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_obb.cpp">
+      <Filter>Math\OBB</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -823,6 +832,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_structs.h">
       <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_obb.h">
+      <Filter>Math\OBB</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

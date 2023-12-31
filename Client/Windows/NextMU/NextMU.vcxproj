@@ -31,7 +31,6 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <VCToolsVersion>14.35.32215</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -39,14 +38,12 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <VCToolsVersion>14.35.32215</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <VCToolsVersion>14.35.32215</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -54,7 +51,6 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <VCToolsVersion>14.35.32215</VCToolsVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -90,11 +86,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Binary\x86\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AS_USE_NAMESPACE=1;FREEIMAGE_LIB;_SILENCE_CXX20_CISO646_REMOVED_WARNING;WIN32;_DEBUG;_WINDOWS;BX_CONFIG_DEBUG=1;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AS_USE_NAMESPACE=1;FREEIMAGE_LIB;_SILENCE_CXX20_CISO646_REMOVED_WARNING;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;WIN32;_DEBUG;_WINDOWS;BX_CONFIG_DEBUG=1;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/Detour/Include;../../../Dependencies/Installed/PhysX/physx/include;../../../Dependencies/Installed/AngelScript/angelscript/include;../../../Dependencies/Installed/AngelScript/add_on/scriptstdstring;../../../Dependencies/Installed/AngelScript/add_on/scriptarray;../../../Dependencies/Installed/AngelScript/add_on/scriptmath;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/NoesisGUI/Include;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Common/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/Win32/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/Basic/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Primitives/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsTools/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngine/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsAccessories/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3D11/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3DBase/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3D12/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineOpenGL/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineVulkan/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentFX/Components/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentFX;../../../Dependencies/Repositories/SDL/build-x86/include;../../../Dependencies/Repositories/SDL/build-x86/include-config-$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -121,7 +124,7 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\..\Bi
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AS_USE_NAMESPACE=1;FREEIMAGE_LIB;_SILENCE_CXX20_CISO646_REMOVED_WARNING;WIN32;NDEBUG;_WINDOWS;BX_CONFIG_DEBUG=0;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AS_USE_NAMESPACE=1;FREEIMAGE_LIB;_SILENCE_CXX20_CISO646_REMOVED_WARNING;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;WIN32;NDEBUG;_WINDOWS;BX_CONFIG_DEBUG=0;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/Detour/Include;../../../Dependencies/Installed/PhysX/physx/include;../../../Dependencies/Installed/AngelScript/angelscript/include;../../../Dependencies/Installed/AngelScript/add_on/scriptstdstring;../../../Dependencies/Installed/AngelScript/add_on/scriptarray;../../../Dependencies/Installed/AngelScript/add_on/scriptmath;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/NoesisGUI/Include;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Common/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/Win32/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/Basic/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Primitives/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsTools/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngine/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsAccessories/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3D11/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3DBase/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3D12/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineOpenGL/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineVulkan/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentFX/Components/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentFX;../../../Dependencies/Repositories/SDL/build-x86/include;../../../Dependencies/Repositories/SDL/build-x86/include-config-$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -149,7 +152,7 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build-x86\Release\SDL2.dll ..\..\Bi
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AS_USE_NAMESPACE=1;FREEIMAGE_LIB;_SILENCE_CXX20_CISO646_REMOVED_WARNING;_DEBUG;_WINDOWS;BX_CONFIG_DEBUG=1;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AS_USE_NAMESPACE=1;FREEIMAGE_LIB;_SILENCE_CXX20_CISO646_REMOVED_WARNING;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;_DEBUG;_WINDOWS;BX_CONFIG_DEBUG=1;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/Detour/Include;../../../Dependencies/Installed/PhysX/physx/include;../../../Dependencies/Installed/AngelScript/angelscript/include;../../../Dependencies/Installed/AngelScript/add_on/scriptstdstring;../../../Dependencies/Installed/AngelScript/add_on/scriptarray;../../../Dependencies/Installed/AngelScript/add_on/scriptmath;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/NoesisGUI/Include;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Common/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/Win32/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/Basic/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Primitives/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsTools/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngine/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsAccessories/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3D11/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3DBase/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3D12/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineOpenGL/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineVulkan/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentFX/Components/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentFX;../../../Dependencies/Repositories/SDL/build/include;../../../Dependencies/Repositories/SDL/build/include-config-$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -176,7 +179,7 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\..\Binary
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AS_USE_NAMESPACE=1;FREEIMAGE_LIB;_SILENCE_CXX20_CISO646_REMOVED_WARNING;NDEBUG;_WINDOWS;BX_CONFIG_DEBUG=0;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AS_USE_NAMESPACE=1;FREEIMAGE_LIB;_SILENCE_CXX20_CISO646_REMOVED_WARNING;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;NDEBUG;_WINDOWS;BX_CONFIG_DEBUG=0;BGFX_CONFIG_RENDERER_OPENGL=31;BGFX_CONFIG_RENDERER_DIRECT3D11=1;BGFX_CONFIG_RENDERER_DIRECT3D12=1;BGFX_CONFIG_RENDERER_VULKAN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>./;../../../Shared;../../Game;../../Game/Detour/Include;../../../Dependencies/Installed/PhysX/physx/include;../../../Dependencies/Installed/AngelScript/angelscript/include;../../../Dependencies/Installed/AngelScript/add_on/scriptstdstring;../../../Dependencies/Installed/AngelScript/add_on/scriptarray;../../../Dependencies/Installed/AngelScript/add_on/scriptmath;../../../Dependencies/Installed/FMOD/core/inc;../../../Dependencies/Installed/NoesisGUI/Include;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Common/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/Win32/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/Basic/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Primitives/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Platforms/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsTools/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngine/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsAccessories/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3D11/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3DBase/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineD3D12/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineOpenGL/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentCore/Graphics/GraphicsEngineVulkan/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentFX/Components/interface;../../../Dependencies/Repositories/DiligentEngine/DiligentFX;../../../Dependencies/Repositories/SDL/build/include;../../../Dependencies/Repositories/SDL/build/include-config-$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -218,6 +221,9 @@ xcopy ..\..\..\Dependencies\Repositories\SDL\build\Release\SDL2.dll ..\..\Binary
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

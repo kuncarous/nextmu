@@ -3,6 +3,7 @@
 
 #pragma once
 
+class NOrientedBoundingBox;
 constexpr mu_float InvalidBox = 50000.0f;
 
 template<typename T>
@@ -20,6 +21,11 @@ public:
 	glm::vec3 Max;
 
 public:
+	NBoundingBox() : Min(glm::vec3()), Max(glm::vec3()) {}
+	explicit NBoundingBox(const glm::vec3 &min, const glm::vec3 &max) : Min(min), Max(max) {}
+	explicit NBoundingBox(const NOrientedBoundingBox &obb);
+
+public:
 	void Order()
 	{
 		if (Min.x > Max.x) Swap(Min.x, Max.x);
@@ -31,7 +37,7 @@ public:
 class NBoundingBoxWithDefault : public NBoundingBox
 {
 public:
-	NBoundingBoxWithDefault()
+	NBoundingBoxWithDefault() : NBoundingBox()
 	{
 		Min = glm::vec3(InvalidBox, InvalidBox, InvalidBox);
 		Max = glm::vec3(-InvalidBox, -InvalidBox, -InvalidBox);

@@ -372,13 +372,6 @@ void CreatePipelineResources()
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
 		);
-		resource.Variables.push_back(
-			Diligent::ShaderResourceVariableDesc(
-				Diligent::SHADER_TYPE_VERTEX,
-				"BBoxDimensions",
-				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
-			)
-		);
 
 		Resources.insert(std::make_pair("bbox", resource));
 	}

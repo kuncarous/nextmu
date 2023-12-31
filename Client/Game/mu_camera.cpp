@@ -8,12 +8,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/vec_swizzle.hpp>
 
 void NCamera::Update()
 {
 	const mu_float elapsedTime = MUState::GetElapsedTime();
 
-	mu_boolean shiftPressed = MUInput::IsShiftPressing() == true;
+	const mu_boolean shiftPressed = MUInput::IsShiftPressing() == true;
 	if (shiftPressed == true &&
 		MUInput::IsMousePressing(MOUSE_BUTTON_LEFT) == true)
 	{
@@ -44,12 +45,12 @@ void NCamera::Update()
 
 		// Smooth the relative mouse data with the old data so it isn't 
 		// jerky when moving slowly at low frame rates.
-		mu_float PercentOfNew = 0.5f;
-		mu_float PercentOfOld = 1.0f - PercentOfNew;
+		constexpr mu_float PercentOfNew = 0.5f;
+		constexpr mu_float PercentOfOld = 1.0f - PercentOfNew;
 		MouseDelta.x = MouseDelta.x * PercentOfOld + static_cast<mu_float>(mousePosition.x) * PercentOfNew;
 		MouseDelta.y = MouseDelta.y * PercentOfOld + static_cast<mu_float>(mousePosition.y) * PercentOfNew;
 
-		glm::vec2 rotVelocity(MouseDelta.x * 0.01f, MouseDelta.y * 0.01f);
+		const glm::vec2 rotVelocity(MouseDelta.x * 0.01f, MouseDelta.y * 0.01f);
 		if (Mode == NCameraMode::Directional)
 			Angle += glm::vec3(-rotVelocity.x, rotVelocity.y, 0.0f);
 		else
@@ -70,7 +71,7 @@ void NCamera::Update()
 	case NCameraMode::Directional:
 		{
 			Angle[0] = glm::mod(Angle[0], glm::radians(360.0f));
-			// We need to limit the angle to avoid direction become exactly |up*inf|, this way we avoid the nand view issue
+			// We need to limit the angle to avoid direction become exactly |up*inf|, this way we avoid the inf view issue
 			Angle[1] = glm::clamp(Angle[1], glm::radians(2.0f), glm::radians(178.0f));
 		}
 		break;
@@ -78,7 +79,7 @@ void NCamera::Update()
 	case NCameraMode::Positional:
 		{
 			Angle[0] = glm::mod(Angle[0], glm::radians(360.0f));
-			// We need to limit the angle to avoid direction become exactly |up*inf|, this way we avoid the nand view issue
+			// We need to limit the angle to avoid direction become exactly |up*inf|, this way we avoid the inf view issue
 			Angle[1] = glm::clamp(Angle[1], glm::radians(90.0f), glm::radians(160.0f));
 		}
 		break;
@@ -89,7 +90,7 @@ void NCamera::Update()
 	const mu_float ySin = glm::sin(Angle[1]);
 	const mu_float yCos = glm::cos(Angle[1]);
 
-	glm::vec3 direction(
+	const glm::vec3 direction(
 		xCos * ySin,
 		xSin * ySin,
 		yCos
@@ -101,7 +102,7 @@ void NCamera::Update()
 		{
 			constexpr mu_float MoveSpeed = 2000.0f / 1000.0f;
 
-			glm::vec3 right(
+			const glm::vec3 right(
 				glm::cos(Angle[0] - glm::half_pi<mu_float>()) * -1.0f,
 				glm::sin(Angle[0] - glm::half_pi<mu_float>()) * -1.0f,
 				0.0f
@@ -159,7 +160,7 @@ void NCamera::GenerateFrustum(glm::mat4 view, glm::mat4 projection, const mu_flo
 	const auto proj = Float4x4FromGLM(projection);
 	glm::mat4 viewProj = projection * view;
 	Diligent::ExtractViewFrustumPlanesFromMatrix(Float4x4FromGLM(viewProj), Frustum, deviceType == Diligent::RENDER_DEVICE_TYPE_GL || deviceType == Diligent::RENDER_DEVICE_TYPE_GLES);
-	Diligent::BoundBox bbox{
+	Diligent::BoundBox bbox {
 		.Min = Diligent::float3(FLT_MAX, FLT_MAX, FLT_MAX),
 		.Max = Diligent::float3(FLT_MIN, FLT_MIN, FLT_MIN),
 	};
@@ -177,28 +178,36 @@ void NCamera::GenerateFrustum(glm::mat4 view, glm::mat4 projection, const mu_flo
 	FrustumBBox = bbox;
 }
 
-glm::mat4 NCamera::GetView()
+glm::mat4 NCamera::GetView() const
 {
-	const glm::vec3 LeftHandedConversion(1.0f, -1.0f, 1.0f);
-	return glm::lookAtLH(Eye * LeftHandedConversion, Target * LeftHandedConversion, Up);
+	return glm::lookAtLH(glm::xzy(Eye), glm::xzy(Target), Up);
 }
 
-void NCamera::SetMode(NCameraMode mode)
+glm::mat4 NCamera::GetShadowView() const
+{
+	// We need a view that points in a direction XY direction but not from Up or Down.
+	glm::vec3 eye = Eye;
+	const glm::vec3 target = Target;
+	eye.z = target.z;
+	return glm::lookAtLH(glm::xzy(eye), glm::xzy(target), Up);
+}
+
+void NCamera::SetMode(const NCameraMode mode)
 {
 	Mode = mode;
 }
 
-void NCamera::SetEye(glm::vec3 eye)
+void NCamera::SetEye(const glm::vec3 eye)
 {
 	Eye = eye;
 }
 
-void NCamera::SetTarget(glm::vec3 target)
+void NCamera::SetTarget(const glm::vec3 target)
 {
 	Target = target;
 }
 
-void NCamera::SetAngle(glm::vec3 angle)
+void NCamera::SetAngle(const glm::vec3 angle)
 {
 	Angle = angle;
 }

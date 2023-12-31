@@ -262,6 +262,17 @@ const mu_boolean NEnvironment::LoadObjects(mu_utf8string filename, const std::ma
 		return false;
 	}
 
+	Objects->ClearFadingGroups();
+
+	if (document.contains("fading_groups"))
+	{
+		const auto &fadingGroups = document["fading_groups"];
+		for (const auto &fadingGroup : fadingGroups)
+		{
+			Objects->AddFadingGroup(fadingGroup["id"].get<mu_uint32>(), fadingGroup["target"].get<mu_float>(), fadingGroup["speed"].get<mu_float>());
+		}
+	}
+
 	const auto &objects = document["objects"];
 	for (const auto &jobject : objects)
 	{
@@ -270,9 +281,9 @@ const mu_boolean NEnvironment::LoadObjects(mu_utf8string filename, const std::ma
 		object.Renderable = jobject["renderable"].get<mu_boolean>();
 		object.Interactive = jobject["interactive"].get<mu_boolean>();
 		object.LightEnable = jobject["light_enable"].get<mu_boolean>();
-		object.ShouldFade = false;
-		if (jobject.contains("should_fade"))
-			object.ShouldFade = jobject["should_fade"].get<mu_boolean>();
+		object.FadingGroup = NInvalidUInt8;
+		if (jobject.contains("fading_group"))
+			object.FadingGroup = jobject["fading_group"].get<mu_uint8>();
 
 		const auto &jlight = jobject["light"];
 		object.Light.Mode = LightModeFromString(jlight["mode"].get<mu_utf8string>());

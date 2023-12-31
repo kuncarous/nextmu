@@ -7,6 +7,8 @@ namespace MUState
 	mu_float ElapsedTime;
 	mu_float UpdateTime;
 	mu_uint32 UpdateCount;
+	mu_float Luminosity;
+	glm::vec3 Luminosity3;
 
 	entt::entity HeroEntity = entt::null;
 
@@ -14,6 +16,8 @@ namespace MUState
 	{
 		WorldTime = worldTime;
 		ElapsedTime = elapsedTime;
+		Luminosity = glm::sin(worldTime * 0.004f) * 0.15f + 0.5f;
+		Luminosity3 = glm::vec3(Luminosity, Luminosity, Luminosity);
 	}
 
 	void SetUpdate(const mu_float updateTime, const mu_uint32 updateCount)
@@ -40,6 +44,16 @@ namespace MUState
 	const mu_uint32 GetUpdateCount()
 	{
 		return UpdateCount;
+	}
+
+	const mu_float GetLuminosity()
+	{
+		return Luminosity;
+	}
+
+	glm::vec3 GetLuminosityVector3()
+	{
+		return Luminosity3;
 	}
 
 	void SetHero(const entt::entity entity)

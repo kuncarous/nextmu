@@ -45,6 +45,7 @@ void NController::Update()
 	const auto windowHeight = MUConfig::GetWindowHeight();
 	auto camera = GetCamera();
 	glm::mat4 view = camera->GetView();
+	glm::mat4 shadowView = camera->GetShadowView();
 	constexpr mu_float HomogeneousFar = 5000.0f;
 	constexpr mu_float NonHomogeneousFar = 50000.0f;
 	const mu_float aspect = static_cast<mu_float>(windowWidth) / static_cast<mu_float>(windowHeight);
@@ -66,10 +67,18 @@ void NController::Update()
 		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GL ||
 		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GLES
 	);
+	Diligent::float4x4 shadowProjection = Diligent::float4x4::Projection(
+		glm::pi<mu_float>() * 0.25f,
+		aspect,
+		nearZ,
+		MUConfig::GetShadowFarZ(),
+		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GL ||
+		MUGraphics::GetDeviceType() == Diligent::RENDER_DEVICE_TYPE_GLES
+	);
 
 	camera->GenerateFrustum(view, GLMFromFloat4x4(projection), nearZ, farZ);
 
-	MURenderState::SetViewTransform(view, GLMFromFloat4x4(projection), GLMFromFloat4x4(projection));
+	MURenderState::SetViewTransform(view, GLMFromFloat4x4(projection), GLMFromFloat4x4(projection), shadowView, GLMFromFloat4x4(shadowProjection));
 	MURenderState::AttachCamera(camera);
 	
 	auto centerNearPoint = (
@@ -77,9 +86,7 @@ void NController::Update()
 		? glm::unProjectNO(glm::vec3(windowWidth * 0.5f, windowHeight * 0.5f, 0.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
 		: glm::unProjectZO(glm::vec3(windowWidth * 0.5f, windowHeight * 0.5f, 0.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
 	);
-
-	// Since we use a left handed view we need to change sign in Z
-	NearPoint = Diligent::float3(centerNearPoint.x, -centerNearPoint.y, centerNearPoint.z);
+	NearPoint = Diligent::float3(centerNearPoint.x, centerNearPoint.z, centerNearPoint.y); // glm::xzy
 
 	if (Character != entt::null)
 	{
@@ -94,10 +101,8 @@ void NController::Update()
 			? glm::unProjectNO(glm::vec3(mousePosition.x, windowHeight - mousePosition.y, 1.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
 			: glm::unProjectZO(glm::vec3(mousePosition.x, windowHeight - mousePosition.y, 1.0f), view, MURenderState::GetProjection(), glm::vec4(0.0f, 0.0f, windowWidth, windowHeight))
 		);
-
-		// Since we use a left handed view we need to change sign in Y coord
-		nearPoint.y *= -1.0f;
-		farPoint.y *= -1.0f;
+		nearPoint = glm::xzy(nearPoint);
+		farPoint = glm::xzy(farPoint);
 
 		const auto rayDirection = glm::normalize(farPoint - nearPoint);
 		glm::vec3 intersection;
@@ -147,13 +152,12 @@ void NController::PreRender()
 		auto characters = Environment->GetCharacters();
 		auto &registry = characters->GetRegistry();
 		auto [position, boundingBoxes] = registry.get<NEntity::NPosition, NEntity::NBoundingBoxes>(Character);
-		auto &bboxMin = boundingBoxes.Calculated.Min;
-		auto &bboxMax = boundingBoxes.Calculated.Max;
+		auto &bbox = boundingBoxes.AABB.Calculated;
 
-		Diligent::BoundBox bbox;
-		bbox.Min = Diligent::float3(bboxMin.x, bboxMin.y, bboxMin.z);
-		bbox.Max = Diligent::float3(bboxMax.x, bboxMax.y, bboxMax.z);
-		DistanceToCharacter = Diligent::GetPointToBoxDistance(bbox, NearPoint);
+		Diligent::BoundBox b;
+		b.Min = Diligent::float3(bbox.Min.x, bbox.Min.y, bbox.Min.z);
+		b.Max = Diligent::float3(bbox.Max.x, bbox.Max.y, bbox.Max.z);
+		DistanceToCharacter = Diligent::GetPointToBoxDistance(b, NearPoint);
 	}
 }
 
