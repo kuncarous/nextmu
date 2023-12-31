@@ -7,15 +7,7 @@
 	path = Dependencies/Repositories/glm
 	url = https://github.com/g-truc/glm.git
 	shallow = true
-[submodule "Dependencies/Repositories/bx"]
-	path = Dependencies/Repositories/bx
-	url = https://github.com/bkaradzic/bx.git
-	shallow = true
-[submodule "Dependencies/Repositories/bimg"]
-	path = Dependencies/Repositories/bimg
-	url = https://github.com/bkaradzic/bimg.git
-	shallow = true
-[submodule "Dependencies/Repositories/bgfx"]
-	path = Dependencies/Repositories/bgfx
-	url = https://github.com/bkaradzic/bgfx.git
+[submodule "Dependencies/Repositories/DiligentEngine"]
+	path = Dependencies/Repositories/DiligentEngine
+	url = https://github.com/DiligentGraphics/DiligentEngine.git
 	shallow = true

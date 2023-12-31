@@ -3,6 +3,7 @@
 
 namespace MUInput
 {
+	glm::ivec2 MousePosition;
 	mu_float MouseWheel = 0.0f;
 	mu_uint8 MouseState[MOUSE_BUTTON_MAX] = {};
 	mu_uint8 MouseUsed[MOUSE_BUTTON_MAX] = {};
@@ -22,7 +23,19 @@ namespace MUInput
 
 	void ProcessKeys()
 	{
+		MouseWheel = 0.0f;
 		mu_memcpy(KeyState, KeyPressed, sizeof(KeyState));
+	}
+
+	void SetMousePosition(mu_int32 x, mu_int32 y)
+	{
+		MousePosition.x = x;
+		MousePosition.y = y;
+	}
+
+	const glm::ivec2 GetMousePosition()
+	{
+		return MousePosition;
 	}
 
 	void SetMouseButton(mu_uint32 index, mu_uint8 state)

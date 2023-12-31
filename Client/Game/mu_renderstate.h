@@ -3,20 +3,41 @@
 
 #pragma once
 
-#include "mu_renderstate_enums.h"
+#include "t_textureattachments.h"
 
 class NCamera;
 class NEnvironment;
 class NTerrain;
-class NTexture;
+class NGraphicsTexture;
 
 namespace MURenderState
 {
+	const mu_boolean Initialize();
+	void Destroy();
 	void Reset();
 
-	void SetViewTransform(cglm::mat4 view, cglm::mat4 projection);
-	void GetProjection(cglm::mat4 dest);
-	void GetView(cglm::mat4 dest);
+	void SetRenderMode(const NRenderMode mode);
+	const NRenderMode GetRenderMode();
+
+	void SetShadowResourceId(const NResourceId resourceId);
+	const NResourceId GetShadowResourceId();
+	void SetShadowMode(const NShadowMode mode);
+	const NShadowMode GetShadowMode();
+	void SetShadowMap(Diligent::ShadowMapManager *shadowMap);
+	Diligent::ShadowMapManager *GetShadowMap();
+
+	Diligent::IBuffer *GetCameraUniform();
+	Diligent::IBuffer *GetLightUniform();
+
+	void SetViewTransform(glm::mat4 view, glm::mat4 projection, glm::mat4 frustumProjection, glm::mat4 shadowView, glm::mat4 shadowProjection);
+	void SetViewProjection(glm::mat4 viewProj);
+	glm::mat4 &GetViewProjection();
+	glm::mat4 &GetViewProjectionTransposed();
+	glm::mat4 &GetFrustumProjection();
+	glm::mat4 &GetProjection();
+	glm::mat4 &GetView();
+	glm::mat4 &GetShadowProjection();
+	glm::mat4 &GetShadowView();
 
 	void AttachCamera(NCamera *camera);
 	void DetachCamera();
@@ -25,11 +46,11 @@ namespace MURenderState
 
 	const NCamera *GetCamera();
 	const NEnvironment *GetEnvironment();
-	const NTerrain *GetTerrain();
+	NTerrain *GetTerrain();
 
-	void AttachTexture(TextureAttachment::Type type, const NTexture *texture);
-	void DetachTexture(TextureAttachment::Type type);
-	const NTexture *GetTexture(TextureAttachment::Type type);
+	void AttachTexture(const NTextureAttachmentType type, NGraphicsTexture *texture);
+	void DetachTexture(const NTextureAttachmentType type);
+	NGraphicsTexture *GetTexture(const NTextureAttachmentType type);
 };
 
 #endif

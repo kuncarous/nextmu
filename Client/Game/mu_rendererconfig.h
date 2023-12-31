@@ -5,11 +5,11 @@
 
 struct NRenderConfig
 {
-	const mu_uint32 BoneOffset;
-	const glm::vec3 BodyOrigin;
-	const mu_float BodyScale;
-	const mu_boolean EnableLight;
-	const glm::vec4 BodyLight;
+	mu_uint32 BoneOffset;
+	glm::vec3 BodyOrigin;
+	mu_float BodyScale;
+	mu_boolean EnableLight;
+	glm::vec4 BodyLight;
 };
 
 #endif

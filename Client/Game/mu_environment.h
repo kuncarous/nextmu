@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "mu_camera.h"
+#include "mu_environment_controller.h"
 #include "mu_environment_objects.h"
 #include "mu_environment_characters.h"
 #include "mu_environment_particles.h"
@@ -12,6 +14,8 @@
 
 class NTerrain;
 
+typedef std::unique_ptr<Diligent::ShadowMapManager> NShadowMapPtr;
+typedef std::unique_ptr<NController> NControllerPtr;
 typedef std::unique_ptr<NTerrain> NTerrainPtr;
 typedef std::unique_ptr<NModel> NModelPtr;
 typedef std::unique_ptr<NObjects> NObjectsPtr;
@@ -25,7 +29,9 @@ public:
 	const mu_boolean Initialize();
 	void Destroy();
 
-	void Reset();
+	const mu_boolean CreateShadowMap();
+
+	void Reset(const mu_boolean forceReset = false);
 	void Update();
 	void Render();
 	void CalculateLight(
@@ -40,6 +46,17 @@ private:
 	const mu_boolean LoadObjects(mu_utf8string filename, const std::map<mu_uint32, NModel *> models);
 
 public:
+	NController *GetController() const
+	{
+		return Controller.get();
+	}
+
+	NCamera *GetCamera() const
+	{
+		if (Controller == nullptr) return nullptr;
+		return Controller->GetCamera();
+	}
+
 	NObjects *GetObjects() const
 	{
 		return Objects.get();
@@ -60,12 +77,21 @@ public:
 		return Joints.get();
 	}
 
-	const NTerrain *GetTerrain() const
+	NTerrain *GetTerrain() const
 	{
 		return Terrain.get();
 	}
 
 private:
+	NRenderSettings RenderSettings;
+	Diligent::LightAttribs LightAttribs;
+
+	Diligent::float4 LightDirection = Diligent::float4(-0.544988f, -0.838444f, 0.0f, 0.0f);
+	NResourceId ShadowResourceId = NInvalidUInt32;
+	NShadowMapPtr ShadowMap;
+	std::vector<Diligent::ViewFrustumExt> ShadowFrustums;
+
+	NControllerPtr Controller;
 	NTerrainPtr Terrain;
 	std::vector<NModelPtr> Models;
 	NObjectsPtr Objects;

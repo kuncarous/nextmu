@@ -9,18 +9,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-namespace cglm
-{
-#include <cglm/types.h>
-#include <cglm/cam.h>
-#include <cglm/frustum.h>
-#include <cglm/box.h>
-#include <cglm/sphere.h>
-#include <cglm/clipspace/persp_rh_zo.h>
-}
 
 #include <SDL.h>
-#include <bgfx/bgfx.h>
 #include <FreeImage.h>
 #include <entt/entt.hpp>
 #include <angelscript.h>
@@ -32,14 +22,28 @@ namespace cglm
 #include "shared_precompiled.h"
 #include "mu_version.h"
 
+/* Diligent Engine */
+#include <RefCntAutoPtr.hpp>
+#include <EngineFactory.h>
+#include <RenderDevice.h>
+#include <DeviceContext.h>
+#include <SwapChain.h>
+#include <ScreenCapture.hpp>
+#include <GraphicsTypesX.hpp>
+#include <AdvancedMath.hpp>
+#include <ShadowMapManager.hpp>
+
 #define NEXTMU_TITLE "NextMU Project"
 
 #define NEXTMU_UI_DUMMY (0)
 #define NEXTMU_UI_NOESISGUI (1)
-#define NEXTMU_UI_LIBRARY NEXTMU_UI_NOESISGUI
+#define NEXTMU_UI_LIBRARY NEXTMU_UI_DUMMY
 
+#define NEXTMU_COMPRESSED_MESHS (0)
 #define NEXTMU_COMPRESSED_PARTICLES (0)
 #define NEXTMU_COMPRESSED_JOINTS (0)
+
+#define NEXTMU_RENDER_BBOX (0)
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 /*
@@ -52,7 +56,6 @@ namespace cglm
 #endif
 
 #include "mu_math.h"
-#include "mu_texture.h"
 #include "mu_model.h"
 #include "mu_terrain.h"
 #include "mu_skeletoninstance.h"

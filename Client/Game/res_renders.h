@@ -10,7 +10,7 @@ namespace MURendersManager
 	const mu_boolean Initialize();
 	void Destroy();
 
-	const NRender *GetRender(const mu_utf8string id);
+	NRender *GetRender(const mu_utf8string id);
 }
 
 #endif

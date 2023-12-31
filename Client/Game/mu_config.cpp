@@ -4,8 +4,19 @@
 namespace MUConfig
 {
 	mu_boolean WindowMode = true;
-	mu_uint32 WindowWidth = 1024;
+	mu_uint32 WindowWidth = 1366;
 	mu_uint32 WindowHeight = 768;
+
+	mu_boolean EnableShadows = false;
+	NShadowMode ShadowMode = NShadowMode::PCF;
+	mu_float ShadowFarZ = 5000.0f;
+	mu_boolean ShadowRightHanded = false;
+	mu_uint32 ShadowCascadesCount = 4u;
+	mu_uint32 ShadowResolution = 2048u;
+	mu_float ShadowPartitioning = 0.95f;
+	mu_uint32 ShadowFilterSize = 2u;
+	mu_boolean ShadowFilterAcrossCascades = false;
+	mu_boolean ShadowBestCascadeSearch = false;
 
 	mu_boolean Antialiasing = false;
 	mu_boolean VerticalSync = false;
@@ -74,6 +85,56 @@ namespace MUConfig
 		}
 #endif
 
+		if (document.contains("Shadows") == true)
+		{
+			EnableShadows = document["Shadows"].get<mu_boolean>();
+		}
+
+		if (document.contains("ShadowMode") == true)
+		{
+			ShadowMode = static_cast<NShadowMode>(std::clamp(document["ShadowMode"].get<mu_uint32>(), MinShadowMode, MaxShadowMode));
+		}
+
+		if (document.contains("ShadowFarZ") == true)
+		{
+			ShadowFarZ = glm::clamp(document["ShadowFarZ"].get<mu_float>(), 1000.0f, 50000.0f);
+		}
+
+		if (document.contains("ShadowRightHanded") == true)
+		{
+			ShadowRightHanded = document["ShadowRightHanded"].get<mu_boolean>();
+		}
+
+		if (document.contains("ShadowCascadesCount") == true)
+		{
+			ShadowCascadesCount = glm::clamp(document["ShadowCascadesCount"].get<mu_uint32>(), 1u, static_cast<mu_uint32>(MAX_CASCADES));
+		}
+
+		if (document.contains("ShadowResolution") == true)
+		{
+			ShadowResolution = glm::clamp(document["ShadowResolution"].get<mu_uint32>(), 1024u, 8192u);
+		}
+
+		if (document.contains("ShadowPartitioning") == true)
+		{
+			ShadowPartitioning = glm::clamp(document["ShadowPartitioning"].get<mu_float>(), 0.0f, 1.0f);
+		}
+
+		if (document.contains("ShadowFilterSize") == true)
+		{
+			ShadowFilterSize = glm::clamp(document["ShadowFilterSize"].get<mu_uint32>(), 1u, 4u);
+		}
+
+		if (document.contains("ShadowFilterAcrossCascades") == true)
+		{
+			ShadowFilterAcrossCascades = document["ShadowFilterAcrossCascades"].get<mu_boolean>();
+		}
+
+		if (document.contains("ShadowBestCascadeSearch") == true)
+		{
+			ShadowBestCascadeSearch = document["ShadowBestCascadeSearch"].get<mu_boolean>();
+		}
+
 		if (document.contains("Antialiasing") == true)
 		{
 			Antialiasing = document["Antialiasing"].get<mu_boolean>();
@@ -120,6 +181,56 @@ namespace MUConfig
 	const mu_uint32 GetWindowHeight()
 	{
 		return WindowHeight;
+	}
+
+	const mu_boolean GetEnableShadows()
+	{
+		return EnableShadows;
+	}
+
+	const NShadowMode GetShadowMode()
+	{
+		return ShadowMode;
+	}
+
+	const mu_float GetShadowFarZ()
+	{
+		return ShadowFarZ;
+	}
+
+	const mu_boolean GetShadowRightHanded()
+	{
+		return ShadowRightHanded;
+	}
+
+	const mu_uint32 GetShadowCascadesCount()
+	{
+		return ShadowCascadesCount;
+	}
+
+	const mu_uint32 GetShadowResolution()
+	{
+		return ShadowResolution;
+	}
+
+	const mu_float GetShadowPartitioning()
+	{
+		return ShadowPartitioning;
+	}
+
+	const mu_uint32 GetShadowFilterSize()
+	{
+		return ShadowFilterSize;
+	}
+
+	const mu_boolean GetShadowFilterAcrossCascades()
+	{
+		return ShadowFilterAcrossCascades;
+	}
+
+	const mu_boolean GetShadowBestCascadeSearch()
+	{
+		return ShadowBestCascadeSearch;
 	}
 
 	const mu_boolean GetAntialiasing()

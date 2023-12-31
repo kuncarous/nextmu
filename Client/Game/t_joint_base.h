@@ -27,7 +27,7 @@ namespace TJoint
 		virtual EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last) = 0;
 		virtual EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last) = 0;
 		virtual EnttIterator Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer) = 0;
-		virtual void RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer) = 0;
+		virtual void RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer) = 0;
 
 	protected:
 		friend Template *GetTemplate(JointType type);

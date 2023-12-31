@@ -10,7 +10,8 @@ namespace UINoesis
 	void Destroy();
 
 	void Update();
-	void Render();
+	void RenderOffscreen();
+	void RenderOnscreen();
 
 	const mu_boolean OnEvent(const SDL_Event *event);
 };

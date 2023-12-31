@@ -31,9 +31,6 @@
     <Filter Include="Textures">
       <UniqueIdentifier>{b841628b-979c-45fb-8d71-9d9873fff6dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="State">
-      <UniqueIdentifier>{bf2d47ed-f01b-40fe-bfbe-6b4955d35b3a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Model">
       <UniqueIdentifier>{6ff101c5-bebe-42b6-9b34-fba312a96054}</UniqueIdentifier>
     </Filter>
@@ -49,17 +46,11 @@
     <Filter Include="UI">
       <UniqueIdentifier>{352cc6ae-aafe-4dd8-b5fe-4977382c90d9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Texture">
-      <UniqueIdentifier>{cbeb6f06-7f5e-453e-8f9e-23b022b1807c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Environment">
       <UniqueIdentifier>{38eb499a-3e3a-4369-8e4a-cd7ca81646b3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Math">
       <UniqueIdentifier>{708273af-4e66-4498-9b69-68d035789674}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Math\Frustum">
-      <UniqueIdentifier>{f674ce35-2860-4304-b734-6fdbbca4e171}</UniqueIdentifier>
     </Filter>
     <Filter Include="Caps">
       <UniqueIdentifier>{ef27b566-d744-4558-bde3-8732c3d1f3dd}</UniqueIdentifier>
@@ -163,6 +154,75 @@
     <Filter Include="Renders">
       <UniqueIdentifier>{de0b807a-8c10-4b6f-a943-30c727cfc12a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Resources">
+      <UniqueIdentifier>{31e85a82-839c-454b-8879-f696c8100b62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Resources\Buffer">
+      <UniqueIdentifier>{26ef7963-dd74-430d-9ae2-c3aa812dc29e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Resources\Texture">
+      <UniqueIdentifier>{90804ab6-b602-4a9d-b5ad-69fd92a9dd34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Shaders">
+      <UniqueIdentifier>{238dfe68-3239-4bc3-b8f9-aff1b786b443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Pipelines">
+      <UniqueIdentifier>{8b8ad92f-fd44-4cb1-9106-da1be626aa9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Layouts">
+      <UniqueIdentifier>{2ae436cb-bf97-4216-a7af-892eb30346f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Samplers">
+      <UniqueIdentifier>{7dd5b32a-2b52-4d1c-b255-c221cc80f194}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Renderer">
+      <UniqueIdentifier>{ec333be7-ed51-4f74-852e-5b002fc036da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Renderer\Classifier">
+      <UniqueIdentifier>{1ccfe428-5982-45f9-9a9f-05903f3a0012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Shadows">
+      <UniqueIdentifier>{4e96e200-008b-4ebb-893b-c2a371857804}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\RenderDevice">
+      <UniqueIdentifier>{6ea3c672-84e0-4fb7-9ced-11ebca2612ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Texture">
+      <UniqueIdentifier>{41fc2974-cd05-442c-be53-6483f2ff933f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\RenderTarget">
+      <UniqueIdentifier>{5e012fbf-7abb-445d-abec-e714e40108d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Navigation">
+      <UniqueIdentifier>{f1f69de9-0ee3-47d4-99bb-52f39717ed51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Navigation\Detour">
+      <UniqueIdentifier>{8bd5757a-e9f3-40cf-9567-318891334455}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="States">
+      <UniqueIdentifier>{bf2d47ed-f01b-40fe-bfbe-6b4955d35b3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="States\Render">
+      <UniqueIdentifier>{114cf7a7-e2b7-402d-beba-5b78658068e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="States\Global">
+      <UniqueIdentifier>{fcd1e889-f053-4ec9-af7f-6e6ffa6a952f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Controller">
+      <UniqueIdentifier>{bb6cf302-ebaa-4a4d-9f41-3be1d61f65ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Animations">
+      <UniqueIdentifier>{abec6bdc-e543-46a8-aa63-cd61236ead53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Attachments">
+      <UniqueIdentifier>{21f5f82c-a57e-43bf-ada2-f26193dade1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Characters">
+      <UniqueIdentifier>{41bc3d93-6e76-453f-8b16-f8f22c2dea33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\OBB">
+      <UniqueIdentifier>{db6ea670-9a27-4ad6-af25-b3cec2d553c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -192,9 +252,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_textures.cpp">
       <Filter>Textures</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_state.cpp">
-      <Filter>State</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_model.cpp">
       <Filter>Model</Filter>
     </ClCompile>
@@ -207,12 +264,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.cpp">
       <Filter>Skeleton</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_texture.cpp">
-      <Filter>Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp">
-      <Filter>State</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_terrain.cpp">
       <Filter>Environment</Filter>
     </ClCompile>
@@ -221,9 +272,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_crypt.cpp">
       <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_frustum.cpp">
-      <Filter>Math\Frustum</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_capabilities.cpp">
       <Filter>Caps</Filter>
@@ -250,15 +298,6 @@
       <Filter>Scripting\Addons\Array</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.cpp">
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_consts.cpp">
@@ -327,6 +366,117 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_entity.cpp">
       <Filter>Environment\Entity</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.cpp">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelineresources.cpp">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shader.cpp">
+      <Filter>Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_layouts.cpp">
+      <Filter>Graphics\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_samplers.cpp">
+      <Filter>Graphics\Samplers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_immutables.cpp">
+      <Filter>Graphics\Samplers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.cpp">
+      <Filter>Graphics\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_texture.cpp">
+      <Filter>Graphics\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resources.cpp">
+      <Filter>Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_buffer.cpp">
+      <Filter>Graphics\Resources\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shaderresources.cpp">
+      <Filter>Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.cpp">
+      <Filter>Graphics\Renderer\Classifier</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_pipelinestate.cpp">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_shadows.cpp">
+      <Filter>Graphics\Shadows</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_texture.cpp">
+      <Filter>UI\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_rendertarget.cpp">
+      <Filter>UI\RenderTarget</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui_noesisgui_renderdevice.cpp">
+      <Filter>UI\RenderDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_graphics_resourceid.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourAlloc.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourAssert.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourCommon.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMesh.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMeshBuilder.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNavMeshQuery.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Detour\Source\DetourNode.cpp">
+      <Filter>Navigation\Detour</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_navigation.cpp">
+      <Filter>Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_renderstate.cpp">
+      <Filter>States\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_state.cpp">
+      <Filter>States\Global</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_controller.cpp">
+      <Filter>Environment\Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_character_move.cpp">
+      <Filter>Environment\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_animationsmanager.cpp">
+      <Filter>Animations</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_textureattachments.cpp">
+      <Filter>Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_charactersmanager.cpp">
+      <Filter>Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_terrain_cullingtree.cpp">
+      <Filter>Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_aabb.cpp">
+      <Filter>Math\AABB</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_obb.cpp">
+      <Filter>Math\OBB</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
@@ -362,9 +512,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_textures.h">
       <Filter>Textures</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_state.h">
-      <Filter>State</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_model.h">
       <Filter>Model</Filter>
     </ClInclude>
@@ -389,20 +536,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_skeletonmanager.h">
       <Filter>Skeleton</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_texture.h">
-      <Filter>Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h">
-      <Filter>State</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate_enums.h">
-      <Filter>State</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment.h">
       <Filter>Environment</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_frustum.h">
-      <Filter>Math\Frustum</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math.h">
       <Filter>Math</Filter>
@@ -441,15 +576,6 @@
       <Filter>Scripting\Addons\Array</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui.h">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfx.h">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxrendertarget.h">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_bgfxtexture.h">
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_consts.h">
@@ -565,6 +691,150 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)res_render.h">
       <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelines.h">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelineresources.h">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shaderresources.h">
+      <Filter>Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shader.h">
+      <Filter>Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_layouts.h">
+      <Filter>Graphics\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_samplers.h">
+      <Filter>Graphics\Samplers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_immutables.h">
+      <Filter>Graphics\Samplers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_rendermanager.h">
+      <Filter>Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resources.h">
+      <Filter>Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_texture.h">
+      <Filter>Graphics\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_buffer.h">
+      <Filter>Graphics\Resources\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_resizablequeue.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_renderclassifier.h">
+      <Filter>Graphics\Renderer\Classifier</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_rendersettings.h">
+      <Filter>Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_pipelinestate.h">
+      <Filter>Graphics\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_shadows.h">
+      <Filter>Graphics\Shadows</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_texture.h">
+      <Filter>UI\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_rendertarget.h">
+      <Filter>UI\RenderTarget</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui_noesisgui_renderdevice.h">
+      <Filter>UI\RenderDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_graphics_resourceid.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourAlloc.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourAssert.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourCommon.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourMath.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMesh.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMeshBuilder.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNavMeshQuery.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourNode.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Detour\Include\DetourStatus.h">
+      <Filter>Navigation\Detour</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_navigation.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)nav_path.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)nav_polys.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_renderstate.h">
+      <Filter>States\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_state.h">
+      <Filter>States\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_controller.h">
+      <Filter>Environment\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_animationsmanager.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ani_node.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ani_input.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_model_enums.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_textureattachments.h">
+      <Filter>Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_textureattachments.h">
+      <Filter>Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_charactersmanager.h">
+      <Filter>Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_charactersmanager_structs.h">
+      <Filter>Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_cullingtree.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_consts.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_structs.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_obb.h">
+      <Filter>Math\OBB</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

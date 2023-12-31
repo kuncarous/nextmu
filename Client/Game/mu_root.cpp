@@ -12,15 +12,20 @@
 #include "mu_environment.h"
 #include "mu_state.h"
 #include "mu_renderstate.h"
+#include "mu_controllerstate.h"
 #include "mu_threadsmanager.h"
 #include "mu_resourcesmanager.h"
+#include "mu_animationsmanager.h"
 #include "mu_skeletoninstance.h"
 #include "mu_skeletonmanager.h"
+#include "mu_charactersmanager.h"
+#include "mu_textureattachments.h"
 #include "mu_model.h"
 #include "mu_modelrenderer.h"
 #include "mu_bboxrenderer.h"
 #include "res_renders.h"
 #include "res_items.h"
+#include "mu_math.h"
 
 #include "ui_noesisgui.h"
 
@@ -32,7 +37,7 @@ constexpr mu_double GameCycleTime = 1000.0 / 25.0; // 25 FPS
 
 struct DemoSettings
 {
-	mu_utf8string Map = "data/worlds/lorencia";
+	mu_utf8string Map = "data/worlds/areniltemple";
 	mu_float X = 160.0f;
 	mu_float Y = 116.5f;
 	mu_float Z = 1282.0f;
@@ -166,6 +171,30 @@ namespace MURoot
 			return false;
 		}
 
+		if (MUCharactersManager::Load() == false)
+		{
+			mu_error("Failed to load characters.");
+			return false;
+		}
+
+		if (MUTextureAttachments::Initialize() == false)
+		{
+			mu_error("Failed to initialize attachments.");
+			return false;
+		}
+
+		if (MUAnimationsManager::Load() == false)
+		{
+			mu_error("Failed to load animations.");
+			return false;
+		}
+
+		if (MURenderState::Initialize() == false)
+		{
+			mu_error("Failed to initialize render state.");
+			return false;
+		}
+
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		if (UINoesis::Initialize() == false)
 		{
@@ -213,6 +242,7 @@ namespace MURoot
 #if PHYSICS_ENABLED == 1
 		MUPhysics::Destroy();
 #endif
+		MURenderState::Destroy();
 		MUGraphics::Destroy();
 		MUAngelScript::Destroy();
 		MUWindow::Destroy();
@@ -223,48 +253,6 @@ namespace MURoot
 	}
 
 	void OnEvent(const SDL_Event* event);
-
-	struct MobInfo
-	{
-		mu_uint16 PriorAction = 0;
-		mu_uint16 CurrentAction = 0;
-		mu_float PriorFrame = 0.0f;
-		mu_float CurrentFrame = 0.0f;
-	};
-
-	std::vector<MobInfo> MobsInfo;
-	std::vector<NSkeletonInstance> MobsInstance;
-	std::vector<mu_uint32> MobsBonesOffset;
-
-	const mu_uint32 GetMobsCount()
-	{
-		return static_cast<mu_uint32>(MobsInstance.size());
-	}
-
-	void AddMob()
-	{
-		if (MobsInstance.size() >= 600) return;
-
-		NSkeletonInstance instance;
-		instance.SetParent(
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			1.0f
-		);
-
-		MobsInfo.push_back(MobInfo());
-		MobsInstance.push_back(instance);
-		MobsBonesOffset.push_back(0);
-	}
-
-	void RemoveMob()
-	{
-		if (MobsInstance.size() == 0) return;
-
-		MobsInfo.pop_back();
-		MobsInstance.pop_back();
-		MobsBonesOffset.pop_back();
-	}
 
 	void Run()
 	{
@@ -279,51 +267,401 @@ namespace MURoot
 
 		const DemoSettings demo = LoadDemoSettings();
 
-		static NCamera camera;
-		camera.SetMode(NCameraMode::Directional);
-		camera.SetEye(glm::vec3(demo.X * TerrainScale, demo.Y * TerrainScale, demo.Z));
-		camera.SetAngle(glm::vec3(glm::radians(demo.CX), glm::radians(demo.CY), glm::radians(0.0f)));
-		camera.SetUp(glm::vec3(0.0f, 0.0f, 1.0f));
-
 		std::unique_ptr<NEnvironment> environment(new NEnvironment());
 		if (environment->Initialize() == false || environment->LoadTerrain(demo.Map) == false)
 		{
 			return;
 		}
 
-		for (mu_uint32 n = 0; n < demo.MonstersCount; ++n)
-		{
-			AddMob();
-		}
+		environment->Reset(true);
 
-		const NModel *Model = MUResourcesManager::GetModel("monster_01");
+		NModel *Model = MUResourcesManager::GetModel("monster_01");
 		if (Model == nullptr)
 		{
 			return;
 		}
 
-		auto characters = environment->GetCharacters();
-		characters->AddOrFind(
-			TCharacter::Settings{
-				.Key = 0,
-				.Type = CharacterType::Character,
-				.X = 160,
-				.Y = 123,
-				.Rotation = 0.0f,
+		// Characters
+		{
+			auto characters = environment->GetCharacters();
+
+			// Dark Knight
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 0,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 1,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 160,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 1);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Maces, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 5);
+				characters->GenerateVirtualMeshToggle(entity);
+
+				environment->GetController()->SetCharacter(entity);
 			}
-		);
+
+			// Dark Wizard
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 1,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 0,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 161,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Elf
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 2,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 2,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 162,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Magic Gladiator
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 3,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 3,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 163,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Dark Lord
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 4,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 4,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 164,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Summoner
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 5,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 5,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 165,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Rage Fighter
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 6,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 6,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 166,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Grow Lancer
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 7,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 7,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 167,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Rune Mage
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 8,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 8,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 168,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Slayer
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 9,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 9,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 169,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Gun Crasher
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 10,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 10,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 170,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// White Wizard
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 11,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 11,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 171,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Mage
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 12,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 12,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 172,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+
+			// Illusion Knight
+			{
+				auto entity = characters->AddOrFind(
+					TCharacter::Settings{
+						.Key = 13,
+						.Type = CharacterType::Character,
+						.CharacterType = NCharacterType{
+							.Class = 13,
+							.SubClass = 0,
+						},
+						.AnimationsId = "player",
+						.X = 173,
+						.Y = 128,
+						.Rotation = 0.0f,
+					}
+				);
+				/*characters->AddAttachmentPartFromItem(entity, NPartType::Helm, EItemCategory::Helm, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Armor, EItemCategory::Armor, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Pants, EItemCategory::Pants, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Gloves, EItemCategory::Gloves, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Boots, EItemCategory::Boots, 3);
+				characters->AddAttachmentPartFromItem(entity, NPartType::ItemLeft, EItemCategory::Staffs, 5);
+				characters->AddAttachmentPartFromItem(entity, NPartType::Wings, EItemCategory::Wings, 4);
+				characters->GenerateVirtualMeshToggle(entity);*/
+			}
+		}
 
 		static mu_double accumulatedTime = 0.0;
-		static cglm::mat4 view, projection, frustumProjection;
 		while (!Quit)
 		{
 			accumulatedTime += elapsedTime;
-			const mu_float updateTime = static_cast<mu_float>(accumulatedTime / GameCycleTime);
-			const mu_uint32 updateCount = static_cast<mu_uint32>(updateTime); // Calculate update count using fixed update time from MU (25 FPS)
+			const mu_float updateTime = static_cast<mu_float>(elapsedTime / GameCycleTime);
+			const mu_uint32 updateCount = static_cast<mu_uint32>(glm::floor(accumulatedTime / GameCycleTime)); // Calculate update count using fixed update time from MU (25 FPS)
 			accumulatedTime -= static_cast<mu_double>(updateCount) * GameCycleTime; // Remove acummulated time
 
 			MUState::SetTime(static_cast<mu_float>(currentTime), static_cast<mu_float>(elapsedTime));
-			MUState::SetUpdate(glm::floor(updateTime), updateCount);
+			MUState::SetUpdate(updateTime, updateCount);
 			MURenderState::Reset();
 			MUSkeletonManager::Reset();
 
@@ -340,8 +678,8 @@ namespace MURoot
 
 			if (updateCount > 0)
 			{
-				auto *joints = environment->GetJoints();
-				/*for (mu_uint32 n = 0; n < 60; ++n)
+				/*auto *joints = environment->GetJoints();
+				for (mu_uint32 n = 0; n < 60; ++n)
 				{
 					const glm::vec3 position = glm::vec3(
 						(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
@@ -361,10 +699,10 @@ namespace MURoot
 							.Scale = glm::linearRand(60.0f, 70.0f),
 						}
 					);
-				}*/
+				}
 
 				auto *particles = environment->GetParticles();
-				/*for (mu_uint32 n = 0; n < 200; ++n)
+				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData {
@@ -409,126 +747,54 @@ namespace MURoot
 				}*/
 			}
 
-			camera.Update();
 			environment->Reset();
 
-			const mu_uint32 mobsCount = GetMobsCount();
-			for (mu_uint32 n = 0; n < mobsCount; ++n)
-			{
-				auto &mobInfo = MobsInfo[n];
-				auto &skeleton = MobsInstance[n];
-				Model->PlayAnimation(mobInfo.CurrentAction, mobInfo.PriorAction, mobInfo.CurrentFrame, mobInfo.PriorFrame, Model->GetPlaySpeed() * MUState::GetUpdateTime());
-				skeleton.Animate(
-					Model,
-					{
-						.Action = mobInfo.CurrentAction,
-						.Frame = mobInfo.CurrentFrame,
-					},
-					{
-						.Action = mobInfo.PriorAction,
-						.Frame = mobInfo.PriorFrame,
-					},
-					glm::vec3(0.0f, 0.0f, 0.0f)
-				);
-			}
+			const auto device = MUGraphics::GetDevice();
+			const auto swapchain = MUGraphics::GetSwapChain();
+			const auto &swapchainDesc = swapchain->GetDesc();
+			const auto immediateContext = MUGraphics::GetImmediateContext();
 
-			const auto windowWidth = MUConfig::GetWindowWidth();
-			const auto windowHeight = MUConfig::GetWindowHeight();
+			mu_float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+			auto *pRTV = swapchain->GetCurrentBackBufferRTV();
+			auto *pDSV = swapchain->GetDepthBufferDSV();
 
-			// Set view 0 default viewport.
-			bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(windowWidth), static_cast<uint16_t>(windowHeight));
-			bgfx::touch(0);
-
-			camera.GetView(view);
-
-			constexpr mu_float HomogeneousFar = 5000.0f;
-			constexpr mu_float NonHomogeneousFar = 50000.0f;
-			const mu_float aspect = static_cast<mu_float>(windowWidth) / static_cast<mu_float>(windowHeight);
-			if (MUCapabilities::IsHomogeneousDepth())
-			{
-				cglm::glm_perspective_rh_no(
-					cglm::glm_rad(35.0f),
-					aspect,
-					50.0f,
-					HomogeneousFar,
-					projection
-				);
-				cglm::glm_perspective_rh_no(
-					cglm::glm_rad(35.0f),
-					aspect,
-					50.0f,
-					HomogeneousFar,
-					frustumProjection
-				);
-			}
-			else
-			{
-				cglm::glm_perspective_rh_zo(
-					cglm::glm_rad(35.0f),
-					aspect,
-					50.0f,
-					NonHomogeneousFar,
-					projection
-				);
-				cglm::glm_perspective_rh_no(
-					cglm::glm_rad(35.0f),
-					aspect,
-					50.0f,
-					NonHomogeneousFar,
-					frustumProjection
-				);
-			}
-
-			camera.GenerateFrustum(view, frustumProjection);
-
-			bgfx::setViewTransform(0, view, projection);
-			MURenderState::SetViewTransform(view, projection);
-			MURenderState::AttachCamera(&camera);
 			MURenderState::AttachEnvironment(environment.get());
-
 			environment->Update();
-
-			for (mu_uint32 n = 0; n < mobsCount; ++n)
-			{
-				auto &skeleton = MobsInstance[n];
-				MobsBonesOffset[n] = skeleton.Upload();
-			}
-
 			MUSkeletonManager::Update();
-
-			environment->Render();
-
-			mu_float mx = 0.0f, my = 0.0f;
-			for (mu_uint32 n = 0; n < mobsCount; ++n)
-			{
-				const auto bonesOffset = MobsBonesOffset[n];
-				if (bonesOffset == NInvalidUInt32) continue;
-				const glm::vec3 position = glm::vec3((100.0f + mx) * TerrainScale, (100.0f + my) * TerrainScale, 800.0f);
-				const mu_float scale = 1.0f;
-				const NRenderConfig config = {
-					.BoneOffset = bonesOffset,
-					.BodyOrigin = position,
-					.BodyScale = scale,
-					.EnableLight = true,
-					.BodyLight = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-				};
-				MUModelRenderer::RenderBody(MobsInstance[n], Model, config);
-				mx += 2.0f;
-				if (mx >= 100.0f)
-				{
-					mx = 0.0f;
-					my += 2.0f;
-				}
-			}
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 			UINoesis::Update();
-			UINoesis::Render();
 #endif
 
-			// Advance to next frame. Rendering thread will be kicked to
-			// process submitted rendering primitives.
-			bgfx::frame();
+			if (MUConfig::GetEnableShadows())
+			{
+				MURenderState::SetRenderMode(NRenderMode::ShadowMap);
+				environment->Render();
+			}
+
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
+			UINoesis::RenderOffscreen();
+#endif
+
+			MURenderState::SetRenderMode(NRenderMode::Normal);
+			MUGraphics::SetRenderTargetDesc(
+				NRenderTargetDesc{
+					.ColorFormat = swapchainDesc.ColorBufferFormat,
+					.DepthStencilFormat = swapchainDesc.DepthBufferFormat,
+				}
+			);
+			immediateContext->SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+			immediateContext->ClearRenderTarget(pRTV, clearColor, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY);
+			immediateContext->ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG | Diligent::CLEAR_STENCIL_FLAG, 1.0f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+			environment->Render();
+
+			ShaderResourcesBindingManager.MergeTemporaryShaderBindings();
+
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
+			UINoesis::RenderOnscreen();
+#endif
+
+			swapchain->Present(MUConfig::GetVerticalSync() ? 1u : 0u);
 
 			MUInput::ProcessKeys();
 
@@ -555,6 +821,15 @@ namespace MURoot
 	{
 		switch (event->type)
 		{
+		case SDL_MOUSEMOTION:
+			{
+				if (event->motion.which == SDL_TOUCH_MOUSEID) return;
+				const mu_int32 mx = MUInput::GetRealPixelSize(event->motion.x);
+				const mu_int32 my = MUInput::GetRealPixelSize(event->motion.y);
+				MUInput::SetMousePosition(mx, my);
+			}
+			break;
+
 		case SDL_MOUSEBUTTONDOWN:
 			{
 				switch (event->button.button)

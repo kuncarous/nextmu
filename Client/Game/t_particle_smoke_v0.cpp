@@ -2,6 +2,7 @@
 #include "t_particle_smoke_v0.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
+#include "mu_graphics.h"
 #include "mu_renderstate.h"
 #include "mu_state.h"
 
@@ -11,14 +12,15 @@ constexpr auto LifeTime = 16;
 constexpr auto LightDivisor = 1.0f / 8.0f;
 static const mu_char *TextureID = "smoke_v0";
 
-constexpr mu_uint64 RenderState = (
-	BGFX_STATE_WRITE_RGB |
-	BGFX_STATE_WRITE_A |
-	BGFX_STATE_CULL_CW |
-	BGFX_STATE_DEPTH_TEST_LEQUAL |
-	BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE) |
-	BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD)
-	);
+const NDynamicPipelineState DynamicPipelineState = {
+	.DepthWrite = false,
+	.DepthFunc = Diligent::COMPARISON_FUNC_LESS_EQUAL,
+	.SrcBlend = Diligent::BLEND_FACTOR_ONE,
+	.DestBlend = Diligent::BLEND_FACTOR_ONE,
+	.SrcBlendAlpha = Diligent::BLEND_FACTOR_ONE,
+	.DestBlendAlpha = Diligent::BLEND_FACTOR_ONE,
+};
+constexpr mu_boolean IsPremultipliedAlpha = true;
 
 static TParticleSmokeV0 Instance;
 
@@ -111,7 +113,7 @@ EnttIterator TParticleSmokeV0::Action(EnttRegistry &registry, EnttView &view, En
 	return iter;
 }
 
-static const NTexture *texture = nullptr;
+static NGraphicsTexture *texture = nullptr;
 EnttIterator TParticleSmokeV0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
@@ -121,8 +123,7 @@ EnttIterator TParticleSmokeV0::Render(EnttRegistry &registry, EnttView &view, En
 	const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 	const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
 
-	cglm::mat4 gview;
-	MURenderState::GetView(gview);
+	glm::mat4 gview = MURenderState::GetView();
 
 	for (; iter != last; ++iter)
 	{
@@ -142,19 +143,102 @@ EnttIterator TParticleSmokeV0::Render(EnttRegistry &registry, EnttView &view, En
 	return iter;
 }
 
-void TParticleSmokeV0::RenderGroup(const NRenderGroup &renderGroup, const NRenderBuffer &renderBuffer)
+void TParticleSmokeV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;
 
-	cglm::mat4 projection;
-	MURenderState::GetProjection(projection);
-	bgfx::update(renderBuffer.VertexBuffer, renderGroup.Index * 4, bgfx::makeRef(renderBuffer.Vertices.data() + renderGroup.Index * 4, sizeof(NRenderVertex) * renderGroup.Count * 4));
-	bgfx::update(renderBuffer.IndexBuffer, renderGroup.Index * 6, bgfx::makeRef(renderBuffer.Indices.data() + renderGroup.Index * 6, sizeof(mu_uint32) * renderGroup.Count * 6));
-	bgfx::setState(RenderState);
-	bgfx::setUniform(renderBuffer.Projection, projection);
-	bgfx::setTexture(0, renderBuffer.TextureSampler, texture->GetTexture());
-	bgfx::setVertexBuffer(0, renderBuffer.VertexBuffer, renderGroup.Index * 4, renderGroup.Count * 4);
-	bgfx::setIndexBuffer(renderBuffer.IndexBuffer, renderGroup.Index * 6, renderGroup.Count * 6);
-	bgfx::submit(0, renderBuffer.Program);
+	auto renderManager = MUGraphics::GetRenderManager();
+	auto immediateContext = MUGraphics::GetImmediateContext();
+
+	if (renderBuffer.RequireTransition == false)
+	{
+		Diligent::StateTransitionDesc updateBarriers[2] = {
+			Diligent::StateTransitionDesc(renderBuffer.VertexBuffer, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+			Diligent::StateTransitionDesc(renderBuffer.IndexBuffer, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+		};
+		immediateContext->TransitionResourceStates(mu_countof(updateBarriers), updateBarriers);
+		renderBuffer.RequireTransition = true;
+	}
+
+	immediateContext->UpdateBuffer(
+		renderBuffer.VertexBuffer,
+		sizeof(NParticleVertex) * renderGroup.Index * 4,
+		sizeof(NParticleVertex) * renderGroup.Count * 4,
+		renderBuffer.Vertices.data() + renderGroup.Index * 4,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE
+	);
+	immediateContext->UpdateBuffer(
+		renderBuffer.IndexBuffer,
+		sizeof(mu_uint32) * renderGroup.Index * 6,
+		sizeof(mu_uint32) * renderGroup.Count * 6,
+		renderBuffer.Indices.data() + renderGroup.Index * 6,
+		Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE
+	);
+
+	// Update Model Settings
+	{
+		auto uniform = renderBuffer.SettingsBuffer.Allocate();
+		uniform->IsPremultipliedAlpha = IsPremultipliedAlpha;
+		renderManager->UpdateBufferWithMap(
+			RUpdateBufferWithMap{
+				.ShouldReleaseMemory = false,
+				.Buffer = renderBuffer.SettingsUniform,
+				.Data = uniform,
+				.Size = sizeof(NParticleSettings),
+				.MapType = Diligent::MAP_WRITE,
+				.MapFlags = Diligent::MAP_FLAG_DISCARD,
+			}
+		);
+	}
+
+	auto pipelineState = GetPipelineState(renderBuffer.FixedPipelineState, DynamicPipelineState);
+	if (pipelineState->StaticInitialized == false)
+	{
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "cbCameraAttribs")->Set(MURenderState::GetCameraUniform());
+		pipelineState->Pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ParticleSettings")->Set(renderBuffer.SettingsUniform);
+		pipelineState->StaticInitialized = true;
+	}
+
+	NResourceId resourceIds[1] = { texture->GetId() };
+	auto binding = ShaderResourcesBindingManager.GetShaderBinding(pipelineState->Id, pipelineState->Pipeline, mu_countof(resourceIds), resourceIds);
+	if (binding->Initialized == false)
+	{
+		binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Texture")->Set(texture->GetTexture()->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+		binding->Initialized = true;
+	}
+
+	renderManager->SetPipelineState(pipelineState);
+	renderManager->SetVertexBuffer(
+		RSetVertexBuffer{
+			.StartSlot = 0,
+			.Buffer = renderBuffer.VertexBuffer.RawPtr(),
+			.Offset = 0,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+			.Flags = Diligent::SET_VERTEX_BUFFERS_FLAG_NONE,
+		}
+	);
+	renderManager->SetIndexBuffer(
+		RSetIndexBuffer{
+			.IndexBuffer = renderBuffer.IndexBuffer,
+			.ByteOffset = 0,
+			.StateTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY,
+		}
+	);
+	renderManager->CommitShaderResources(
+		RCommitShaderResources{
+			.ShaderResourceBinding = binding,
+		}
+	);
+
+	renderManager->DrawIndexed(
+		RDrawIndexed{
+			.Attribs = Diligent::DrawIndexedAttribs(renderGroup.Count * 6, Diligent::VT_UINT32, Diligent::DRAW_FLAG_VERIFY_ALL, 1, renderGroup.Index * 6, renderGroup.Index * 4)
+		},
+		RCommandListInfo{
+			.Type = NDrawOrderType::Classifier,
+			.View = 0,
+			.Index = 0,
+		}
+	);
 }

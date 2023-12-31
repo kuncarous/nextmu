@@ -16,6 +16,9 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{52fd0f7a-86d3-4d69-aa7f-8b15af702149}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{114242d7-2477-49cf-9583-5ef593fb6ffb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)shared_operatingsystem.h">
@@ -44,6 +47,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)shared_binaryreader.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared_enums.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

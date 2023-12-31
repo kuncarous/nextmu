@@ -1,4 +1,5 @@
 /Client/.vs
+/Tools/.vs
 /Dependencies/Installed/*
 /Client/Windows/.vs
 /Client/JSON
@@ -44,3 +45,4 @@
 /Tools/ConvertObjects/Release
 /.vs
 /Client/Binary
+/Client/Windows/NextMU/vcpkg_installed

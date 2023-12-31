@@ -59,7 +59,7 @@ namespace MUItemsManager
 		Items.clear();
 	}
 
-	const NItem *GetItem(const mu_uint16 category, const mu_uint16 index)
+	NItem *GetItem(const mu_uint16 category, const mu_uint16 index)
 	{
 		const auto id = GetItemId(category, index);
 		auto iter = Items.find(id);

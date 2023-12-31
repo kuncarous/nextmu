@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "mu_resizablequeue.h"
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/packing.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,17 +11,11 @@
 namespace TParticle
 {
 	constexpr mu_uint32 MaxRenderCount = 10000;
+
 #pragma pack(4)
-	struct NRenderVertex
+	struct NParticleSettings
 	{
-		glm::vec3 Position;
-#if NEXTMU_COMPRESSED_PARTICLES == 1
-		mu_uint64 Color;
-		mu_uint32 UV;
-#else
-		glm::vec4 Color;
-		glm::vec2 UV;
-#endif
+		mu_float IsPremultipliedAlpha;
 	};
 #pragma pack()
 
@@ -33,17 +28,19 @@ namespace TParticle
 
 	struct NRenderBuffer
 	{
-		std::array<NRenderVertex, MaxRenderCount * 4> Vertices;
+		std::array<NParticleVertex, MaxRenderCount * 4> Vertices;
 		std::array<mu_uint32, MaxRenderCount * 6> Indices;
 
 		std::vector<NRenderGroup> Groups;
 
-		bgfx::VertexLayout Layout;
-		bgfx::DynamicVertexBufferHandle VertexBuffer = BGFX_INVALID_HANDLE;
-		bgfx::DynamicIndexBufferHandle IndexBuffer = BGFX_INVALID_HANDLE;
-		bgfx::UniformHandle Projection = BGFX_INVALID_HANDLE;
-		bgfx::UniformHandle TextureSampler = BGFX_INVALID_HANDLE;
-		bgfx::ProgramHandle Program = BGFX_INVALID_HANDLE;
+		mu_shader Program = NInvalidShader;
+		mu_boolean RequireTransition = false;
+		NFixedPipelineState FixedPipelineState;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> IndexBuffer;
+		Diligent::RefCntAutoPtr<Diligent::IBuffer> SettingsUniform;
+		NResizableQueue<NParticleSettings> SettingsBuffer;
+		std::map<NPipelineStateId, Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>> Bindings;
 	};
 
 	NEXTMU_INLINE void RenderSprite(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, const glm::vec3 position[4], const glm::vec4 &light, const glm::vec4 &uv)
@@ -105,10 +102,9 @@ namespace TParticle
 		*indices = vertex + 3; ++indices;
 	}
 
-	NEXTMU_INLINE void RenderBillboardSprite(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, cglm::mat4 view, const glm::vec3 &position, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
+	NEXTMU_INLINE void RenderBillboardSprite(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, const glm::mat4 &view, const glm::vec3 &position, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
 	{
-		cglm::vec3 cposition;
-		cglm::glm_mat4_mulv3(view, (mu_float *)glm::value_ptr(position), 1.0f, cposition);
+		glm::vec3 cposition = view * glm::vec4(position.x, position.z, position.y, 1.0f);
 
 		glm::vec3 rposition[4] = {
 			{ cposition[0] - width, cposition[1] - height, cposition[2] },
@@ -120,10 +116,9 @@ namespace TParticle
 		RenderSprite(renderBuffer, renderGroup, renderIndex, rposition, light, uv);
 	}
 
-	NEXTMU_INLINE void RenderBillboardSpriteWithRotation(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, cglm::mat4 view, const glm::vec3 &position, const mu_float rotation, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
+	NEXTMU_INLINE void RenderBillboardSpriteWithRotation(NRenderBuffer &renderBuffer, const mu_uint32 renderGroup, const mu_uint32 renderIndex, const glm::mat4 &view, const glm::vec3 &position, const mu_float rotation, const mu_float width, const mu_float height, const glm::vec4 &light, const glm::vec4 &uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
 	{
-		cglm::vec3 cposition;
-		cglm::glm_mat4_mulv3(view, (mu_float *)glm::value_ptr(position), 1.0f, cposition);
+		glm::vec3 cposition = view * glm::vec4(position.x, position.z, position.y, 1.0f);
 
 		glm::vec3 rposition[4] = {
 			{ -width, -height, cposition[2] },

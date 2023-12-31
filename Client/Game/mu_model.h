@@ -5,16 +5,19 @@
 
 #include "mu_model_mesh.h"
 #include "mu_model_skeleton.h"
-#include "mu_renderstate_enums.h"
+#include "t_textureattachments.h"
 
-class NTexture;
+class NGraphicsTexture;
+typedef std::vector<NVirtualMesh> NVirtualMeshVector;
+typedef std::vector<mu_boolean> NRenderVirtualMeshToggle;
+typedef std::vector<mu_uint32> NRenderVirtualMeshLightIndex;
 
 constexpr mu_uint32 MaxBones = 200;
 
 struct NModelTexture
 {
-	TextureAttachment::Type Type = TextureAttachment::Normal;
-	std::unique_ptr<NTexture> Texture;
+	NTextureAttachmentType Type = NInvalidAttachment;
+	std::unique_ptr<NGraphicsTexture> Texture;
 };
 
 class NModel
@@ -41,10 +44,18 @@ public:
 		const mu_float PlaySpeed
 	) const;
 
+	NRenderVirtualMeshToggle GenerateVirtualMeshToggle(const NMeshRenderConditionInput &input);
+	NRenderVirtualMeshLightIndex GenerateVirtualMeshLightIndex(const NMeshRenderConditionInput &input);
+
 public:
 	NEXTMU_INLINE const mu_boolean HasMeshes() const
 	{
 		return !Meshes.empty();
+	}
+
+	NEXTMU_INLINE const mu_boolean ShouldHideBody() const
+	{
+		return HideBody;
 	}
 
 	NEXTMU_INLINE const mu_boolean HasGlobalBBox() const
@@ -52,14 +63,14 @@ public:
 		return BBoxes.Valid;
 	}
 
-	NEXTMU_INLINE const NBoundingBox &GetGlobalBBox() const
+	NEXTMU_INLINE const NOrientedBoundingBox &GetGlobalBBox() const
 	{
 		return BBoxes.Global;
 	}
 
-	NEXTMU_INLINE const mu_float GetPlaySpeed() const
+	NEXTMU_INLINE const mu_float GetPlaySpeed(const mu_uint32 index) const
 	{
-		return PlaySpeed;
+		return Animations[index].PlaySpeed;
 	}
 
 	NEXTMU_INLINE const mu_uint32 GetBoneById(const mu_utf8string id) const
@@ -81,14 +92,19 @@ public:
 		return iter->second;
 	}
 
-protected:
+	NEXTMU_INLINE const NAnimationModifierType GetAnimationModifierType(const mu_uint32 index) const
+	{
+		return Animations[index].Modifier;
+	}
+
+public:
 	friend class NSkeletonInstance;
 	friend class MUModelRenderer;
 
-	bgfx::VertexBufferHandle VertexBuffer = BGFX_INVALID_HANDLE;
+	Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexBuffer;
 	std::vector<NModelTexture> Textures;
 
-	std::vector<NVirtualMesh> VirtualMeshes;
+	NVirtualMeshVector VirtualMeshes;
 	std::vector<NMesh> Meshes;
 	std::vector<mu_utf8string> BoneName; // Per Bone (separated for better cache ratio)
 	std::vector<NBoneInfo> BoneInfo; // Per Bone (separated for better cache ratio)
@@ -100,9 +116,9 @@ protected:
 	std::map<mu_utf8string, mu_uint32> AnimationsById;
 
 	mu_utf8string Id;
+	mu_boolean HideBody = true;
 	mu_int16 BoneHead = NInvalidInt16;
 	mu_float BodyHeight = 0.0f;
-	mu_float PlaySpeed = 1.0f;
 };
 
 #endif

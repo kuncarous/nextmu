@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "mu_textures.h"
-#include "mu_texture.h"
+#include "mu_graphics.h"
 
 namespace MUTextures
 {
+	mu_atomic_uint32_t TextureIdGenerator = 0;
+
 	template <class T> void SwapValue(T& a, T& b) {
 		T tmp = a;
 		a = b;
@@ -61,6 +63,7 @@ namespace MUTextures
 		else
 		{
 			mu_assert(!"unsupported texture format");
+			return false;
 		}
 
 		FIMEMORY *memory = FreeImage_OpenMemory(buffer.get(), static_cast<DWORD>(fileLength));
@@ -99,16 +102,18 @@ namespace MUTextures
 			bitmap = newBitmap;
 		}
 
+		constexpr mu_uint32 bitsPerPixel = 32u;
+		constexpr mu_uint32 bytesPerPixel = bitsPerPixel / 8u;
+
 #if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
-		const auto bit_count = FreeImage_GetBPP(bitmap);
-		if (bit_count == 24 || bit_count == 32) {
-			const unsigned width = FreeImage_GetWidth(bitmap);
-			const unsigned height = FreeImage_GetHeight(bitmap);
-			for (unsigned y = 0; y < height; y++) {
-				BYTE* pixel = FreeImage_GetScanLine(bitmap, y);
-				for (unsigned x = 0; x < width; x++) {
-					SwapValue(pixel[0], pixel[2]);
-					pixel += (bit_count >> 3);
+		{
+			const mu_uint32 width = FreeImage_GetWidth(bitmap);
+			const mu_uint32 height = FreeImage_GetHeight(bitmap);
+			for (mu_uint32 y = 0; y < height; y++) {
+				mu_uint8 *pixels = FreeImage_GetScanLine(bitmap, y);
+				for (mu_uint32 x = 0; x < width; x++) {
+					SwapValue(pixels[0], pixels[2]);
+					pixels += bytesPerPixel;
 				}
 			}
 		}
@@ -122,7 +127,7 @@ namespace MUTextures
 		return true;
 	}
 
-	std::unique_ptr<NTexture> Load(mu_utf8string path, const mu_uint64 samplerFlags)
+	std::unique_ptr<NGraphicsTexture> Load(mu_utf8string path, const Diligent::SamplerDesc &samplerDesc)
 	{
 		TextureInfo info;
 		FIBITMAP *bitmap = nullptr;
@@ -131,59 +136,80 @@ namespace MUTextures
 			return nullptr;
 		}
 
+		auto device = MUGraphics::GetDevice();
+
 		const mu_uint32 width = info.Width;
 		const mu_uint32 height = info.Height;
 		const mu_uint32 bpp = FreeImage_GetBPP(bitmap);
 		const mu_uint32 bitmapSize = width * height * (bpp / 8);
 		const mu_uint8 *bitmapBuffer = FreeImage_GetBits(bitmap);
-		const bgfx::Memory *mem = bgfx::copy(bitmapBuffer, bitmapSize);
-		bgfx::TextureHandle texture = bgfx::createTexture2D(
-			width,
-			height,
-			false,
-			1,
-			bgfx::TextureFormat::RGBA8,
-			samplerFlags,
-			mem
-		);
-		FreeImage_Unload(bitmap);
 
-		if (bgfx::isValid(texture) == false)
+		std::vector<Diligent::TextureSubResData> subresources;
+		Diligent::TextureSubResData subresource;
+		subresource.pData = bitmapBuffer;
+		subresource.Stride = width * (bpp / 8);
+		subresources.push_back(subresource);
+
+		Diligent::TextureDesc textureDesc;
+#if NEXTMU_COMPILE_DEBUG == 1
+		textureDesc.Name = path.c_str();
+#endif
+		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+		textureDesc.Width = width;
+		textureDesc.Height = height;
+		textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM;
+		textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
+		textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+		Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+		Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+		device->CreateTexture(textureDesc, &textureData, &texture);
+		if (texture == nullptr)
 		{
 			return nullptr;
 		}
 
-		return std::make_unique<NTexture>(texture, width, height, info.Alpha);
+		const auto immediateContext = MUGraphics::GetImmediateContext();
+		Diligent::StateTransitionDesc barrier(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+		immediateContext->TransitionResourceStates(1u, &barrier);
+		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(samplerDesc)->Sampler);
+		return std::make_unique<NGraphicsTexture>(TextureIdGenerator++, texture, width, height, info.Alpha);
 	}
 
-	struct TextureFlags
+	struct SamplerMode
 	{
 		const mu_utf8string name;
-		const mu_uint64 flags;
+		const Diligent::FILTER_TYPE mode;
 	};
 
-	const std::array<TextureFlags, 2> filters = { {
+	struct AddressMode
+	{
+		const mu_utf8string name;
+		const Diligent::TEXTURE_ADDRESS_MODE mode;
+	};
+
+	const std::array<SamplerMode, 2> filters = { {
 		{
 			.name = "linear",
-			.flags = 0,
+			.mode = Diligent::FILTER_TYPE_LINEAR,
 		},
 		{
 			.name = "nearest",
-			.flags = BGFX_SAMPLER_POINT,
+			.mode = Diligent::FILTER_TYPE_POINT,
 		},
 	} };
-	const std::array<TextureFlags, 3> wraps = { {
+	const std::array<AddressMode, 3> wraps = { {
 		{
 			.name = "repeat",
-			.flags = 0,
+			.mode = Diligent::TEXTURE_ADDRESS_WRAP,
 		},
 		{
 			.name = "clamp",
-			.flags = BGFX_SAMPLER_UVW_CLAMP,
+			.mode = Diligent::TEXTURE_ADDRESS_CLAMP,
 		},
 		{
 			.name = "mirror",
-			.flags = BGFX_SAMPLER_UVW_MIRROR,
+			.mode = Diligent::TEXTURE_ADDRESS_MIRROR,
 		},
 	} };
 
@@ -209,16 +235,18 @@ namespace MUTextures
 		return false;
 	}
 
-	const mu_uint64 CalculateSamplerFlags(const mu_utf8string filter, const mu_utf8string wrap)
+	const Diligent::SamplerDesc CalculateSamplerFlags(const mu_utf8string filter, const mu_utf8string wrap)
 	{
-		mu_uint64 flags = 0;
+		Diligent::SamplerDesc desc;
 
 		for (mu_uint32 index = 0; index < filters.size(); ++index)
 		{
 			const auto &f = filters[index];
 			if (filter == f.name)
 			{
-				flags |= f.flags;
+				desc.MinFilter = f.mode;
+				desc.MagFilter = f.mode;
+				desc.MipFilter = f.mode;
 				break;
 			}
 		}
@@ -228,12 +256,14 @@ namespace MUTextures
 			const auto &f = wraps[index];
 			if (wrap == f.name)
 			{
-				flags |= f.flags;
+				desc.AddressU = f.mode;
+				desc.AddressV = f.mode;
+				desc.AddressW = f.mode;
 				break;
 			}
 		}
 
-		return flags;
+		return desc;
 	}
 
 	const mu_uint32 CalculateComponentsCount(FIBITMAP *bitmap)

@@ -3,11 +3,12 @@
 #include "ui_noesisgui_fontprovider.h"
 #include "ui_noesisgui_xamlprovider.h"
 #include "ui_noesisgui_textureprovider.h"
-#include "ui_noesisgui_bgfx.h"
+#include "ui_noesisgui_renderdevice.h"
 #include "ui_noesisgui_sdl.h"
 #include "mu_config.h"
 #include "mu_window.h"
 #include "mu_state.h"
+#include "mu_graphics.h"
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
@@ -99,7 +100,7 @@ namespace UINoesis
 
 	const mu_boolean CreateDevice()
 	{
-		Device = Noesis::MakePtr<BGFXRenderDevice>(false);
+		Device = Noesis::MakePtr<DERenderDevice>(MUGraphics::IssRGB());
 		if (!Device)
 		{
 			mu_error("failed to create device");
@@ -113,14 +114,19 @@ namespace UINoesis
 
 	void Update()
 	{
-		View->Update(MUState::GetElapsedTime() / 1000.0);
+		View->Update(MUState::GetWorldTime() / 1000.0);
 	}
 
-	void Render()
+	void RenderOffscreen()
 	{
 		auto *renderer = View->GetRenderer();
 		mu_boolean updated = renderer->UpdateRenderTree();
 		renderer->RenderOffscreen();
+	}
+
+	void RenderOnscreen()
+	{
+		auto *renderer = View->GetRenderer();
 		renderer->Render();
 	}
 
