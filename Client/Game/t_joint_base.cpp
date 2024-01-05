@@ -3,7 +3,23 @@
 
 namespace TJoint
 {
+	std::map<mu_utf8string, JointType> Template::TemplateTypes;
 	std::map<JointType, Template *> Template::Templates;
+
+	void Initialize()
+	{
+		for (auto iter = Template::Templates.begin(); iter != Template::Templates.end(); ++iter)
+		{
+			iter->second->Initialize();
+		}
+	}
+
+	std::optional<JointType> GetTemplateType(const mu_utf8string id)
+	{
+		auto iter=Template::TemplateTypes.find(id);
+		if (iter == Template::TemplateTypes.end()) return std::nullopt;
+		return iter->second;
+	}
 
 	Template *GetTemplate(JointType type)
 	{

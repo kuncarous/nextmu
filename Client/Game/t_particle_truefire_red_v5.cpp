@@ -1,20 +1,16 @@
 #include "stdafx.h"
-#include "t_particle_bubble_v0.h"
+#include "t_particle_truefire_red_v5.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
 #include "mu_renderstate.h"
-#include "mu_state.h"
 
 using namespace TParticle;
-constexpr auto Type = ParticleType::Bubble_V0;
-static const mu_char *ParticleID = "bubble_v0";
-static const mu_char *TextureID = "bubble";
-constexpr mu_float FrameDivisor = 3;
-constexpr mu_float UVMultiplier = 0.25f;
-constexpr mu_float UVOffset = 0.005f;
-constexpr mu_float USize = 0.25f - 0.01f;
-constexpr mu_float VSize = 0.25f - 0.01f;
+constexpr auto Type = ParticleType::TrueFire_Red_V5;
+constexpr auto LifeTime = 20;
+constexpr auto LightDivisor = 1.0f / 25.0f;
+static const mu_char* ParticleID = "truefire_red_v5";
+static const mu_char* TextureID = "truefire_red";
 
 const NDynamicPipelineState DynamicPipelineState = {
 	.CullMode = Diligent::CULL_MODE_FRONT,
@@ -28,21 +24,21 @@ const NDynamicPipelineState DynamicPipelineState = {
 constexpr mu_float IsPremultipliedAlpha = static_cast<mu_float>(true);
 constexpr mu_float IsLinear = static_cast<mu_float>(false);
 
-static TParticleBubbleV0 Instance;
+static TParticleTrueFireRedV5 Instance;
 static NGraphicsTexture* texture = nullptr;
 
-TParticleBubbleV0::TParticleBubbleV0()
+TParticleTrueFireRedV5::TParticleTrueFireRedV5()
 {
 	TParticle::Template::TemplateTypes.insert(std::make_pair(ParticleID, Type));
 	TParticle::Template::Templates.insert(std::make_pair(Type, this));
 }
 
-void TParticleBubbleV0::Initialize()
+void TParticleTrueFireRedV5::Initialize()
 {
 	texture = MUResourcesManager::GetTexture(TextureID);
 }
 
-void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &data)
+void TParticleTrueFireRedV5::Create(entt::registry &registry, const NParticleData &data)
 {
 	using namespace TParticle;
 	const auto entity = registry.create();
@@ -55,25 +51,26 @@ void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &da
 		}
 	);
 
-	registry.emplace<Entity::LifeTime>(entity, glm::linearRand(30, 40));
+	registry.emplace<Entity::LifeTime>(entity, LifeTime);
 
 	registry.emplace<Entity::Position>(
 		entity,
 		Entity::Position{
 			.StartPosition = data.Position,
 			.Position = data.Position,
-			.Scale = glm::linearRand(0.12f, 0.3f),
+			.Angle = data.Angle,
+			.Velocity = glm::vec3(
+				glm::linearRand(-2.0f, 2.0f),
+				0.0f,
+				glm::linearRand(1.0f, 3.0f)
+			),
+			.Scale = data.Scale,
 		}
 	);
 
 	registry.emplace<Entity::Light>(
 		entity,
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
-	);
-
-	registry.emplace<Entity::Frame>(
-		entity,
-		0
+		glm::vec4(static_cast<mu_float>(LifeTime) * LightDivisor, data.Light.x, data.Light.x, 1.0f)
 	);
 
 	registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
@@ -81,7 +78,7 @@ void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &da
 	registry.emplace<Entity::RenderCount>(entity, 1);
 }
 
-EnttIterator TParticleBubbleV0::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleTrueFireRedV5::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -91,15 +88,20 @@ EnttIterator TParticleBubbleV0::Move(EnttRegistry &registry, EnttView &view, Ent
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [position, frame] = registry.get<Entity::Position, Entity::Frame>(entity);
-		position.Position += glm::linearRand(glm::vec3(-25.0f, -25.0f, 25.0f), glm::vec3(25.0f, 25.0f, 75.0f)) * position.Scale;
-		frame = (frame + 1) % 9;
+		auto [lifetime, position, light] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light>(entity);
+		position.Position = MovePosition(position.Position, position.Angle, position.Velocity);
+		position.Position.z += 1.0f;
+		position.Velocity.x *= 0.95f;
+		position.Velocity.y *= 0.95f;
+		position.Scale = glm::max(position.Scale - 0.02f, 0.0f);
+		const mu_float l = lifetime * LightDivisor;
+		light = glm::vec4(l, l, l, 1.0f);
 	}
 
 	return iter;
 }
 
-EnttIterator TParticleBubbleV0::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleTrueFireRedV5::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -115,11 +117,9 @@ EnttIterator TParticleBubbleV0::Action(EnttRegistry &registry, EnttView &view, E
 	return iter;
 }
 
-EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
+EnttIterator TParticleTrueFireRedV5::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
-
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 
 	const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 	const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
@@ -132,22 +132,19 @@ EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, E
 		const auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		const auto [position, light, frame, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::Frame, Entity::RenderGroup, Entity::RenderIndex>(entity);
+		const auto [position, light, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::RenderGroup, Entity::RenderIndex>(entity);
 		if (renderGroup.t == NInvalidUInt32) continue;
-
-		const auto uoffset = static_cast<mu_float>(frame % 3) * UVMultiplier + UVOffset;
-		const auto voffset = static_cast<mu_float>(frame / 3) * UVMultiplier + UVOffset;
 
 		const mu_float width = textureWidth * position.Scale * 0.5f;
 		const mu_float height = textureHeight * position.Scale * 0.5f;
 
-		RenderBillboardSprite(renderBuffer, renderGroup, renderIndex, gview, position.Position, width, height, light, glm::vec4(uoffset, voffset, uoffset + USize, voffset + VSize));
+		RenderBillboardSprite(renderBuffer, renderGroup, renderIndex, gview, position.Position, width, height, light);
 	}
 
 	return iter;
 }
 
-void TParticleBubbleV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
+void TParticleTrueFireRedV5::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;

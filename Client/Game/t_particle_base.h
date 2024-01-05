@@ -18,11 +18,14 @@ namespace TParticle
 	typedef EnttView::iterator EnttIterator;
 
 	class Template;
+	void Initialize();
+	std::optional<ParticleType> GetTemplateType(const mu_utf8string id);
 	Template *GetTemplate(ParticleType type);
 
 	class Template
 	{
 	public:
+		virtual void Initialize() = 0;
 		virtual void Create(EnttRegistry &registry, const NParticleData &data) = 0;
 		virtual EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last) = 0;
 		virtual EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last) = 0;
@@ -30,7 +33,10 @@ namespace TParticle
 		virtual void RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer) = 0;
 
 	protected:
-		friend Template *GetTemplate(ParticleType type);
+		friend void Initialize();
+		friend std::optional<ParticleType> GetTemplateType(const mu_utf8string id);
+		friend Template* GetTemplate(ParticleType type);
+		static std::map<mu_utf8string, ParticleType> TemplateTypes;
 		static std::map<ParticleType, Template *> Templates;
 	};
 }

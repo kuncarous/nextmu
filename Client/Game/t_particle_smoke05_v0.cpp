@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "t_particle_bubble_v0.h"
+#include "t_particle_smoke05_v0.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
@@ -7,43 +7,44 @@
 #include "mu_state.h"
 
 using namespace TParticle;
-constexpr auto Type = ParticleType::Bubble_V0;
-static const mu_char *ParticleID = "bubble_v0";
-static const mu_char *TextureID = "bubble";
-constexpr mu_float FrameDivisor = 3;
-constexpr mu_float UVMultiplier = 0.25f;
-constexpr mu_float UVOffset = 0.005f;
-constexpr mu_float USize = 0.25f - 0.01f;
-constexpr mu_float VSize = 0.25f - 0.01f;
+constexpr auto Type = ParticleType::Smoke05_V0;
+constexpr auto LifeTime = 32;
+constexpr auto LightDivisor = 1.0f / 32.0f;
+static const mu_char* ParticleID = "smoke05_v0";
+static const mu_char *TextureID = "smoke05";
 
 const NDynamicPipelineState DynamicPipelineState = {
 	.CullMode = Diligent::CULL_MODE_FRONT,
 	.DepthWrite = false,
 	.DepthFunc = Diligent::COMPARISON_FUNC_LESS_EQUAL,
-	.SrcBlend = Diligent::BLEND_FACTOR_ONE,
-	.DestBlend = Diligent::BLEND_FACTOR_ONE,
-	.SrcBlendAlpha = Diligent::BLEND_FACTOR_ONE,
-	.DestBlendAlpha = Diligent::BLEND_FACTOR_ONE,
+	.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA,
+	.DestBlend = Diligent::BLEND_FACTOR_INV_SRC_ALPHA,
+	.SrcBlendAlpha = Diligent::BLEND_FACTOR_SRC_ALPHA,
+	.DestBlendAlpha = Diligent::BLEND_FACTOR_INV_SRC_ALPHA,
 };
-constexpr mu_float IsPremultipliedAlpha = static_cast<mu_float>(true);
+constexpr mu_float IsPremultipliedAlpha = static_cast<mu_float>(false);
 constexpr mu_float IsLinear = static_cast<mu_float>(false);
 
-static TParticleBubbleV0 Instance;
+static TParticleSmoke05V0 Instance;
 static NGraphicsTexture* texture = nullptr;
 
-TParticleBubbleV0::TParticleBubbleV0()
+TParticleSmoke05V0::TParticleSmoke05V0()
 {
 	TParticle::Template::TemplateTypes.insert(std::make_pair(ParticleID, Type));
 	TParticle::Template::Templates.insert(std::make_pair(Type, this));
 }
 
-void TParticleBubbleV0::Initialize()
+void TParticleSmoke05V0::Initialize()
 {
 	texture = MUResourcesManager::GetTexture(TextureID);
 }
 
-void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &data)
+void TParticleSmoke05V0::Create(entt::registry &registry, const NParticleData &data)
 {
+	const auto* environment = MURenderState::GetEnvironment();
+	const auto* terrain = MURenderState::GetTerrain();
+	const auto textureHeight = texture->GetHeight();
+
 	using namespace TParticle;
 	const auto entity = registry.create();
 
@@ -55,25 +56,33 @@ void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &da
 		}
 	);
 
-	registry.emplace<Entity::LifeTime>(entity, glm::linearRand(30, 40));
+	registry.emplace<Entity::LifeTime>(entity, LifeTime);
 
+	const mu_float scale = glm::linearRand(0.32f, 0.64f) * data.Scale;
+	glm::vec3 position = glm::vec3(
+		data.Position.x + glm::linearRand(-8.0f, 8.0f),
+		data.Position.y + glm::linearRand(-8.0f, 8.0f),
+		data.Position.z
+	);
+	position.z = terrain->RequestHeight(position.x, position.y) + textureHeight * scale * 0.5f;
 	registry.emplace<Entity::Position>(
 		entity,
 		Entity::Position{
 			.StartPosition = data.Position,
-			.Position = data.Position,
-			.Scale = glm::linearRand(0.12f, 0.3f),
+			.Position = position,
+			.Angle = glm::vec3(glm::linearRand(0.0f, 359.99f), data.Angle.y, data.Angle.z),
+			.Velocity = RotateByAngle(
+				glm::vec3(0.0f, 3.0f, 0.0f),
+				data.Angle
+			),
+			.Scale = scale,
 		}
 	);
 
+	const mu_float luminosity = static_cast<mu_float>(LifeTime) * LightDivisor;
 	registry.emplace<Entity::Light>(
 		entity,
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
-	);
-
-	registry.emplace<Entity::Frame>(
-		entity,
-		0
+		glm::vec4(luminosity, luminosity, luminosity, 1.0f)
 	);
 
 	registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
@@ -81,9 +90,13 @@ void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &da
 	registry.emplace<Entity::RenderCount>(entity, 1);
 }
 
-EnttIterator TParticleBubbleV0::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleSmoke05V0::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
+
+	const auto *environment = MURenderState::GetEnvironment();
+	const auto *terrain = MURenderState::GetTerrain();
+	const auto textureHeight = texture->GetHeight();
 
 	for (; iter != last; ++iter)
 	{
@@ -91,15 +104,22 @@ EnttIterator TParticleBubbleV0::Move(EnttRegistry &registry, EnttView &view, Ent
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [position, frame] = registry.get<Entity::Position, Entity::Frame>(entity);
-		position.Position += glm::linearRand(glm::vec3(-25.0f, -25.0f, 25.0f), glm::vec3(25.0f, 25.0f, 75.0f)) * position.Scale;
-		frame = (frame + 1) % 9;
+		auto [lifetime, position, light] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light>(entity);
+
+		position.Position += RotateByAngle(position.Velocity, position.Angle);
+		position.Position += position.Velocity;
+		position.Velocity *= 0.9f;
+		position.Scale += 0.08f;
+		position.Position.z = terrain->RequestHeight(position.Position.x, position.Position.y) + textureHeight * position.Scale * 0.5f;
+
+		const mu_float luminosity = static_cast<mu_float>(lifetime) * LightDivisor;
+		light = glm::vec4(luminosity, luminosity, luminosity, luminosity);
 	}
 
 	return iter;
 }
 
-EnttIterator TParticleBubbleV0::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleSmoke05V0::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -115,11 +135,9 @@ EnttIterator TParticleBubbleV0::Action(EnttRegistry &registry, EnttView &view, E
 	return iter;
 }
 
-EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
+EnttIterator TParticleSmoke05V0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
-
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 
 	const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 	const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
@@ -132,22 +150,19 @@ EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, E
 		const auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		const auto [position, light, frame, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::Frame, Entity::RenderGroup, Entity::RenderIndex>(entity);
+		const auto [position, light, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::RenderGroup, Entity::RenderIndex>(entity);
 		if (renderGroup.t == NInvalidUInt32) continue;
-
-		const auto uoffset = static_cast<mu_float>(frame % 3) * UVMultiplier + UVOffset;
-		const auto voffset = static_cast<mu_float>(frame / 3) * UVMultiplier + UVOffset;
 
 		const mu_float width = textureWidth * position.Scale * 0.5f;
 		const mu_float height = textureHeight * position.Scale * 0.5f;
 
-		RenderBillboardSprite(renderBuffer, renderGroup, renderIndex, gview, position.Position, width, height, light, glm::vec4(uoffset, voffset, uoffset + USize, voffset + VSize));
+		RenderBillboardSprite(renderBuffer, renderGroup, renderIndex, gview, position.Position, width, height, light);
 	}
 
 	return iter;
 }
 
-void TParticleBubbleV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
+void TParticleSmoke05V0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;
@@ -242,8 +257,9 @@ void TParticleBubbleV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuff
 		},
 		RCommandListInfo{
 			.Type = NDrawOrderType::Classifier,
+			.Classify = NRenderClassify::PostAlpha,
 			.View = 0,
-			.Index = 0,
+			.Index = 1,
 		}
 	);
 }

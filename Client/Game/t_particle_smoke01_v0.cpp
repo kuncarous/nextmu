@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "t_particle_bubble_v0.h"
+#include "t_particle_smoke01_v0.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
@@ -7,14 +7,11 @@
 #include "mu_state.h"
 
 using namespace TParticle;
-constexpr auto Type = ParticleType::Bubble_V0;
-static const mu_char *ParticleID = "bubble_v0";
-static const mu_char *TextureID = "bubble";
-constexpr mu_float FrameDivisor = 3;
-constexpr mu_float UVMultiplier = 0.25f;
-constexpr mu_float UVOffset = 0.005f;
-constexpr mu_float USize = 0.25f - 0.01f;
-constexpr mu_float VSize = 0.25f - 0.01f;
+constexpr auto Type = ParticleType::Smoke01_V0;
+constexpr auto LifeTime = 16;
+constexpr auto LightDivisor = 1.0f / 8.0f;
+static const mu_char* ParticleID = "smoke01_v0";
+static const mu_char *TextureID = "smoke01";
 
 const NDynamicPipelineState DynamicPipelineState = {
 	.CullMode = Diligent::CULL_MODE_FRONT,
@@ -28,21 +25,21 @@ const NDynamicPipelineState DynamicPipelineState = {
 constexpr mu_float IsPremultipliedAlpha = static_cast<mu_float>(true);
 constexpr mu_float IsLinear = static_cast<mu_float>(false);
 
-static TParticleBubbleV0 Instance;
+static TParticleSmoke01V0 Instance;
 static NGraphicsTexture* texture = nullptr;
 
-TParticleBubbleV0::TParticleBubbleV0()
+TParticleSmoke01V0::TParticleSmoke01V0()
 {
 	TParticle::Template::TemplateTypes.insert(std::make_pair(ParticleID, Type));
 	TParticle::Template::Templates.insert(std::make_pair(Type, this));
 }
 
-void TParticleBubbleV0::Initialize()
+void TParticleSmoke01V0::Initialize()
 {
 	texture = MUResourcesManager::GetTexture(TextureID);
 }
 
-void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &data)
+void TParticleSmoke01V0::Create(entt::registry &registry, const NParticleData &data)
 {
 	using namespace TParticle;
 	const auto entity = registry.create();
@@ -55,25 +52,31 @@ void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &da
 		}
 	);
 
-	registry.emplace<Entity::LifeTime>(entity, glm::linearRand(30, 40));
+	registry.emplace<Entity::LifeTime>(entity, LifeTime);
 
 	registry.emplace<Entity::Position>(
 		entity,
 		Entity::Position{
 			.StartPosition = data.Position,
 			.Position = data.Position,
-			.Scale = glm::linearRand(0.12f, 0.3f),
+			.Scale = glm::linearRand(4.8f, 8.0f),
 		}
 	);
 
+	const mu_float luminosity = static_cast<mu_float>(LifeTime) * LightDivisor;
 	registry.emplace<Entity::Light>(
 		entity,
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+		glm::vec4(luminosity, luminosity, luminosity, 1.0f)
 	);
 
-	registry.emplace<Entity::Frame>(
+	registry.emplace<Entity::Rotation>(
 		entity,
-		0
+		glm::mod(MUState::GetWorldTime(), 360.0f)
+	);
+
+	registry.emplace<Entity::Gravity>(
+		entity,
+		0.0f
 	);
 
 	registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
@@ -81,7 +84,7 @@ void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &da
 	registry.emplace<Entity::RenderCount>(entity, 1);
 }
 
-EnttIterator TParticleBubbleV0::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleSmoke01V0::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -91,15 +94,20 @@ EnttIterator TParticleBubbleV0::Move(EnttRegistry &registry, EnttView &view, Ent
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [position, frame] = registry.get<Entity::Position, Entity::Frame>(entity);
-		position.Position += glm::linearRand(glm::vec3(-25.0f, -25.0f, 25.0f), glm::vec3(25.0f, 25.0f, 75.0f)) * position.Scale;
-		frame = (frame + 1) % 9;
+		auto [lifetime, position, light, gravity] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light, Entity::Gravity>(entity);
+
+		gravity += 0.2f;
+		position.Position.z += gravity;
+		position.Scale += 0.05f;
+
+		const mu_float luminosity = static_cast<mu_float>(lifetime) * LightDivisor;
+		light = glm::vec4(luminosity, luminosity, luminosity, 1.0f);
 	}
 
 	return iter;
 }
 
-EnttIterator TParticleBubbleV0::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleSmoke01V0::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -115,11 +123,9 @@ EnttIterator TParticleBubbleV0::Action(EnttRegistry &registry, EnttView &view, E
 	return iter;
 }
 
-EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
+EnttIterator TParticleSmoke01V0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
-
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 
 	const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 	const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
@@ -132,22 +138,19 @@ EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, E
 		const auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		const auto [position, light, frame, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::Frame, Entity::RenderGroup, Entity::RenderIndex>(entity);
+		const auto [position, light, rotation, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::Rotation, Entity::RenderGroup, Entity::RenderIndex>(entity);
 		if (renderGroup.t == NInvalidUInt32) continue;
-
-		const auto uoffset = static_cast<mu_float>(frame % 3) * UVMultiplier + UVOffset;
-		const auto voffset = static_cast<mu_float>(frame / 3) * UVMultiplier + UVOffset;
 
 		const mu_float width = textureWidth * position.Scale * 0.5f;
 		const mu_float height = textureHeight * position.Scale * 0.5f;
 
-		RenderBillboardSprite(renderBuffer, renderGroup, renderIndex, gview, position.Position, width, height, light, glm::vec4(uoffset, voffset, uoffset + USize, voffset + VSize));
+		RenderBillboardSpriteWithRotation(renderBuffer, renderGroup, renderIndex, gview, position.Position, rotation, width, height, light);
 	}
 
 	return iter;
 }
 
-void TParticleBubbleV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
+void TParticleSmoke01V0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;

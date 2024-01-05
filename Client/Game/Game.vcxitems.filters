@@ -109,12 +109,6 @@
     <Filter Include="Environment\Particles\Templates\Types\TrueFire\V5">
       <UniqueIdentifier>{4d1c0e45-e2b4-4c39-aefa-78f19a037c7b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Environment\Particles\Templates\Types\Smoke">
-      <UniqueIdentifier>{3dfebd6b-5ea8-4a13-9a39-df9cf80c316b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Environment\Particles\Templates\Types\Smoke\V0">
-      <UniqueIdentifier>{01264895-67cf-4972-81a5-2cf15b2efe4a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Environment\Particles\Templates\Types\Bubble">
       <UniqueIdentifier>{ae6e97a9-f582-47cd-84d9-f20c29668fda}</UniqueIdentifier>
     </Filter>
@@ -132,12 +126,6 @@
     </Filter>
     <Filter Include="Environment\Joints\Templates\Types">
       <UniqueIdentifier>{8f318ba7-777c-4455-bad9-d0a373b45c53}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Environment\Joints\Templates\Types\Thunder1">
-      <UniqueIdentifier>{0911e42f-2699-4579-ae02-86d6c64c34ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Environment\Joints\Templates\Types\Thunder1\V7">
-      <UniqueIdentifier>{acf76f1e-008b-4eba-a91f-f0e6879377c4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Threading">
       <UniqueIdentifier>{903d2deb-9bb7-4b9f-a0e3-f7af6f9d6d72}</UniqueIdentifier>
@@ -222,6 +210,54 @@
     </Filter>
     <Filter Include="Math\OBB">
       <UniqueIdentifier>{db6ea670-9a27-4ad6-af25-b3cec2d553c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Joints\Templates\Types\Thunder01">
+      <UniqueIdentifier>{0911e42f-2699-4579-ae02-86d6c64c34ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Joints\Templates\Types\Thunder01\V7">
+      <UniqueIdentifier>{acf76f1e-008b-4eba-a91f-f0e6879377c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Smoke05">
+      <UniqueIdentifier>{665ad470-c745-43a5-b707-d827d372bdf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Smoke05\V0">
+      <UniqueIdentifier>{b43d30c5-baf6-41e3-967b-e7934ed51687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Smoke05\V1">
+      <UniqueIdentifier>{a6490af3-7bd4-4697-885c-b3e8b01c237d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Smoke01">
+      <UniqueIdentifier>{3dfebd6b-5ea8-4a13-9a39-df9cf80c316b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Smoke01\V0">
+      <UniqueIdentifier>{01264895-67cf-4972-81a5-2cf15b2efe4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect">
+      <UniqueIdentifier>{ff4a84e1-1f86-41d4-8611-0d4ba2bdcbb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect\V0">
+      <UniqueIdentifier>{bff51f26-b790-486b-bcf0-56d5532526e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect\V1">
+      <UniqueIdentifier>{10328605-85e3-4b31-a7da-2cca1c9fbb04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect\V2">
+      <UniqueIdentifier>{23f1f004-06d8-46d9-a0d6-f50a58e333c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect\V3">
+      <UniqueIdentifier>{638299e9-4f09-4f85-ba3e-8e2ba86f23b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect\V4">
+      <UniqueIdentifier>{1fef7749-dae2-4e19-b840-472b56dd67e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect\V5">
+      <UniqueIdentifier>{66de4571-e909-4bf8-af8e-6fb74cfffe11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect\V6">
+      <UniqueIdentifier>{35bd3311-a96a-46b2-9eda-9cc3e699788f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Effect\V7">
+      <UniqueIdentifier>{91fb4059-30cd-4fc5-9889-a721a854fe04}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -324,11 +360,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_particles.cpp">
       <Filter>Environment\Particles</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_truefire_red_v5.cpp">
       <Filter>Environment\Particles\Templates\Types\TrueFire\V5</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.cpp">
-      <Filter>Environment\Particles\Templates\Types\Smoke\V0</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke01_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\Smoke01\V0</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.cpp">
       <Filter>Environment\Particles\Templates\Types\Bubble\V0</Filter>
@@ -336,8 +372,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_environment_joints.cpp">
       <Filter>Environment\Joints</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_thunder1_v7.cpp">
-      <Filter>Environment\Joints\Templates\Types\Thunder1\V7</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_thunder01_v7.cpp">
+      <Filter>Environment\Joints\Templates\Types\Thunder01\V7</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_threadsmanager.cpp">
       <Filter>Threading</Filter>
@@ -477,6 +513,36 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_math_obb.cpp">
       <Filter>Math\OBB</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke05_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\Smoke05\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke05_v1.cpp">
+      <Filter>Environment\Particles\Templates\Types\Smoke05\V1</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\Effect\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v1.cpp">
+      <Filter>Environment\Particles\Templates\Types\Effect\V1</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v2.cpp">
+      <Filter>Environment\Particles\Templates\Types\Effect\V2</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v3.cpp">
+      <Filter>Environment\Particles\Templates\Types\Effect\V3</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v4.cpp">
+      <Filter>Environment\Particles\Templates\Types\Effect\V4</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v5.cpp">
+      <Filter>Environment\Particles\Templates\Types\Effect\V5</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v6.cpp">
+      <Filter>Environment\Particles\Templates\Types\Effect\V6</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v7.cpp">
+      <Filter>Environment\Particles\Templates\Types\Effect\V7</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_root.h">
@@ -605,7 +671,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_particles.h">
       <Filter>Environment\Particles</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_truefire_v5.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_truefire_red_v5.h">
       <Filter>Environment\Particles\Templates\Types\TrueFire\V5</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_base.h">
@@ -623,8 +689,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_render.h">
       <Filter>Environment\Particles\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke_v0.h">
-      <Filter>Environment\Particles\Templates\Types\Smoke\V0</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke01_v0.h">
+      <Filter>Environment\Particles\Templates\Types\Smoke01\V0</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.h">
       <Filter>Environment\Particles\Templates\Types\Bubble\V0</Filter>
@@ -650,8 +716,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_environment_joints.h">
       <Filter>Environment\Joints</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_thunder1_v7.h">
-      <Filter>Environment\Joints\Templates\Types\Thunder1\V7</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_thunder01_v7.h">
+      <Filter>Environment\Joints\Templates\Types\Thunder01\V7</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_joint_tails.h">
       <Filter>Environment\Joints\Templates</Filter>
@@ -835,6 +901,36 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_obb.h">
       <Filter>Math\OBB</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke05_v0.h">
+      <Filter>Environment\Particles\Templates\Types\Smoke05\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke05_v1.h">
+      <Filter>Environment\Particles\Templates\Types\Smoke05\V1</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v0.h">
+      <Filter>Environment\Particles\Templates\Types\Effect\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v1.h">
+      <Filter>Environment\Particles\Templates\Types\Effect\V1</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v2.h">
+      <Filter>Environment\Particles\Templates\Types\Effect\V2</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v3.h">
+      <Filter>Environment\Particles\Templates\Types\Effect\V3</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v4.h">
+      <Filter>Environment\Particles\Templates\Types\Effect\V4</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v5.h">
+      <Filter>Environment\Particles\Templates\Types\Effect\V5</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v6.h">
+      <Filter>Environment\Particles\Templates\Types\Effect\V6</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v7.h">
+      <Filter>Environment\Particles\Templates\Types\Effect\V7</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

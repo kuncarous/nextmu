@@ -16,6 +16,7 @@ namespace TParticle
 	struct NParticleSettings
 	{
 		mu_float IsPremultipliedAlpha;
+		mu_float IsLinear;
 	};
 #pragma pack()
 

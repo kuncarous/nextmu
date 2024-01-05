@@ -18,11 +18,14 @@ namespace TJoint
 	typedef EnttView::iterator EnttIterator;
 
 	class Template;
+	void Initialize();
+	std::optional<JointType> GetTemplateType(const mu_utf8string id);
 	Template *GetTemplate(JointType type);
 
 	class Template
 	{
 	public:
+		virtual void Initialize() = 0;
 		virtual void Create(EnttRegistry &registry, const NJointData &data) = 0;
 		virtual EnttIterator Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last) = 0;
 		virtual EnttIterator Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last) = 0;
@@ -30,7 +33,10 @@ namespace TJoint
 		virtual void RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer) = 0;
 
 	protected:
+		friend void Initialize();
+		friend std::optional<JointType> GetTemplateType(const mu_utf8string id);
 		friend Template *GetTemplate(JointType type);
+		static std::map<mu_utf8string, JointType> TemplateTypes;
 		static std::map<JointType, Template *> Templates;
 	};
 }

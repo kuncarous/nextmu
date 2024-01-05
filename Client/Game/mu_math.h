@@ -30,6 +30,16 @@ struct NCompressedMatrix
 	}
 };
 
+NEXTMU_INLINE const glm::quat AngleToQuaternion(const glm::vec3 v)
+{
+	return glm::quat(glm::radians(v));
+}
+
+NEXTMU_INLINE const glm::vec3 RotateByAngle(const glm::vec3 v, const glm::vec3 angle)
+{
+	return AngleToQuaternion(angle) * v;
+}
+
 NEXTMU_INLINE const glm::vec3 Transform(const glm::vec3 v, const NCompressedMatrix &matrix)
 {
 	return matrix.Rotation * (v * matrix.Scale) + matrix.Position;

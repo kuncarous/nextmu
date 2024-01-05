@@ -5,11 +5,12 @@
 
 #include "t_joint_base.h"
 
-class TJointThunder1V7 : public TJoint::Template
+class TJointThunder01V7 : public TJoint::Template
 {
 public:
-	TJointThunder1V7();
+	TJointThunder01V7();
 public:
+	virtual void Initialize() override;
 	virtual void Create(TJoint::EnttRegistry &registry, const NJointData &data) override;
 	virtual TJoint::EnttIterator Move(TJoint::EnttRegistry &registry, TJoint::EnttView &view, TJoint::EnttIterator iter, TJoint::EnttIterator last) override;
 	virtual TJoint::EnttIterator Action(TJoint::EnttRegistry &registry, TJoint::EnttView &view, TJoint::EnttIterator iter, TJoint::EnttIterator last) override;

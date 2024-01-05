@@ -43,6 +43,12 @@
 /Tools/ConvertObjects/x64
 /Tools/ConvertObjects/Debug
 /Tools/ConvertObjects/Release
+/Tools/GenerateNavMesh/x64
+/Tools/GenerateNavMesh/Debug
+/Tools/GenerateNavMesh/Release
+/Tools/GenerateBoundingBox/x64
+/Tools/GenerateBoundingBox/Debug
+/Tools/GenerateBoundingBox/Release
 /.vs
 /Client/Binary
 /Client/Windows/NextMU/vcpkg_installed

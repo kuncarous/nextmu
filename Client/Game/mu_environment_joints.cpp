@@ -84,6 +84,7 @@ const mu_boolean NJoints::Initialize()
 	immediateContext->TransitionResourceStates(mu_countof(updateBarriers), updateBarriers);
 
 	RenderBuffer.Groups.reserve(100);
+	TJoint::Initialize();
 
 	return true;
 }

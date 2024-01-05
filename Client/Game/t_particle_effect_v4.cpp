@@ -1,17 +1,19 @@
 #include "stdafx.h"
-#include "t_particle_truefire_v5.h"
+#include "t_particle_effect_v4.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
 #include "mu_renderstate.h"
+#include "mu_state.h"
 
 using namespace TParticle;
-constexpr auto Type = ParticleType::TrueFire_V5;
+constexpr auto Type = ParticleType::Effect_V4;
 constexpr auto LifeTime = 20;
-constexpr auto LightDivisor = 1.0f / 25.0f;
-static const mu_char *TextureID = "truefire_v5";
+static const mu_char* ParticleID = "effect_v4";
+static const mu_char *TextureID = "chasellight";
 
 const NDynamicPipelineState DynamicPipelineState = {
+	.CullMode = Diligent::CULL_MODE_FRONT,
 	.DepthWrite = false,
 	.DepthFunc = Diligent::COMPARISON_FUNC_LESS_EQUAL,
 	.SrcBlend = Diligent::BLEND_FACTOR_ONE,
@@ -19,16 +21,24 @@ const NDynamicPipelineState DynamicPipelineState = {
 	.SrcBlendAlpha = Diligent::BLEND_FACTOR_ONE,
 	.DestBlendAlpha = Diligent::BLEND_FACTOR_ONE,
 };
-constexpr mu_boolean IsPremultipliedAlpha = true;
+constexpr mu_float IsPremultipliedAlpha = static_cast<mu_float>(false);
+constexpr mu_float IsLinear = static_cast<mu_float>(false);
 
-static TParticleTrueFireV5 Instance;
+static TParticleEffectV4 Instance;
+static NGraphicsTexture* texture = nullptr;
 
-TParticleTrueFireV5::TParticleTrueFireV5()
+TParticleEffectV4::TParticleEffectV4()
 {
+	TParticle::Template::TemplateTypes.insert(std::make_pair(ParticleID, Type));
 	TParticle::Template::Templates.insert(std::make_pair(Type, this));
 }
 
-void TParticleTrueFireV5::Create(entt::registry &registry, const NParticleData &data)
+void TParticleEffectV4::Initialize()
+{
+	texture = MUResourcesManager::GetTexture(TextureID);
+}
+
+void TParticleEffectV4::Create(entt::registry &registry, const NParticleData &data)
 {
 	using namespace TParticle;
 	const auto entity = registry.create();
@@ -41,26 +51,26 @@ void TParticleTrueFireV5::Create(entt::registry &registry, const NParticleData &
 		}
 	);
 
-	registry.emplace<Entity::LifeTime>(entity, LifeTime);
+	registry.emplace<Entity::LifeTime>(entity, LifeTime + glm::linearRand(0, 2));
 
+	glm::vec3 position = glm::vec3(
+		data.Position.x + glm::linearRand(-25.0f, 25.0f) + glm::linearRand(-52.0f, 52.0f),
+		data.Position.y + glm::linearRand(-25.0f, 25.0f),
+		data.Position.z + glm::linearRand(-100.0f, 100.0f) + 150.0f
+	);
 	registry.emplace<Entity::Position>(
 		entity,
 		Entity::Position{
 			.StartPosition = data.Position,
-			.Position = data.Position,
+			.Position = position,
 			.Angle = data.Angle,
-			.Velocity = glm::vec3(
-				glm::linearRand(-2.0f, 2.0f),
-				0.0f,
-				glm::linearRand(1.0f, 3.0f)
-			),
-			.Scale = data.Scale,
+			.Scale = glm::linearRand(2.6f, 3.25f),
 		}
 	);
 
 	registry.emplace<Entity::Light>(
 		entity,
-		glm::vec4(static_cast<mu_float>(LifeTime) * LightDivisor, data.Light.x, data.Light.x, 1.0f)
+		glm::vec4(data.Light, 1.0f)
 	);
 
 	registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
@@ -68,9 +78,13 @@ void TParticleTrueFireV5::Create(entt::registry &registry, const NParticleData &
 	registry.emplace<Entity::RenderCount>(entity, 1);
 }
 
-EnttIterator TParticleTrueFireV5::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleEffectV4::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
+
+	const auto *environment = MURenderState::GetEnvironment();
+	const auto *terrain = MURenderState::GetTerrain();
+	const auto textureHeight = texture->GetHeight();
 
 	for (; iter != last; ++iter)
 	{
@@ -78,18 +92,14 @@ EnttIterator TParticleTrueFireV5::Move(EnttRegistry &registry, EnttView &view, E
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [lifetime, position, light] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light>(entity);
-		position.Position = MovePosition(position.Position, position.Angle, position.Velocity);
-		position.Position.z += 1.0f;
-		position.Velocity.x *= 0.95f;
-		position.Scale = glm::max(position.Scale - 0.02f, 0.0f);
-		light = glm::vec4(lifetime * LightDivisor, light.x, light.x, 1.0f);
+		auto [lifetime, light] = registry.get<Entity::LifeTime, Entity::Light>(entity);
+		light *= lifetime.t >= 10u ? 1.16f : (1.0f / 1.16f);
 	}
 
 	return iter;
 }
 
-EnttIterator TParticleTrueFireV5::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleEffectV4::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -105,12 +115,9 @@ EnttIterator TParticleTrueFireV5::Action(EnttRegistry &registry, EnttView &view,
 	return iter;
 }
 
-static NGraphicsTexture *texture = nullptr;
-EnttIterator TParticleTrueFireV5::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
+EnttIterator TParticleEffectV4::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
-
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 
 	const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 	const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
@@ -135,7 +142,7 @@ EnttIterator TParticleTrueFireV5::Render(EnttRegistry &registry, EnttView &view,
 	return iter;
 }
 
-void TParticleTrueFireV5::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
+void TParticleEffectV4::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;
@@ -172,6 +179,7 @@ void TParticleTrueFireV5::RenderGroup(const NRenderGroup &renderGroup, NRenderBu
 	{
 		auto uniform = renderBuffer.SettingsBuffer.Allocate();
 		uniform->IsPremultipliedAlpha = IsPremultipliedAlpha;
+		uniform->IsLinear = IsLinear;
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
 				.ShouldReleaseMemory = false,

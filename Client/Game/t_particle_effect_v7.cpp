@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "t_particle_smoke_v0.h"
+#include "t_particle_effect_v7.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
@@ -7,12 +7,13 @@
 #include "mu_state.h"
 
 using namespace TParticle;
-constexpr auto Type = ParticleType::Smoke_V0;
-constexpr auto LifeTime = 16;
-constexpr auto LightDivisor = 1.0f / 8.0f;
-static const mu_char *TextureID = "smoke_v0";
+constexpr auto Type = ParticleType::Effect_V7;
+constexpr auto LifeTime = 20;
+static const mu_char* ParticleID = "effect_v7";
+static const mu_char *TextureID = "impack03";
 
 const NDynamicPipelineState DynamicPipelineState = {
+	.CullMode = Diligent::CULL_MODE_FRONT,
 	.DepthWrite = false,
 	.DepthFunc = Diligent::COMPARISON_FUNC_LESS_EQUAL,
 	.SrcBlend = Diligent::BLEND_FACTOR_ONE,
@@ -20,16 +21,24 @@ const NDynamicPipelineState DynamicPipelineState = {
 	.SrcBlendAlpha = Diligent::BLEND_FACTOR_ONE,
 	.DestBlendAlpha = Diligent::BLEND_FACTOR_ONE,
 };
-constexpr mu_boolean IsPremultipliedAlpha = true;
+constexpr mu_float IsPremultipliedAlpha = static_cast<mu_float>(false);
+constexpr mu_float IsLinear = static_cast<mu_float>(false);
 
-static TParticleSmokeV0 Instance;
+static TParticleEffectV7 Instance;
+static NGraphicsTexture* texture = nullptr;
 
-TParticleSmokeV0::TParticleSmokeV0()
+TParticleEffectV7::TParticleEffectV7()
 {
+	TParticle::Template::TemplateTypes.insert(std::make_pair(ParticleID, Type));
 	TParticle::Template::Templates.insert(std::make_pair(Type, this));
 }
 
-void TParticleSmokeV0::Create(entt::registry &registry, const NParticleData &data)
+void TParticleEffectV7::Initialize()
+{
+	texture = MUResourcesManager::GetTexture(TextureID);
+}
+
+void TParticleEffectV7::Create(entt::registry &registry, const NParticleData &data)
 {
 	using namespace TParticle;
 	const auto entity = registry.create();
@@ -42,31 +51,28 @@ void TParticleSmokeV0::Create(entt::registry &registry, const NParticleData &dat
 		}
 	);
 
-	registry.emplace<Entity::LifeTime>(entity, LifeTime);
+	registry.emplace<Entity::LifeTime>(entity, LifeTime + glm::linearRand(0, 2));
 
+	glm::vec3 position = glm::vec3(
+		data.Position.x + glm::linearRand(-25.0f, 25.0f),
+		data.Position.y + glm::linearRand(-25.0f, 25.0f),
+		data.Position.z + glm::linearRand(-100.0f, 100.0f) + 150.0f
+	);
 	registry.emplace<Entity::Position>(
 		entity,
 		Entity::Position{
 			.StartPosition = data.Position,
-			.Position = data.Position,
-			.Scale = glm::linearRand(4.8f, 8.0f),
+			.Position = position,
+			.Angle = data.Angle,
+			.Scale = glm::linearRand(0.2f, 0.3f),
 		}
 	);
 
-	const mu_float luminosity = static_cast<mu_float>(LifeTime) * LightDivisor;
+	registry.emplace<Entity::Gravity>(entity, glm::linearRand(8.0f, 10.0f));
+
 	registry.emplace<Entity::Light>(
 		entity,
-		glm::vec4(luminosity, luminosity, luminosity, 1.0f)
-	);
-
-	registry.emplace<Entity::Rotation>(
-		entity,
-		glm::mod(MUState::GetWorldTime(), 360.0f)
-	);
-
-	registry.emplace<Entity::Gravity>(
-		entity,
-		0.0f
+		glm::vec4(data.Light, 1.0f)
 	);
 
 	registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
@@ -74,9 +80,13 @@ void TParticleSmokeV0::Create(entt::registry &registry, const NParticleData &dat
 	registry.emplace<Entity::RenderCount>(entity, 1);
 }
 
-EnttIterator TParticleSmokeV0::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleEffectV7::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
+
+	const auto *environment = MURenderState::GetEnvironment();
+	const auto *terrain = MURenderState::GetTerrain();
+	const auto textureHeight = texture->GetHeight();
 
 	for (; iter != last; ++iter)
 	{
@@ -84,20 +94,15 @@ EnttIterator TParticleSmokeV0::Move(EnttRegistry &registry, EnttView &view, Entt
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [lifetime, position, light, gravity] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light, Entity::Gravity>(entity);
-
-		gravity += 0.2f;
+		auto [lifetime, position, gravity, light] = registry.get<Entity::LifeTime, Entity::Position, Entity::Gravity, Entity::Light>(entity);
 		position.Position.z += gravity;
-		position.Scale += 0.05f;
-
-		const mu_float luminosity = static_cast<mu_float>(lifetime) * LightDivisor;
-		light = glm::vec4(luminosity, luminosity, luminosity, 1.0f);
+		light *= lifetime.t >= 10u ? 1.16f : (1.0f / 1.16f);
 	}
 
 	return iter;
 }
 
-EnttIterator TParticleSmokeV0::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleEffectV7::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -113,12 +118,9 @@ EnttIterator TParticleSmokeV0::Action(EnttRegistry &registry, EnttView &view, En
 	return iter;
 }
 
-static NGraphicsTexture *texture = nullptr;
-EnttIterator TParticleSmokeV0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
+EnttIterator TParticleEffectV7::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
-
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 
 	const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 	const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
@@ -131,19 +133,19 @@ EnttIterator TParticleSmokeV0::Render(EnttRegistry &registry, EnttView &view, En
 		const auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		const auto [position, light, rotation, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::Rotation, Entity::RenderGroup, Entity::RenderIndex>(entity);
+		const auto [position, light, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::RenderGroup, Entity::RenderIndex>(entity);
 		if (renderGroup.t == NInvalidUInt32) continue;
 
 		const mu_float width = textureWidth * position.Scale * 0.5f;
 		const mu_float height = textureHeight * position.Scale * 0.5f;
 
-		RenderBillboardSpriteWithRotation(renderBuffer, renderGroup, renderIndex, gview, position.Position, rotation, width, height, light);
+		RenderBillboardSprite(renderBuffer, renderGroup, renderIndex, gview, position.Position, width, height, light);
 	}
 
 	return iter;
 }
 
-void TParticleSmokeV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
+void TParticleEffectV7::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;
@@ -180,6 +182,7 @@ void TParticleSmokeV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffe
 	{
 		auto uniform = renderBuffer.SettingsBuffer.Allocate();
 		uniform->IsPremultipliedAlpha = IsPremultipliedAlpha;
+		uniform->IsLinear = IsLinear;
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
 				.ShouldReleaseMemory = false,

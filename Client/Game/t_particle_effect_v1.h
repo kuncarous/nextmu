@@ -1,14 +1,14 @@
-#ifndef __T_PARTICLE_BUBBLE_V0_H__
-#define __T_PARTICLE_BUBBLE_V0_H__
+#ifndef __T_PARTICLE_EFFECT_V1_H__
+#define __T_PARTICLE_EFFECT_V1_H__
 
 #pragma once
 
 #include "t_particle_base.h"
 
-class TParticleBubbleV0 : public TParticle::Template
+class TParticleEffectV1 : public TParticle::Template
 {
 public:
-	TParticleBubbleV0();
+	TParticleEffectV1();
 public:
 	virtual void Initialize() override;
 	virtual void Create(TParticle::EnttRegistry &registry, const NParticleData &data) override;

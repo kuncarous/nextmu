@@ -133,7 +133,7 @@ void NController::Update()
 					Environment->GetParticles()->Create(
 						NParticleData{
 							.Layer = 0,
-							.Type = ParticleType::TrueFire_V5,
+							.Type = ParticleType::TrueFire_Red_V5,
 							.Position = intersection + glm::vec3(0.0f, 0.0f, 30.0f),
 							.Scale = 2.8f
 						}

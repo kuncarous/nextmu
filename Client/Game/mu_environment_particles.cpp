@@ -85,6 +85,7 @@ const mu_boolean NParticles::Initialize()
 	immediateContext->TransitionResourceStates(mu_countof(updateBarriers), updateBarriers);
 
 	RenderBuffer.Groups.reserve(100);
+	TParticle::Initialize();
 
 	return true;
 }

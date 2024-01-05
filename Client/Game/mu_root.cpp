@@ -689,7 +689,7 @@ namespace MURoot
 					joints->Create(
 						NJointData {
 							.Layer = 0,
-							.Type = JointType::Thunder1_V7,
+							.Type = JointType::Thunder01_V7,
 							.Position = position,
 							.TargetPosition = position + glm::vec3(
 								glm::linearRand(-80.0f, 80.0f),
@@ -699,9 +699,37 @@ namespace MURoot
 							.Scale = glm::linearRand(60.0f, 70.0f),
 						}
 					);
-				}
+				}*/
 
-				auto *particles = environment->GetParticles();
+				/*auto* particles = environment->GetParticles();
+				for (mu_uint32 n = 0; n < 200; ++n)
+				{
+					particles->Create(
+						NParticleData{
+							.Layer = 0,
+							.Type = ParticleType::Effect_V7,
+							.Position = glm::vec3(
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								400.0f
+							)
+						}
+					);
+				}
+				for (mu_uint32 n = 0; n < 200; ++n)
+				{
+					particles->Create(
+						NParticleData {
+							.Layer = 0,
+							.Type = ParticleType::Smoke05_V0,
+							.Position = glm::vec3(
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+								400.0f
+							)
+						}
+					);
+				}
 				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
@@ -721,7 +749,7 @@ namespace MURoot
 					particles->Create(
 						NParticleData {
 							.Layer = 0,
-							.Type = ParticleType::Smoke_V0,
+							.Type = ParticleType::Smoke01_V0,
 							.Position = glm::vec3(
 								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
 								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
@@ -735,7 +763,7 @@ namespace MURoot
 					particles->Create(
 						NParticleData {
 							.Layer = 0,
-							.Type = ParticleType::TrueFire_V5,
+							.Type = ParticleType::TrueFire_Red_V5,
 							.Position = glm::vec3(
 								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
 								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,

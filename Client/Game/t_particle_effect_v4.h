@@ -1,15 +1,16 @@
-#ifndef __T_PARTICLE_SMOKE_V0_H__
-#define __T_PARTICLE_SMOKE_V0_H__
+#ifndef __T_PARTICLE_EFFECT_V4_H__
+#define __T_PARTICLE_EFFECT_V4_H__
 
 #pragma once
 
 #include "t_particle_base.h"
 
-class TParticleSmokeV0 : public TParticle::Template
+class TParticleEffectV4 : public TParticle::Template
 {
 public:
-	TParticleSmokeV0();
+	TParticleEffectV4();
 public:
+	virtual void Initialize() override;
 	virtual void Create(TParticle::EnttRegistry &registry, const NParticleData &data) override;
 	virtual TParticle::EnttIterator Move(TParticle::EnttRegistry &registry, TParticle::EnttView &view, TParticle::EnttIterator iter, TParticle::EnttIterator last) override;
 	virtual TParticle::EnttIterator Action(TParticle::EnttRegistry &registry, TParticle::EnttView &view, TParticle::EnttIterator iter, TParticle::EnttIterator last) override;
