@@ -21,6 +21,7 @@ namespace TParticle::Entity
 	}
 
 	BOOST_STRONG_TYPEDEF(mu_uint16, LifeTime);
+	BOOST_STRONG_TYPEDEF(mu_boolean, Trigger);
 
 	struct Position
 	{

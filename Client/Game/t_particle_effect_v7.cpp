@@ -84,10 +84,6 @@ EnttIterator TParticleEffectV7::Move(EnttRegistry &registry, EnttView &view, Ent
 {
 	using namespace TParticle;
 
-	const auto *environment = MURenderState::GetEnvironment();
-	const auto *terrain = MURenderState::GetTerrain();
-	const auto textureHeight = texture->GetHeight();
-
 	for (; iter != last; ++iter)
 	{
 		const auto entity = *iter;

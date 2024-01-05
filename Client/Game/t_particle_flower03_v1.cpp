@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "t_particle_effect_v1.h"
+#include "t_particle_flower03_v1.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
@@ -7,38 +7,38 @@
 #include "mu_state.h"
 
 using namespace TParticle;
-constexpr auto Type = ParticleType::Effect_V1;
-constexpr auto LifeTime = 20;
-static const mu_char* ParticleID = "effect_v1";
-static const mu_char *TextureID = "impack03";
+constexpr auto Type = ParticleType::Flower03_V1;
+constexpr auto LifeTime = 15;
+static const mu_char* ParticleID = "flower03_v1";
+static const mu_char *TextureID = "flower03";
 
 const NDynamicPipelineState DynamicPipelineState = {
 	.CullMode = Diligent::CULL_MODE_FRONT,
 	.DepthWrite = false,
 	.DepthFunc = Diligent::COMPARISON_FUNC_LESS_EQUAL,
-	.SrcBlend = Diligent::BLEND_FACTOR_ONE,
-	.DestBlend = Diligent::BLEND_FACTOR_ONE,
-	.SrcBlendAlpha = Diligent::BLEND_FACTOR_ONE,
-	.DestBlendAlpha = Diligent::BLEND_FACTOR_ONE,
+	.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA,
+	.DestBlend = Diligent::BLEND_FACTOR_INV_SRC_ALPHA,
+	.SrcBlendAlpha = Diligent::BLEND_FACTOR_SRC_ALPHA,
+	.DestBlendAlpha = Diligent::BLEND_FACTOR_INV_SRC_ALPHA,
 };
 constexpr mu_float IsPremultipliedAlpha = static_cast<mu_float>(false);
 constexpr mu_float IsLinear = static_cast<mu_float>(false);
 
-static TParticleEffectV1 Instance;
+static TParticleFlower03V1 Instance;
 static NGraphicsTexture* texture = nullptr;
 
-TParticleEffectV1::TParticleEffectV1()
+TParticleFlower03V1::TParticleFlower03V1()
 {
 	TParticle::Template::TemplateTypes.insert(std::make_pair(ParticleID, Type));
 	TParticle::Template::Templates.insert(std::make_pair(Type, this));
 }
 
-void TParticleEffectV1::Initialize()
+void TParticleFlower03V1::Initialize()
 {
 	texture = MUResourcesManager::GetTexture(TextureID);
 }
 
-void TParticleEffectV1::Create(entt::registry &registry, const NParticleData &data)
+void TParticleFlower03V1::Create(entt::registry &registry, const NParticleData &data)
 {
 	using namespace TParticle;
 	const auto entity = registry.create();
@@ -51,38 +51,41 @@ void TParticleEffectV1::Create(entt::registry &registry, const NParticleData &da
 		}
 	);
 
-	registry.emplace<Entity::LifeTime>(entity, LifeTime + glm::linearRand(0, 2));
+	registry.emplace<Entity::LifeTime>(entity, LifeTime + glm::linearRand(0, 9));
 
-	glm::vec3 position = glm::vec3(
-		data.Position.x + glm::linearRand(-25.0f, 25.0f),
-		data.Position.y + glm::linearRand(-25.0f, 25.0f),
-		data.Position.z + glm::linearRand(-100.0f, 100.0f) + 250.0f
-	);
 	registry.emplace<Entity::Position>(
 		entity,
 		Entity::Position{
 			.StartPosition = data.Position,
-			.Position = position,
+			.Position = data.Position,
 			.Angle = data.Angle,
-			.Scale = glm::linearRand(0.1f, 0.3f),
+			.Velocity = glm::vec3(
+				glm::linearRand(-1.6f, 1.6f),
+				glm::linearRand(-1.6f, 1.6f),
+				glm::linearRand(-3.2f, 0.0f)
+			),
+			.Scale = glm::linearRand(0.12f, 0.36f),
 		}
 	);
 
-	registry.emplace<Entity::Gravity>(entity, glm::linearRand(0.5f, 1.5f));
-
 	registry.emplace<Entity::Light>(
 		entity,
-		glm::vec4(data.Light, 1.0f)
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
 	);
+
+	registry.emplace<Entity::Rotation>(entity, 0.0f);
+	registry.emplace<Entity::Trigger>(entity, true);
 
 	registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
 	registry.emplace<Entity::RenderIndex>(entity, 0);
 	registry.emplace<Entity::RenderCount>(entity, 1);
 }
 
-EnttIterator TParticleEffectV1::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleFlower03V1::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
+
+	const auto *terrain = MURenderState::GetTerrain();
 
 	for (; iter != last; ++iter)
 	{
@@ -90,15 +93,33 @@ EnttIterator TParticleEffectV1::Move(EnttRegistry &registry, EnttView &view, Ent
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [lifetime, position, gravity, light] = registry.get<Entity::LifeTime, Entity::Position, Entity::Gravity, Entity::Light>(entity);
-		position.Position.z += gravity;
+		auto [lifetime, position, rotation, light, trigger] = registry.get<Entity::LifeTime, Entity::Position, Entity::Rotation, Entity::Light, Entity::Trigger>(entity);
+		position.Position = MovePosition(position.Position, position.Angle, position.Velocity);
+		if (trigger)
+		{
+			position.Velocity += glm::vec3(
+				glm::linearRand(-0.2f, 0.2f),
+				glm::linearRand(-0.2f, 0.2f),
+				glm::linearRand(-0.0025f, 0.0f)
+			);
+			position.Position += position.Velocity;
+
+			const auto height = terrain->RequestHeight(position.Position.x, position.Position.y);
+			if (position.Position.z < height)
+			{
+				position.Position.z = height;
+				position.Velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+				trigger = false;
+			}
+		}
+		rotation += glm::linearRand(0.0f, 15.0f);
 		light *= lifetime.t >= 10u ? 1.16f : (1.0f / 1.16f);
 	}
 
 	return iter;
 }
 
-EnttIterator TParticleEffectV1::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleFlower03V1::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -114,7 +135,7 @@ EnttIterator TParticleEffectV1::Action(EnttRegistry &registry, EnttView &view, E
 	return iter;
 }
 
-EnttIterator TParticleEffectV1::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
+EnttIterator TParticleFlower03V1::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
 
@@ -129,19 +150,19 @@ EnttIterator TParticleEffectV1::Render(EnttRegistry &registry, EnttView &view, E
 		const auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		const auto [position, light, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::RenderGroup, Entity::RenderIndex>(entity);
+		const auto [position, rotation, light, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Rotation, Entity::Light, Entity::RenderGroup, Entity::RenderIndex>(entity);
 		if (renderGroup.t == NInvalidUInt32) continue;
 
 		const mu_float width = textureWidth * position.Scale * 0.5f;
 		const mu_float height = textureHeight * position.Scale * 0.5f;
 
-		RenderBillboardSprite(renderBuffer, renderGroup, renderIndex, gview, position.Position, width, height, light);
+		RenderBillboardSpriteWithRotation(renderBuffer, renderGroup, renderIndex, gview, position.Position, rotation, width, height, light);
 	}
 
 	return iter;
 }
 
-void TParticleEffectV1::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
+void TParticleFlower03V1::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;
@@ -236,8 +257,9 @@ void TParticleEffectV1::RenderGroup(const NRenderGroup &renderGroup, NRenderBuff
 		},
 		RCommandListInfo{
 			.Type = NDrawOrderType::Classifier,
+			.Classify = NRenderClassify::PostAlpha,
 			.View = 0,
-			.Index = 0,
+			.Index = 1,
 		}
 	);
 }

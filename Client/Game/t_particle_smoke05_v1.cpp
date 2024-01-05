@@ -41,7 +41,6 @@ void TParticleSmoke05V1::Initialize()
 
 void TParticleSmoke05V1::Create(entt::registry &registry, const NParticleData &data)
 {
-	const auto* environment = MURenderState::GetEnvironment();
 	const auto* terrain = MURenderState::GetTerrain();
 	const auto textureHeight = texture->GetHeight();
 
@@ -90,7 +89,6 @@ EnttIterator TParticleSmoke05V1::Move(EnttRegistry &registry, EnttView &view, En
 {
 	using namespace TParticle;
 
-	const auto *environment = MURenderState::GetEnvironment();
 	const auto *terrain = MURenderState::GetTerrain();
 	const auto textureHeight = texture->GetHeight();
 
@@ -102,6 +100,7 @@ EnttIterator TParticleSmoke05V1::Move(EnttRegistry &registry, EnttView &view, En
 
 		auto [lifetime, position, light] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light>(entity);
 		position.Scale += 0.08f;
+		position.Position.z = terrain->RequestHeight(position.Position.x, position.Position.y) + textureHeight * position.Scale * 0.5f;
 
 		const mu_float luminosity = static_cast<mu_float>(lifetime) * LightDivisor;
 		light = glm::vec4(luminosity, luminosity, luminosity, luminosity);

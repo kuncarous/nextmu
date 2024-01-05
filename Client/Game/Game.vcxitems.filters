@@ -259,6 +259,33 @@
     <Filter Include="Environment\Particles\Templates\Types\Effect\V7">
       <UniqueIdentifier>{91fb4059-30cd-4fc5-9889-a721a854fe04}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower01">
+      <UniqueIdentifier>{b7fb4b38-9e61-4613-8f3b-82af89789be0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower01\V0">
+      <UniqueIdentifier>{7ec8901e-1b3e-4b62-9a13-9497f01bfab4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower02">
+      <UniqueIdentifier>{e8fa976d-fbd3-41f8-b4a8-87e2bde4925f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower02\V0">
+      <UniqueIdentifier>{310cd19b-b006-437c-ba95-21309b0d7738}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower03">
+      <UniqueIdentifier>{14069a02-19e6-42e3-9807-f8bfa2df34be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower03\V0">
+      <UniqueIdentifier>{ad11c831-2619-48e0-a199-a87fac3c7655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower01\V1">
+      <UniqueIdentifier>{cec8109f-6ebd-48fd-937d-f79c9e6b147d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower02\V1">
+      <UniqueIdentifier>{3824090c-7968-44d4-8aa2-dc3e69fd887e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flower03\V1">
+      <UniqueIdentifier>{c07f52d6-816d-4358-bfbb-8efc9a9754cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -542,6 +569,24 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v7.cpp">
       <Filter>Environment\Particles\Templates\Types\Effect\V7</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower01_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\Flower01\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower02_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\Flower02\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower03_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\Flower03\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower01_v1.cpp">
+      <Filter>Environment\Particles\Templates\Types\Flower01\V1</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower02_v1.cpp">
+      <Filter>Environment\Particles\Templates\Types\Flower02\V1</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower03_v1.cpp">
+      <Filter>Environment\Particles\Templates\Types\Flower03\V1</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -931,6 +976,24 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v7.h">
       <Filter>Environment\Particles\Templates\Types\Effect\V7</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower01_v0.h">
+      <Filter>Environment\Particles\Templates\Types\Flower01\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower02_v0.h">
+      <Filter>Environment\Particles\Templates\Types\Flower02\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower03_v0.h">
+      <Filter>Environment\Particles\Templates\Types\Flower03\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower01_v1.h">
+      <Filter>Environment\Particles\Templates\Types\Flower01\V1</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower02_v1.h">
+      <Filter>Environment\Particles\Templates\Types\Flower02\V1</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower03_v1.h">
+      <Filter>Environment\Particles\Templates\Types\Flower03\V1</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

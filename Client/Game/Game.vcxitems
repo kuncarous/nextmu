@@ -111,6 +111,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v5.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v6.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v7.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower01_v0.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower01_v1.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower02_v0.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower02_v1.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower03_v0.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flower03_v1.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke05_v1.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke01_v0.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_smoke05_v0.cpp" />
@@ -155,6 +161,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v5.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v6.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v7.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower01_v0.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower01_v1.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower02_v0.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower02_v1.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower03_v0.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flower03_v1.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke05_v0.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_smoke05_v1.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_terrain_consts.h" />

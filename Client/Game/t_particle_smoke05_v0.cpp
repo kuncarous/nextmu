@@ -41,7 +41,6 @@ void TParticleSmoke05V0::Initialize()
 
 void TParticleSmoke05V0::Create(entt::registry &registry, const NParticleData &data)
 {
-	const auto* environment = MURenderState::GetEnvironment();
 	const auto* terrain = MURenderState::GetTerrain();
 	const auto textureHeight = texture->GetHeight();
 
@@ -94,7 +93,6 @@ EnttIterator TParticleSmoke05V0::Move(EnttRegistry &registry, EnttView &view, En
 {
 	using namespace TParticle;
 
-	const auto *environment = MURenderState::GetEnvironment();
 	const auto *terrain = MURenderState::GetTerrain();
 	const auto textureHeight = texture->GetHeight();
 

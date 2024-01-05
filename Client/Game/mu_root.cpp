@@ -701,13 +701,13 @@ namespace MURoot
 					);
 				}*/
 
-				/*auto* particles = environment->GetParticles();
+				auto *particles = environment->GetParticles();
 				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
 						NParticleData{
 							.Layer = 0,
-							.Type = ParticleType::Effect_V7,
+							.Type = static_cast<ParticleType>(static_cast<mu_uint32>(ParticleType::Flower01_V0) + glm::linearRand(0, 2)),
 							.Position = glm::vec3(
 								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
 								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
@@ -716,6 +716,8 @@ namespace MURoot
 						}
 					);
 				}
+
+				/*
 				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
