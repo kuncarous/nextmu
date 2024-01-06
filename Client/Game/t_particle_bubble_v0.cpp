@@ -9,7 +9,7 @@
 using namespace TParticle;
 constexpr auto Type = ParticleType::Bubble_V0;
 static const mu_char *ParticleID = "bubble_v0";
-static const mu_char *TextureID = "bubble";
+static const mu_char *TextureID = "bubble01";
 constexpr mu_float FrameDivisor = 3;
 constexpr mu_float UVMultiplier = 0.25f;
 constexpr mu_float UVOffset = 0.005f;
@@ -119,8 +119,6 @@ EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, E
 {
 	using namespace TParticle;
 
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
-
 	const mu_float textureWidth = static_cast<mu_float>(texture->GetWidth());
 	const mu_float textureHeight = static_cast<mu_float>(texture->GetHeight());
 
@@ -149,9 +147,6 @@ EnttIterator TParticleBubbleV0::Render(EnttRegistry &registry, EnttView &view, E
 
 void TParticleBubbleV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
-	if (texture == nullptr) return;
-
 	auto renderManager = MUGraphics::GetRenderManager();
 	auto immediateContext = MUGraphics::GetImmediateContext();
 

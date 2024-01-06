@@ -143,9 +143,6 @@ EnttIterator TParticleEffectV6::Render(EnttRegistry &registry, EnttView &view, E
 
 void TParticleEffectV6::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
-	if (texture == nullptr) return;
-
 	auto renderManager = MUGraphics::GetRenderManager();
 	auto immediateContext = MUGraphics::GetImmediateContext();
 

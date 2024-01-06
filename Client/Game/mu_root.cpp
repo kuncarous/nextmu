@@ -702,6 +702,8 @@ namespace MURoot
 				}*/
 
 				auto *particles = environment->GetParticles();
+
+				/*
 				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
@@ -716,8 +718,6 @@ namespace MURoot
 						}
 					);
 				}
-
-				/*
 				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(

@@ -7,7 +7,7 @@
 
 enum class JointType : mu_uint32
 {
-	Thunder1_V7,
+	Thunder01_V7,
 	Invalid = std::numeric_limits<mu_uint32>::max(),
 };
 

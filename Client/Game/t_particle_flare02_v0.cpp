@@ -157,9 +157,6 @@ EnttIterator TParticleFlare02V0::Render(EnttRegistry &registry, EnttView &view, 
 
 void TParticleFlare02V0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
-	if (texture == nullptr) return;
-
 	auto renderManager = MUGraphics::GetRenderManager();
 	auto immediateContext = MUGraphics::GetImmediateContext();
 

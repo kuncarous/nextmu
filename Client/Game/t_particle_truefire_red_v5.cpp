@@ -146,9 +146,6 @@ EnttIterator TParticleTrueFireRedV5::Render(EnttRegistry &registry, EnttView &vi
 
 void TParticleTrueFireRedV5::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
-	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
-	if (texture == nullptr) return;
-
 	auto renderManager = MUGraphics::GetRenderManager();
 	auto immediateContext = MUGraphics::GetImmediateContext();
 

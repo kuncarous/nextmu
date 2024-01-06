@@ -8,7 +8,7 @@
 #include <MapHelper.hpp>
 
 using namespace TJoint;
-constexpr auto Type = JointType::Thunder1_V7;
+constexpr auto Type = JointType::Thunder01_V7;
 constexpr auto LifeTime = 20;
 constexpr auto LightDivisor = 1.0f / 1.2f;
 static const mu_char *JointID = "thunder01_v7";
