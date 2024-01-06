@@ -89,7 +89,7 @@ EnttIterator TParticleFlareBlueV1::Move(EnttRegistry &registry, EnttView &view, 
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [lifetime, position, light] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light>(entity);
+		auto [position, light] = registry.get<Entity::Position, Entity::Light>(entity);
 		position.Scale += 1.5f;
 		light *= (1.0f / 1.1f);
 	}

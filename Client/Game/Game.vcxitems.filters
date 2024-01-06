@@ -295,6 +295,12 @@
     <Filter Include="Environment\Particles\Templates\Types\FlareBlue\V1">
       <UniqueIdentifier>{41780f71-9627-4b54-9ce1-6550d8b9b017}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flare02">
+      <UniqueIdentifier>{59f719ae-70e5-479e-8ed7-98fb9d8d9db3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\Flare02\V0">
+      <UniqueIdentifier>{7594ad7f-012f-4c81-84e3-99863a8e7de5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -602,6 +608,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flareblue_v1.cpp">
       <Filter>Environment\Particles\Templates\Types\FlareBlue\V1</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flare02_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\Flare02\V0</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1015,6 +1024,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flareblue_v1.h">
       <Filter>Environment\Particles\Templates\Types\FlareBlue\V1</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flare02_v0.h">
+      <Filter>Environment\Particles\Templates\Types\Flare02\V0</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

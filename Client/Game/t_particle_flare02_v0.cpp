@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "t_particle_flareblue_v0.h"
+#include "t_particle_flare02_v0.h"
 #include "t_particle_macros.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
@@ -7,10 +7,10 @@
 #include "mu_state.h"
 
 using namespace TParticle;
-constexpr auto Type = ParticleType::FlareBlue_V0;
-constexpr auto LifeTime = 30;
-static const mu_char* ParticleID = "flareblue_v0";
-static const mu_char *TextureID = "flareblue";
+constexpr auto Type = ParticleType::Flare02_V0;
+constexpr auto LifeTime = 110;
+static const mu_char* ParticleID = "flare02_v0";
+static const mu_char *TextureID = "flare02";
 
 const NDynamicPipelineState DynamicPipelineState = {
 	.CullMode = Diligent::CULL_MODE_FRONT,
@@ -24,21 +24,21 @@ const NDynamicPipelineState DynamicPipelineState = {
 constexpr mu_float IsPremultipliedAlpha = static_cast<mu_float>(false);
 constexpr mu_float IsLinear = static_cast<mu_float>(false);
 
-static TParticleFlareBlueV0 Instance;
+static TParticleFlare02V0 Instance;
 static NGraphicsTexture* texture = nullptr;
 
-TParticleFlareBlueV0::TParticleFlareBlueV0()
+TParticleFlare02V0::TParticleFlare02V0()
 {
 	TParticle::Template::TemplateTypes.insert(std::make_pair(ParticleID, Type));
 	TParticle::Template::Templates.insert(std::make_pair(Type, this));
 }
 
-void TParticleFlareBlueV0::Initialize()
+void TParticleFlare02V0::Initialize()
 {
 	texture = MUResourcesManager::GetTexture(TextureID);
 }
 
-void TParticleFlareBlueV0::Create(entt::registry &registry, const NParticleData &data)
+void TParticleFlare02V0::Create(entt::registry &registry, const NParticleData &data)
 {
 	using namespace TParticle;
 	const auto entity = registry.create();
@@ -51,34 +51,45 @@ void TParticleFlareBlueV0::Create(entt::registry &registry, const NParticleData 
 		}
 	);
 
-	registry.emplace<Entity::LifeTime>(entity, LifeTime + glm::linearRand(0, 9));
+	const auto lifetime = LifeTime + glm::linearRand(0, 9);
+	registry.emplace<Entity::LifeTime>(entity, lifetime);
 
+	const auto velocity = glm::linearRand(-50.0f, 50.0f);
+	const auto scale = data.Scale + glm::linearRand(0.0f, 0.01f);
+	const auto gravity = 1.0f + glm::linearRand(0.0f, 2.0f);
+	const mu_float c = (velocity + static_cast<mu_float>(lifetime)) * 0.05f;
 	registry.emplace<Entity::Position>(
 		entity,
 		Entity::Position{
 			.StartPosition = data.Position,
-			.Position = data.Position,
-			.Angle = data.Angle,
-			.Velocity = glm::vec3(
-				0.0f,
-				0.0f,
-				glm::linearRand(0.0f, 2.0f)
+			.Position = glm::vec3(
+				data.Position.x + glm::sin(c) * (105.0f + scale * -250.0f),
+				data.Position.y - glm::cos(c) * (105.0f + scale * -250.0f),
+				data.Position.z + gravity
 			),
-			.Scale = 0.2f,
+			.Angle = glm::vec3(0.0f, 0.0f, 0.0f),
+			.Velocity = glm::vec3(
+				velocity,
+				0.0f,
+				0.0f
+			),
+			.Scale = scale,
 		}
 	);
 
 	registry.emplace<Entity::Light>(
 		entity,
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+		glm::vec4(data.Light, 1.0f)
 	);
+	registry.emplace<Entity::Gravity>(entity, gravity);
+	registry.emplace<Entity::Rotation>(entity, glm::linearRand(0.0f, 359.99f));
 
 	registry.emplace<Entity::RenderGroup>(entity, NInvalidUInt32);
 	registry.emplace<Entity::RenderIndex>(entity, 0);
 	registry.emplace<Entity::RenderCount>(entity, 1);
 }
 
-EnttIterator TParticleFlareBlueV0::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleFlare02V0::Move(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -88,16 +99,20 @@ EnttIterator TParticleFlareBlueV0::Move(EnttRegistry &registry, EnttView &view, 
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [lifetime, position, light] = registry.get<Entity::LifeTime, Entity::Position, Entity::Light>(entity);
-		position.Position = MovePosition(position.Position, position.Angle, position.Velocity);
-		position.Velocity.z = glm::min(position.Velocity.z + 0.4f, 0.8f);
-		light *= lifetime.t >= 5u ? 1.0f : (1.0f / 1.2f);
+		auto [lifetime, position, gravity] = registry.get<Entity::LifeTime, Entity::Position, Entity::Gravity>(entity);
+		const mu_float c = (position.Velocity.x + static_cast<mu_float>(lifetime.t)) * 0.05f;
+		position.Position = glm::vec3(
+			position.StartPosition.x + glm::sin(c) * (105.0f + position.Scale * -250.0f),
+			position.StartPosition.y - glm::cos(c) * (105.0f + position.Scale * -250.0f),
+			position.Position.z + gravity
+		);
+		position.Scale -= 0.0008f;
 	}
 
 	return iter;
 }
 
-EnttIterator TParticleFlareBlueV0::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
+EnttIterator TParticleFlare02V0::Action(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last)
 {
 	using namespace TParticle;
 
@@ -113,7 +128,7 @@ EnttIterator TParticleFlareBlueV0::Action(EnttRegistry &registry, EnttView &view
 	return iter;
 }
 
-EnttIterator TParticleFlareBlueV0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
+EnttIterator TParticleFlare02V0::Render(EnttRegistry &registry, EnttView &view, EnttIterator iter, EnttIterator last, NRenderBuffer &renderBuffer)
 {
 	using namespace TParticle;
 
@@ -140,7 +155,7 @@ EnttIterator TParticleFlareBlueV0::Render(EnttRegistry &registry, EnttView &view
 	return iter;
 }
 
-void TParticleFlareBlueV0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
+void TParticleFlare02V0::RenderGroup(const NRenderGroup &renderGroup, NRenderBuffer &renderBuffer)
 {
 	if (texture == nullptr) texture = MUResourcesManager::GetTexture(TextureID);
 	if (texture == nullptr) return;

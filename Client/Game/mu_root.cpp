@@ -707,7 +707,7 @@ namespace MURoot
 					particles->Create(
 						NParticleData{
 							.Layer = 0,
-							.Type = ParticleType::FlareBlue_V1,
+							.Type = ParticleType::Flare02_V0,
 							.Position = glm::vec3(
 								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
 								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,

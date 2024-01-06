@@ -88,7 +88,7 @@ EnttIterator TParticleEffectV2::Move(EnttRegistry &registry, EnttView &view, Ent
 		auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		auto [lifetime, light] = registry.get<Entity::LifeTime, Entity::Light>(entity);
+		auto &light = registry.get<Entity::Light>(entity);
 		light *= (1.0f / 1.03f);
 	}
 

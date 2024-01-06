@@ -173,7 +173,7 @@ TJoint::EnttIterator TJointThunder01V7::Render(TJoint::EnttRegistry &registry, T
 		const auto &info = view.get<Entity::Info>(entity);
 		if (info.Type != Type) break;
 
-		const auto [position, light, tails, renderGroup, renderIndex] = registry.get<Entity::Position, Entity::Light, Entity::Tails, Entity::RenderGroup, Entity::RenderIndex>(entity);
+		const auto [light, tails, renderGroup, renderIndex] = registry.get<Entity::Light, Entity::Tails, Entity::RenderGroup, Entity::RenderIndex>(entity);
 		if (renderGroup.t == NInvalidUInt32) continue;
 
 		mu_uint32 rindex = renderIndex;
