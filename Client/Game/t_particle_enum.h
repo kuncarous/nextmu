@@ -21,6 +21,8 @@ enum class ParticleType : mu_uint32
 	Flower01_V1,
 	Flower02_V1,
 	Flower03_V1,
+	FlareBlue_V0,
+	FlareBlue_V1,
 	Smoke01_V0,
 	Smoke05_V0,
 	Smoke05_V1,
