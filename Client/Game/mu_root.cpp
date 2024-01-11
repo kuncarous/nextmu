@@ -702,22 +702,26 @@ namespace MURoot
 				}*/
 
 				auto *particles = environment->GetParticles();
+				constexpr mu_uint32 MaxParticlesPerType = glm::min(TParticle::MaxRenderCount / MaxParticleType, 40u);
+				for (mu_uint32 type = 0; type < MaxParticleType; ++type)
+				{
+					for (mu_uint32 n = 0; n < MaxParticlesPerType; ++n)
+					{
+						particles->Create(
+							NParticleData{
+								.Layer = 0,
+								.Type = static_cast<ParticleType>(type),
+								.Position = glm::vec3(
+									(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+									(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
+									400.0f
+								)
+							}
+						);
+					}
+				}
 
 				/*
-				for (mu_uint32 n = 0; n < 200; ++n)
-				{
-					particles->Create(
-						NParticleData{
-							.Layer = 0,
-							.Type = ParticleType::Flare02_V0,
-							.Position = glm::vec3(
-								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
-								(123.0f + glm::linearRand(-30.0f, 30.0f)) * TerrainScale,
-								400.0f
-							)
-						}
-					);
-				}
 				for (mu_uint32 n = 0; n < 200; ++n)
 				{
 					particles->Create(
@@ -851,6 +855,7 @@ namespace MURoot
 #endif
 			}
 
+			//OutputDebugStringA(fmt::format("particles count : {}\n", environment->GetParticles()->GetCount()).c_str());
 			MUGlobalTimer::Wait();
 			elapsedTime = MUGlobalTimer::GetElapsedFrametime();
 			currentTime = MUGlobalTimer::GetFrametime();

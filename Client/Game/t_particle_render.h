@@ -10,7 +10,7 @@
 
 namespace TParticle
 {
-	constexpr mu_uint32 MaxRenderCount = 10000;
+	constexpr mu_uint32 MaxRenderCount = 50000;
 
 #pragma pack(4)
 	struct NParticleSettings

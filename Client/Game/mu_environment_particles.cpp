@@ -238,7 +238,7 @@ void NParticles::Update()
 
 		//auto endTimer = std::chrono::high_resolution_clock::now();
 		//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);
-		//mu_info("[DEBUG] Particles Move : {}ms with {} elements", diff.count(), registry.size());
+		//mu_info("[DEBUG] Particles Move : {}ms with {} elements", diff.count(), registry.storage<entt::entity>().in_use());
 	}
 }
 
@@ -430,7 +430,12 @@ void NParticles::Render()
 
 	//auto endTimer = std::chrono::high_resolution_clock::now();
 	//auto diff = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endTimer - startTimer);
-	//mu_info("[DEBUG] Particles Render : {}ms with {} elements", diff.count(), Registry.size());
+	//mu_info("[DEBUG] Particles Render : {}ms with {} elements", diff.count(), Registry.storage<entt::entity>().in_use());
 
 	RenderBuffer.Groups.clear();
+}
+
+mu_size NParticles::GetCount()
+{
+	return Registry.storage<entt::entity>().in_use();
 }

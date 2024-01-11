@@ -24,12 +24,16 @@ enum class ParticleType : mu_uint32
 	FlareBlue_V0,
 	FlareBlue_V1,
 	Flare02_V0,
+	BlueBlur_V0,
+	BlueBlur_V1,
 	Smoke01_V0,
 	Smoke05_V0,
 	Smoke05_V1,
 	TrueFire_Red_V5,
 	Bubble_V0,
+	Max,
 	Invalid = std::numeric_limits<mu_uint32>::max(),
 };
+constexpr mu_uint32 MaxParticleType = static_cast<mu_uint32>(ParticleType::Max);
 
 #endif

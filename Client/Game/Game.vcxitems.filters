@@ -301,6 +301,15 @@
     <Filter Include="Environment\Particles\Templates\Types\Flare02\V0">
       <UniqueIdentifier>{7594ad7f-012f-4c81-84e3-99863a8e7de5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\BlueBlur">
+      <UniqueIdentifier>{2708b8d2-194a-4e33-8e03-9b550b06ccf4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\BlueBlur\V0">
+      <UniqueIdentifier>{a50b764f-edf4-47ec-a302-1f6e595f3568}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment\Particles\Templates\Types\BlueBlur\V1">
+      <UniqueIdentifier>{ea3bc864-fdac-4318-9278-72fd23746f5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)mu_root.cpp">
@@ -611,6 +620,12 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_flare02_v0.cpp">
       <Filter>Environment\Particles\Templates\Types\Flare02\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_blueblur_v0.cpp">
+      <Filter>Environment\Particles\Templates\Types\BlueBlur\V0</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_blueblur_v1.cpp">
+      <Filter>Environment\Particles\Templates\Types\BlueBlur\V1</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1027,6 +1042,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_flare02_v0.h">
       <Filter>Environment\Particles\Templates\Types\Flare02\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_blueblur_v0.h">
+      <Filter>Environment\Particles\Templates\Types\BlueBlur\V0</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_blueblur_v1.h">
+      <Filter>Environment\Particles\Templates\Types\BlueBlur\V1</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

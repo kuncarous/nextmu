@@ -17,6 +17,9 @@ public:
 	void Propagate();
 	void Render();
 
+public:
+	mu_size GetCount();
+
 private:
 	entt::registry Registry;
 	TParticle::NRenderBuffer RenderBuffer;

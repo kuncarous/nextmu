@@ -102,6 +102,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_base.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_joint_thunder01_v7.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_base.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_blueblur_v0.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_blueblur_v1.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_bubble_v0.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v0.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)t_particle_effect_v1.cpp" />
@@ -156,6 +158,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_animationsmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_charactersmanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mu_math_obb.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_blueblur_v0.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_blueblur_v1.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v0.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v1.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)t_particle_effect_v2.h" />
