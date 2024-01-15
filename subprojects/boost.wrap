@@ -1,0 +1,10 @@
+[wrap-git]
+url = https://github.com/boostorg/boost.git
+revision = boost-1.84.0
+depth = 1
+clone-recursive = true
+method = cmake
+
+[provide]
+boost_algorithm = boost_algorithm_dep
+boost_serialization = boost_serialization_dep

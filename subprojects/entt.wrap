@@ -1,0 +1,9 @@
+[wrap-file]
+directory = entt-3.12.2
+source_url = https://github.com/skypjack/entt/archive/refs/tags/v3.12.2.tar.gz
+source_filename = v3.12.2.tar.gz
+source_hash = 3f3e43988218daecc0530ccaf45e960f7f7416e1fcf2c69799160c18b6a2fee3
+diff_files = entt-3.12.2/0001.patch
+
+[provide]
+entt = entt_dep

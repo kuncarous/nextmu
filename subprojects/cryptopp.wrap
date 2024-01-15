@@ -1,0 +1,9 @@
+[wrap-file]
+directory = cryptopp-CRYPTOPP_8_9_0
+source_url = https://github.com/weidai11/cryptopp/archive/refs/tags/CRYPTOPP_8_9_0.tar.gz
+source_filename = CRYPTOPP_8_9_0.tar.gz
+source_hash = ab5174b9b5c6236588e15a1aa1aaecb6658cdbe09501c7981ac8db276a24d9ab
+diff_files = cryptopp-8.9.0/0001.patch
+
+[provide]
+cryptopp = cryptopp_dep

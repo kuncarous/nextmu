@@ -1,0 +1,34 @@
+[wrap-git]
+url = https://github.com/DiligentGraphics/DiligentEngine.git
+revision = head
+depth = 1
+clone-recursive = true
+method = cmake
+
+[provide]
+DiligentFX = DiligentFX_dep
+Diligent_GraphicsTools = Diligent_GraphicsTools_dep
+Diligent_GraphicsAccessories = Diligent_GraphicsAccessories_dep
+Diligent_GraphicsEngineD3D11_static = Diligent_GraphicsEngineD3D11_static_dep
+Diligent_GraphicsEngineD3D12_static = Diligent_GraphicsEngineD3D12_static_dep
+Diligent_GraphicsEngineVk_static = Diligent_GraphicsEngineVk_static_dep
+Diligent_GraphicsEngineNextGenBase = Diligent_GraphicsEngineNextGenBase_dep
+Diligent_GraphicsEngineOpenGL_static = Diligent_GraphicsEngineOpenGL_static_dep
+glew_static = glew_static_dep
+Diligent_GraphicsEngineD3DBase = Diligent_GraphicsEngineD3DBase_dep
+Diligent_ShaderTools = Diligent_ShaderTools_dep
+Diligent_HLSL2GLSLConverterLib = Diligent_HLSL2GLSLConverterLib_dep
+spirv_cross_core = spirv_cross_core_dep
+SPIRV = SPIRV_dep
+SPIRV_Tools_static = SPIRV_Tools_static_dep
+SPIRV_Tools_opt = SPIRV_Tools_opt_dep
+glslang = glslang_dep
+MachineIndependent = MachineIndependent_dep
+GenericCodeGen = GenericCodeGen_dep
+OGLCompiler = OGLCompiler_dep
+OSDependent = OSDependent_dep
+Diligent_GraphicsEngine = Diligent_GraphicsEngine_dep
+Diligent_Common = Diligent_Common_dep
+Diligent_BasicPlatform = Diligent_BasicPlatform_dep
+Diligent_Win32Platform = Diligent_Win32Platform_dep
+Diligent_Primitives = Diligent_Primitives_dep

@@ -1,0 +1,281 @@
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..2176fb2
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,266 @@
++project(
++    'cryptopp',
++    'c', 'cpp',
++    version: '8.9.0',
++    meson_version : '>= 1.3',
++    default_options: ['warning_level=3', 'cpp_std=c++17']
++)
++
++include = include_directories('.')
++
++cpp_args = [
++	'-DCRYPTOPP_DISABLE_SSSE3',
++	'-DCRYPTOPP_DISABLE_SSSE4',
++	'-DCRYPTOPP_DISABLE_AESNI',
++]
++
++libs = []
++
++sources = files(
++    'cryptlib.cpp',
++    'cpu.cpp',
++    'primetab.cpp',
++    'integer.cpp',
++    '3way.cpp',
++    'adler32.cpp',
++    'algebra.cpp',
++    'algparam.cpp',
++    'allocate.cpp',
++    'arc4.cpp',
++    'aria.cpp',
++    'ariatab.cpp',
++    'asn.cpp',
++    'authenc.cpp',
++    'base32.cpp',
++    'base64.cpp',
++    'basecode.cpp',
++    'bfinit.cpp',
++    'blake2.cpp',
++    'blake2b_simd.cpp',
++    'blake2s_simd.cpp',
++    'blowfish.cpp',
++    'blumshub.cpp',
++    'camellia.cpp',
++    'cast.cpp',
++    'casts.cpp',
++    'cbcmac.cpp',
++    'ccm.cpp',
++    'chacha.cpp',
++    'chacha_avx.cpp',
++    'chacha_simd.cpp',
++    'chachapoly.cpp',
++    'cham.cpp',
++    'cham_simd.cpp',
++    'channels.cpp',
++    'cmac.cpp',
++    'crc.cpp',
++    'crc_simd.cpp',
++    'darn.cpp',
++    'default.cpp',
++    'des.cpp',
++    'dessp.cpp',
++    'dh.cpp',
++    'dh2.cpp',
++    'dll.cpp',
++    'donna_32.cpp',
++    'donna_64.cpp',
++    'donna_sse.cpp',
++    'dsa.cpp',
++    'eax.cpp',
++    'ec2n.cpp',
++    'eccrypto.cpp',
++    'ecp.cpp',
++    'elgamal.cpp',
++    'emsa2.cpp',
++    'eprecomp.cpp',
++    'esign.cpp',
++    'files.cpp',
++    'filters.cpp',
++    'fips140.cpp',
++    'fipstest.cpp',
++    'gcm.cpp',
++    'gcm_simd.cpp',
++    'gf256.cpp',
++    'gf2_32.cpp',
++    'gf2n.cpp',
++    'gf2n_simd.cpp',
++    'gfpcrypt.cpp',
++    'gost.cpp',
++    'gzip.cpp',
++    'hc128.cpp',
++    'hc256.cpp',
++    'hex.cpp',
++    'hight.cpp',
++    'hmac.cpp',
++    'hrtimer.cpp',
++    'ida.cpp',
++    'idea.cpp',
++    'iterhash.cpp',
++    'kalyna.cpp',
++    'kalynatab.cpp',
++    'keccak.cpp',
++    'keccak_core.cpp',
++    'keccak_simd.cpp',
++    'lea.cpp',
++    'lea_simd.cpp',
++    'lsh256.cpp',
++    'lsh256_avx.cpp',
++    'lsh256_sse.cpp',
++    'lsh512.cpp',
++    'lsh512_avx.cpp',
++    'lsh512_sse.cpp',
++    'luc.cpp',
++    'mars.cpp',
++    'marss.cpp',
++    'md2.cpp',
++    'md4.cpp',
++    'md5.cpp',
++    'misc.cpp',
++    'modes.cpp',
++    'mqueue.cpp',
++    'mqv.cpp',
++    'nbtheory.cpp',
++    'oaep.cpp',
++    'osrng.cpp',
++    'padlkrng.cpp',
++    'panama.cpp',
++    'pkcspad.cpp',
++    'poly1305.cpp',
++    'polynomi.cpp',
++    'pssr.cpp',
++    'pubkey.cpp',
++    'queue.cpp',
++    'rabbit.cpp',
++    'rabin.cpp',
++    'randpool.cpp',
++    'rc2.cpp',
++    'rc5.cpp',
++    'rc6.cpp',
++    'rdrand.cpp',
++    'rdtables.cpp',
++    'rijndael.cpp',
++    'rijndael_simd.cpp',
++    'ripemd.cpp',
++    'rng.cpp',
++    'rsa.cpp',
++    'rw.cpp',
++    'safer.cpp',
++    'salsa.cpp',
++    'scrypt.cpp',
++    'seal.cpp',
++    'seed.cpp',
++    'serpent.cpp',
++    'sha.cpp',
++    'sha3.cpp',
++    'sha_simd.cpp',
++    'shacal2.cpp',
++    'shacal2_simd.cpp',
++    'shake.cpp',
++    'shark.cpp',
++    'sharkbox.cpp',
++    'simeck.cpp',
++    'simon.cpp',
++    'simon128_simd.cpp',
++    'skipjack.cpp',
++    'sm3.cpp',
++    'sm4.cpp',
++    'sm4_simd.cpp',
++    'sosemanuk.cpp',
++    'speck.cpp',
++    'speck128_simd.cpp',
++    'square.cpp',
++    'squaretb.cpp',
++    'sse_simd.cpp',
++    'strciphr.cpp',
++    'tea.cpp',
++    'tftables.cpp',
++    'threefish.cpp',
++    'tiger.cpp',
++    'tigertab.cpp',
++#    'ttmac.cpp',
++    'tweetnacl.cpp',
++    'twofish.cpp',
++    'vmac.cpp',
++    'wake.cpp',
++    'whrlpool.cpp',
++    'xed25519.cpp',
++    'xtr.cpp',
++    'xtrcrypt.cpp',
++    'xts.cpp',
++    'zdeflate.cpp',
++    'zinflate.cpp',
++    'zlib.cpp'
++)
++
++if target_machine.cpu_family() == 'arm' or target_machine.cpu_family() == 'aarch64'
++    sources += files('neon_simd.cpp')
++endif
++
++if get_option('shared_lib')
++  libtype = 'shared_library'
++  cpp_args += '-DCRYPTOPP_EXPORTS'
++else
++  libtype = 'static_library'
++endif
++
++if target_machine.cpu_family() == 'x86_64'
++	cpp_args += [ '-D_M_X64' ]
++endif
++
++if target_machine.system() == 'windows'
++	cpp_args += [
++        get_option('buildtype') == 'release' or get_option('buildtype') == 'debugoptimized'
++        ? '/MD'
++        : '/MDd'
++    ]
++
++	if target_machine.cpu_family() == 'x86_64'
++		#gen = generator(executable('ml64.exe'),
++		#	output : '@BASENAME@.obj',
++		#	arguments : [ '/c', '/nologo', '/D_M_X64', '/W3', '/Cx', '/Zi', '/Fo', '@INPUT@', '@OUTPUT@' ]
++		#)
++
++		masm_cmd = [
++			[ 'ml64.exe', [ '/c', '/nologo', '/D_M_X64', '/W3', '/Cx', '/Zi', '/Fo', join_paths([ meson.current_source_dir(), 'rdrand-x64.obj' ]), join_paths([ meson.current_source_dir(), 'rdrand.asm' ]) ] ],
++			[ 'ml64.exe', [ '/c', '/nologo', '/D_M_X64', '/W3', '/Cx', '/Zi', '/Fo', join_paths([ meson.current_source_dir(), 'rdseed-x64.obj' ]), join_paths([ meson.current_source_dir(), 'rdseed.asm' ]) ] ],
++			[ 'ml64.exe', [ '/c', '/nologo', '/D_M_X64', '/W3', '/Zi', '/Fo', join_paths([ meson.current_source_dir(), 'x64masm.obj' ]), join_paths([ meson.current_source_dir(), 'x64masm.asm' ]) ] ],
++			[ 'ml64.exe', [ '/c', '/nologo', '/D_M_X64', '/W3', '/Zi', '/Fo', join_paths([ meson.current_source_dir(), 'x64dll.obj' ]), join_paths([ meson.current_source_dir(), 'x64dll.asm' ]) ] ]
++		]
++
++		libs += [ 'rdrand-x64.obj', 'rdseed-x64.obj', 'x64masm.obj', 'x64dll.obj' ]
++	else
++		masm_cmd = [
++			[ 'ml.exe', [ '/c', '/nologo', '/D_M_X86', '/W3', '/Cx', '/Zi', '/safeseh', '/Fo', join_paths([ meson.current_source_dir(), 'rdrand-x86.obj' ]), join_paths([ meson.current_source_dir(), 'rdrand.asm' ]) ] ],
++			[ 'ml.exe', [ '/c', '/nologo', '/D_M_X86', '/W3', '/Cx', '/Zi', '/safeseh', '/Fo', join_paths([ meson.current_source_dir(), 'rdseed-x86.obj' ]), join_paths([ meson.current_source_dir(), 'rdseed.asm' ]) ] ],
++		]
++
++		libs += [ 'rdrand-x86.obj', 'rdseed-x86.obj' ]
++	endif
++
++	foreach cmd : masm_cmd
++		res = run_command(cmd[0], cmd[1])
++
++		if res.returncode() != 0
++			output = res.stdout().strip()
++			errortxt = res.stderr().strip()
++			message(output)
++			message(errortxt)
++			
++			error('Assembly compilation failed with error')
++		endif
++	endforeach
++elif target_machine.cpu_family() == 'x86' or target_machine.cpu_family() == 'x86_64'
++	cpp_args += '-msse2'
++endif
++
++lib = build_target('cryptopp', sources,
++	target_type : libtype,
++	cpp_args : cpp_args,
++	objects : libs,
++	pic : true
++)
++
++cryptopp_dep = declare_dependency(
++	include_directories : include,
++	link_with : lib
++)
+\ No newline at end of file
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..ef3733f
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1 @@
++option('shared_lib', type : 'boolean', value : false)
+\ No newline at end of file
