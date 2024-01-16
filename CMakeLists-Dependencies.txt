@@ -1,0 +1,70 @@
+include(FetchContent)
+
+add_subdirectory(dependencies/freeimage)
+
+set(BOOST_INCLUDE_LIBRARIES algorithm serialization CACHE STRING "" FORCE)
+set(BOOST_ENABLE_CMAKE ON CACHE BOOL "" FORCE)
+include(FetchContent)
+FetchContent_Declare(
+  Boost
+  GIT_REPOSITORY https://github.com/boostorg/boost.git
+  GIT_TAG boost-1.84.0
+)
+FetchContent_MakeAvailable(Boost)
+
+set(FMT_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt
+    GIT_TAG e69e5f977d458f2650bb346dadf2ad30c5320281
+)
+FetchContent_MakeAvailable(fmt)
+
+FetchContent_Declare(
+    SDL2
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL
+    GIT_TAG 15ead9a40d09a1eb9972215cceac2bf29c9b77f6
+)
+FetchContent_MakeAvailable(SDL2)
+
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG 9cca280a4d0ccf0c08f47a99aa71d1b0e52f8d03
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm
+    GIT_TAG bf71a834948186f4097caa076cd2663c69a10e1e
+)
+FetchContent_MakeAvailable(glm)
+
+FetchContent_Declare(
+    entt
+    GIT_REPOSITORY https://github.com/skypjack/entt
+    GIT_TAG fedcb920ce0068c35ffbc66fd4e84864e6ef71ef
+)
+FetchContent_MakeAvailable(entt)
+
+set(CRYPTOPP_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(CRYPTOPP_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    cryptopp-cmake
+    GIT_REPOSITORY https://github.com/abdes/cryptopp-cmake
+    GIT_TAG f815f6284684be6ab03af4b6c273359331c61241
+)
+FetchContent_MakeAvailable(cryptopp-cmake)
+
+set(DILIGENT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_CORE OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_FX OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_SAMPLES OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_TOOLS OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    DiligentEngine
+    GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentEngine
+    GIT_TAG 7d46b75850ca3fe1f7778775ea0fedb28146327e
+)
+FetchContent_MakeAvailable(DiligentEngine)
