@@ -835,6 +835,7 @@ namespace MURoot
 #endif
 
 			swapchain->Present(MUConfig::GetVerticalSync() ? 1u : 0u);
+			MUGraphics::ClearTransactions();
 
 			MUInput::ProcessKeys();
 

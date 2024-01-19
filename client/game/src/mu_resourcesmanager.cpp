@@ -95,6 +95,8 @@ namespace MUResourcesManager
 			}
 		}
 
+		MUGraphics::FlushContext();
+
 		if (document.contains("models"))
 		{
 			const auto models = document["models"];
@@ -103,6 +105,8 @@ namespace MUResourcesManager
 				return false;
 			}
 		}
+
+		MUGraphics::FlushContext();
 
 		return true;
 	}
@@ -254,6 +258,8 @@ namespace MUResourcesManager
 
 	const mu_boolean LoadTextures(const mu_utf8string basePath, const nlohmann::json &textures)
 	{
+		auto swapchain = MUGraphics::GetSwapChain();
+
 		for (const auto &t : textures)
 		{
 			const mu_utf8string id = t["id"];
@@ -286,6 +292,8 @@ namespace MUResourcesManager
 
 	const mu_boolean LoadModels(const mu_utf8string basePath, const nlohmann::json &models)
 	{
+		auto swapchain = MUGraphics::GetSwapChain();
+
 		for (const auto &m : models)
 		{
 			const mu_utf8string id = m["id"];

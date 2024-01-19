@@ -43,7 +43,7 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 					}
 					if (data.TransitionState != Diligent::RESOURCE_STATE_UNKNOWN)
 					{
-						stateTransitions.push_back(Diligent::StateTransitionDesc(data.Buffer, Diligent::RESOURCE_STATE_COPY_DEST, data.TransitionState, data.TransitionFlags));
+						stateTransitions.push_back(Diligent::StateTransitionDesc(data.Buffer, Diligent::RESOURCE_STATE_UNKNOWN, data.TransitionState, data.TransitionFlags));
 					}
 				}
 				break;
@@ -66,7 +66,7 @@ void NRenderManager::Execute(Diligent::IDeviceContext *immediateContext)
 					}
 					if (data.TransitionState != Diligent::RESOURCE_STATE_UNKNOWN)
 					{
-						stateTransitions.push_back(Diligent::StateTransitionDesc(data.Texture, Diligent::RESOURCE_STATE_COPY_DEST, data.TransitionState, data.TransitionFlags));
+						stateTransitions.push_back(Diligent::StateTransitionDesc(data.Texture, Diligent::RESOURCE_STATE_UNKNOWN, data.TransitionState, data.TransitionFlags));
 					}
 				}
 				break;

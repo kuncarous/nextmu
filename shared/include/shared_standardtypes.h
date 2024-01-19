@@ -133,7 +133,7 @@ NEXTMU_INLINE int sprintf_s(char* s, mu_size n, const char* fmt, ...)
 	va_end(ap);
 	return ret;
 }
-NEXTMU_INLINE void strcpy_s(char* dest, const mu_size destLength, const char* src)
+NEXTMU_INLINE void win_strcpy_s(char* dest, const mu_size destLength, const char* src)
 {
 	strcpy(dest, src);
 }
@@ -172,6 +172,8 @@ NEXTMU_INLINE void wcscat_s(wchar_t* dest, const mu_size destLength, const wchar
 {
 	wcscat(dest, src);
 }
+#else
+#define win_strcpy_s strcpy_s
 #endif
 
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX
@@ -225,7 +227,7 @@ NEXTMU_INLINE void wcscat_s(wchar_t* dest, const mu_size destLength, const wchar
 // UTF-8
 #define mu_utf8strcmp			strcmp
 #define mu_utf8strlen			strlen
-#define mu_utf8strcpy_s			strcpy_s
+#define mu_utf8strcpy_s			win_strcpy_s
 #define mu_utf8strncpy_s		strncpy_s
 #define mu_utf8sprintf			sprintf
 #define mu_utf8sprintf_s		sprintf_s
@@ -238,7 +240,7 @@ NEXTMU_INLINE void wcscat_s(wchar_t* dest, const mu_size destLength, const wchar
 #define mu_utf8strcat_s			strcat_s
 
 #define mu_utf8splitpath		_splitpath_s
-#define mu_utf8strcpy			strcpy_s
+#define mu_utf8strcpy			win_strcpy_s
 #define mu_utf8strncpy			strncpy_s
 #define mu_utf8strcpy_ns		strcpy
 #define mu_utf8strncpy_ns		strncpy

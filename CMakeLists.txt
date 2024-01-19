@@ -1,10 +1,11 @@
-cmake_minimum_required (VERSION 3.28)
+cmake_minimum_required (VERSION 3.22)
 
 project(
     NextMU
     VERSION 0.0.1
 )
 
+include(CMakeLists-SetPlatform.txt)
 include(CMakeLists-Dependencies.txt)
 
 add_subdirectory(shared)
@@ -12,4 +13,7 @@ add_subdirectory(client/game)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_subdirectory(client/windows)
+endif()
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+    add_subdirectory(client/android/lib)
 endif()

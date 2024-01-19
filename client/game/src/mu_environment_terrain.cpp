@@ -198,11 +198,11 @@ const mu_boolean NEnvironment::LoadTerrain(mu_utf8string path)
 	std::map<mu_uint32, NModel *> modelsMap;
 	if (document.contains("models"))
 	{
-		const auto models = document["models"];
-		for (const auto &model : models)
+		const auto jmodels = document["models"];
+		for (const auto &jmodel : jmodels)
 		{
-			const mu_uint32 id = model["id"].get<mu_uint32>();
-			const mu_utf8string modelPath = model["path"].get<mu_utf8string>();
+			const mu_uint32 id = jmodel["id"].get<mu_uint32>();
+			const mu_utf8string modelPath = jmodel["path"].get<mu_utf8string>();
 
 			NModelPtr model = std::make_unique<NModel>();
 			if (

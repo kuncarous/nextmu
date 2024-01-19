@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.28)
+cmake_minimum_required (VERSION 3.22)
 
 project(FreeImage)
 
@@ -141,21 +141,6 @@ set(
     Source/LibJPEG/jquant2.c
     Source/LibJPEG/jutils.c
     Source/LibJPEG/transupp.c
-    Source/LibPNG/png.c
-    Source/LibPNG/pngerror.c
-    Source/LibPNG/pngget.c
-    Source/LibPNG/pngmem.c
-    Source/LibPNG/pngpread.c
-    Source/LibPNG/pngread.c
-    Source/LibPNG/pngrio.c
-    Source/LibPNG/pngrtran.c
-    Source/LibPNG/pngrutil.c
-    Source/LibPNG/pngset.c
-    Source/LibPNG/pngtrans.c
-    Source/LibPNG/pngwio.c
-    Source/LibPNG/pngwrite.c
-    Source/LibPNG/pngwtran.c
-    Source/LibPNG/pngwutil.c
     Source/LibTIFF4/tif_aux.c
     Source/LibTIFF4/tif_close.c
     Source/LibTIFF4/tif_codec.c
@@ -192,21 +177,6 @@ set(
     Source/LibTIFF4/tif_warning.c
     Source/LibTIFF4/tif_write.c
     Source/LibTIFF4/tif_zip.c
-    Source/ZLib/adler32.c
-    Source/ZLib/compress.c
-    Source/ZLib/crc32.c
-    Source/ZLib/deflate.c
-    Source/ZLib/gzclose.c
-    Source/ZLib/gzlib.c
-    Source/ZLib/gzread.c
-    Source/ZLib/gzwrite.c
-    Source/ZLib/infback.c
-    Source/ZLib/inffast.c
-    Source/ZLib/inflate.c
-    Source/ZLib/inftrees.c
-    Source/ZLib/trees.c
-    Source/ZLib/uncompr.c
-    Source/ZLib/zutil.c
     Source/LibOpenJPEG/bio.c
     Source/LibOpenJPEG/cio.c
     Source/LibOpenJPEG/dwt.c
@@ -482,38 +452,49 @@ endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
-add_definitions(-DLIBRAW_NODLL -DDISABLE_PERF_MEASUREMENT -DOPJ_STATIC)
+add_definitions(-DLIBRAW_NODLL -DDISABLE_PERF_MEASUREMENT -DOPJ_STATIC -D__ANSI__)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    add_definitions(-D__LP64__)
+endif()
 add_library(FreeImage STATIC ${SOURCE} ${INCLUDE})
+get_target_property(PNG_INCLUDE_DIRECTORIES png_static INCLUDE_DIRECTORIES)
+
+target_link_libraries(
+    FreeImage
+    PUBLIC
+        Boost::endian
+        ZLib
+        png_static
+)
 target_compile_definitions(FreeImage PUBLIC FREEIMAGE_LIB)
 target_include_directories(
     FreeImage
     PUBLIC
-        Source
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source
 	PRIVATE
-        Source/Metadata
-        Source/FreeImageToolkit
-        Source/LibJPEG
-        Source/LibPNG
-        Source/LibTIFF4
-        Source/ZLib
-        Source/LibOpenJPEG
-        Source/OpenEXR
-        Source/OpenEXR/Half
-        Source/OpenEXR/Iex
-        Source/OpenEXR/IlmImf
-        Source/OpenEXR/IlmThread
-        Source/OpenEXR/Imath
-        Source/OpenEXR/IexMath
-        Source/LibRawLite
-        Source/LibRawLite/dcraw
-        Source/LibRawLite/internal
-        Source/LibRawLite/libraw
-        Source/LibRawLite/src
-        Source/LibWebP
-        Source/LibJXR
-        Source/LibJXR/common/include
-        Source/LibJXR/image/sys
-        Source/LibJXR/jxrgluelib
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/Metadata
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/FreeImageToolkit
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibJPEG
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibTIFF4
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibOpenJPEG
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/OpenEXR
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/OpenEXR/Half
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/OpenEXR/Iex
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/OpenEXR/IlmImf
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/OpenEXR/IlmThread
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/OpenEXR/Imath
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/OpenEXR/IexMath
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibRawLite
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibRawLite/dcraw
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibRawLite/internal
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibRawLite/libraw
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibRawLite/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibWebP
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibJXR
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibJXR/common/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibJXR/image/sys
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibJXR/jxrgluelib
+        ${PNG_INCLUDE_DIRECTORIES}
 )
 
 source_group("src" FILES ${SOURCE})

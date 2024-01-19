@@ -112,7 +112,7 @@ namespace MUBBoxRenderer
 			}
 
 			IndexBuffer = buffer;
-			barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+			barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_INDEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		}
 
 		const auto immediateContext = MUGraphics::GetImmediateContext();

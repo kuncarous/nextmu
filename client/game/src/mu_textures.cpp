@@ -170,9 +170,13 @@ namespace MUTextures
 		}
 
 		const auto immediateContext = MUGraphics::GetImmediateContext();
-		Diligent::StateTransitionDesc barrier(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+		Diligent::StateTransitionDesc barrier(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
 		immediateContext->TransitionResourceStates(1u, &barrier);
 		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(samplerDesc)->Sampler);
+
+		MUGraphics::IncreaseTransactions();
+		MUGraphics::CheckIfRequireFlushContext();
+
 		return std::make_unique<NGraphicsTexture>(TextureIdGenerator++, texture, width, height, info.Alpha);
 	}
 

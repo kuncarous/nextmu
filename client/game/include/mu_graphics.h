@@ -19,6 +19,11 @@ namespace MUGraphics
 	Diligent::ISwapChain *GetSwapChain();
 	Diligent::IDeviceContext *GetImmediateContext();
 	NRenderManager *GetRenderManager();
+
+	void IncreaseTransactions();
+	void ClearTransactions();
+	void FlushContext(Diligent::ISwapChain *swapchain = GetSwapChain());
+	void CheckIfRequireFlushContext(Diligent::ISwapChain *swapchain = GetSwapChain());
 };
 
 #endif

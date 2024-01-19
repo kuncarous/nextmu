@@ -33,7 +33,7 @@ namespace MUSkeletonManager
 			return false;
 		}
 
-		Diligent::StateTransitionDesc barrier(texture, Diligent::RESOURCE_STATE_UNDEFINED, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+		Diligent::StateTransitionDesc barrier(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
 		immediateContext->TransitionResourceStates(1, &barrier);
 
 		BonesTexture = texture;
@@ -81,9 +81,7 @@ namespace MUSkeletonManager
 		);
 		Diligent::StateTransitionDesc barrier(
 			BonesTexture,
-			deviceType == Diligent::RENDER_DEVICE_TYPE_D3D12
-			? Diligent::RESOURCE_STATE_UNKNOWN
-			: Diligent::RESOURCE_STATE_COPY_DEST,
+			Diligent::RESOURCE_STATE_UNKNOWN,
 			Diligent::RESOURCE_STATE_SHADER_RESOURCE,
 			Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
 		);

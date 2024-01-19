@@ -296,7 +296,7 @@ const mu_boolean NTerrain::LoadHeightmap(mu_utf8string path, std::vector<Diligen
 		return false;
 	}
 
-	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 	HeightmapTexture = texture;
 
 	return true;
@@ -336,10 +336,10 @@ const mu_boolean NTerrain::GenerateNormal(std::vector<Diligent::StateTransitionD
 	{
 		for (mu_uint32 x = 0; x < TerrainSize; ++x, ++src, ++data)
 		{
-			*data = glm::packUnorm4x16(glm::vec4(*src, 0.0f));
+			*data = glm::packHalf4x16(glm::vec4(*src, 0.0f));
 		}
 	}
-
+    
 	const auto device = MUGraphics::GetDevice();
 
 	std::vector<Diligent::TextureSubResData> subresources;
@@ -355,7 +355,7 @@ const mu_boolean NTerrain::GenerateNormal(std::vector<Diligent::StateTransitionD
 	textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
 	textureDesc.Width = TerrainSize;
 	textureDesc.Height = TerrainSize;
-	textureDesc.Format = Diligent::TEX_FORMAT_RGBA16_UNORM;
+	textureDesc.Format = Diligent::TEX_FORMAT_RGBA16_FLOAT;
 	textureDesc.Usage = Diligent::USAGE_DEFAULT;
 	textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
 
@@ -367,7 +367,7 @@ const mu_boolean NTerrain::GenerateNormal(std::vector<Diligent::StateTransitionD
 		return false;
 	}
 
-	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 	NormalTexture = texture;
 
 	return true;
@@ -520,7 +520,7 @@ const mu_boolean NTerrain::LoadLightmap(mu_utf8string path, std::vector<Diligent
 		return false;
 	}
 
-	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 	LightmapTexture = texture;
 
 	return true;
@@ -655,7 +655,7 @@ const mu_boolean NTerrain::LoadTextures(
 			return false;
 		}
 
-		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(MUTextures::CalculateSamplerFlags(filter, wrap))->Sampler);
 		Textures = texture;
 	}
@@ -694,7 +694,7 @@ const mu_boolean NTerrain::LoadTextures(
 			return false;
 		}
 
-		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		UVTexture = texture;
 	}
 
@@ -799,7 +799,7 @@ const mu_boolean NTerrain::LoadGrassTextures(
 			return false;
 		}
 
-		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)->SetSampler(GetTextureSampler(MUTextures::CalculateSamplerFlags(filter, wrap))->Sampler);
 		GrassTextures = texture;
 	}
@@ -838,7 +838,7 @@ const mu_boolean NTerrain::LoadGrassTextures(
 			return false;
 		}
 
-		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		GrassUVTexture = texture;
 	}
 
@@ -945,7 +945,7 @@ const mu_boolean NTerrain::LoadMappings(
 		return false;
 	}
 
-	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 	MappingTexture = texture;
 
 	return true;
@@ -1058,7 +1058,7 @@ const mu_boolean NTerrain::LoadAttributes(mu_utf8string path, std::vector<Dilige
 		return false;
 	}
 
-	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+	barriers.push_back(Diligent::StateTransitionDesc(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 	AttributesTexture = texture;
 
 	return true;
@@ -1131,7 +1131,7 @@ const mu_boolean NTerrain::GenerateBuffers(std::vector<Diligent::StateTransition
 			return false;
 		}
 
-		barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
+		barriers.push_back(Diligent::StateTransitionDesc(buffer, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE));
 		VertexBuffer = buffer;
 	}
 
@@ -1225,9 +1225,9 @@ void NTerrain::Update()
 	GenerateTerrain();
 
 	Diligent::StateTransitionDesc restoreBarriers[3] = {
-		Diligent::StateTransitionDesc(LightmapTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
-		Diligent::StateTransitionDesc(NormalTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
-		Diligent::StateTransitionDesc(AttributesTexture, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
+		Diligent::StateTransitionDesc(LightmapTexture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+		Diligent::StateTransitionDesc(NormalTexture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
+		Diligent::StateTransitionDesc(AttributesTexture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE)
 	};
 	immediateContext->TransitionResourceStates(mu_countof(restoreBarriers), restoreBarriers);
 }

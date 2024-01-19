@@ -47,6 +47,8 @@ namespace MUGraphics
     const Diligent::TEXTURE_FORMAT DesiredColorFormat = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
     constexpr mu_boolean ForceNonSeprblProgs = false;
 
+	mu_uint32 TransactionsCount = 0u; // Used to known how many transactions were added to the command buffer so we prevent it from overflow forcing it to flush
+
     const mu_boolean InitializeEngine(const Diligent::NativeWindow *window)
     {
 #if NEXTMU_D3D11_SUPPORTED || NEXTMU_D3D12_SUPPORTED || NEXTMU_VULKAN_SUPPORTED
@@ -373,7 +375,7 @@ namespace MUGraphics
 #elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
         init.platformData.nwh = wmi.info.cocoa.window;
 #elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
-        init.platformData.nwh = wmi.info.android.window;
+        Diligent::NativeWindow window = { wmi.info.android.window };
 #endif
 
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
@@ -385,24 +387,24 @@ namespace MUGraphics
         SwapChainInitDesc.ColorBufferFormat = DesiredColorFormat;
         SwapChainInitDesc.DepthBufferFormat = Diligent::TEX_FORMAT_D32_FLOAT_S8X24_UINT;
 
-        const Diligent::RENDER_DEVICE_TYPE deviceTypes[] = {
+		const Diligent::RENDER_DEVICE_TYPE deviceTypes[] = {
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
+            Diligent::RENDER_DEVICE_TYPE_GLES,
+#endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
-            Diligent::RENDER_DEVICE_TYPE_VULKAN,
+			Diligent::RENDER_DEVICE_TYPE_VULKAN,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
-            Diligent::RENDER_DEVICE_TYPE_D3D12,
+			Diligent::RENDER_DEVICE_TYPE_D3D12,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
-            Diligent::RENDER_DEVICE_TYPE_D3D11,
-#endif
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
-            Diligent::RENDER_DEVICE_TYPE_GL,
+			Diligent::RENDER_DEVICE_TYPE_D3D11,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
             Diligent::RENDER_DEVICE_TYPE_METAL,
 #endif
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
-            Diligent::RENDER_DEVICE_TYPE_GLES,
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
+			Diligent::RENDER_DEVICE_TYPE_GL,
 #endif
         };
         mu_boolean initialized = false;
@@ -487,5 +489,34 @@ namespace MUGraphics
     NRenderManager *GetRenderManager()
     {
         return RenderManager.get();
+	}
+
+	void IncreaseTransactions()
+	{
+		++TransactionsCount;
+	}
+
+    void ClearTransactions()
+    {
+        TransactionsCount = 0u;
     }
+
+	void FlushContext(Diligent::ISwapChain *swapchain)
+	{
+		if (TransactionsCount == 0u) return;
+		if (
+            DeviceType == Diligent::RENDER_DEVICE_TYPE_D3D12 ||
+            DeviceType == Diligent::RENDER_DEVICE_TYPE_VULKAN ||
+            DeviceType == Diligent::RENDER_DEVICE_TYPE_METAL
+            )
+            swapchain->Present(0);
+		ClearTransactions();
+	}
+
+	constexpr mu_uint32 MaxTransactionsBeforeForceFlush = 100u;
+	void CheckIfRequireFlushContext(Diligent::ISwapChain *swapchain)
+	{
+		if (TransactionsCount < MaxTransactionsBeforeForceFlush) return;
+		FlushContext(swapchain);
+	}
 };

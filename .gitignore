@@ -13,19 +13,9 @@ __pycache__
 /install dir
 /work area
 
-/meson-test-run.txt
-/meson-test-run.xml
-/meson-cross-test-run.txt
-/meson-cross-test-run.xml
-
 .DS_Store
 *~
 *.swp
-packagecache
-/MANIFEST
-/build
-/dist
-/meson.egg-info
 
 /docs/built_docs
 /docs/hotdoc-private*
@@ -34,11 +24,21 @@ packagecache
 /*venv*
 /*.log
 
-/subprojects/*
-!/subprojects/freeimage
-!/subprojects/packagefiles
-!/subprojects/*.wrap
-
 /client/game/include/ui_noesisgui_license.h
+/builds
 
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
 /build
+/captures
+.externalNativeBuild
+.cxx
+local.properties

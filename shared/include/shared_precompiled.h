@@ -11,11 +11,12 @@
 
 #include <SDL.h>
 
+#include "shared_operatingsystem.h"
+
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
 #include <windows.h>
 #endif
 
-#include "shared_operatingsystem.h"
 #include "shared_standardtypes.h"
 #include "shared_operatingsystem_io.h"
 #include "shared_operatingsystem_backend.h"

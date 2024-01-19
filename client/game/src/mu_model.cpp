@@ -1106,9 +1106,12 @@ const mu_boolean NModel::GenerateBuffers()
 	}
 
 	const auto immediateContext = MUGraphics::GetImmediateContext();
-	Diligent::StateTransitionDesc barrier(buffer, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+	Diligent::StateTransitionDesc barrier(buffer, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_VERTEX_BUFFER, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
 	immediateContext->TransitionResourceStates(1, &barrier);
 	VertexBuffer = buffer;
+
+	MUGraphics::IncreaseTransactions();
+	MUGraphics::CheckIfRequireFlushContext();
 
 	return true;
 }

@@ -2,12 +2,11 @@
 #include "mu_threadsmanager.h"
 #include <thread>
 #include <barrier>
-#include <xutility>
 
 namespace MUThreadsManager
 {
 	std::atomic_bool Terminated = false;
-	std::vector<std::jthread> Threads;
+	std::vector<std::thread> Threads;
 	std::unique_ptr<std::barrier<>> WakeBarrier;
 	std::unique_ptr<std::barrier<>> RunBarrier;
 	std::unique_ptr<NThreadExecutorBase> Executor;
@@ -16,7 +15,7 @@ namespace MUThreadsManager
 
 	const mu_boolean Initialize()
 	{
-		const auto threadsCount = glm::min(std::jthread::hardware_concurrency(), 16u);
+		const auto threadsCount = glm::min(std::thread::hardware_concurrency(), 16u);
 
 		WakeBarrier.reset(new std::barrier(threadsCount + 1));
 		RunBarrier.reset(new std::barrier(threadsCount + 1));
@@ -24,7 +23,7 @@ namespace MUThreadsManager
 		Threads.resize(threadsCount);
 		for (mu_uint32 n = 0; n < threadsCount; ++n)
 		{
-			Threads[n] = std::jthread(Worker, n);
+			Threads[n] = std::thread(Worker, n);
 		}
 
 		return true;
@@ -34,6 +33,10 @@ namespace MUThreadsManager
 	{
 		Terminated = true;
 		WakeBarrier->arrive_and_wait();
+        for (auto &thread : Threads)
+        {
+            if (thread.joinable()) thread.join();
+        }
 		Threads.clear();
 		WakeBarrier.reset();
 		RunBarrier.reset();

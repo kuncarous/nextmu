@@ -268,7 +268,7 @@ public:
 				if (resourceLinksIter == ResourceLinksMap.end()) continue;
 				auto &resourceLinks = resourceLinksIter->second;
 
-				auto pipelineIter = resourceLinks.Bindings.find(shaderResource->PipelineId);
+				auto pipelineIter = resourceLinks.Bindings.find(binding->ParentId);
 				if (pipelineIter == resourceLinks.Bindings.end()) continue;
 				auto &resources = pipelineIter->second;
 

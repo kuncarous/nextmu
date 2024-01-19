@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.28)
+cmake_minimum_required (VERSION 3.22)
 
 project(Game)
 
@@ -247,17 +247,11 @@ set(
 	src/ui_noesisgui.cpp
 )
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_definitions(-DWINVER=0x0601 -D_WIN32_WINNT=0x0601)
-endif()
-
 get_supported_backends(ENGINE_LIBRARIES)
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 add_library(Game STATIC ${SOURCE} ${INCLUDE})
-target_include_directories(Game PUBLIC include PRIVATE Detour/Include)
-target_precompile_headers(Game PRIVATE include/mu_precompiled.h)
 target_link_libraries(
     Game
     PUBLIC
@@ -273,6 +267,8 @@ target_link_libraries(
         Diligent-GraphicsTools
         ${ENGINE_LIBRARIES}
 )
+target_precompile_headers(Game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/mu_precompiled.h)
+target_include_directories(Game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include)
 
 source_group("src" FILES ${SOURCE})
 source_group("include" FILES ${INCLUDE})
