@@ -9,9 +9,7 @@ If you want to donate, press the button below
 # Discord
 If you want to join our discord, press the button below
 
-<p align="center">
-  <a href="https://discord.gg/ARafEy92hp"><img src="https://discordapp.com/api/guilds/1025209137430265996/widget.png?style=banner2" alt="Discord server"></a>
-</p>
+<a href="https://discord.gg/ARafEy92hp"><img src="https://discord.com/api/guilds/1025209137430265996/widget.png?style=banner2" alt="Discord server"></a>
 
 # Dependencies
 ## From Repositories
