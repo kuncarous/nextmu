@@ -1,12 +1,16 @@
 cmake_minimum_required (VERSION 3.22)
 
+set(NEXTMU_COMPANY_NAME     "NextGames" CACHE STRING "Company Name")
+set(NEXTMU_GAME_NAME        "NextMU" CACHE STRING "Game Name")
+set(NEXTMU_VERSION_MAJOR    "0" CACHE STRING "Version Major")
+set(NEXTMU_VERSION_MINOR	"0" CACHE STRING "Version Minor")
+set(NEXTMU_VERSION_REVISION	"1" CACHE STRING "Version Revision")
+set(NEXTMU_VERSION_SERIAL	"UUb335yJPFn7MFfdx6HtTBLrfuAxcDD49nNMQgXZFPbcdHF3sSXrBHqg5stc66bu" CACHE STRING "Version Serial")
+
 project(
     NextMU
-    VERSION 0.0.1
+    VERSION ${NEXTMU_VERSION_MAJOR}.${NEXTMU_VERSION_MINOR}.${NEXTMU_VERSION_REVISION}
 )
-
-set(NEXTMU_COMPANY_NAME "NextGames" CACHE STRING "Company Name")
-set(NEXTMU_GAME_NAME "NextMU" CACHE STRING "Game Name")
 
 include(CMakeLists-SetPlatform.txt)
 include(CMakeLists-Dependencies.txt)
