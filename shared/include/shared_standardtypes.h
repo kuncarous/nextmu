@@ -203,8 +203,13 @@ NEXTMU_INLINE void wcscat_s(wchar_t* dest, const mu_size destLength, const wchar
 #define mu_unicodestrncpy_ns	wcsncpy
 #define mu_unicodestrcat		wcscat_s
 #define mu_unicodestrcat_ns		wcscat
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
+#define mu_unicodestricmp		wcscasecmp
+#define mu_unicodestrnicmp		wcsncasecmp
+#else
 #define mu_unicodestricmp		_wcsicmp
 #define mu_unicodestrnicmp		_wcsnicmp
+#endif
 #define mu_unicodestrcmp		wcscmp
 #define mu_unicodeprintf		wprintf
 #define mu_unicodestrtol		wcstol
@@ -246,8 +251,13 @@ NEXTMU_INLINE void wcscat_s(wchar_t* dest, const mu_size destLength, const wchar
 #define mu_utf8strncpy_ns		strncpy
 #define mu_utf8strcat			strcat_s
 #define mu_utf8strcat_ns		strcat
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
+#define mu_utf8stricmp			strcasecmp
+#define mu_utf8strnicmp			strncasecmp
+#else
 #define mu_utf8stricmp			_stricmp
 #define mu_utf8strnicmp			_strnicmp
+#endif
 #define mu_utf8strcmp			strcmp
 #define mu_utf8printf			printf
 #define mu_utf8strtol			strtol
@@ -575,53 +585,53 @@ void mu_trace_info(fmt::format_string<T...> x, T&&... args)
 #else
 #define mu_assert(x) (void)(x)
 #endif
-#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
-void iOSLogToConsole(const mu_char* message);
+#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
+void AppleLogToConsole(const mu_char* message);
 
 template<typename... T>
-void iOSAssert(const mu_char* asserttype, fmt::format_string<T...> text, T&&... args)
+void AppleAssert(const mu_char* asserttype, fmt::format_string<T...> text, T&&... args)
 {
 	const mu_utf8string srcmessage = fmt::format(text, std::forward<T>(args)...);
 	const mu_utf8string message = fmt::format("[NextMU][{0}] {1}\n", asserttype, srcmessage);
 
-	iOSLogToConsole(message.c_str());
+	AppleLogToConsole(message.c_str());
 }
 
 template<typename... T>
 void mu_error(fmt::format_string<T...> x, T&&... args)
 {
-	iOSAssert("Error", x, std::forward<T>(args)...);
+	AppleAssert("Error", x, std::forward<T>(args)...);
 }
 template<typename... T>
 void mu_info(fmt::format_string<T...> x, T&&... args)
 {
-	iOSAssert("Info", x, std::forward<T>(args)...);
+	AppleAssert("Info", x, std::forward<T>(args)...);
 }
 
 template<typename... T>
 void mu_debug_error(fmt::format_string<T...> x, T&&... args)
 {
 #ifndef NDEBUG
-	iOSAssert("Error", x, std::forward<T>(args)...);
+	AppleAssert("Error", x, std::forward<T>(args)...);
 #endif
 }
 template<typename... T>
 void mu_debug_info(fmt::format_string<T...> x, T&&... args)
 {
 #ifndef NDEBUG
-	iOSAssert("Info", x, std::forward<T>(args)...);
+	AppleAssert("Info", x, std::forward<T>(args)...);
 #endif
 }
 template<typename... T>
 void mu_trace_info(fmt::format_string<T...> x, T&&... args)
 {
 #if !defined(NDEBUG) && defined(NEXTMU_ENABLE_TRACE_INFO)
-	iOSAssert("Info", x, std::forward<T>(args)...);
+	AppleAssert("Info", x, std::forward<T>(args)...);
 #endif
 }
 
 #ifndef NDEBUG
-#define mu_assert(x) if (!(x)) { iOSAssert("Assert", #x); }
+#define mu_assert(x) if (!(x)) { AppleAssert("Assert", #x); }
 #else
 #define mu_assert(x) (void)(x)
 #endif

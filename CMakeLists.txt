@@ -5,15 +5,21 @@ project(
     VERSION 0.0.1
 )
 
+set(NEXTMU_COMPANY_NAME "NextGames" CACHE STRING "Company Name")
+set(NEXTMU_GAME_NAME "NextMU" CACHE STRING "Game Name")
+
 include(CMakeLists-SetPlatform.txt)
 include(CMakeLists-Dependencies.txt)
 
 add_subdirectory(shared)
 add_subdirectory(client/game)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if (PLATFORM_MACOS)
+    add_subdirectory(client/macos)
+endif()
+if (PLATFORM_WIN32)
     add_subdirectory(client/windows)
 endif()
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+if (PLATFORM_ANDROID)
     add_subdirectory(client/android/lib)
 endif()

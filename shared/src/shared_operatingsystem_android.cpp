@@ -95,50 +95,7 @@ namespace NXOperatingSystem
 
 		return true;
 	}
-
-	const mu_utf8string GetSystemLanguageISO3()
-	{
-		JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv();
-
-		jni_unique localeClass = env->FindClass("java/util/Locale");
-		if (!localeClass)
-		{
-			return "";
-		}
-
-		jmethodID getDefault = env->GetStaticMethodID(localeClass.get(), "getDefault", "()Ljava/util/Locale;");
-		if (getDefault == nullptr)
-		{
-			return "";
-		}
-
-		jni_unique defaultLocale = env->CallStaticObjectMethod(localeClass.get(), getDefault);
-		if (!defaultLocale)
-		{
-			return "";
-		}
-
-		jmethodID getISO3Language = env->GetMethodID(localeClass.get(), "getISO3Language", "()Ljava/lang/String;");
-		if (getISO3Language == nullptr)
-		{
-			return "";
-		}
-
-		jni_unique iso3Language = (jstring)env->CallObjectMethod(defaultLocale.get(), getISO3Language);
-		if (!iso3Language)
-		{
-			return "";
-		}
-
-		return env->GetStringUTFChars(iso3Language.get(), nullptr);
-	}
-
-	const mu_boolean GetSystemLanguages(std::vector<mu_utf8string> &languages)
-	{
-		languages.push_back(GetSystemLanguageISO3());
-		return true;
-	}
-
+	
 	void EnumerateFilesAPK(const mu_utf8string path,
 						   std::vector<mu_utf8string> &filesList)
 	{

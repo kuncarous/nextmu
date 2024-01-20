@@ -31,7 +31,8 @@ mu_boolean ConvertToUTF8(const mu_unicode* input, mu_uint32 inputCount, mu_char*
 
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || \
 	NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS || \
-	NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX
+	NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || \
+    NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 	* outputCount = static_cast<mu_uint32>(wcstombs(output, input, static_cast<size_t>(inputCount)));
 #else
 	* outputCount = WideCharToMultiByte(CP_UTF8, 0, input, inputCount, output, outputSize, nullptr, nullptr);
@@ -67,7 +68,8 @@ mu_boolean ConvertFromUTF8(const mu_char* input, mu_uint32 inputCount, mu_unicod
 
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || \
 	NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS || \
-	NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX
+	NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || \
+    NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 	* outputCount = static_cast<mu_uint32>(mbstowcs(output, input, static_cast<size_t>(inputCount)));
 #else
 	* outputCount = MultiByteToWideChar(CP_UTF8, 0, input, inputCount, output, outputSize);

@@ -4,6 +4,7 @@
 
 #include <array>
 #include <bitset>
+#include <thread>
 
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
 #include <unistd.h>

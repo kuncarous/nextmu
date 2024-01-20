@@ -448,6 +448,8 @@ set(
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(-DWINVER=0x0601 -D_WIN32_WINNT=0x0601)
+elseif (PLATFORM_MACOS)
+    add_definitions(-DMACOS=1)
 endif()
 
 set(CMAKE_C_STANDARD 11)

@@ -356,6 +356,7 @@ namespace MUGraphics
         }
     }
 
+    SDL_MetalView MetalView = nullptr;
     const mu_boolean Initialize()
     {
         auto *sdlWindow = MUWindow::GetWindow();
@@ -373,7 +374,8 @@ namespace MUGraphics
         init.platformData.ndt = wmi.info.x11.display;
         init.platformData.nwh = (void *)(uintptr_t)wmi.info.x11.window;
 #elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
-        init.platformData.nwh = wmi.info.cocoa.window;
+        MetalView = SDL_Metal_CreateView(sdlWindow);
+        Diligent::NativeWindow window(MetalView);
 #elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
         Diligent::NativeWindow window = { wmi.info.android.window };
 #endif
@@ -391,7 +393,7 @@ namespace MUGraphics
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
             Diligent::RENDER_DEVICE_TYPE_GLES,
 #endif
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 			Diligent::RENDER_DEVICE_TYPE_VULKAN,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
@@ -400,7 +402,7 @@ namespace MUGraphics
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
 			Diligent::RENDER_DEVICE_TYPE_D3D11,
 #endif
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
+#if (NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS) && 0
             Diligent::RENDER_DEVICE_TYPE_METAL,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
@@ -449,6 +451,12 @@ namespace MUGraphics
         Device.Release();
         EngineFactory.Release();
         FreeImage_DeInitialise();
+        
+        if (MetalView != nullptr)
+        {
+            SDL_Metal_DestroyView(MetalView);
+            MetalView = nullptr;
+        }
     }
 
     NRenderTargetDesc &GetRenderTargetDesc()
@@ -493,16 +501,21 @@ namespace MUGraphics
 
 	void IncreaseTransactions()
 	{
+#if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS && NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
 		++TransactionsCount;
+#endif
 	}
 
     void ClearTransactions()
     {
+#if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS && NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
         TransactionsCount = 0u;
+#endif
     }
 
 	void FlushContext(Diligent::ISwapChain *swapchain)
 	{
+#if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS && NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
 		if (TransactionsCount == 0u) return;
 		if (
             DeviceType == Diligent::RENDER_DEVICE_TYPE_D3D12 ||
@@ -511,12 +524,15 @@ namespace MUGraphics
             )
             swapchain->Present(0);
 		ClearTransactions();
+#endif
 	}
 
 	constexpr mu_uint32 MaxTransactionsBeforeForceFlush = 100u;
 	void CheckIfRequireFlushContext(Diligent::ISwapChain *swapchain)
 	{
+#if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS && NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
 		if (TransactionsCount < MaxTransactionsBeforeForceFlush) return;
 		FlushContext(swapchain);
+#endif
 	}
 };

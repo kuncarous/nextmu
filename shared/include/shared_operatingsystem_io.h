@@ -66,7 +66,7 @@ NEXTMU_INLINE const mu_boolean mu_rwexists_extstorage(const mu_utf8string filena
 
 	return file != nullptr;
 }
-#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
+#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 template<const EGameDirectoryType dirType>
 NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(SDL_RWops** file, const mu_utf8string filename, const mu_char* mode)
 {
@@ -119,7 +119,7 @@ NEXTMU_INLINE const mu_boolean mu_rwexists_extstorage(const mu_utf8string filena
 template<const EGameDirectoryType dirType>
 NEXTMU_INLINE const mu_boolean mu_rwfromfile(SDL_RWops** file, const mu_utf8string filename, const mu_char* mode)
 {
-#if NEXTMU_OPERATING_SYSTEM_TYPE == NEXTMU_OSTYPE_MOBILE
+#if NEXTMU_OPERATING_SYSTEM_TYPE == NEXTMU_OSTYPE_MOBILE || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 	if constexpr (dirType != EGameDirectoryType::eApplicationOnly)
 	{
 		if (mu_rwfromfile_extstorage<dirType>(file, filename, mode) == true)

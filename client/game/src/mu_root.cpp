@@ -105,7 +105,7 @@ namespace MURoot
 
 		SDL_SetHint(SDL_HINT_VIDEO_EXTERNAL_CONTEXT, "1");
 
-#if NEXTMU_OPERATING_SYSTEM_TYPE == NEXTMU_OSTYPE_MOBILE
+#if NEXTMU_OPERATING_SYSTEM_TYPE == NEXTMU_OSTYPE_MOBILE || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 		SupportPathUTF8 = NXOperatingSystem::GetStorageSupportFilesPath();
 		SupportPathUnicode = ConvertToUnicodeString(SupportPathUTF8);
 		CachePathUTF8 = NXOperatingSystem::GetStorageCacheFilesPath();

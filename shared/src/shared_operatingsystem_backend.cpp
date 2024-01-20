@@ -6,7 +6,8 @@ namespace NXOperatingSystem
 	mu_boolean HasScreenKeyboardSupport = false;
 
 #if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_ANDROID && \
-	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
+	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS && \
+	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS
 	void Initialize()
 	{
 
@@ -14,7 +15,8 @@ namespace NXOperatingSystem
 #endif
 
 #if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_ANDROID && \
-	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
+	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS && \
+	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS
 	const mu_boolean EnumerateFiles(const mu_utf8string path, std::vector<mu_utf8string> &filesList)
 	{
 		std::filesystem::path pathHandler(path);
@@ -49,7 +51,8 @@ namespace NXOperatingSystem
 #endif
 
 #if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_ANDROID && \
-	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
+	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS && \
+	NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS
 	const mu_utf8string GetStorageSupportFilesPath()
 	{
 		return mu_utf8string();

@@ -14,8 +14,8 @@ namespace NXOperatingSystem
 
 #if NEXTMU_OPERATING_SYSTEM_TYPE == NEXTMU_OSTYPE_MOBILE
 	const mu_boolean GetDeviceScreenSize(mu_int32 &width, mu_int32 &height);
-#endif
 	const mu_boolean GetSystemLanguages(std::vector<mu_utf8string> &languages);
+#endif
 
 #if NEXTMU_OPERATING_SYSTEM_TYPE == NEXTMU_OSTYPE_MOBILE
 	const mu_boolean EnumerateFilesFromApplication(const mu_utf8string path, std::vector<mu_utf8string> &filesList);

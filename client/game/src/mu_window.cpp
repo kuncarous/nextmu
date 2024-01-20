@@ -9,10 +9,8 @@ namespace MUWindow
 
 	const mu_boolean Initialize()
 	{
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS
-		constexpr mu_uint32 extraWindowFlags = SDL_WINDOW_ALLOW_HIGHDPI;
-#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
-		constexpr mu_uint32 extraWindowFlags = SDL_WINDOW_ALLOW_HIGHDPI;
+#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
+		constexpr mu_uint32 extraWindowFlags = SDL_WINDOW_METAL | SDL_WINDOW_ALLOW_HIGHDPI;
 #else
 		constexpr mu_uint32 extraWindowFlags = 0;
 #endif

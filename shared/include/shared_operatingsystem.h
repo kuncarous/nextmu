@@ -109,8 +109,8 @@
 #define NEXTMU_D3D12_SUPPORTED			(0)
 #define NEXTMU_GL_SUPPORTED			    (0)
 #define NEXTMU_GLES_SUPPORTED			(1)
-#define NEXTMU_VULKAN_SUPPORTED		    (0)
-#define NEXTMU_METAL_SUPPORTED			(1)
+#define NEXTMU_VULKAN_SUPPORTED		    (1)
+#define NEXTMU_METAL_SUPPORTED			(0)
 #endif
 
 #endif

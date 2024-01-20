@@ -18,10 +18,6 @@ set(
     mu_main.cpp
 )
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_definitions(-DWINVER=0x0601 -D_WIN32_WINNT=0x0601)
-endif()
-
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 add_executable(NextMU WIN32 ${SOURCE} ${INCLUDE} ${RESOURCE})

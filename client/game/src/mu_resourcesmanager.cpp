@@ -94,7 +94,6 @@ namespace MUResourcesManager
 				return false;
 			}
 		}
-
 		MUGraphics::FlushContext();
 
 		if (document.contains("models"))
