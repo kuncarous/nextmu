@@ -58,7 +58,7 @@ Tutorial not available yet, however if you know what you do you will be able to 
 ## Requirements
 Each license listed below are required to be listed in a user manual as part of your distribution, some licenses might have special requirements which can make this optional or permit you to provide it in a differet way.
 
-## Free Image
+## FreeImage
 ### How to include the license
 List it inside the user manual of your application distribution, if there is no way to access to it (like in Android and iOS) I recommend to include it in a credits screen.
 
