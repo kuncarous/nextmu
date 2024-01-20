@@ -42,7 +42,9 @@ Instructions soon
 
 ## Setup
 ### Windows
-Open CMake, choose the repository folder, set builds/windows-(x64|x86|arm|arm64|arm64ec) as output directory, press configure, choose Visual Studio 2022, select the platform (x64|Win32|ARM|ARM64|ARM64EC), wait until it finish configure everything, change NEXTMU_COMPANY_NAME and NEXTMU_GAME_NAME to match your Company (if you don't have one, just use a fantasy name) and your Game name, press generate, go to the builds/windows folder, open the solution and compile.
+Open CMake, choose the repository folder, set builds/windows-(x64|x86|arm|arm64|arm64ec) as output directory, press configure, choose Visual Studio 2022, select the platform (x64|Win32|ARM|ARM64|ARM64EC), wait until it finish configure everything, change NEXTMU_COMPANY_NAME and NEXTMU_GAME_NAME to match your Company (if you don't have one, just use a fantasy name) and your Game name, press generate, go to the builds/windows-(x64|x86|arm|arm64|arm64ec) folder, open the solution and compile.
+
+After you finish building everything you will be able to find the executable and the DLLs inside of the builds/windows-(x64|x86|arm|arm64|arm64ec)/client/windows/(Debug|Release) folder.
 
 ### MacOS
 Open CMake, choose the repository folder, set builds/macos as output directory, press configure, choose Xcode, wait until it finish configure everything, change NEXTMU_COMPANY_NAME and NEXTMU_GAME_NAME to match your Company (if you don't have one, just use a fantasy name) and your Game name, press generate, open Xcode, open Xcode project from builds/macos folder, configure the scheme to use NextMu executable and build.
