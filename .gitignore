@@ -25,6 +25,7 @@ __pycache__
 /*.log
 
 /client/game/include/ui_noesisgui_license.h
+/dependencies/installed
 /builds
 
 *.iml

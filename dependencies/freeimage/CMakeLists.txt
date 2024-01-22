@@ -460,12 +460,13 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 add_library(FreeImage STATIC ${SOURCE} ${INCLUDE})
 get_target_property(PNG_INCLUDE_DIRECTORIES png_static INCLUDE_DIRECTORIES)
+get_target_property(ZLIB_INCLUDE_DIRECTORIES zlibstatic INCLUDE_DIRECTORIES)
 
 target_link_libraries(
     FreeImage
     PUBLIC
         Boost::endian
-        ZLib
+        zlibstatic
         png_static
 )
 target_compile_definitions(FreeImage PUBLIC FREEIMAGE_LIB)
@@ -497,6 +498,7 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibJXR/image/sys
         ${CMAKE_CURRENT_SOURCE_DIR}/Source/LibJXR/jxrgluelib
         ${PNG_INCLUDE_DIRECTORIES}
+        ${ZLIB_INCLUDE_DIRECTORIES}
 )
 
 source_group("src" FILES ${SOURCE})

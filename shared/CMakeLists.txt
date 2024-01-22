@@ -66,7 +66,7 @@ target_link_libraries(
         Boost::algorithm
         Boost::serialization
         fmt
-        SDL2
+        SDL2::SDL2
         nlohmann_json
 )
 target_precompile_headers(Shared PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/shared_precompiled.h)

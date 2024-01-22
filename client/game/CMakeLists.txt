@@ -15,7 +15,7 @@ set(
 
 source_group("Root" FILES ${G_ROOT_SOURCE} ${G_ROOT_INCLUDE})
 list(APPEND GAME_INCLUDE ${G_ROOT_INCLUDE})
-list(APPEND GAME_SOURCE ${G_ROOT_INCLUDE})
+list(APPEND GAME_SOURCE ${G_ROOT_SOURCE})
 
 # Version Group
 set(
@@ -41,9 +41,9 @@ source_group("Window" FILES ${G_WINDOW_SOURCE} ${G_WINDOW_INCLUDE})
 list(APPEND GAME_INCLUDE ${G_WINDOW_INCLUDE})
 list(APPEND GAME_SOURCE ${G_WINDOW_SOURCE})
 
-# UI Group
+# UI NoesisGUI Group
 set(
-    G_UI_INCLUDE
+    G_UI_NOESISGUI_INCLUDE
 	include/ui_noesisgui_consts.h
 	include/ui_noesisgui_fontprovider.h
 	include/ui_noesisgui_renderdevice.h
@@ -57,7 +57,7 @@ set(
 )
 
 set(
-    G_UI_SOURCE
+    G_UI_NOESISGUI_SOURCE
 	src/ui_noesisgui_consts.cpp
 	src/ui_noesisgui_fontprovider.cpp
 	src/ui_noesisgui_renderdevice.cpp
@@ -70,9 +70,24 @@ set(
 	src/ui_noesisgui.cpp
 )
 
-source_group("UI" FILES ${G_UI_SOURCE} ${G_UI_INCLUDE})
-list(APPEND GAME_INCLUDE ${G_UI_INCLUDE})
-list(APPEND GAME_SOURCE ${G_UI_SOURCE})
+source_group("UI\\NoesisGUI" FILES ${G_UI_NOESISGUI_SOURCE} ${G_UI_NOESISGUI_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_UI_NOESISGUI_INCLUDE})
+list(APPEND GAME_SOURCE ${G_UI_NOESISGUI_SOURCE})
+
+# UI RmlUI Group
+set(
+    G_UI_RMLUI_INCLUDE
+	include/ui_rmlui.h
+)
+
+set(
+    G_UI_RMLUI_SOURCE
+	src/ui_rmlui.cpp
+)
+
+source_group("UI\\RmlUI" FILES ${G_UI_RMLUI_SOURCE} ${G_UI_RMLUI_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_UI_RMLUI_INCLUDE})
+list(APPEND GAME_SOURCE ${G_UI_RMLUI_SOURCE})
 
 # Navigation Group
 set(
@@ -981,6 +996,13 @@ get_supported_backends(ENGINE_LIBRARIES)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 add_library(Game STATIC ${GAME_SOURCE} ${GAME_INCLUDE} ${JOINTS_SOURCE} ${PARTICLES_SOURCE})
+
+target_compile_definitions(
+    Shared
+    PUBLIC
+        -DRMLUI_STATIC_LIB=1
+)
+
 target_link_libraries(
     Game
     PUBLIC
@@ -995,6 +1017,7 @@ target_link_libraries(
         Diligent-Common
         Diligent-GraphicsTools
         ${ENGINE_LIBRARIES}
+        RmlCore
 )
 target_precompile_headers(Game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/mu_precompiled.h)
 target_include_directories(Game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include)
