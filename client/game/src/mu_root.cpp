@@ -26,7 +26,11 @@
 #include "res_items.h"
 #include "mu_math.h"
 
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 #include "ui_noesisgui.h"
+#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+#include "ui_rmlui.h"
+#endif
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -191,7 +195,13 @@ namespace MURoot
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		if (UINoesis::Initialize() == false)
 		{
-			mu_error("Failed to initialize ultralight.");
+			mu_error("Failed to initialize noesisgui.");
+			return false;
+		}
+#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+		if (UIRmlUI::Initialize() == false)
+		{
+			mu_error("Failed to initialize rmlui.");
 			return false;
 		}
 #endif
@@ -223,6 +233,12 @@ namespace MURoot
 
 	void Destroy()
 	{
+		auto *window = MUWindow::GetWindow();
+		if (window != nullptr)
+		{
+			SDL_RestoreWindow(window);
+		}
+
 		MUItemsManager::Destroy();
 		MURendersManager::Destroy();
 		MUBBoxRenderer::Destroy();
@@ -230,6 +246,8 @@ namespace MURoot
 		MUSkeletonManager::Destroy();
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		UINoesis::Destroy();
+#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+		UIRmlUI::Destroy();
 #endif
 		MUResourcesManager::Destroy();
 #if PHYSICS_ENABLED == 1
@@ -244,6 +262,7 @@ namespace MURoot
 		SDL_Quit();
 	}
 
+	void OnPreEvent(const SDL_Event *event);
 	void OnEvent(const SDL_Event* event);
 
 	void Run()
@@ -804,6 +823,8 @@ namespace MURoot
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 			UINoesis::Update();
+#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+			UIRmlUI::Update();
 #endif
 
 			if (MUConfig::GetEnableShadows())
@@ -832,6 +853,8 @@ namespace MURoot
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 			UINoesis::RenderOnscreen();
+#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+			UIRmlUI::RenderOnscreen();
 #endif
 
 			swapchain->Present(MUConfig::GetVerticalSync() ? 1u : 0u);
@@ -842,11 +865,18 @@ namespace MURoot
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
 			{
-				MURoot::OnEvent(&event);
+				MURoot::OnPreEvent(&event);
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 				if (UINoesis::OnEvent(&event) == true) continue;
+#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+				if (UIRmlUI::OnEvent(&event) == true) continue;
 #endif
+				MURoot::OnEvent(&event);
 			}
+
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+			UIRmlUI::ReleaseGarbage();
+#endif
 
 			//OutputDebugStringA(fmt::format("particles count : {}\n", environment->GetParticles()->GetCount()).c_str());
 			MUGlobalTimer::Wait();
@@ -859,7 +889,7 @@ namespace MURoot
 		mu_trace_info("Destroying game");
 	}
 
-	void OnEvent(const SDL_Event* event)
+	void OnPreEvent(const SDL_Event *event)
 	{
 		switch (event->type)
 		{
@@ -872,6 +902,18 @@ namespace MURoot
 			}
 			break;
 
+		case SDL_QUIT:
+			{
+				Quit = true;
+			}
+			break;
+		}
+	}
+
+	void OnEvent(const SDL_Event* event)
+	{
+		switch (event->type)
+		{
 		case SDL_MOUSEBUTTONDOWN:
 			{
 				switch (event->button.button)
@@ -954,12 +996,6 @@ namespace MURoot
 		case SDL_KEYUP:
 			{
 				MUInput::SetKeyUp(event->key.keysym.scancode);
-			}
-			break;
-
-		case SDL_QUIT:
-			{
-				Quit = true;
 			}
 			break;
 		}

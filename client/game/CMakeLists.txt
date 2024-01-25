@@ -78,11 +78,15 @@ list(APPEND GAME_SOURCE ${G_UI_NOESISGUI_SOURCE})
 set(
     G_UI_RMLUI_INCLUDE
 	include/ui_rmlui.h
+    include/ui_rmlui_system.h
+    include/ui_rmlui_renderer.h
 )
 
 set(
     G_UI_RMLUI_SOURCE
 	src/ui_rmlui.cpp
+    src/ui_rmlui_system.cpp
+    src/ui_rmlui_renderer.cpp
 )
 
 source_group("UI\\RmlUI" FILES ${G_UI_RMLUI_SOURCE} ${G_UI_RMLUI_INCLUDE})
@@ -1018,6 +1022,7 @@ target_link_libraries(
         Diligent-GraphicsTools
         ${ENGINE_LIBRARIES}
         RmlCore
+        debug RmlDebugger
 )
 target_precompile_headers(Game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/mu_precompiled.h)
 target_include_directories(Game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include)

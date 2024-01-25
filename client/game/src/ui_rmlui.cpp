@@ -1,257 +1,195 @@
 #include "mu_precompiled.h"
 #include "ui_rmlui.h"
+#include "ui_rmlui_system.h"
+#include "ui_rmlui_renderer.h"
 #include "mu_config.h"
 #include "mu_window.h"
 #include "mu_state.h"
 #include "mu_graphics.h"
 #include <RmlUi/Core.h>
+#include <RmlUi/Debugger.h>
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-namespace UINoesis
+namespace UIRmlUI
 {
-	Noesis::Ptr<Noesis::IView> View;
-	Noesis::Ptr<Noesis::RenderDevice> Device;
+	std::unique_ptr<NSystemInterface> System;
+	std::unique_ptr<NRenderInterface> Render;
+	Rml::Context *Context;
+	Rml::ElementDocument *Document = nullptr;
 
-	const mu_boolean CreateView();
-	const mu_boolean CreateDevice();
+	const mu_boolean CreateSystem();
+	const mu_boolean CreateRender();
+	const mu_boolean LoadFonts();
 
 	const mu_boolean Initialize()
 	{
-		Noesis::SetLogHandler(
-			[](const char *, uint32_t, uint32_t level, const char *, const char *msg)
-			{
-				switch (level)
-				{
-				case NS_LOG_LEVEL_TRACE: mu_info("[Trace][NoesisGUI] {}", msg); break;
-				case NS_LOG_LEVEL_DEBUG: mu_info("[Debug][NoesisGUI] {}", msg); break;
-				case NS_LOG_LEVEL_INFO: mu_info("[Info][NoesisGUI] {}", msg); break;
-				case NS_LOG_LEVEL_WARNING: mu_info("[Warning][NoesisGUI] {}", msg); break;
-				case NS_LOG_LEVEL_ERROR: mu_error("[NoesisGUI] {}", msg); break;
-				}
-			}
-		);
-
-		Noesis::GUI::SetLicense(NS_LICENSE_NAME, NS_LICENSE_KEY);
-		Noesis::GUI::Init();
-
-		Noesis::GUI::SetXamlProvider(Noesis::MakePtr<XamlProvider>());
-		Noesis::GUI::SetFontProvider(Noesis::MakePtr<FontProvider>());
-		Noesis::GUI::SetTextureProvider(Noesis::MakePtr<TextureProvider>());
-
-		const char *fonts[] = { "Roboto", "Exo2", "Arial" };
-
-		Noesis::GUI::LoadApplicationResources("Theme/NoesisTheme.DarkBlue.xaml");
-		Noesis::GUI::SetFontFallbacks(fonts, 3);
-		Noesis::GUI::SetFontDefaultProperties(15.0f, Noesis::FontWeight_Normal, Noesis::FontStretch_Normal, Noesis::FontStyle_Normal);
-
-		if (CreateView() == false)
+		if (CreateSystem() == false)
 		{
 			mu_error("failed to create noesisgui view");
 			return false;
 		}
 
-		if (CreateDevice() == false)
+		if (CreateRender() == false)
 		{
 			mu_error("failed to create noesisgui device");
 			return false;
 		}
+
+		Rml::SetSystemInterface(System.get());
+		Rml::SetRenderInterface(Render.get());
+
+		Rml::Initialise();
+
+		const auto swapchain = MUGraphics::GetSwapChain();
+		auto &swapchainDesc = swapchain->GetDesc();
+		Context = Rml::CreateContext("main", Rml::Vector2i(swapchainDesc.Width, swapchainDesc.Height));
+		if (!Context)
+		{
+			return false;
+		}
+
+#ifndef NDEBUG
+		Rml::Debugger::Initialise(Context);
+#endif
+
+		if (!LoadFonts())
+		{
+			return false;
+		}
+
+		Document = Context->LoadDocument(SupportPathUTF8 + "data/ui/example/index.rml");
+		if (!Document)
+		{
+			return false;
+		}
+
+		Document->Show();
 
 		return true;
 	}
 
 	void Destroy()
 	{
-		if (View && View->Release() == 0)
-		{
-			View = nullptr;
-		}
-
-		if (Device && Device->Release() == 0)
-		{
-			Device = nullptr;
-		}
+		Rml::Shutdown();
+		System.reset();
+		Render.reset();
+		Document = nullptr;
 	}
 
-	const mu_boolean CreateView()
+	const mu_boolean CreateSystem()
 	{
-		Noesis::Ptr<Noesis::FrameworkElement> xaml = Noesis::GUI::LoadXaml<Noesis::FrameworkElement>("UpdateScene.xaml");
-		if (!xaml)
+		System.reset(new NSystemInterface());
+		if (!System)
 		{
-			mu_error("failed to load xaml");
 			return false;
 		}
-
-		View = Noesis::GUI::CreateView(xaml);
-		if (!View)
-		{
-			mu_error("failed to create view");
-			return false;
-		}
-
-		View->SetFlags(Noesis::RenderFlags_PPAA | Noesis::RenderFlags_LCD);
-		View->SetSize(MUConfig::GetWindowWidth(), MUConfig::GetWindowHeight());
 
 		return true;
 	}
 
-	const mu_boolean CreateDevice()
+	const mu_boolean CreateRender()
 	{
-		Device = Noesis::MakePtr<DERenderDevice>(MUGraphics::IssRGB());
-		if (!Device)
+		Render.reset(new NRenderInterface());
+		if (!Render)
 		{
-			mu_error("failed to create device");
 			return false;
 		}
 
-		View->GetRenderer()->Init(Device);
+		if (Render->Initialize() == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	const mu_boolean LoadFonts()
+	{
+		const Rml::String directory = SupportPathUTF8 + "data/fonts/";
+
+		struct FontFace {
+			const char *filename;
+			bool fallback_face;
+		};
+		FontFace font_faces[] = {
+			{"LatoLatin-Regular.ttf", false},
+			{"LatoLatin-Italic.ttf", false},
+			{"LatoLatin-Bold.ttf", false},
+			{"LatoLatin-BoldItalic.ttf", false},
+			{"NotoEmoji-Regular.ttf", true},
+		};
+
+		for (const FontFace &face : font_faces)
+			Rml::LoadFontFace(directory + face.filename, face.fallback_face);
 
 		return true;
 	}
 
 	void Update()
 	{
-		View->Update(MUState::GetWorldTime() / 1000.0);
-	}
-
-	void RenderOffscreen()
-	{
-		auto *renderer = View->GetRenderer();
-		mu_boolean updated = renderer->UpdateRenderTree();
-		renderer->RenderOffscreen();
+		Context->Update();
 	}
 
 	void RenderOnscreen()
 	{
-		auto *renderer = View->GetRenderer();
-		renderer->Render();
+		Render->BeginFrame();
+		Context->Render();
+		Render->EndFrame();
+	}
+
+	void ReleaseGarbage()
+	{
+		Render->ReleaseGarbage();
 	}
 
 	const mu_boolean OnEvent(const SDL_Event *event)
 	{
+		mu_boolean result = false;
 		switch (event->type)
 		{
 		case SDL_MOUSEMOTION:
-		{
-			View->MouseMove(event->motion.x, event->motion.y);
-		}
-		return true;
-
-		case SDL_MOUSEWHEEL:
-		{
-			if (event->wheel.x != 0)
-				View->MouseHWheel(event->wheel.mouseX, event->wheel.mouseY, event->wheel.x);
-			if (event->wheel.y != 0)
-				View->MouseWheel(event->wheel.mouseX, event->wheel.mouseY, event->wheel.y);
-		}
-		return true;
-
+			result = Context->ProcessMouseMove(event->motion.x, event->motion.y, GetKeyModifierState());
+			break;
 		case SDL_MOUSEBUTTONDOWN:
-		{
-			Noesis::MouseButton button = (
-				event->button.button == SDL_BUTTON_LEFT
-				? Noesis::MouseButton_Left
-				: event->button.button == SDL_BUTTON_RIGHT
-				? Noesis::MouseButton_Right
-				: event->button.button == SDL_BUTTON_MIDDLE
-				? Noesis::MouseButton_Middle
-				: event->button.button == SDL_BUTTON_X1
-				? Noesis::MouseButton_XButton1
-				: event->button.button == SDL_BUTTON_X2
-				? Noesis::MouseButton_XButton2
-				: Noesis::MouseButton_Count
-				);
-			if (button != Noesis::MouseButton_Count)
-			{
-				View->MouseButtonDown(
-					event->button.x,
-					event->button.y,
-					button
-				);
-			}
-		}
-		break;
-
+			result = Context->ProcessMouseButtonDown(ConvertMouseButton(event->button.button), GetKeyModifierState());
+			SDL_CaptureMouse(SDL_TRUE);
+			break;
 		case SDL_MOUSEBUTTONUP:
-		{
-			Noesis::MouseButton button = (
-				event->button.button == SDL_BUTTON_LEFT
-				? Noesis::MouseButton_Left
-				: event->button.button == SDL_BUTTON_RIGHT
-				? Noesis::MouseButton_Right
-				: event->button.button == SDL_BUTTON_MIDDLE
-				? Noesis::MouseButton_Middle
-				: event->button.button == SDL_BUTTON_X1
-				? Noesis::MouseButton_XButton1
-				: event->button.button == SDL_BUTTON_X2
-				? Noesis::MouseButton_XButton2
-				: Noesis::MouseButton_Count
-				);
-			if (button != Noesis::MouseButton_Count)
-			{
-				View->MouseButtonUp(
-					event->button.x,
-					event->button.y,
-					button
-				);
-			}
-		}
-		return true;
-
-		case SDL_TEXTINPUT:
-		{
-			View->Char(*SDL_iconv_utf8_ucs4(event->text.text));
-		}
-		return true;
-
+			SDL_CaptureMouse(SDL_FALSE);
+			result = Context->ProcessMouseButtonUp(ConvertMouseButton(event->button.button), GetKeyModifierState());
+			break;
+		case SDL_MOUSEWHEEL:
+			result = Context->ProcessMouseWheel(float(-event->wheel.y), GetKeyModifierState());
+			break;
 		case SDL_KEYDOWN:
-		{
-			Noesis::Key key = SDLKeyCodeToNoesisKeyCode(event->key.keysym.sym);
-			if (key != Noesis::Key_Count)
-			{
-				View->KeyDown(key);
-			}
-		}
-		return true;
-
+			result = Context->ProcessKeyDown(ConvertKey(event->key.keysym.sym), GetKeyModifierState());
+			if (event->key.keysym.sym == SDLK_RETURN || event->key.keysym.sym == SDLK_KP_ENTER)
+				result &= Context->ProcessTextInput('\n');
+			break;
 		case SDL_KEYUP:
-		{
-			Noesis::Key key = SDLKeyCodeToNoesisKeyCode(event->key.keysym.sym);
-			if (key != Noesis::Key_Count)
+			result = Context->ProcessKeyUp(ConvertKey(event->key.keysym.sym), GetKeyModifierState());
+			break;
+		case SDL_TEXTINPUT:
+			result = Context->ProcessTextInput(Rml::String(&event->text.text[0]));
+			break;
+		case SDL_WINDOWEVENT:
 			{
-				View->KeyUp(key);
+				switch (event->window.event)
+				{
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
+					{
+						Rml::Vector2i dimensions(event->window.data1, event->window.data2);
+						Context->SetDimensions(dimensions);
+					}
+					break;
+				case SDL_WINDOWEVENT_LEAVE:
+					Context->ProcessMouseLeave();
+					break;
+				}
 			}
-		}
-		return true;
-
-		case SDL_FINGERMOTION:
-		{
-			mu_int32 w, h;
-			SDL_GetWindowSize(MUWindow::GetWindow(), &w, &h);
-			mu_int32 x = static_cast<mu_int32>(w * event->tfinger.x);
-			mu_int32 y = static_cast<mu_int32>(h * event->tfinger.y);
-			View->TouchMove(x, y, event->tfinger.fingerId);
-		}
-		return true;
-
-		case SDL_FINGERDOWN:
-		{
-			mu_int32 w, h;
-			SDL_GetWindowSize(MUWindow::GetWindow(), &w, &h);
-			mu_int32 x = static_cast<mu_int32>(w * event->tfinger.x);
-			mu_int32 y = static_cast<mu_int32>(h * event->tfinger.y);
-			View->TouchDown(x, y, event->tfinger.fingerId);
-		}
-		return true;
-
-		case SDL_FINGERUP:
-		{
-			mu_int32 w, h;
-			SDL_GetWindowSize(MUWindow::GetWindow(), &w, &h);
-			mu_int32 x = static_cast<mu_int32>(w * event->tfinger.x);
-			mu_int32 y = static_cast<mu_int32>(h * event->tfinger.y);
-			View->TouchUp(x, y, event->tfinger.fingerId);
-		}
-		return true;
+			break;
+		default:
+			break;
 		}
 
 		return false;

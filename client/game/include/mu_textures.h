@@ -14,6 +14,8 @@ struct TextureInfo
 
 namespace MUTextures
 {
+	const mu_uint32 GenerateTextureId();
+
 	const mu_boolean LoadRaw(mu_utf8string path, FIBITMAP **texture, TextureInfo &info);
 	std::unique_ptr<NGraphicsTexture> Load(mu_utf8string path, const Diligent::SamplerDesc &samplerDesc);
 

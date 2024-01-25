@@ -1,6 +1,9 @@
 #include "mu_precompiled.h"
 #include "t_graphics_layouts.h"
 #include <cstddef>
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+#include <RmlUi/Core.h>
+#endif
 
 std::map<mu_utf8string, Diligent::InputLayoutDescX> InputLayouts;
 
@@ -274,6 +277,49 @@ void CreateInputLayouts()
 
 		InputLayouts.insert(std::make_pair("particle", inputLayout));
 	}
+
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
+	// RmlUI
+	{
+		Diligent::InputLayoutDescX inputLayout;
+		inputLayout.Add(
+			Diligent::LayoutElement(
+				0,
+				0,
+				2,
+				Diligent::VALUE_TYPE::VT_FLOAT32,
+				false,
+				offsetof(Rml::Vertex, position),
+				sizeof(Rml::Vertex)
+			)
+		);
+		inputLayout.Add(
+			Diligent::LayoutElement(
+				1,
+				0,
+				4,
+				Diligent::VALUE_TYPE::VT_UINT8,
+				true,
+				offsetof(Rml::Vertex, colour),
+				sizeof(Rml::Vertex)
+			)
+		);
+		inputLayout.Add(
+			Diligent::LayoutElement(
+				2,
+				0,
+				2,
+				Diligent::VALUE_TYPE::VT_FLOAT32,
+				false,
+				offsetof(Rml::Vertex, tex_coord),
+				sizeof(Rml::Vertex)
+			)
+		);
+
+		InputLayouts.insert(std::make_pair("rmlui_color", inputLayout));
+		InputLayouts.insert(std::make_pair("rmlui_texture", inputLayout));
+	}
+#endif
 }
 
 Diligent::InputLayoutDesc GetInputLayout(const mu_utf8string resourceId)

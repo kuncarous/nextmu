@@ -12,6 +12,11 @@ namespace MUTextures
 		b = tmp;
 	}
 
+	const mu_uint32 GenerateTextureId()
+	{
+		return TextureIdGenerator++;
+	}
+
 	const mu_boolean LoadRaw(mu_utf8string path, FIBITMAP **texture, TextureInfo &info)
 	{
 		NormalizePath(path);
@@ -177,7 +182,7 @@ namespace MUTextures
 		MUGraphics::IncreaseTransactions();
 		MUGraphics::CheckIfRequireFlushContext();
 
-		return std::make_unique<NGraphicsTexture>(TextureIdGenerator++, texture, width, height, info.Alpha);
+		return std::make_unique<NGraphicsTexture>(GenerateTextureId(), texture, width, height, info.Alpha);
 	}
 
 	struct SamplerMode
