@@ -129,7 +129,7 @@ namespace UIRmlUI
 
 			DynamicVertexBuffer.reset(
 				new (std::nothrow) NDynamicBuffer{
-					.Offset = DynamicVertices.size(),
+					.Offset = static_cast<mu_uint32>(DynamicVertices.size()),
 					.Count = vertexCount,
 					.Buffer = buffer
 				}
@@ -188,7 +188,7 @@ namespace UIRmlUI
 
 			DynamicIndexBuffer.reset(
 				new (std::nothrow) NDynamicBuffer{
-					.Offset = DynamicVertices.size(),
+					.Offset = static_cast<mu_uint32>(DynamicVertices.size()),
 					.Count = indexCount,
 					.Buffer = buffer
 				}
