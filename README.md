@@ -2,7 +2,7 @@
 NextMU is a rework of the famous MMORPG Mu Online.
 
 # Sponsors
-Special thanks to our donators and sponsors, as a way to express our gratitude we will list our sponsors here so everyone can be aware about who sponsored the project, thank you! we really appreciate it!
+Special thanks to our donators and sponsors, as a way to express our gratitude we list each donator in discord and also we will list our sponsors here so everyone can be aware about who donated and sponsored the project, thank you! we really appreciate it!
 
 <a href="https://www.mudevs.com"><img src="https://i.ibb.co/FbPKs0n/logo.png" height="140px" alt="logo" border="0"></a>
 
