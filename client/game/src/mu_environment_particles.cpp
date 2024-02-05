@@ -132,7 +132,7 @@ void NParticles::Update()
 		{
 			MUThreadsManager::Run(
 				std::unique_ptr<NThreadExecutorBase>(
-					new (std::nothrow) NThreadExecutorRangeIterator(
+					new_nothrow NThreadExecutorRangeIterator(
 						view.begin(), view.end(),
 						[&registry, &view](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
 							ParticleType type = ParticleType::Invalid;
@@ -160,7 +160,7 @@ void NParticles::Update()
 
 			MUThreadsManager::Run(
 				std::unique_ptr<NThreadExecutorBase>(
-					new (std::nothrow) NThreadExecutorRangeIterator(
+					new_nothrow NThreadExecutorRangeIterator(
 						view.begin(), view.end(),
 						[&registry, &view](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
 							ParticleType type = ParticleType::Invalid;
@@ -342,7 +342,7 @@ void NParticles::Render()
 
 		MUThreadsManager::Run(
 			std::unique_ptr<NThreadExecutorBase>(
-				new (std::nothrow) NThreadExecutorRangeIterator(
+				new_nothrow NThreadExecutorRangeIterator(
 					view.begin(), view.end(),
 					[&registry, &view, &renderBuffer](TParticle::EnttIterator begin, TParticle::EnttIterator end) {
 						ParticleType type = ParticleType::Invalid;

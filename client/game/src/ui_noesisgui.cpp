@@ -65,20 +65,18 @@ namespace UINoesis
 
 	void Destroy()
 	{
-		if (View && View->Release() == 0)
+		if (Device) Device.Reset();
+		if (View)
 		{
-			View = nullptr;
+			View->GetRenderer()->Shutdown();
+			View.Reset();
 		}
-
-		if (Device && Device->Release() == 0)
-		{
-			Device = nullptr;
-		}
+		Noesis::GUI::Shutdown();
 	}
 
 	const mu_boolean CreateView()
 	{
-		Noesis::Ptr<Noesis::FrameworkElement> xaml = Noesis::GUI::LoadXaml<Noesis::FrameworkElement>("UpdateScene.xaml");
+		Noesis::Ptr<Noesis::FrameworkElement> xaml = Noesis::GUI::LoadXaml<Noesis::FrameworkElement>("main.xaml");
 		if (!xaml)
 		{
 			mu_error("failed to load xaml");
@@ -92,8 +90,11 @@ namespace UINoesis
 			return false;
 		}
 
+		const auto swapchain = MUGraphics::GetSwapChain();
+		const auto &swapchainDesc = swapchain->GetDesc();
+
 		View->SetFlags(Noesis::RenderFlags_PPAA | Noesis::RenderFlags_LCD);
-		View->SetSize(MUConfig::GetWindowWidth(), MUConfig::GetWindowHeight());
+		View->SetSize(swapchainDesc.Width, swapchainDesc.Height);
 
 		return true;
 	}

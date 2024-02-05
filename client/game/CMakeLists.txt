@@ -1001,11 +1001,13 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 add_library(Game STATIC ${GAME_SOURCE} ${GAME_INCLUDE} ${JOINTS_SOURCE} ${PARTICLES_SOURCE})
 
-target_compile_definitions(
-    Shared
-    PUBLIC
-        -DRMLUI_STATIC_LIB=1
-)
+if(UI_LIBRARY STREQUAL "RmlUI")
+    target_compile_definitions(
+        Shared
+        PUBLIC
+            -DRMLUI_STATIC_LIB=1
+    )
+endif()
 
 target_link_libraries(
     Game
@@ -1021,8 +1023,28 @@ target_link_libraries(
         Diligent-Common
         Diligent-GraphicsTools
         ${ENGINE_LIBRARIES}
-        RmlCore
-        debug RmlDebugger
 )
+
+list(APPEND GAME_PUBLIC_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
+list(APPEND GAME_PRIVATE_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include)
+
+if(UI_LIBRARY STREQUAL "RmlUI")
+    target_link_libraries(
+        Game
+        PUBLIC
+            RmlCore
+            debug RmlDebugger
+    )
+elseif(UI_LIBRARY STREQUAL "NoesisGUI")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../NoesisGUI.cmake)
+    target_link_libraries(
+        Game
+        PUBLIC
+            Noesis
+    )
+    target_link_directories(Game PUBLIC ${NOESISGUI_LIBRARY_DIR})
+    list(APPEND GAME_PUBLIC_INCLUDES ${NOESISGUI_INCLUDE_DIR})
+endif()
+
 target_precompile_headers(Game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/mu_precompiled.h)
-target_include_directories(Game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include)
+target_include_directories(Game PUBLIC ${GAME_PUBLIC_INCLUDES} PRIVATE ${GAME_PRIVATE_INCLUDES})

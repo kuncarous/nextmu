@@ -30,31 +30,31 @@ const mu_boolean NEnvironment::Initialize()
 		return false;
 	}
 
-	Controller.reset(new (std::nothrow) NController(this));
+	Controller.reset(new_nothrow NController(this));
 	if (!Controller)
 	{
 		return false;
 	}
 
-	Objects.reset(new (std::nothrow) NObjects(this));
+	Objects.reset(new_nothrow NObjects(this));
 	if (!Objects || Objects->Initialize() == false)
 	{
 		return false;
 	}
 
-	Characters.reset(new (std::nothrow) NCharacters(this));
+	Characters.reset(new_nothrow NCharacters(this));
 	if (!Characters || Characters->Initialize() == false)
 	{
 		return false;
 	}
 
-	Particles.reset(new (std::nothrow) NParticles());
+	Particles.reset(new_nothrow NParticles());
 	if (!Particles || Particles->Initialize() == false)
 	{
 		return false;
 	}
 
-	Joints.reset(new (std::nothrow) NJoints());
+	Joints.reset(new_nothrow NJoints());
 	if (!Joints || Joints->Initialize() == false)
 	{
 		return false;
@@ -87,7 +87,7 @@ const mu_boolean NEnvironment::CreateShadowMap()
 	}
 
 	ShadowResourceId = GenerateResourceId();
-	ShadowMap.reset(new (std::nothrow) Diligent::ShadowMapManager());
+	ShadowMap.reset(new_nothrow Diligent::ShadowMapManager());
 	if (!ShadowMap)
 	{
 		return false;

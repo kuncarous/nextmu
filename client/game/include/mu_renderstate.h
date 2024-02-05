@@ -16,6 +16,10 @@ namespace MURenderState
 	void Destroy();
 	void Reset();
 
+	void SetRenderSize(const mu_uint32 width, const mu_uint32 height);
+	mu_uint32 GetRenderWidth();
+	mu_uint32 GetRenderHeight();
+
 	void SetRenderMode(const NRenderMode mode);
 	const NRenderMode GetRenderMode();
 

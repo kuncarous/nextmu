@@ -433,7 +433,7 @@ namespace MUGraphics
             swapchainDesc.ColorBufferFormat == Diligent::TEX_FORMAT_BGRA8_UNORM_SRGB
         );
 
-        RenderManager.reset(new (std::nothrow) NRenderManager());
+        RenderManager.reset(new_nothrow NRenderManager());
         CreateInputLayouts();
         CreatePipelineResources();
         FreeImage_Initialise(true);

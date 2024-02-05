@@ -817,6 +817,7 @@ namespace MURoot
 			auto *pRTV = swapchain->GetCurrentBackBufferRTV();
 			auto *pDSV = swapchain->GetDepthBufferDSV();
 
+			MURenderState::SetRenderSize(swapchainDesc.Width, swapchainDesc.Height);
 			MURenderState::AttachEnvironment(environment.get());
 			environment->Update();
 			MUSkeletonManager::Update();

@@ -1,4 +1,6 @@
 #include "mu_precompiled.h"
+
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
 #include "ui_rmlui.h"
 #include "ui_rmlui_system.h"
 #include "ui_rmlui_renderer.h"
@@ -9,7 +11,6 @@
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger.h>
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
 namespace UIRmlUI
 {
 	std::unique_ptr<NSystemInterface> System;

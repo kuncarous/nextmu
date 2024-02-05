@@ -42,10 +42,10 @@ namespace MUResourcesManager
 	const mu_boolean LoadTextures(const mu_utf8string basePath, const nlohmann::json &textures);
 	const mu_boolean LoadModels(const mu_utf8string basePath, const nlohmann::json &models);
 
-	const mu_boolean Load()
+	const mu_boolean Load(const mu_utf8string jsonFilename)
 	{
 		const mu_utf8string path = "data/";
-		const mu_utf8string filename = path + "resources.json";
+		const mu_utf8string filename = path + jsonFilename;
 
 		SDL_RWops *fp = nullptr;
 		if (mu_rwfromfile<EGameDirectoryType::eSupport>(&fp, filename, "rb") == false)

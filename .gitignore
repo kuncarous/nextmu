@@ -7,39 +7,8 @@
 /.idea
 /.vscode
 
-__pycache__
-/.coverage/
-/.coveragerc
-/install dir
-/work area
-
 .DS_Store
 *~
 *.swp
 
-/docs/built_docs
-/docs/hotdoc-private*
-
-*.pyc
-/*venv*
-/*.log
-
-/client/game/include/ui_noesisgui_license.h
 /dependencies/installed
-/builds
-
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties

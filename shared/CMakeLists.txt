@@ -36,16 +36,25 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 add_library(Shared STATIC ${SOURCE} ${INCLUDE})
 
-target_compile_definitions(
-    Shared
-    PUBLIC
-        -DNEXTMU_COMPANY_NAME="${NEXTMU_COMPANY_NAME}"
-        -DNEXTMU_GAME_NAME="${NEXTMU_GAME_NAME}"
-        -DNEXTMU_VERSION_MAJOR=${NEXTMU_VERSION_MAJOR}
-        -DNEXTMU_VERSION_MINOR=${NEXTMU_VERSION_MINOR}
-        -DNEXTMU_VERSION_REVISION=${NEXTMU_VERSION_REVISION}
-        -DNEXTMU_VERSION_SERIAL="${NEXTMU_VERSION_SERIAL}"
-)
+if (IS_CLIENT_SHARED GREATER_EQUAL 1)
+    target_compile_definitions(
+        Shared
+        PUBLIC
+            -DNEXTMU_CLIENT_SHARED=1
+            -DNEXTMU_COMPANY_NAME="${NEXTMU_COMPANY_NAME}"
+            -DNEXTMU_GAME_NAME="${NEXTMU_GAME_NAME}"
+            -DNEXTMU_VERSION_MAJOR=${NEXTMU_VERSION_MAJOR}
+            -DNEXTMU_VERSION_MINOR=${NEXTMU_VERSION_MINOR}
+            -DNEXTMU_VERSION_REVISION=${NEXTMU_VERSION_REVISION}
+            -DNEXTMU_VERSION_SERIAL="${NEXTMU_VERSION_SERIAL}"
+    )
+
+    if (UI_LIBRARY STREQUAL "NoesisGUI")
+        target_compile_definitions(Shared PUBLIC -DNEXTMU_USE_NOESISGUI=1)
+    elseif (UI_LIBRARY STREQUAL "RmlUI")
+        target_compile_definitions(Shared PUBLIC -DNEXTMU_USE_RMLUI=1)
+    endif()
+endif()
 
 if (PLATFORM_WIN32)
     target_compile_definitions(Shared PUBLIC -DWINVER=0x0601 -D_WIN32_WINNT=0x0601)
@@ -66,9 +75,21 @@ target_link_libraries(
         Boost::algorithm
         Boost::serialization
         fmt
-        SDL2::SDL2
         nlohmann_json
 )
+if(IS_CLIENT_SHARED GREATER_EQUAL 1)
+    target_link_libraries(
+        Shared
+        PUBLIC
+            SDL2::SDL2
+    )
+else()
+    target_link_libraries(
+        Shared
+        PUBLIC
+            Qt6::Core
+    )
+endif()
 target_precompile_headers(Shared PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/shared_precompiled.h)
 target_include_directories(Shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

@@ -39,7 +39,7 @@ namespace MUBBoxRenderer
 
 		// Vertex Buffer
 		{
-			/*std::unique_ptr<NBBoxVertex[]> memory(new (std::nothrow) NBBoxVertex[8]);
+			/*std::unique_ptr<NBBoxVertex[]> memory(new_nothrow NBBoxVertex[8]);
 			NBBoxVertex *vertices = reinterpret_cast<NBBoxVertex *>(memory.get());
 			vertices[0].Position = glm::vec3(0.0f, 0.0f, 0.0f);
 			vertices[1].Position = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -69,7 +69,7 @@ namespace MUBBoxRenderer
 
 		// Index Buffer
 		{
-			const std::unique_ptr<mu_uint16[]> memory(new (std::nothrow) mu_uint16[6 * 6]);
+			const std::unique_ptr<mu_uint16[]> memory(new_nothrow mu_uint16[6 * 6]);
 			mu_uint16 *indexes = memory.get();
 			// Left Side
 			indexes[0] = 0; indexes[1] = 2; indexes[2] = 3; indexes += 3;

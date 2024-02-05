@@ -1,5 +1,7 @@
 #include "mu_precompiled.h"
 #include "ui_rmlui_renderer.h"
+
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
 #include "mu_graphics.h"
 #include "mu_config.h"
 #include "mu_renderstate.h"
@@ -128,7 +130,7 @@ namespace UIRmlUI
 			}
 
 			DynamicVertexBuffer.reset(
-				new (std::nothrow) NDynamicBuffer{
+				new_nothrow NDynamicBuffer{
 					.Offset = static_cast<mu_uint32>(DynamicVertices.size()),
 					.Count = vertexCount,
 					.Buffer = buffer
@@ -187,7 +189,7 @@ namespace UIRmlUI
 			}
 
 			DynamicIndexBuffer.reset(
-				new (std::nothrow) NDynamicBuffer{
+				new_nothrow NDynamicBuffer{
 					.Offset = static_cast<mu_uint32>(DynamicVertices.size()),
 					.Count = indexCount,
 					.Buffer = buffer
@@ -599,3 +601,4 @@ namespace UIRmlUI
 		}
 	}
 }
+#endif

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/SystemInterface.h>
 #include <RmlUi/Core/Types.h>
@@ -55,5 +56,6 @@ namespace UIRmlUI
     // Returns the active RmlUi key modifier state.
     mu_int32 GetKeyModifierState();
 }
+#endif
 
 #endif

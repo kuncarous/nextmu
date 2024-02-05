@@ -17,6 +17,7 @@ namespace MURenderState
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> CameraUniform;
 	Diligent::RefCntAutoPtr<Diligent::IBuffer> LightUniform;
 
+	mu_uint32 RenderWidth = 0u, RenderHeight = 0u;
 	NRenderMode RenderMode = NRenderMode::Normal;
 
 	NResourceId ShadowResourceId = NInvalidUInt32;
@@ -88,6 +89,22 @@ namespace MURenderState
 		{
 			TextureAttachments[n] = nullptr;
 		}
+	}
+
+	void SetRenderSize(const mu_uint32 width, const mu_uint32 height)
+	{
+		RenderWidth = width;
+		RenderHeight = height;
+	}
+
+	mu_uint32 GetRenderWidth()
+	{
+		return RenderWidth;
+	}
+
+	mu_uint32 GetRenderHeight()
+	{
+		return RenderHeight;
 	}
 
 	void SetRenderMode(const NRenderMode mode)

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
 #include <RmlUi/Core/RenderInterface.h>
 #include <SDL.h>
 
@@ -158,5 +159,6 @@ namespace UIRmlUI
 		ScissorMode CurrentScissorMode = ScissorMode::None;
     };
 }
+#endif
 
 #endif

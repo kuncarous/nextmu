@@ -1,5 +1,6 @@
 include(FetchContent)
 
+set(UI_LIBRARY "NoesisGUI") # Values : NoesisGUI, RmlUI
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 set(BOOST_INCLUDE_LIBRARIES algorithm serialization CACHE STRING "" FORCE)
@@ -112,48 +113,50 @@ file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/PNG-extra.cmake
   set(PNG_LIBRARIES PNG::PNG)
 ]=])
 
-FetchContent_Declare(
-    BZip2
-    GIT_REPOSITORY https://gitlab.com/bzip2/bzip2
-    GIT_TAG 6a8690fc8d26c815e798c588f796eabe9d684cf0
-    OVERRIDE_FIND_PACKAGE
-)
-FetchContent_MakeAvailable(BZip2)
+if (UI_LIBRARY STREQUAL "RmlUI")
+    FetchContent_Declare(
+        BZip2
+        GIT_REPOSITORY https://gitlab.com/bzip2/bzip2
+        GIT_TAG 6a8690fc8d26c815e798c588f796eabe9d684cf0
+        OVERRIDE_FIND_PACKAGE
+    )
+    FetchContent_MakeAvailable(BZip2)
 
-FetchContent_Declare(
-    BrotliDec
-    GIT_REPOSITORY https://github.com/google/brotli
-    GIT_TAG ed738e842d2fbdf2d6459e39267a633c4a9b2f5d
-    OVERRIDE_FIND_PACKAGE
-)
-FetchContent_MakeAvailable(BrotliDec)
-add_library(BrotliDec::brotlidec ALIAS brotlidec)
-file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/BrotliDec-extra.cmake
-[=[
-  get_target_property(BROTLIDEC_INCLUDE_DIRS BrotliDec::brotlidec INCLUDE_DIRECTORIES)
-  set(BROTLIDEC_LIBRARIES BrotliDec::brotlidec)
-]=])
+    FetchContent_Declare(
+        BrotliDec
+        GIT_REPOSITORY https://github.com/google/brotli
+        GIT_TAG ed738e842d2fbdf2d6459e39267a633c4a9b2f5d
+        OVERRIDE_FIND_PACKAGE
+    )
+    FetchContent_MakeAvailable(BrotliDec)
+    add_library(BrotliDec::brotlidec ALIAS brotlidec)
+    file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/BrotliDec-extra.cmake
+    [=[
+    get_target_property(BROTLIDEC_INCLUDE_DIRS BrotliDec::brotlidec INCLUDE_DIRECTORIES)
+    set(BROTLIDEC_LIBRARIES BrotliDec::brotlidec)
+    ]=])
 
-FetchContent_Declare(
-    Freetype
-    GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype
-    GIT_TAG 920c5502cc3ddda88f6c7d85ee834ac611bb11cc
-    OVERRIDE_FIND_PACKAGE
-)
-FetchContent_MakeAvailable(Freetype)
-add_library(Freetype::freetype ALIAS freetype)
-file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/Freetype-extra.cmake
-[=[
-  get_target_property(FREETYPE_INCLUDE_DIRS Freetype::freetype INCLUDE_DIRECTORIES)
-  set(FREETYPE_LIBRARIES Freetype::freetype)
-]=])
+    FetchContent_Declare(
+        Freetype
+        GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype
+        GIT_TAG 920c5502cc3ddda88f6c7d85ee834ac611bb11cc
+        OVERRIDE_FIND_PACKAGE
+    )
+    FetchContent_MakeAvailable(Freetype)
+    add_library(Freetype::freetype ALIAS freetype)
+    file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/Freetype-extra.cmake
+    [=[
+    get_target_property(FREETYPE_INCLUDE_DIRS Freetype::freetype INCLUDE_DIRECTORIES)
+    set(FREETYPE_LIBRARIES Freetype::freetype)
+    ]=])
 
-FetchContent_Declare(
-    RmlUi
-    GIT_REPOSITORY https://github.com/mikke89/RmlUi
-    GIT_TAG 40edf1acfa7f13f0c9b2af91d6f09ed47aa2c2c9
-)
-FetchContent_MakeAvailable(RmlUi)
+    FetchContent_Declare(
+        RmlUi
+        GIT_REPOSITORY https://github.com/mikke89/RmlUi
+        GIT_TAG b8f8e2e1237a967ad5b2d2eae9a751aace428a67
+    )
+    FetchContent_MakeAvailable(RmlUi)
+endif()
 
 set(DILIGENT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_CORE OFF CACHE BOOL "" FORCE)
@@ -168,4 +171,4 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(DiligentEngine)
 
-add_subdirectory(dependencies/freeimage)
+add_subdirectory(../dependencies/freeimage ${CMAKE_CURRENT_BINARY_DIR}/dependencies/freeimage)

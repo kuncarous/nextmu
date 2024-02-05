@@ -24,5 +24,15 @@ target_link_libraries(
 target_precompile_headers(NextMU PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/stdafx.h)
 target_include_directories(NextMU PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+if(UI_LIBRARY STREQUAL "NoesisGUI")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../../NoesisGUI.cmake)
+    add_custom_command(
+        TARGET NextMU POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${NOESISGUI_BINARY_DIR}/libNoesis.so
+                $<TARGET_FILE_DIR:NextMU>
+    )
+endif()
+
 source_group("src" FILES ${SOURCE})
 source_group("include" FILES ${INCLUDE})

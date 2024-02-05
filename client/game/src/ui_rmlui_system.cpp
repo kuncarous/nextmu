@@ -1,6 +1,8 @@
 #include "mu_precompiled.h"
+
+#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
 #include "ui_rmlui_system.h"
-#include "mu_timer.h"
+#include "mu_state.h"
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/StringUtilities.h>
 
@@ -35,7 +37,7 @@ namespace UIRmlUI
 
     double NSystemInterface::GetElapsedTime()
     {
-        return MUGlobalTimer::GetRealtime();
+        return MUState::GetWorldTime();
     }
 
     void NSystemInterface::SetMouseCursor(const Rml::String& cursor_name)
@@ -293,3 +295,4 @@ namespace UIRmlUI
         return retval;
     }
 }
+#endif

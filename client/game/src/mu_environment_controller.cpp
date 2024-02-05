@@ -11,7 +11,7 @@
 #include "mu_navigation.h"
 #include <glm/gtx/vec_swizzle.hpp>
 
-NController::NController(const NEnvironment *environment) : Environment(environment), Camera(new (std::nothrow) NCamera()), Character(entt::null)
+NController::NController(const NEnvironment *environment) : Environment(environment), Camera(new_nothrow NCamera()), Character(entt::null)
 {
 	auto &camera = *Camera;
 	camera.SetMode(NCameraMode::Directional);
@@ -41,8 +41,8 @@ void NController::Update()
 
 	Camera->Update();
 
-	const auto windowWidth = MUConfig::GetWindowWidth();
-	const auto windowHeight = MUConfig::GetWindowHeight();
+	const auto windowWidth = MURenderState::GetRenderWidth();
+	const auto windowHeight = MURenderState::GetRenderHeight();
 	auto camera = GetCamera();
 	glm::mat4 view = camera->GetView();
 	glm::mat4 shadowView = camera->GetShadowView();

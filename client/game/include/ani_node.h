@@ -39,7 +39,7 @@ NEXTMU_INLINE NAnimationString AllocateString(const mu_utf8string value)
 {
 	NAnimationString string;
 	string.Length = static_cast<mu_uint32>(value.size());
-	string.Value = new (std::nothrow) mu_char[string.Length + 1];
+	string.Value = new_nothrow mu_char[string.Length + 1];
 	if (string.Value == nullptr) return NAnimationString();
 	mu_memset(string.Value, 0, string.Length + 1);
 	mu_memcpy(string.Value, value.c_str(), string.Length);

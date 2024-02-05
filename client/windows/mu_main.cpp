@@ -14,10 +14,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
 
-#if ENABLE_BACKTRACE == 1
-	backtrace::initializeCrashpad();
-#endif
-
 	if (MURoot::Initialize() == true)
 	{
 		MURoot::Run();

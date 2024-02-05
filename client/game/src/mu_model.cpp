@@ -1052,7 +1052,7 @@ const mu_boolean NModel::GenerateBuffers()
 	if (verticesCount == 0) return true;
 
 	const mu_size memorySize = verticesCount * sizeof(NMeshVertex);
-	std::unique_ptr<mu_uint8[]> memory(new (std::nothrow) mu_uint8[memorySize]);
+	std::unique_ptr<mu_uint8[]> memory(new_nothrow mu_uint8[memorySize]);
 	NMeshVertex *dest = reinterpret_cast<NMeshVertex *>(memory.get());
 
 	for (const auto &mesh : Meshes)

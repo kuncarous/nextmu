@@ -114,7 +114,7 @@ namespace MUAnimationsManager
 			const auto id = jroot["id"].get<mu_utf8string>();
 			const auto &jnodes = jroot["nodes"];
 
-			AnimationRootPtr root(new (std::nothrow) NAnimationsRoot());
+			AnimationRootPtr root(new_nothrow NAnimationsRoot());
 			root->Id = id;
 			root->Nodes.resize(jnodes.size());
 

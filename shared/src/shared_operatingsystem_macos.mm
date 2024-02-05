@@ -55,10 +55,15 @@ namespace NXOperatingSystem
 
     const mu_utf8string GetExternalStoragePath()
     {
+#if NEXTMU_CLIENT_SHARED == 1
         char *path = SDL_GetPrefPath(NEXTMU_COMPANY_NAME, NEXTMU_GAME_NAME);
         if (path == nullptr) return mu_utf8string();
         const mu_utf8string utf8Path(path);
         SDL_free(path);
+#else
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        const mu_utf8string utf8Path = path.toUtf8().constData();
+#endif
         return utf8Path;
     }
 

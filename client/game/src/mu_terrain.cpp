@@ -664,7 +664,7 @@ const mu_boolean NTerrain::LoadTextures(
 	{
 		const mu_uint32 settingsWidth = GetPowerOfTwoSize(static_cast<mu_uint32>(settings.size()));
 		const mu_size memorySize = settingsWidth * sizeof(SettingFormat);
-		std::unique_ptr<mu_uint8[]> memory(new (std::nothrow) mu_uint8[memorySize]);
+		std::unique_ptr<mu_uint8[]> memory(new_nothrow mu_uint8[memorySize]);
 		mu_zeromem(memory.get(), memorySize);
 		mu_memcpy(memory.get(), settings.data(), settings.size() * sizeof(SettingFormat));
 
@@ -808,7 +808,7 @@ const mu_boolean NTerrain::LoadGrassTextures(
 	{
 		const mu_uint32 settingsWidth = GetPowerOfTwoSize(static_cast<mu_uint32>(settings.size()));
 		const mu_size memorySize = settingsWidth * sizeof(SettingFormat);
-		std::unique_ptr<mu_uint8[]> memory(new (std::nothrow) mu_uint8[memorySize]);
+		std::unique_ptr<mu_uint8[]> memory(new_nothrow mu_uint8[memorySize]);
 		mu_zeromem(memory.get(), memorySize);
 		mu_memcpy(memory.get(), settings.data(), settings.size() * sizeof(SettingFormat));
 
@@ -901,7 +901,7 @@ const mu_boolean NTerrain::LoadMappings(
 	const mu_uint8 *mapping2 = reader.GetPointer(); reader.Skip(TerrainSize * TerrainSize);
 	const mu_uint8 *alpha = reader.GetPointer(); reader.Skip(TerrainSize * TerrainSize);
 
-	std::unique_ptr<mu_uint8[]> memory(new (std::nothrow) mu_uint8[TerrainSize * TerrainSize * sizeof(MappingFormat)]);
+	std::unique_ptr<mu_uint8[]> memory(new_nothrow mu_uint8[TerrainSize * TerrainSize * sizeof(MappingFormat)]);
 	MappingFormat *mapping = reinterpret_cast<MappingFormat *>(memory.get());
 
 	for (mu_uint32 index = 0; index < TerrainSize * TerrainSize; ++index)
@@ -1142,7 +1142,7 @@ const mu_boolean NTerrain::GenerateBuffers(std::vector<Diligent::StateTransition
 
 const mu_boolean NTerrain::GenerateCullingTree()
 {
-	CullingTree.reset(new (std::nothrow) NTerrainCullingTree());
+	CullingTree.reset(new_nothrow NTerrainCullingTree());
 	if (CullingTree == nullptr)
 	{
 		return false;

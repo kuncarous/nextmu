@@ -9,7 +9,14 @@
 #include <fmt/format.h>
 #include <fmt/printf.h>
 
+#if NEXTMU_CLIENT_SHARED == 1
 #include <SDL.h>
+#else
+#include <QString>
+#include <QFile>
+#include <QFileInfo>
+#include <QStandardPaths>
+#endif
 
 #include "shared_operatingsystem.h"
 

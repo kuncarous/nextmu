@@ -84,7 +84,7 @@ public:
 private:
 	NShaderResourcesBinding *CreateShaderBinding(NShaderParentId parentId, ParentType *parent, const mu_uint32 numResources, const NResourceId *resources)
 	{
-		std::unique_ptr<NShaderResourcesBinding> binding(new (std::nothrow) NShaderResourcesBinding());
+		std::unique_ptr<NShaderResourcesBinding> binding(new_nothrow NShaderResourcesBinding());
 		parent->CreateShaderResourceBinding(&binding->Binding, true);
 		if (binding->Binding == nullptr)
 		{

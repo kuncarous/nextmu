@@ -12,18 +12,19 @@ project(
     VERSION ${NEXTMU_VERSION_MAJOR}.${NEXTMU_VERSION_MINOR}.${NEXTMU_VERSION_REVISION}
 )
 
-include(CMakeLists-SetPlatform.txt)
-include(CMakeLists-Dependencies.txt)
+include(../SetPlatform.cmake)
+include(Dependencies.cmake)
 
-add_subdirectory(shared)
-add_subdirectory(client/game)
+set(IS_CLIENT_SHARED "1")
+add_subdirectory(../shared ${CMAKE_CURRENT_BINARY_DIR}/shared)
+add_subdirectory(game)
 
 if (PLATFORM_MACOS)
-    add_subdirectory(client/macos)
+    add_subdirectory(macos)
 endif()
 if (PLATFORM_WIN32)
-    add_subdirectory(client/windows)
+    add_subdirectory(windows)
 endif()
 if (PLATFORM_ANDROID)
-    add_subdirectory(client/android/lib)
+    add_subdirectory(android/lib)
 endif()

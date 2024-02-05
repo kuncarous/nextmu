@@ -38,6 +38,15 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:NextMU> $<TARGET_FILE_DIR:NextMU>
     COMMAND_EXPAND_LISTS
 )
+if(UI_LIBRARY STREQUAL "NoesisGUI")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../NoesisGUI.cmake)
+    add_custom_command(
+        TARGET NextMU POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${NOESISGUI_BINARY_DIR}/Noesis.dll
+                $<TARGET_FILE_DIR:NextMU>
+    )
+endif()
 
 source_group("src" FILES ${SOURCE})
 source_group("include" FILES ${INCLUDE})

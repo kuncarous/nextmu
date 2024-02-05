@@ -38,7 +38,7 @@ void NCharacters::Update()
 
 	MUThreadsManager::Run(
 		std::unique_ptr<NThreadExecutorBase>(
-			new (std::nothrow) NThreadExecutorIterator(
+			new_nothrow NThreadExecutorIterator(
 				view.begin(), view.end(),
 				[characters, updateTime](const entt::entity entity) -> void {
 					characters->MoveCharacter(entity);
@@ -69,7 +69,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 
 	MUThreadsManager::Run(
 		std::unique_ptr<NThreadExecutorBase>(
-			new (std::nothrow) NThreadExecutorIterator(
+			new_nothrow NThreadExecutorIterator(
 				view.begin(), view.end(),
 				[&view, environment, characters, &renderSettings, updateTime](const entt::entity entity) -> void {
 					auto [attachment, light, renderState, skeleton, position, animationsMapping, animation, action, boundingBox] = view.get<

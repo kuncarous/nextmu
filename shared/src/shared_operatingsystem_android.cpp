@@ -1,6 +1,6 @@
 #include "shared_precompiled.h"
 
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
+#if NEXTMU_CLIENT_SHARED == 1 && NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
 #include <jni.h>
 #include <filesystem>
 

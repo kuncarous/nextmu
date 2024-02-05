@@ -55,7 +55,7 @@ namespace UINoesis
 		if (offset == -1) return;
 		const auto fileSize = SDL_RWsize(File);
 		if (fileSize == -1) return;
-		std::unique_ptr<mu_uint8[]> data(new (std::nothrow) mu_uint8[fileSize]);
+		std::unique_ptr<mu_uint8[]> data(new_nothrow mu_uint8[fileSize]);
 		if (!data) return;
 		SDL_RWseek(File, 0, RW_SEEK_SET);
 		const auto readSize = SDL_RWread(File, data.get(), 1, fileSize);

@@ -35,7 +35,8 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
 
     // Configure Rasterizer
     {
-        auto &rasterizer = graphicsInfo.RasterizerDesc;
+		auto &rasterizer = graphicsInfo.RasterizerDesc;
+		rasterizer.FillMode = dynamicState.GetFillMode();
         rasterizer.CullMode = dynamicState.GetCullMode();
     }
 

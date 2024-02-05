@@ -40,7 +40,11 @@ namespace NXOperatingSystem
 		{
 			if (std::filesystem::is_regular_file(iter->status()) == true)
 			{
+#if NEXTMU_CLIENT_SHARED == 1
 				mu_utf8string filename = SDL_iconv_wchar_utf8(iter->path().filename().c_str());
+#else
+                mu_utf8string filename = QString::fromWCharArray(iter->path().filename().c_str()).toUtf8().constData();
+#endif
 
 				filesList.push_back(filename);
 			}

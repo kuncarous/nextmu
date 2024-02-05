@@ -131,7 +131,7 @@ void NJoints::Update()
 		{
 			MUThreadsManager::Run(
 				std::unique_ptr<NThreadExecutorBase>(
-					new (std::nothrow) NThreadExecutorRangeIterator(
+					new_nothrow NThreadExecutorRangeIterator(
 						view.begin(), view.end(),
 						[&registry, &view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
 							JointType type = JointType::Invalid;
@@ -159,7 +159,7 @@ void NJoints::Update()
 
 			MUThreadsManager::Run(
 				std::unique_ptr<NThreadExecutorBase>(
-					new (std::nothrow) NThreadExecutorRangeIterator(
+					new_nothrow NThreadExecutorRangeIterator(
 						view.begin(), view.end(),
 						[&registry, &view](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
 							JointType type = JointType::Invalid;
@@ -341,7 +341,7 @@ void NJoints::Render()
 
 		MUThreadsManager::Run(
 			std::unique_ptr<NThreadExecutorBase>(
-				new (std::nothrow) NThreadExecutorRangeIterator(
+				new_nothrow NThreadExecutorRangeIterator(
 					view.begin(), view.end(),
 					[&registry, &view, &renderBuffer](TJoint::EnttIterator begin, TJoint::EnttIterator end) {
 						JointType type = JointType::Invalid;

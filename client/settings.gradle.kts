@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "NextMU"
 include(":app")
-project(":app").projectDir = File("./client/android/apk/app/")
+project(":app").projectDir = File("./android/apk/app/")

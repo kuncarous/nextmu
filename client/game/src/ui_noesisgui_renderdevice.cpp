@@ -500,8 +500,6 @@ namespace UINoesis
 		case Shader::Vertex::PosColorTex0RectImagePos: VSHADER_4(HAS_COLOR, HAS_UV0, HAS_RECT, HAS_IMAGE_POSITION); break;
 		default: NS_ASSERT_UNREACHABLE;
 		}
-
-		macros.Finalize();
 	}
 
 	void GetPixelMacros(const Noesis::Shader::Enum shader, Diligent::ShaderMacroHelper &macros)
@@ -576,48 +574,47 @@ namespace UINoesis
 
 		default: NS_ASSERT_UNREACHABLE;
 		}
-
-		macros.Finalize();
 	}
 
-	const mu_utf8string GetVertexInputOutput(const Diligent::ShaderMacro *macros)
+	const mu_utf8string GetVertexInputOutput(const Diligent::ShaderMacroArray macros)
 	{
 		mu_utf8string value;
 
 		value += "struct VSInput\n";
 		value += "{\n";
 		value += "float2 position: ATTRIB0;\n";
-		for (auto macro = macros; macro->Name != nullptr; ++macro)
+		for (mu_uint32 n = 0; n < macros.Count; ++n)
 		{
-			if (std::strcmp(macro->Name, "HAS_COLOR") == 0)
+			const auto &macro = macros.Elements[n];
+			if (std::strcmp(macro.Name, "HAS_COLOR") == 0)
 			{
 				value += "half4 color: ATTRIB1;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_UV0") == 0)
+			else if (std::strcmp(macro.Name, "HAS_UV0") == 0)
 			{
 				value += "float2 uv0: ATTRIB2;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_UV1") == 0)
+			else if (std::strcmp(macro.Name, "HAS_UV1") == 0)
 			{
 				value += "float2 uv1: ATTRIB3;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_COVERAGE") == 0)
+			else if (std::strcmp(macro.Name, "HAS_COVERAGE") == 0)
 			{
 				value += "half coverage: ATTRIB4;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_RECT") == 0)
+			else if (std::strcmp(macro.Name, "HAS_RECT") == 0)
 			{
 				value += "float4 rect: ATTRIB5;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_TILE") == 0)
+			else if (std::strcmp(macro.Name, "HAS_TILE") == 0)
 			{
 				value += "float4 tile: ATTRIB6;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_IMAGE_POSITION") == 0)
+			else if (std::strcmp(macro.Name, "HAS_IMAGE_POSITION") == 0)
 			{
 				value += "float4 imagePos: ATTRIB7;\n";
 			}
-			else if (std::strcmp(macro->Name, "STEREO_RENDERING") == 0)
+			else if (std::strcmp(macro.Name, "STEREO_RENDERING") == 0)
 			{
 				value += "uint eyeIndex : SV_InstanceID;\n";
 			}
@@ -627,46 +624,47 @@ namespace UINoesis
 		value += "struct PSInput\n";
 		value += "{\n";
 		value += "float4 position: SV_POSITION;\n";
-		for (auto macro = macros; macro->Name != nullptr; ++macro)
+		for (mu_uint32 n = 0; n < macros.Count; ++n)
 		{
-			if (std::strcmp(macro->Name, "HAS_COLOR") == 0)
+			const auto &macro = macros.Elements[n];
+			if (std::strcmp(macro.Name, "HAS_COLOR") == 0)
 			{
 				value += "nointerpolation half4 color: COLOR0;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_UV0") == 0)
+			else if (std::strcmp(macro.Name, "HAS_UV0") == 0)
 			{
 				value += "float2 uv0: TEXCOORD0;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_UV1") == 0)
+			else if (std::strcmp(macro.Name, "HAS_UV1") == 0)
 			{
 				value += "float2 uv1: TEXCOORD1;\n";
 			}
-			else if (std::strcmp(macro->Name, "DOWNSAMPLE") == 0)
+			else if (std::strcmp(macro.Name, "DOWNSAMPLE") == 0)
 			{
 				value += "float2 uv2: TEXCOORD2;\n";
 				value += "float2 uv3: TEXCOORD3;\n";
 			}
-			else if (std::strcmp(macro->Name, "SDF") == 0)
+			else if (std::strcmp(macro.Name, "SDF") == 0)
 			{
 				value += "float4 st1: TEXCOORD2;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_COVERAGE") == 0)
+			else if (std::strcmp(macro.Name, "HAS_COVERAGE") == 0)
 			{
 				value += "half coverage: COVERAGE;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_RECT") == 0)
+			else if (std::strcmp(macro.Name, "HAS_RECT") == 0)
 			{
 				value += "nointerpolation float4 rect: RECT;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_TILE") == 0)
+			else if (std::strcmp(macro.Name, "HAS_TILE") == 0)
 			{
 				value += "nointerpolation float4 tile: TILE;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_IMAGE_POSITION") == 0)
+			else if (std::strcmp(macro.Name, "HAS_IMAGE_POSITION") == 0)
 			{
 				value += "float4 imagePos: IMAGE_POSITION;\n";
 			}
-			else if (std::strcmp(macro->Name, "STEREO_RENDERING") == 0)
+			else if (std::strcmp(macro.Name, "STEREO_RENDERING") == 0)
 			{
 				value += "uint renderTargetIndex: SV_RenderTargetArrayIndex;\n";
 			}
@@ -676,49 +674,50 @@ namespace UINoesis
 		return value;
 	}
 
-	const mu_utf8string GetPixelInput(const Diligent::ShaderMacro *vertexMacros, const Diligent::ShaderMacro *pixelMacros)
+	const mu_utf8string GetPixelInput(const Diligent::ShaderMacroArray vertexMacros, const Diligent::ShaderMacroArray pixelMacros)
 	{
 		mu_utf8string value;
 
 		value += "struct PSInput\n";
 		value += "{\n";
 		value += "float4 position: SV_POSITION;\n";
-		for (auto macro = vertexMacros; macro->Name != nullptr; ++macro)
+		for (mu_uint32 n = 0; n < vertexMacros.Count; ++n)
 		{
-			if (std::strcmp(macro->Name, "HAS_COLOR") == 0)
+			const auto &macro = vertexMacros.Elements[n];
+			if (std::strcmp(macro.Name, "HAS_COLOR") == 0)
 			{
 				value += "nointerpolation half4 color: COLOR0;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_UV0") == 0)
+			else if (std::strcmp(macro.Name, "HAS_UV0") == 0)
 			{
 				value += "float2 uv0: TEXCOORD0;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_UV1") == 0)
+			else if (std::strcmp(macro.Name, "HAS_UV1") == 0)
 			{
 				value += "float2 uv1: TEXCOORD1;\n";
 			}
-			else if (std::strcmp(macro->Name, "DOWNSAMPLE") == 0)
+			else if (std::strcmp(macro.Name, "DOWNSAMPLE") == 0)
 			{
 				value += "float2 uv2: TEXCOORD2;\n";
 				value += "float2 uv3: TEXCOORD3;\n";
 			}
-			else if (std::strcmp(macro->Name, "SDF") == 0)
+			else if (std::strcmp(macro.Name, "SDF") == 0)
 			{
 				value += "float4 st1: TEXCOORD2;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_COVERAGE") == 0)
+			else if (std::strcmp(macro.Name, "HAS_COVERAGE") == 0)
 			{
 				value += "half coverage: COVERAGE;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_RECT") == 0)
+			else if (std::strcmp(macro.Name, "HAS_RECT") == 0)
 			{
 				value += "nointerpolation float4 rect: RECT;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_TILE") == 0)
+			else if (std::strcmp(macro.Name, "HAS_TILE") == 0)
 			{
 				value += "nointerpolation float4 tile: TILE;\n";
 			}
-			else if (std::strcmp(macro->Name, "HAS_IMAGE_POSITION") == 0)
+			else if (std::strcmp(macro.Name, "HAS_IMAGE_POSITION") == 0)
 			{
 				value += "float4 imagePos: IMAGE_POSITION;\n";
 			}
@@ -728,9 +727,10 @@ namespace UINoesis
 		value += "struct PSOutput\n";
 		value += "{\n";
 		value += "half4 color: SV_TARGET0;\n";
-		for (auto macro = pixelMacros; macro->Name != nullptr; ++macro)
+		for (mu_uint32 n = 0; n < pixelMacros.Count; ++n)
 		{
-			if (std::strcmp(macro->Name, "EFFECT_SDF_LCD") == 0)
+			const auto &macro = pixelMacros.Elements[n];
+			if (std::strcmp(macro.Name, "EFFECT_SDF_LCD") == 0)
 			{
 				value += "half4 alpha: SV_TARGET1;\n";
 			}
@@ -1231,6 +1231,7 @@ namespace UINoesis
 		const auto immediateContext = MUGraphics::GetImmediateContext();
 
 		auto &state = batch.renderState;
+		dynamicState.WireframeMode = state.f.wireframe;
 		dynamicState.CullMode = Diligent::CULL_MODE_NONE;
 		dynamicState.ColorWrite = state.f.colorEnable > 0;
 		dynamicState.AlphaWrite = state.f.colorEnable > 0;

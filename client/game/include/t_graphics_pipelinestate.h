@@ -6,6 +6,7 @@
 constexpr mu_uint32 EnableScissorsBits = 1;
 constexpr mu_uint32 ColorWriteBits = 1;
 constexpr mu_uint32 AlphaWriteBits = 1;
+constexpr mu_uint32 WireframeModeBits = ComputeBitsNeeded(Diligent::FILL_MODE_NUM_MODES - 1); // no extra bit since we force it to be uint8
 constexpr mu_uint32 CullModeBits = ComputeBitsNeeded(Diligent::CULL_MODE_NUM_MODES); // no extra bit since we force it to be uint8
 constexpr mu_uint32 DepthWriteBits = 1;
 constexpr mu_uint32 DepthFuncBits = ComputeBitsNeeded(Diligent::COMPARISON_FUNC_NUM_FUNCTIONS);
@@ -17,6 +18,7 @@ constexpr mu_uint32 BlendFactorBits = ComputeBitsNeeded(Diligent::BLEND_FACTOR_N
 constexpr mu_uint32 BlendOperationBits = ComputeBitsNeeded(Diligent::BLEND_OPERATION_NUM_OPERATIONS); // no extra bit since we force it to be uint8
 
 constexpr mu_uint32 DynamicPipelineBits = (
+	WireframeModeBits +
 	CullModeBits +
 	EnableScissorsBits +
 	ColorWriteBits +
@@ -37,7 +39,8 @@ constexpr mu_uint32 DynamicPipelineBits = (
 	BlendOperationBits
 );
 
-constexpr mu_uint64 CullModeShift = 0;
+constexpr mu_uint64 WireframeModeShift = 0;
+constexpr mu_uint64 CullModeShift = WireframeModeShift + WireframeModeBits;
 constexpr mu_uint64 EnableScissorsShift = CullModeShift + CullModeBits;
 constexpr mu_uint64 ColorWriteShift = EnableScissorsShift + EnableScissorsBits;
 constexpr mu_uint64 AlphaWriteShift = ColorWriteShift + ColorWriteBits;
@@ -60,6 +63,7 @@ constexpr mu_uint64 BlendOpAlphaShift = BlendOpShift + BlendOperationBits;
 typedef mu_uint64 NDynamicPipelineHash;
 struct NDynamicPipelineState
 {
+	Diligent::Bool WireframeMode : WireframeModeBits = false;
 	Diligent::Uint8 CullMode : CullModeBits = Diligent::CULL_MODE_NONE;
 
 	Diligent::Bool EnableScissors : EnableScissorsBits = false;
@@ -82,6 +86,11 @@ struct NDynamicPipelineState
 	Diligent::Uint8 DestBlendAlpha : BlendFactorBits = Diligent::BLEND_FACTOR_UNDEFINED;
 	Diligent::Uint8 BlendOp : BlendOperationBits = Diligent::BLEND_OPERATION_ADD;
 	Diligent::Uint8 BlendOpAlpha : BlendOperationBits = Diligent::BLEND_OPERATION_ADD;
+
+	Diligent::FILL_MODE GetFillMode() const
+	{
+		return WireframeMode ? Diligent::FILL_MODE_WIREFRAME : Diligent::FILL_MODE_SOLID;
+	}
 
 	Diligent::CULL_MODE GetCullMode() const
 	{
@@ -141,6 +150,7 @@ struct NDynamicPipelineState
 	const NDynamicPipelineHash GetHash() const
 	{
 		return (
+			(static_cast<mu_uint64>(WireframeMode) << WireframeModeShift) |
 			(static_cast<mu_uint64>(CullMode) << CullModeShift) |
 			(static_cast<mu_uint64>(EnableScissors) << EnableScissorsShift) |
 			(static_cast<mu_uint64>(ColorWrite) << ColorWriteShift) |
@@ -190,7 +200,7 @@ struct NFixedPipelineState
 			(static_cast<mu_uint64>(CombinedShader) << CombinedShaderShift) |
 			(static_cast<mu_uint64>(RTVFormat) << RTVFormatShift) |
 			(static_cast<mu_uint64>(DSVFormat) << DSVFormatShift)
-			);
+		);
 	}
 };
 
@@ -200,6 +210,7 @@ extern NDynamicPipelineState DefaultShadowDynamicPipelineState;
 
 NEXTMU_INLINE NDynamicPipelineState NormalizeShadowRenderState(NDynamicPipelineState renderState)
 {
+	renderState.WireframeMode = false;
 	renderState.CullMode = Diligent::CULL_MODE_NONE;
 	renderState.ColorWrite = false;
 	renderState.AlphaWrite = false;

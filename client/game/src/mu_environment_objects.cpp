@@ -41,7 +41,7 @@ void NObjects::Update()
 
 	MUThreadsManager::Run(
 		std::unique_ptr<NThreadExecutorBase>(
-			new (std::nothrow) NThreadExecutorIterator(
+			new_nothrow NThreadExecutorIterator(
 				view.begin(), view.end(),
 				[&view, environment, &renderSettings, updateTime](const entt::entity entity) -> void {
 					auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
@@ -89,7 +89,7 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 		const auto nearPoint = Environment->GetController()->GetNearPoint();
 		MUThreadsManager::Run(
 			std::unique_ptr<NThreadExecutorBase>(
-				new (std::nothrow) NThreadExecutorIterator(
+				new_nothrow NThreadExecutorIterator(
 					view.begin(), view.end(),
 					[&view, environment, objects, &renderSettings, updateTime, distanceToCharacter, nearPoint](const entt::entity entity) -> void {
 						auto [attachment, light, renderState, skeleton, position, animation, boundingBox] = view.get<
@@ -289,7 +289,7 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 
 		MUThreadsManager::Run(
 			std::unique_ptr<NThreadExecutorBase>(
-				new (std::nothrow) NThreadExecutorIterator(
+				new_nothrow NThreadExecutorIterator(
 					view.begin(), view.end(),
 					[&view, environment, objects, updateTime](const entt::entity entity) -> void {
 						auto &renderState = view.get<

@@ -21,7 +21,7 @@ struct NShaderSettings
 
 namespace MUResourcesManager
 {
-	const mu_boolean Load();
+	const mu_boolean Load(const mu_utf8string jsonFilename = "resources.json");
 	void Destroy();
 
 	const mu_boolean LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment, NShaderSettings &settings);

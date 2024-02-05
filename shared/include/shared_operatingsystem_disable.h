@@ -3,7 +3,7 @@
 
 #pragma once
 
-#if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
+#if NEXTMU_CLIENT_SHARED == 1 && NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
 // Disable annoying Windows features
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #define NOATOM
