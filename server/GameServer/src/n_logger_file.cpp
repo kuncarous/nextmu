@@ -1,9 +1,12 @@
 #include "mu_precompiled.h"
 #include "n_logger_file.h"
+#include <QDir>
 
-NFileLogger::NFileLogger(const mu_utf8string directory, NConsoleLogger *consoleLogger) : HasLogs(false), Directory(directory), ConsoleLogger(consoleLogger)
+NFileLogger::NFileLogger(const QString directory, NConsoleLogger *consoleLogger) : HasLogs(false), ConsoleLogger(consoleLogger)
 {
-    
+    QFileInfo fileInfo(directory + QDir::separator() + "dummy.log");
+    fileInfo.absoluteDir().mkpath(".");
+    Directory = (fileInfo.absolutePath() + QDir::separator()).toStdString();
 }
 
 NFileLogger::~NFileLogger()
@@ -31,7 +34,17 @@ void NFileLogger::Create(const QDateTime currentDT)
         return;
     }
 
-    if (mu_rwfromfile_swt(File, fmt::format("{}/{:04}-{:02}-{:02}.json", Directory, currentDate.year(), currentDate.month(), currentDate.day()), QIODeviceBase::WriteOnly) == false)
+    mu_uint32 logNumber = 1u;
+    mu_utf8string filename;
+
+    do
+    {
+        filename = fmt::format("{}{:04}-{:02}-{:02}-{:04}.json", Directory, currentDate.year(), currentDate.month(), currentDate.day(), logNumber++);
+        QFileInfo fileInfo(filename.c_str());
+        if (fileInfo.exists() == false) break;
+    } while(true);
+
+    if (mu_rwfromfile_swt(File, filename, QIODeviceBase::WriteOnly) == false)
     {
         return;
     }
@@ -42,22 +55,25 @@ void NFileLogger::Create(const QDateTime currentDT)
     *Stream << "[";
 }
 
-void NFileLogger::WriteBuffer(const NLogMessage &message)
+void NFileLogger::Write(NLogMessagePtr message)
 {
-    QMutexLocker lock(&Mutex);
+    // File Mutex
+    {
+        QMutexLocker lock(&Mutex);
 
-    const QDateTime &currentDT = message.DateTime;
-    Create(currentDT);
-    if (Stream == nullptr) return;
+        const QDateTime &currentDT = message->DateTime;
+        Create(currentDT);
+        if (Stream == nullptr) return;
 
-    if (HasLogs) *Stream << ",";
-    HasLogs = true;
+        if (HasLogs) *Stream << ",";
+        HasLogs = true;
 
-    nlohmann::json jobject;
-    jobject["timestamp"] = currentDT.currentMSecsSinceEpoch();
-    jobject["type"] = message.Type;
-    jobject["message"] = message.Message;
-    *Stream << jobject.dump().c_str();
+        nlohmann::json jobject;
+        jobject["timestamp"] = currentDT.currentMSecsSinceEpoch();
+        jobject["type"] = message->Type;
+        jobject["message"] = message->Message;
+        *Stream << jobject.dump().c_str();
+    }
 
-    if (ConsoleLogger != nullptr) ConsoleLogger->Write(message);
+    if (ConsoleLogger != nullptr) ConsoleLogger->Write(std::move(message));
 }

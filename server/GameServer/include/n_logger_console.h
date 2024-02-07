@@ -12,12 +12,12 @@ public:
     NConsoleLogger() {}
     ~NConsoleLogger() {}
 
-    void Write(const NLogMessage &message);
-    std::vector<NLogMessage> GetMessages();
+    void Write(NLogMessagePtr message);
+    std::vector<NLogMessagePtr> GetMessages();
 
 private:
     QMutex Mutex;
-    std::vector<NLogMessage> Messages;
+    std::vector<NLogMessagePtr> Messages;
 };
 
 #endif

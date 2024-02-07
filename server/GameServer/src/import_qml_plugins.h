@@ -7,3 +7,4 @@
 
 Q_IMPORT_QML_PLUGIN(contentPlugin)
 Q_IMPORT_QML_PLUGIN(GameServerPlugin)
+Q_IMPORT_QML_PLUGIN(GameServerBackendPlugin)

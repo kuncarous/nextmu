@@ -24,6 +24,7 @@ qt_add_executable(GameServerApp ${GAMESERVER_SOURCE} ${GAMESERVER_INCLUDE})
 
 list(
     APPEND PRIVATE_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/imports/GameServerBackend
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include
 )
@@ -34,6 +35,7 @@ qt_add_resources(GameServerApp "configuration"
     PREFIX "/"
     FILES
         qtquickcontrols2.conf
+        icon.ico
 )
 
 target_link_libraries(GameServerApp PRIVATE

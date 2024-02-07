@@ -12,19 +12,21 @@ public:
     static constexpr mu_size MaxWriteBuffer = 64 * 1024; // 64KB
 
 public:
-    explicit NFileLogger(const mu_utf8string directory, NConsoleLogger *consoleLogger = nullptr);
+    explicit NFileLogger(const QString directory, NConsoleLogger *consoleLogger = nullptr);
     virtual ~NFileLogger();
 
 private:
     void Close();
     void Create(const QDateTime currentDT = QDateTime::currentDateTime());
-    void WriteBuffer(const NLogMessage &message);
+
+public:
+    void Write(NLogMessagePtr message);
 
 public:
 	template<typename... Args>
-    void Print(const mu_utf8string type, const mu_char *format, const Args &... args)
+    void Write(const mu_utf8string type, const mu_char *format, const Args &... args)
 	{
-        WriteBuffer(NLogMessage(type, fmt::format(format, args...)));
+        Write(std::make_unique<NLogMessage>(type, fmt::format(format, args...)));
 	}
 
 private:

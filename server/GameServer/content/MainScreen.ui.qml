@@ -10,8 +10,17 @@ import QtQuick 6.2
 import QtQuick.Controls 6.2
 import QtQuick.Layouts
 import GameServer
+import GameServerBackend
 
 Rectangle {
+    property string performanceStatistics: "Test Label"
+    property list<NConsoleMessage> messages: [
+        NConsoleMessage {
+            message: "testing"
+            backgroundColor: "red"
+        }
+    ]
+
     id: gsBackgroundRect
     width: Constants.width
     height: Constants.height
@@ -20,43 +29,52 @@ Rectangle {
     ColumnLayout {
         id: column
         anchors.fill: parent
+        spacing: 0
 
         MainBar {
             Layout.fillWidth: true
         }
 
-        ListView {
-            id: gsConsole
-            clip: true
+        Rectangle {
+            color: "#ffffff"
             Layout.fillHeight: true
             Layout.fillWidth: true
-            ScrollBar.vertical: ScrollBar {}
 
-            model: rootCxt.messages
-            delegate: RowLayout {
-                id: gsLayout
+            ListView {
+                anchors.fill: parent
+                id: gsConsole
                 clip: true
-                width: gsConsole.width
-                Layout.leftMargin: 5
-                Layout.minimumHeight: 40
+                interactive: false
+                verticalLayoutDirection: ListView.BottomToTop
 
-                Rectangle {
+                model: messages
+                delegate: RowLayout {
+                    id: gsLayout
                     clip: true
-                    Layout.fillWidth: true
-                    Layout.minimumHeight: childrenRect.height
-                    color: backgroundColor.length > 0 ? backgroundColor : Constants.backgroundColor
+                    width: gsConsole.width
+                    Layout.leftMargin: 5
+                    Layout.minimumHeight: 40
 
-                    TextEdit {
-                        width: gsLayout.width
+                    Rectangle {
+                        clip: true
+                        Layout.fillWidth: true
+                        Layout.minimumHeight: childrenRect.height
+                        color: backgroundColor.length > 0 ? backgroundColor : "transparent"
 
-                        text: message
-                        color: fontColor.length > 0 ? fontColor : {}
-                        selectedTextColor: selectedColor.length > 0 ? selectedColor : {}
-                        selectionColor: highlightColor.length > 0 ? highlightColor : {}
-                        readOnly: true
-                        selectByMouse: true
-                        font.bold: true
-                        wrapMode: Text.Wrap
+                        TextEdit {
+                            width: gsLayout.width
+
+                            text: message
+                            color: fontColor.length > 0 ? fontColor : {}
+                            selectedTextColor: selectedColor.length > 0 ? selectedColor : {}
+                            selectionColor: highlightColor.length > 0 ? highlightColor : {}
+                            readOnly: true
+                            selectByMouse: false
+
+                            font.pixelSize: 18
+                            font.bold: true
+                            wrapMode: Text.Wrap
+                        }
                     }
                 }
             }
@@ -73,7 +91,7 @@ Rectangle {
 
             Label {
                 id: fpsLabel
-                text: rootCxt.performanceStatistics
+                text: performanceStatistics
                 Layout.fillHeight: true
             }
         }

@@ -15,4 +15,6 @@ public:
     const mu_utf8string Message;
 };
 
+typedef std::unique_ptr<NLogMessage> NLogMessagePtr;
+
 #endif

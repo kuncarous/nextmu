@@ -5,6 +5,7 @@
 namespace MULogger
 {
     std::unique_ptr<NConsoleLogger> ConsoleLogger;
+    std::unique_ptr<NFileLogger> FileLogger;
     std::map<mu_utf8string, NLogTypeConfig> Types;
 
     const mu_boolean Load()
@@ -83,6 +84,7 @@ namespace MULogger
     const mu_boolean Initialize()
     {
         ConsoleLogger.reset(new_nothrow NConsoleLogger());
+        FileLogger.reset(new_nothrow NFileLogger("./logs/main", ConsoleLogger.get()));
         return Load();
     }
 
@@ -97,10 +99,10 @@ namespace MULogger
         return ConsoleLogger.get();
     }
 
-    void LogToConsole(const mu_utf8string type, const mu_utf8string message)
+    void Write(const mu_utf8string type, const mu_utf8string message)
     {
-        if (ConsoleLogger == nullptr) return;
-        ConsoleLogger->Write(NLogMessage(type, message));
+        if (FileLogger == nullptr) return;
+        FileLogger->Write(std::make_unique<NLogMessage>(type, message));
     }
 
     const NLogTypeConfig *GetType(const mu_utf8string type)

@@ -31,20 +31,29 @@ source_group("Root" FILES ${G_ROOT_SOURCE} ${G_ROOT_INCLUDE})
 list(APPEND GAMESERVER_INCLUDE ${G_ROOT_INCLUDE})
 list(APPEND GAMESERVER_SOURCE ${G_ROOT_SOURCE})
 
-# Root Context Group
+# Root Application Group
 set(
-    G_ROOT_CONTEXT_INCLUDE
-	include/n_root_context.h
+    G_ROOT_APPLICATION_INCLUDE
+	include/n_root_application.h
 )
 
 set(
-    G_ROOT_CONTEXT_SOURCE
-	src/n_root_context.cpp
+    G_ROOT_APPLICATION_SOURCE
+	src/n_root_application.cpp
 )
- 
-source_group("Root\\Context" FILES ${G_ROOT_CONTEXT_SOURCE} ${G_ROOT_CONTEXT_INCLUDE})
-list(APPEND GAMESERVER_INCLUDE ${G_ROOT_CONTEXT_INCLUDE})
-list(APPEND GAMESERVER_SOURCE ${G_ROOT_CONTEXT_SOURCE})
+
+source_group("Root\\Application" FILES ${G_ROOT_APPLICATION_SOURCE} ${G_ROOT_APPLICATION_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_ROOT_APPLICATION_INCLUDE})
+list(APPEND GAMESERVER_SOURCE ${G_ROOT_APPLICATION_SOURCE})
+
+# Root Events Group
+set(
+    G_ROOT_EVENTS_SOURCE
+	src/n_root_events.cpp
+)
+
+source_group("Root\\Events" FILES ${G_ROOT_EVENTS_SOURCE})
+list(APPEND GAMESERVER_SOURCE ${G_ROOT_EVENTS_SOURCE})
 
 # Root Thread Group
 set(
@@ -139,3 +148,31 @@ set(
 source_group("Timer" FILES ${G_TIMER_SOURCE} ${G_TIMER_INCLUDE})
 list(APPEND GAMESERVER_INCLUDE ${G_TIMER_INCLUDE})
 list(APPEND GAMESERVER_SOURCE ${G_TIMER_SOURCE})
+
+# UI Events Group
+set(
+    G_UI_EVENTS_INCLUDE
+	include/mu_uievents.h
+	include/n_uievent_base.h
+)
+
+source_group("UI\\Events" FILES ${G_UI_EVENTS_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_UI_EVENTS_INCLUDE})
+
+# UI Events FPS Group
+set(
+    G_UIEVENT_FPS_INCLUDE
+	include/n_uievent_updatefps.h
+)
+
+source_group("UI\\Events\\FPS" FILES ${G_UIEVENT_FPS_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_UIEVENT_FPS_INCLUDE})
+
+# UI Events Console Group
+set(
+    G_UIEVENT_CONSOLE_INCLUDE
+	include/n_uievent_updateconsole.h
+)
+
+source_group("UI\\Events\\Console" FILES ${G_UIEVENT_CONSOLE_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_UIEVENT_CONSOLE_INCLUDE})

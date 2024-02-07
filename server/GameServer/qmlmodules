@@ -15,4 +15,5 @@ add_subdirectory(imports)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
     contentplugin
     GameServerplugin
+    GameServerBackendplugin
 )

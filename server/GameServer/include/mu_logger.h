@@ -20,7 +20,7 @@ namespace MULogger
     const mu_boolean Initialize();
     void Destroy();
     NConsoleLogger *GetConsoleLogger();
-    void LogToConsole(const mu_utf8string type, const mu_utf8string message);
+    void Write(const mu_utf8string type, const mu_utf8string message);
     const NLogTypeConfig *GetType(const mu_utf8string type);
 };
 

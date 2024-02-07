@@ -1,21 +1,13 @@
 #include "mu_precompiled.h"
 #include "mu_root.h"
 #include "n_root_thread.h"
-#include "n_root_context.h"
-
-#if NEXTMU_CONSOLE_MODE == 1
-#include <QCoreApplication>
-#else
-#include <QGuiApplication>
-#endif
-#include <QQmlApplicationEngine>
-#include <QQmlContext>
+#include "n_root_context.qml.h"
 
 namespace MURoot
 {
     QCoreApplication *App = nullptr;
     QQmlApplicationEngine *Engine = nullptr;
-    std::unique_ptr<NRootContext> RootContext;
+    NRootContext *RootContext = nullptr;
     std::unique_ptr<NRootThread> RootThread;
 
     void AboutToCloseEvent();
@@ -23,11 +15,14 @@ namespace MURoot
     {
         App = app;
         Engine = engine;
-        RootContext.reset(new_nothrow NRootContext());
-        if (engine != nullptr)
+
+        auto objects = Engine->rootObjects();
+        if (objects.empty())
         {
-            engine->rootContext()->setContextProperty("rootCxt", RootContext.get());
+            return;
         }
+
+        RootContext = objects.first()->findChild<NRootContext*>("rootCxt");
 
         QObject::connect(app, &QCoreApplication::aboutToQuit, AboutToCloseEvent);
         RootThread.reset(new_nothrow NRootThread());
@@ -51,7 +46,7 @@ namespace MURoot
 
     NRootContext *GetRootContext()
     {
-        return RootContext.get();
+        return RootContext;
     }
 
     void AboutToCloseEvent()
