@@ -3,12 +3,12 @@
 
 #pragma once
 
+#include <boost/filesystem.hpp>
+
 extern mu_utf8string SupportPathUTF8;
-extern mu_unicodestring SupportPathUnicode;
 extern mu_utf8string CachePathUTF8;
-extern mu_unicodestring CachePathUnicode;
 extern mu_utf8string UserPathUTF8;
-extern mu_unicodestring UserPathUnicode;
+extern mu_utf8string GameDataPathUTF8;
 
 enum class EGameDirectoryType : mu_uint32
 {
@@ -23,14 +23,16 @@ void SetReadFromSupport(const mu_boolean enable);
 const mu_boolean IsReadFromSupportAvailable();
 
 #if NEXTMU_CLIENT_SHARED == 1
-typedef SDL_RWops** NFile;
+typedef SDL_RWops* NFile;
+typedef NFile* NFileRef;
 #else
-typedef std::unique_ptr<QFile>& NFile;
+typedef std::unique_ptr<QFile> NFile;
+typedef NFile& NFileRef;
 #endif
 
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID
 template<const EGameDirectoryType dirType>
-NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFile file, const mu_utf8string filename, const mu_char* mode)
+NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFileRef file, const mu_utf8string filename, const mu_char* mode)
 {
     if constexpr (dirType == EGameDirectoryType::eSupport)
     {
@@ -75,30 +77,26 @@ NEXTMU_INLINE const mu_boolean mu_rwexists_extstorage(const mu_utf8string filena
 #elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 #if NEXTMU_CLIENT_SHARED == 1
 template<const EGameDirectoryType dirType>
-NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFile file, const mu_utf8string filename, const mu_char* mode)
+NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFileRef file, const mu_utf8string filename, const mu_char* mode)
 #else
 template<const EGameDirectoryType dirType>
-NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFile file, const mu_utf8string filename, const QIODeviceBase::OpenMode mode)
+NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFileRef file, const mu_utf8string filename, const QIODeviceBase::OpenMode mode)
 #endif
 {
 #if NEXTMU_CLIENT_SHARED == 1
-    FILE* tfile = nullptr;
     if constexpr (dirType == EGameDirectoryType::eSupport)
     {
-        tfile = fopen((SupportPathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((SupportPathUTF8 + filename).c_str(), mode);
     }
     else if constexpr (dirType == EGameDirectoryType::eCache)
     {
-        tfile = fopen((CachePathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((CachePathUTF8 + filename).c_str(), mode);
     }
     else if constexpr (dirType == EGameDirectoryType::eUser)
     {
-        tfile = fopen((UserPathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((UserPathUTF8 + filename).c_str(), mode);
     }
 
-    if (tfile == nullptr) return false;
-
-    *file = SDL_RWFromFP(tfile, SDL_TRUE);
     return *file != nullptr;
 #else
     if constexpr (dirType == EGameDirectoryType::eSupport)
@@ -121,23 +119,23 @@ NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFile file, const mu_utf
 template<const EGameDirectoryType dirType>
 NEXTMU_INLINE const mu_boolean mu_rwexists_extstorage(const mu_utf8string filename)
 {
-    FILE* tfile = nullptr;
+    NFile file = nullptr;
     if constexpr (dirType == EGameDirectoryType::eSupport)
     {
-        tfile = fopen((SupportPathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((SupportPathUTF8 + filename).c_str(), "rb");
     }
     else if constexpr (dirType == EGameDirectoryType::eCache)
     {
-        tfile = fopen((CachePathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((CachePathUTF8 + filename).c_str(), "rb");
     }
     else if constexpr (dirType == EGameDirectoryType::eUser)
     {
-        tfile = fopen((UserPathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((UserPathUTF8 + filename).c_str(), "rb");
     }
 
-    if (tfile != nullptr)
+    if (file != nullptr)
     {
-        fclose(tfile);
+        SDL_RWclose(file);
     }
 
     return tfile != nullptr;
@@ -146,10 +144,10 @@ NEXTMU_INLINE const mu_boolean mu_rwexists_extstorage(const mu_utf8string filena
 
 #if NEXTMU_CLIENT_SHARED == 1
 template<const EGameDirectoryType dirType>
-NEXTMU_INLINE const mu_boolean mu_rwfromfile(NFile file, const mu_utf8string filename, const mu_char* mode)
+NEXTMU_INLINE const mu_boolean mu_rwfromfile(NFileRef file, const mu_utf8string filename, const mu_char* mode)
 #else
 template<const EGameDirectoryType dirType>
-NEXTMU_INLINE const mu_boolean mu_rwfromfile(NFile file, const mu_utf8string filename, const QIODeviceBase::OpenMode mode)
+NEXTMU_INLINE const mu_boolean mu_rwfromfile(NFileRef file, const mu_utf8string filename, const QIODeviceBase::OpenMode mode)
 #endif
 {
 #if NEXTMU_CLIENT_SHARED == 1
@@ -168,7 +166,7 @@ NEXTMU_INLINE const mu_boolean mu_rwfromfile(NFile file, const mu_utf8string fil
         *file = SDL_RWFromFile(filename.c_str(), mode);
     }
 #else
-    * file = SDL_RWFromFile(filename.c_str(), mode);
+    *file = SDL_RWFromFile(filename.c_str(), mode);
 #endif
 
     return *file != nullptr;
@@ -219,9 +217,9 @@ NEXTMU_INLINE const mu_boolean mu_rwexists(const mu_utf8string filename)
 }
 
 #if NEXTMU_CLIENT_SHARED == 1
-NEXTMU_INLINE const mu_boolean mu_rwfromfile_swt(NFile file, const mu_utf8string filename, const mu_char* mode)
+NEXTMU_INLINE const mu_boolean mu_rwfromfile_swt(NFileRef file, const mu_utf8string filename, const mu_char* mode)
 #else
-NEXTMU_INLINE const mu_boolean mu_rwfromfile_swt(NFile file, const mu_utf8string filename, const QIODeviceBase::OpenMode mode)
+NEXTMU_INLINE const mu_boolean mu_rwfromfile_swt(NFileRef file, const mu_utf8string filename, const QIODeviceBase::OpenMode mode)
 #endif
 {
     if (IsReadFromSupportAvailable() == true)
@@ -230,6 +228,30 @@ NEXTMU_INLINE const mu_boolean mu_rwfromfile_swt(NFile file, const mu_utf8string
     }
 
     return mu_rwfromfile<EGameDirectoryType::eApplicationOnly>(file, filename, mode);
+}
+
+template<const EGameDirectoryType dirType>
+NEXTMU_INLINE void MakeDirectory(mu_utf8string Path)
+{
+	std::replace(Path.begin(), Path.end(), '\\', '/');
+#if ELION_OPERATING_SYSTEM_TYPE == ELION_OSTYPE_MOBILE
+	if constexpr (dirType == EGameDirectoryType::eSupport)
+	{
+		Path = SupportPathUTF8 + Path;
+	}
+	else if constexpr (dirType == EGameDirectoryType::eCache)
+	{
+		Path = CachePathUTF8 + Path;
+	}
+	else if constexpr (dirType == EGameDirectoryType::eUser)
+	{
+		Path = UserPathUTF8 + Path;
+	}
+#endif
+
+	boost::filesystem::path dirPath(Path);
+	boost::system::error_code ec;
+	boost::filesystem::create_directories(dirPath, ec);
 }
 
 #endif

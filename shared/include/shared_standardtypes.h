@@ -298,7 +298,6 @@ NEXTMU_INLINE void wcscat_s(wchar_t* dest, const mu_size destLength, const wchar
 #define mu_malloc				malloc
 #define mu_realloc				realloc
 #define mu_free					free
-#define mu_sleep(ms)			boost::this_thread::sleep_for(boost::chrono::milliseconds(ms))
 
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || \
 	NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS || \
@@ -695,6 +694,12 @@ void NormalizePath(mu_utf8string &path)
 	{
 		if (!path.ends_with('/')) path += '/';
 	}
+}
+
+template<mu_size StringLength>
+constexpr mu_uint32 GetStringLengthAtCompileTime(const char(&)[StringLength])
+{
+	return StringLength - 1;
 }
 
 #endif

@@ -31,13 +31,13 @@ namespace UIRmlUI
 		const auto device = MUGraphics::GetDevice();
 		const auto immediateContext = MUGraphics::GetImmediateContext();
 
-		ColorShader = MUResourcesManager::GetProgram("rmlui_color");
+		ColorShader = MUResourcesManager::GetResourcesManager()->GetProgram("rmlui_color");
 		if (ColorShader == NInvalidShader)
 		{
 			return false;
 		}
 
-		TextureShader = MUResourcesManager::GetProgram("rmlui_texture");
+		TextureShader = MUResourcesManager::GetResourcesManager()->GetProgram("rmlui_texture");
 		if (TextureShader == NInvalidShader)
 		{
 			return false;

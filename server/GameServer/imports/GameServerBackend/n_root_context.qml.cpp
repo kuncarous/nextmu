@@ -68,12 +68,6 @@ void NConsoleMessage::setHighlightColor(const QString &value)
     HighlightColor = value;
 }
 
-NRootContext::~NRootContext()
-{
-    for (auto message : Messages) message->deleteLater();
-    Messages.clear();
-}
-
 QString NRootContext::getPerformanceStatistics() const
 {
     return PerformanceStatistics;

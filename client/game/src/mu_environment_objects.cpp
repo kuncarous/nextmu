@@ -188,7 +188,7 @@ void NObjects::PreRender(const NRenderSettings &renderSettings)
 						{
 							renderState.ShadowVisible = NInvalidUInt8;
 							mu_uint32 shadowIndex = 0;
-							for (shadowIndex; shadowIndex < renderSettings.ShadowFrustumsNum; ++shadowIndex)
+							for (; shadowIndex < renderSettings.ShadowFrustumsNum; ++shadowIndex)
 							{
 								const auto isVisible = Diligent::GetBoxVisibility(
 									renderSettings.ShadowFrustums[shadowIndex],

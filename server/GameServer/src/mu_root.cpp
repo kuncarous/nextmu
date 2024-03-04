@@ -2,12 +2,14 @@
 #include "mu_root.h"
 #include "n_root_thread.h"
 #include "n_root_context.qml.h"
+#include "mu_uievents.h"
 
 namespace MURoot
 {
     QCoreApplication *App = nullptr;
     QQmlApplicationEngine *Engine = nullptr;
     NRootContext *RootContext = nullptr;
+    QTimer *ConsoleTimer = nullptr;
     std::unique_ptr<NRootThread> RootThread;
 
     void AboutToCloseEvent();
@@ -23,6 +25,15 @@ namespace MURoot
         }
 
         RootContext = objects.first()->findChild<NRootContext*>("rootCxt");
+        ConsoleTimer = new_nothrow QTimer(App);
+        ConsoleTimer->setInterval(500);
+        ConsoleTimer->setTimerType(Qt::PreciseTimer);
+        ConsoleTimer->callOnTimeout(
+            []() {
+                App->postEvent(App, new UIUpdateConsoleEvent());
+            }
+        );
+        ConsoleTimer->start();
 
         QObject::connect(app, &QCoreApplication::aboutToQuit, AboutToCloseEvent);
         RootThread.reset(new_nothrow NRootThread());

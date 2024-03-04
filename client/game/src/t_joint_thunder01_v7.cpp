@@ -38,7 +38,7 @@ TJointThunder01V7::TJointThunder01V7()
 
 void TJointThunder01V7::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TJointThunder01V7::Create(TJoint::EnttRegistry &registry, const NJointData &data)

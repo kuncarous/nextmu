@@ -30,6 +30,9 @@ namespace UINoesis
 		DERenderDevice(const mu_boolean sRGB);
 		~DERenderDevice();
 
+	public:
+		void ResetShaders();
+
 	private:
 		void FillCaps(const mu_boolean sRGB);
 		void CreateShaderResources();

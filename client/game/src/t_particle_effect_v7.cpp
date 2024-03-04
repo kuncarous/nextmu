@@ -35,7 +35,7 @@ TParticleEffectV7::TParticleEffectV7()
 
 void TParticleEffectV7::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TParticleEffectV7::Create(entt::registry &registry, const NParticleData &data)

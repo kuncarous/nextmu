@@ -104,6 +104,11 @@ namespace UINoesis
 		ResourceBindingsManager.Destroy();
 	}
 
+	void DERenderDevice::ResetShaders()
+	{
+		std::fill(Programs.begin(), Programs.end(), NInvalidShader);
+	}
+
 	void DERenderDevice::FillCaps(const mu_boolean sRGB)
 	{
 		const auto device = MUGraphics::GetDevice();
@@ -743,7 +748,8 @@ namespace UINoesis
 	const mu_shader DERenderDevice::LoadShader(const Noesis::Shader::Enum shader)
 	{
 		const mu_utf8string id = ShaderIDs[shader];
-		const mu_shader program = MUResourcesManager::GetProgram(id);
+		auto *manager = MUResourcesManager::GetResourcesManager();
+		const mu_shader program = manager->GetProgram(id);
 		if (program != NInvalidShader)
 		{
 			return program;
@@ -763,12 +769,12 @@ namespace UINoesis
 
 		const mu_utf8string vertexPath = "./data/shaders/noesisgui/shader.vs";
 		const mu_utf8string pixelPath = "./data/shaders/noesisgui/shader.fs";
-		if (MUResourcesManager::LoadProgram(id, vertexPath, pixelPath, settings) == false)
+		if (manager->LoadProgram(id, vertexPath, pixelPath, settings) == false)
 		{
 			return NInvalidShader;
 		}
 
-		return MUResourcesManager::GetProgram(id);
+		return manager->GetProgram(id);
 	}
 
 	void DERenderDevice::EnsureProgram(const Noesis::Shader::Enum shader)

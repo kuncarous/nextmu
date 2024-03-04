@@ -7,4 +7,4 @@
 Noesis::Key SDLKeyCodeToNoesisKeyCode(SDL_Keycode key);
 #endif
 
-#endif#pragma once
+#endif

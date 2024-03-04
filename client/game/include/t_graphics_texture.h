@@ -55,4 +55,6 @@ private:
 	mu_boolean Alpha;
 };
 
+typedef std::unique_ptr<NGraphicsTexture> NGraphicsTexturePtr;
+
 #endif

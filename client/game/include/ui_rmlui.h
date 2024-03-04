@@ -7,6 +7,7 @@
 namespace UIRmlUI
 {
 	const mu_boolean Initialize();
+	const mu_boolean CreateView(const mu_utf8string filename);
 	void Destroy();
 
 	void Update();

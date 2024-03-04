@@ -58,7 +58,18 @@ namespace UIRmlUI
 			return false;
 		}
 
-		Document = Context->LoadDocument(SupportPathUTF8 + "data/ui/example/index.rml");
+		return true;
+	}
+
+	const mu_boolean CreateView(const mu_utf8string filename)
+	{
+		if (Document != nullptr)
+		{
+			Document->Close();
+			Document = nullptr;
+		}
+
+		Document = Context->LoadDocument(SupportPathUTF8 + "resources/" + filename);
 		if (!Document)
 		{
 			return false;

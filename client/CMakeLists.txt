@@ -7,6 +7,11 @@ set(NEXTMU_VERSION_MINOR	"0" CACHE STRING "Version Minor")
 set(NEXTMU_VERSION_REVISION	"1" CACHE STRING "Version Revision")
 set(NEXTMU_VERSION_SERIAL	"UUb335yJPFn7MFfdx6HtTBLrfuAxcDD49nNMQgXZFPbcdHF3sSXrBHqg5stc66bu" CACHE STRING "Version Serial")
 
+set(NEXTMU_CLIENT_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(CMAKE_ANDROID_STL_TYPE c++_static)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(BUILD_SHARED_LIBS OFF)
+
 project(
     NextMU
     VERSION ${NEXTMU_VERSION_MAJOR}.${NEXTMU_VERSION_MINOR}.${NEXTMU_VERSION_REVISION}
@@ -15,7 +20,10 @@ project(
 include(../SetPlatform.cmake)
 include(Dependencies.cmake)
 
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(IS_CLIENT_SHARED "1")
+
 add_subdirectory(../shared ${CMAKE_CURRENT_BINARY_DIR}/shared)
 add_subdirectory(game)
 

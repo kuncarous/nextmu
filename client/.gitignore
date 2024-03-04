@@ -6,6 +6,8 @@
 /.cproject
 /.idea
 /.vscode
+/.vs
+/out
 
 __pycache__
 /.coverage/
@@ -43,3 +45,5 @@ __pycache__
 .externalNativeBuild
 .cxx
 local.properties
+CMakeSettings.json
+CMakeUserPresets.json

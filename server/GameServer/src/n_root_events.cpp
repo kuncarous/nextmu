@@ -85,7 +85,7 @@ bool NApplication::event(QEvent *event)
                                 highlightColor = type->HighlightColor;
                             }
 
-                            *dst_iter = new NConsoleMessage(message, backgroundColor, fontColor, selectedColor, highlightColor);
+                            *dst_iter = new NConsoleMessage(message, backgroundColor, fontColor, selectedColor, highlightColor, rootContext);
                         }
                     }
 

@@ -11,12 +11,20 @@
 #include "mu_graphics.h"
 
 #if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
+#include "ngui_context.h"
+
+#include "RichText.h"
+#include "LocExtension.h"
+
+using namespace NoesisApp;
+
 namespace UINoesis
 {
 	Noesis::Ptr<Noesis::IView> View;
 	Noesis::Ptr<Noesis::RenderDevice> Device;
+	Noesis::Ptr<NGApplicationContext> Context;
+	mu_double UpdateTime = 0.0;
 
-	const mu_boolean CreateView();
 	const mu_boolean CreateDevice();
 
 	const mu_boolean Initialize()
@@ -38,6 +46,11 @@ namespace UINoesis
 		Noesis::GUI::SetLicense(NS_LICENSE_NAME, NS_LICENSE_KEY);
 		Noesis::GUI::Init();
 
+		NS_BEGIN_COLD_REGION
+			NS_REGISTER_COMPONENT(LocExtension)
+			Noesis::TypeOf<RichText>();
+		NS_END_COLD_REGION
+
 		Noesis::GUI::SetXamlProvider(Noesis::MakePtr<XamlProvider>());
 		Noesis::GUI::SetFontProvider(Noesis::MakePtr<FontProvider>());
 		Noesis::GUI::SetTextureProvider(Noesis::MakePtr<TextureProvider>());
@@ -48,35 +61,34 @@ namespace UINoesis
 		Noesis::GUI::SetFontFallbacks(fonts, 3);
 		Noesis::GUI::SetFontDefaultProperties(15.0f, Noesis::FontWeight_Normal, Noesis::FontStretch_Normal, Noesis::FontStyle_Normal);
 
-		if (CreateView() == false)
-		{
-			mu_error("failed to create noesisgui view");
-			return false;
-		}
-
 		if (CreateDevice() == false)
 		{
 			mu_error("failed to create noesisgui device");
 			return false;
 		}
 
+		Context = Noesis::MakePtr<NGApplicationContext>();
+
 		return true;
 	}
 
 	void Destroy()
 	{
-		if (Device) Device.Reset();
-		if (View)
-		{
-			View->GetRenderer()->Shutdown();
-			View.Reset();
-		}
+		if (View && View->GetRenderer() != nullptr) View->GetRenderer()->Shutdown();
+		Device.Reset();
+		View.Reset();
+		Context.Reset();
 		Noesis::GUI::Shutdown();
 	}
 
-	const mu_boolean CreateView()
+	NGApplicationContext *GetContext()
 	{
-		Noesis::Ptr<Noesis::FrameworkElement> xaml = Noesis::GUI::LoadXaml<Noesis::FrameworkElement>("main.xaml");
+		return Context.GetPtr();
+	}
+
+	const mu_boolean CreateView(const mu_utf8string filename)
+	{
+		Noesis::Ptr<Noesis::FrameworkElement> xaml = Noesis::GUI::LoadXaml<Noesis::FrameworkElement>(filename.c_str());
 		if (!xaml)
 		{
 			mu_error("failed to load xaml");
@@ -95,8 +107,17 @@ namespace UINoesis
 
 		View->SetFlags(Noesis::RenderFlags_PPAA | Noesis::RenderFlags_LCD);
 		View->SetSize(swapchainDesc.Width, swapchainDesc.Height);
+		View->GetRenderer()->Init(Device);
+		View->GetContent()->SetDataContext(Context.GetPtr());
+		UpdateTime = 0.0;
+		View->Update(UpdateTime);
 
 		return true;
+	}
+
+	Noesis::IView *GetView()
+	{
+		return View.GetPtr();
 	}
 
 	const mu_boolean CreateDevice()
@@ -107,15 +128,21 @@ namespace UINoesis
 			mu_error("failed to create device");
 			return false;
 		}
-
-		View->GetRenderer()->Init(Device);
 		
 		return true;
 	}
 
+	void ResetDeviceShaders()
+	{
+		if (!Device) return;
+		auto *device = static_cast<DERenderDevice*>(Device.GetPtr());
+		device->ResetShaders();
+	}
+
 	void Update()
 	{
-		View->Update(MUState::GetWorldTime() / 1000.0);
+		UpdateTime += static_cast<mu_double>(MUState::GetElapsedTime());
+		View->Update(UpdateTime / 1000.0);
 	}
 
 	void RenderOffscreen()
@@ -200,7 +227,7 @@ namespace UINoesis
 					);
 				}
 			}
-			return true;
+			break;
 
 		case SDL_TEXTINPUT:
 			{
@@ -216,7 +243,7 @@ namespace UINoesis
 					View->KeyDown(key);
 				}
 			}
-			return true;
+			break;
 
 		case SDL_KEYUP:
 			{
@@ -226,7 +253,7 @@ namespace UINoesis
 					View->KeyUp(key);
 				}
 			}
-			return true;
+			break;
 
 		case SDL_FINGERMOTION:
 			{
@@ -236,7 +263,7 @@ namespace UINoesis
 				mu_int32 y = static_cast<mu_int32>(h * event->tfinger.y);
 				View->TouchMove(x, y, event->tfinger.fingerId);
 			}
-			return true;
+			break;
 
 		case SDL_FINGERDOWN:
 			{
@@ -246,7 +273,7 @@ namespace UINoesis
 				mu_int32 y = static_cast<mu_int32>(h * event->tfinger.y);
 				View->TouchDown(x, y, event->tfinger.fingerId);
 			}
-			return true;
+			break;
 
 		case SDL_FINGERUP:
 			{
@@ -256,7 +283,7 @@ namespace UINoesis
 				mu_int32 y = static_cast<mu_int32>(h * event->tfinger.y);
 				View->TouchUp(x, y, event->tfinger.fingerId);
 			}
-			return true;
+			break;
 		}
 
 		return false;

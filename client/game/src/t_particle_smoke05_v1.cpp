@@ -36,7 +36,7 @@ TParticleSmoke05V1::TParticleSmoke05V1()
 
 void TParticleSmoke05V1::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TParticleSmoke05V1::Create(entt::registry &registry, const NParticleData &data)

@@ -39,7 +39,7 @@ TParticleBubbleV0::TParticleBubbleV0()
 
 void TParticleBubbleV0::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TParticleBubbleV0::Create(entt::registry &registry, const NParticleData &data)

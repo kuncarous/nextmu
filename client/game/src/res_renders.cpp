@@ -52,7 +52,7 @@ namespace MURendersManager
 
 			NRender render;
 			render.Id = id;
-			render.Model = MUResourcesManager::GetModel(model);
+			render.Model = MUResourcesManager::GetResourcesManager()->GetModel(model);
 			render.IsLinked = jrender["is_linked"].get<mu_boolean>();
 
 			if (jrender.contains("animations"))

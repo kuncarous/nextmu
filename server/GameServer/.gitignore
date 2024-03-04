@@ -1,3 +1,7 @@
+/.vs
 /GameServer.qmlproject.user
 /GameServer.qmlproject.qtds
 /CMakeLists.txt.user
+/out
+/CMakePresets.json
+/CMakeUserPresets.json

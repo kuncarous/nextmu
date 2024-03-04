@@ -17,7 +17,7 @@ constexpr mu_uint32 MaxBones = 200;
 struct NModelTexture
 {
 	NTextureAttachmentType Type = NInvalidAttachment;
-	std::unique_ptr<NGraphicsTexture> Texture;
+	NGraphicsTexturePtr Texture;
 };
 
 class NModel

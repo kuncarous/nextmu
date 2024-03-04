@@ -35,7 +35,7 @@ TParticleBlueBlurV1::TParticleBlueBlurV1()
 
 void TParticleBlueBlurV1::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TParticleBlueBlurV1::Create(entt::registry &registry, const NParticleData &data)

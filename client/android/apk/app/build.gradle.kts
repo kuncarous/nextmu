@@ -17,14 +17,16 @@ android {
         versionName = "0.0.1"
         externalNativeBuild {
             cmake {
-                arguments("-DCMAKE_VERBOSE_MAKEFILE=1")
+                arguments(
+                    "-DCMAKE_VERBOSE_MAKEFILE=1"
+                )
             }
         }
     }
 
     externalNativeBuild {
         cmake {
-            path("../../../../CMakeLists.txt")
+            path("../../../CMakeLists.txt")
             version = "3.28.1"
         }
     }

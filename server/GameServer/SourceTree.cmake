@@ -126,6 +126,7 @@ set(
 set(
     G_LOGGER_SOURCE
 	src/mu_logger.cpp
+	src/n_logger_message.cpp
 	src/n_logger_console.cpp
 	src/n_logger_file.cpp
 )
@@ -176,3 +177,87 @@ set(
 
 source_group("UI\\Events\\Console" FILES ${G_UIEVENT_CONSOLE_INCLUDE})
 list(APPEND GAMESERVER_INCLUDE ${G_UIEVENT_CONSOLE_INCLUDE})
+
+# Threading Group
+set(
+    G_THREADING_INCLUDE
+	include/mu_threadsmanager.h
+	include/t_threading_helper.h
+)
+
+set(
+    G_THREADING_SOURCE
+	src/mu_threadsmanager.cpp
+	src/t_threading_helper.cpp
+)
+
+source_group("Threading" FILES ${G_THREADING_SOURCE} ${G_THREADING_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_THREADING_INCLUDE})
+list(APPEND GAMESERVER_SOURCE ${G_THREADING_SOURCE})
+
+# Math Group
+set(
+    G_MATH_INCLUDE
+	include/mu_math_aabb.h
+	include/mu_math_obb.h
+	include/mu_math.h
+)
+
+set(
+    G_MATH_SOURCE
+	src/mu_math_aabb.cpp
+	src/mu_math_obb.cpp
+)
+
+source_group("Math" FILES ${G_MATH_SOURCE} ${G_MATH_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_MATH_INCLUDE})
+list(APPEND GAMESERVER_SOURCE ${G_MATH_SOURCE})
+
+# Models Group
+set(
+    G_MODELS_INCLUDE
+	include/mu_model_mesh.h
+	include/mu_model_skeleton.h
+	include/mu_model.h
+	include/t_model_enums.h
+)
+
+set(
+    G_MODELS_SOURCE
+	src/mu_model.cpp
+)
+
+source_group("Models" FILES ${G_MODELS_SOURCE} ${G_MODELS_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_MODELS_INCLUDE})
+list(APPEND GAMESERVER_SOURCE ${G_MODELS_SOURCE})
+
+# Resources Group
+set(
+    G_RESOURCES_INCLUDE
+	include/mu_resourcesmanager.h
+)
+
+set(
+    G_RESOURCES_SOURCE
+	src/mu_resourcesmanager.cpp
+)
+
+source_group("Resources" FILES ${G_RESOURCES_SOURCE} ${G_RESOURCES_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_RESOURCES_INCLUDE})
+list(APPEND GAMESERVER_SOURCE ${G_RESOURCES_SOURCE})
+
+# Utils Group
+set(
+    G_UTILS_INCLUDE
+	include/mu_crypt.h
+	include/mu_resizablequeue.h
+)
+
+set(
+    G_UTILS_SOURCE
+	src/mu_crypt.cpp
+)
+
+source_group("Utils" FILES ${G_UTILS_SOURCE} ${G_UTILS_INCLUDE})
+list(APPEND GAMESERVER_INCLUDE ${G_UTILS_INCLUDE})
+list(APPEND GAMESERVER_SOURCE ${G_UTILS_SOURCE})

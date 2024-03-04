@@ -35,7 +35,7 @@ TParticleTrueFireRedV5::TParticleTrueFireRedV5()
 
 void TParticleTrueFireRedV5::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TParticleTrueFireRedV5::Create(entt::registry &registry, const NParticleData &data)

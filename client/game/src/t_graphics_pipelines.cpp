@@ -1,6 +1,7 @@
 #include "mu_precompiled.h"
 #include "t_graphics_pipelines.h"
 #include "mu_graphics.h"
+#include "mu_resourcesmanager.h"
 
 typedef std::map<NDynamicPipelineHash, NPipelineState> DynamicPipelineMap;
 typedef std::map<NFixedPipelineHash, DynamicPipelineMap> FixedPipelineMap;
@@ -27,7 +28,7 @@ const NPipelineBlendHash CalculateBlendHash(
 
 NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const NDynamicPipelineState &dynamicState)
 {
-    auto shader = GetShader(fixedState.CombinedShader);
+    auto shader = MUResourcesManager::GetResourcesManager()->GetShader(fixedState.CombinedShader);
 
     Diligent::GraphicsPipelineStateCreateInfo createInfo;
     auto &graphicsInfo = createInfo.GraphicsPipeline;
@@ -98,7 +99,7 @@ NPipelineState *CreatePipelineState(const NFixedPipelineState &fixedState, const
 
         if (shader->Resource != nullptr)
         {
-            const auto resource = shader->Resource;
+            const auto *resource = shader->Resource;
             auto &resourceLayout = pipelineStateDesc.ResourceLayout;
             resourceLayout.NumVariables = static_cast<mu_uint32>(resource->Variables.size());
             resourceLayout.Variables = resource->Variables.data();

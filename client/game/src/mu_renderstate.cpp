@@ -3,7 +3,7 @@
 #include "mu_environment.h"
 #include "mu_camera.h"
 #include "mu_graphics.h"
-#include "mu_textureattachments.h"
+#include "mu_resourcesmanager.h"
 #include <MapHelper.hpp>
 
 namespace MURenderState
@@ -30,6 +30,7 @@ namespace MURenderState
 		const auto immediateContext = MUGraphics::GetImmediateContext();
 
 		// Camera Uniform
+		if (CameraUniform.RawPtr() == nullptr)
 		{
 			Diligent::BufferDesc bufferDesc;
 			bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
@@ -51,6 +52,7 @@ namespace MURenderState
 		}
 
 		// Light Uniform
+		if (LightUniform.RawPtr() == nullptr)
 		{
 			Diligent::BufferDesc bufferDesc;
 			bufferDesc.Usage = Diligent::USAGE_DYNAMIC;
@@ -71,7 +73,7 @@ namespace MURenderState
 			*uniform = Diligent::LightAttribs();
 		}
 
-		TextureAttachments.resize(MUTextureAttachments::GetAttachmentsCount(), nullptr);
+		TextureAttachments.resize(MUResourcesManager::GetResourcesManager()->GetAttachmentsCount(), nullptr);
 
 		return true;
 	}

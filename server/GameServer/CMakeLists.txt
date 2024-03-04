@@ -3,10 +3,25 @@ cmake_minimum_required(VERSION 3.21.1)
 option(LINK_INSIGHT "Link Qt Insight Tracker library" ON)
 option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
 
-project(GameServerApp LANGUAGES CXX)
+set(CMAKE_ANDROID_STL_TYPE c++_static)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(BUILD_SHARED_LIBS OFF)
+list(APPEND CMAKE_PROJECT_TOP_LEVEL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../conan_provider.cmake")
 
-set(CMAKE_AUTOMOC ON)
+project(GameServerApp LANGUAGES CXX)
+if (MSVC)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/EHsc>)
+else()
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fexceptions>)
+endif()
+
+include(../../SetPlatform.cmake)
+include(Dependencies.cmake)
+include(SourceTree.cmake)
+
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 6.2 REQUIRED COMPONENTS Core Gui Qml Quick)
 
@@ -15,12 +30,21 @@ if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
 endif()
 
 set(IS_CLIENT_SHARED "0")
-include(../../SetPlatform.cmake)
-include(Dependencies.cmake)
-include(SourceTree.cmake)
 add_subdirectory(../../shared ${CMAKE_CURRENT_BINARY_DIR}/shared)
 
-qt_add_executable(GameServerApp ${GAMESERVER_SOURCE} ${GAMESERVER_INCLUDE})
+set(MACOSX_BUNDLE_ICON_FILE icon.icns)
+
+if(WIN32)
+    set(GAMESERVER_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/resources/mu_main.rc")
+elseif(APPLE)
+    set(GAMESERVER_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/resources/icon.icns")
+    set_source_files_properties(
+            ${GAMESERVER_RESOURCES} PROPERTIES
+           MACOSX_PACKAGE_LOCATION "Resources"
+    )
+endif()
+
+qt_add_executable(GameServerApp WIN32 MACOSX_BUNDLE ${GAMESERVER_SOURCE} ${GAMESERVER_INCLUDE} ${GAMESERVER_RESOURCES})
 
 list(
     APPEND PRIVATE_INCLUDES
@@ -35,14 +59,16 @@ qt_add_resources(GameServerApp "configuration"
     PREFIX "/"
     FILES
         qtquickcontrols2.conf
-        icon.ico
+        resources/icon.ico
+        resources/icon.icns
 )
 
 target_link_libraries(GameServerApp PRIVATE
     Shared
-    glm
+    glm::glm
     EnTT
     cryptopp
+    gRPC::grpc++
     Qt6::Core
     Qt6::Gui
     Qt6::Qml
@@ -69,3 +95,14 @@ install(TARGETS GameServerApp
 # make IDEs aware of the QML import path
 set(QML_IMPORT_PATH ${PROJECT_BINARY_DIR}/qml CACHE PATH
     "Path to the custom QML components defined by the project")
+
+qt_generate_deploy_qml_app_script(
+    TARGET GameServerApp
+    OUTPUT_SCRIPT deploy_script
+    NO_COMPILER_RUNTIME
+    NO_UNSUPPORTED_PLATFORM_ERROR
+    MACOS_BUNDLE_POST_BUILD
+)
+
+install(TARGETS GameServerApp DESTINATION bin)
+install(SCRIPT deploy_script)

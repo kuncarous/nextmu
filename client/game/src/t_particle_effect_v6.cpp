@@ -35,7 +35,7 @@ TParticleEffectV6::TParticleEffectV6()
 
 void TParticleEffectV6::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TParticleEffectV6::Create(entt::registry &registry, const NParticleData &data)

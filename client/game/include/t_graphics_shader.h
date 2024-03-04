@@ -16,7 +16,4 @@ struct NCombinedShader
 typedef mu_uint16 mu_shader;
 constexpr mu_shader NInvalidShader = NInvalidUInt16;
 
-mu_shader RegisterShader(NCombinedShader shader);
-NCombinedShader *GetShader(const mu_shader shader);
-
 #endif

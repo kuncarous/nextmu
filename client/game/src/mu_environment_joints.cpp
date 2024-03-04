@@ -1,7 +1,7 @@
 #include "mu_precompiled.h"
 #include "mu_environment_joints.h"
-#include "mu_resourcesmanager.h"
 #include "mu_threadsmanager.h"
+#include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
 #include "t_joint_base.h"
 #include "t_joint_entity.h"
@@ -13,7 +13,7 @@ const mu_boolean NJoints::Initialize()
 {
 	const auto device = MUGraphics::GetDevice();
 
-	RenderBuffer.Program = MUResourcesManager::GetProgram("joint");
+	RenderBuffer.Program = MUResourcesManager::GetResourcesManager()->GetProgram("joint");
 	if (RenderBuffer.Program == NInvalidShader)
 	{
 		return false;

@@ -59,6 +59,7 @@ namespace MUInput
 	const mu_boolean IsMousePressed(mu_int32 index);
 	const mu_boolean IsMouseDoublePressed(mu_int32 index);
 	const mu_boolean IsMousePressing(mu_uint32 index);
+	const mu_boolean IsAnyMousePressing();
 
 	void AddMouseWheel(mu_int32 wheel);
 	const mu_float GetMouseWheel();
@@ -67,6 +68,7 @@ namespace MUInput
 	void SetKeyUp(mu_uint32 Key);
 	mu_boolean GetKeyState(mu_uint32 Key);
 	const mu_boolean IsKeyPressing(const mu_uint32 key);
+	const mu_boolean IsAnyKeyPressing();
 	const mu_boolean IsShiftPressing();
 
 	template<typename T>

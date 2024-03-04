@@ -13,6 +13,8 @@
 class MCryptoCipherBase
 {
 public:
+    virtual ~MCryptoCipherBase() {}
+
 	virtual bool Initialize(const mu_uint8 *key, const mu_uint32 keylength) = 0;
 	virtual mu_uint32 Encrypt(const mu_uint8 *input, const mu_uint32 inputLength, mu_uint8 *output) = 0;
 	virtual mu_uint32 Decrypt(const mu_uint8 *input, const mu_uint32 inputLength, mu_uint8 *output) = 0;

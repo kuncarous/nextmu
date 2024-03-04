@@ -132,7 +132,7 @@ namespace MUTextures
 		return true;
 	}
 
-	std::unique_ptr<NGraphicsTexture> Load(mu_utf8string path, const Diligent::SamplerDesc &samplerDesc)
+	NGraphicsTexturePtr Load(mu_utf8string path, const Diligent::SamplerDesc &samplerDesc)
 	{
 		TextureInfo info;
 		FIBITMAP *bitmap = nullptr;

@@ -6,6 +6,7 @@
 // This doesn't change only the layout of glm::quat so shouldn't be used
 //#define GLM_FORCE_QUAT_DATA_XYZW 1
 #define GLM_FORCE_QUAT_DATA_WXYZ 1 // vcpkg glm requires this to work as before
+#define GLM_ENABLE_EXPERIMENTAL 1
 
 #include "shared_precompiled.h"
 

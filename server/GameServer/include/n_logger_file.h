@@ -24,10 +24,15 @@ public:
 
 public:
 	template<typename... Args>
-    void Write(const mu_utf8string type, const mu_char *format, const Args &... args)
-	{
-        Write(std::make_unique<NLogMessage>(type, fmt::format(format, args...)));
+    void Write(const mu_utf8string type, fmt::format_string<Args...> format, Args&&... args)
+    {
+        Write(std::make_unique<NLogMessage>(type, fmt::format(format, std::forward<Args>(args)...).c_str()));
 	}
+
+    void Write(const mu_utf8string type, const mu_char *message)
+    {
+        Write(std::make_unique<NLogMessage>(type, message));
+    }
 
 private:
     mu_boolean HasLogs;

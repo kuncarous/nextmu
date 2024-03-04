@@ -5,8 +5,13 @@ project(Shared)
 set(
     INCLUDE
 	include/shared_binaryreader.h
+	include/shared_objectid.h
+	include/shared_uuid.h
 	include/shared_enums.h
 	include/shared_json.h
+	include/shared_crc32.h
+	include/shared_memorybuffer.h
+	include/shared_compression.h
 	include/shared_operatingsystem_android.h
 	include/shared_operatingsystem_backend.h
 	include/shared_operatingsystem_disable.h
@@ -72,10 +77,15 @@ endif()
 target_link_libraries(
     Shared
     PUBLIC
-        Boost::algorithm
+        Boost::headers
+        Boost::filesystem
         Boost::serialization
-        fmt
-        nlohmann_json
+        Boost::uuid
+        Boost::regex
+        fmt::fmt
+        nlohmann_json::nlohmann_json
+        fifo_map::fifo_map
+        ZLIB::ZLIB
 )
 if(IS_CLIENT_SHARED GREATER_EQUAL 1)
     target_link_libraries(

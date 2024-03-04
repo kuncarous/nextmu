@@ -1,6 +1,5 @@
 #include "mu_precompiled.h"
 #include "mu_charactersmanager.h"
-#include "mu_textureattachments.h"
 #include "mu_resourcesmanager.h"
 
 namespace MUCharactersManager
@@ -34,6 +33,7 @@ namespace MUCharactersManager
 			return false;
 		}
 
+		auto *resourcesManager = MUResourcesManager::GetResourcesManager();
 		for (const auto &jcharacter : document)
 		{
 			NCharacterClass character;
@@ -54,10 +54,10 @@ namespace MUCharactersManager
 				for (const auto &jattachment : jattachments)
 				{
 					const auto id = jattachment["id"].get<mu_utf8string>();
-					const auto type = MUTextureAttachments::GetAttachmentTypeFromString(id);
+					const auto type = resourcesManager->GetAttachmentTypeFromCRC32(GetAttachmentTypeFromId(id.c_str()));
 					if (type == NInvalidAttachment) continue;
 
-					const auto texture = MUResourcesManager::GetTexture(jattachment["texture"].get<mu_utf8string>());
+					const auto texture = resourcesManager->GetTexture(jattachment["texture"].get<mu_utf8string>());
 					if (texture == nullptr) continue;
 
 					config.Attachments.push_back(
@@ -69,11 +69,11 @@ namespace MUCharactersManager
 				}
 
 				const auto &jbody = jsubClass["body"];
-				if (jbody.contains("head")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Head)] = MUResourcesManager::GetModel(jbody["head"].get<mu_utf8string>());
-				if (jbody.contains("chest")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Chest)] = MUResourcesManager::GetModel(jbody["chest"].get<mu_utf8string>());
-				if (jbody.contains("lower")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Lower)] = MUResourcesManager::GetModel(jbody["lower"].get<mu_utf8string>());
-				if (jbody.contains("arms")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Arms)] = MUResourcesManager::GetModel(jbody["arms"].get<mu_utf8string>());
-				if (jbody.contains("legs")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Legs)] = MUResourcesManager::GetModel(jbody["legs"].get<mu_utf8string>());
+				if (jbody.contains("head")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Head)] = resourcesManager->GetModel(jbody["head"].get<mu_utf8string>());
+				if (jbody.contains("chest")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Chest)] = resourcesManager->GetModel(jbody["chest"].get<mu_utf8string>());
+				if (jbody.contains("lower")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Lower)] = resourcesManager->GetModel(jbody["lower"].get<mu_utf8string>());
+				if (jbody.contains("arms")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Arms)] = resourcesManager->GetModel(jbody["arms"].get<mu_utf8string>());
+				if (jbody.contains("legs")) config.Parts[static_cast<mu_uint32>(CharacterBodyPart::Legs)] = resourcesManager->GetModel(jbody["legs"].get<mu_utf8string>());
 
 				TypeMap.insert(
 					std::make_pair(

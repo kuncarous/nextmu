@@ -33,7 +33,7 @@ namespace MUBBoxRenderer
 	{
 		const auto device = MUGraphics::GetDevice();
 
-		BoundingBoxProgram = MUResourcesManager::GetProgram("boundingbox");
+		BoundingBoxProgram = MUResourcesManager::GetResourcesManager()->GetProgram("boundingbox");
 
 		std::vector<Diligent::StateTransitionDesc> barriers;
 

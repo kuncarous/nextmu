@@ -4,7 +4,6 @@
 #include "shared_binaryreader.h"
 #include "mu_textures.h"
 #include "mu_resourcesmanager.h"
-#include "mu_textureattachments.h"
 #include "mu_graphics.h"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -250,8 +249,8 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 		const auto &settings = document["settings"];
 		if (settings.contains("virtual_meshes"))
 		{
-			const auto program = MUResourcesManager::GetProgram(ProgramDefault);
-			const auto shadowProgram = MUResourcesManager::GetProgram(ProgramDefault + "_shadow");
+			const auto program = MUResourcesManager::GetResourcesManager()->GetProgram(ProgramDefault);
+			const auto shadowProgram = MUResourcesManager::GetResourcesManager()->GetProgram(ProgramDefault + "_shadow");
 
 			const auto &jvirtualMeshes = settings["virtual_meshes"];
 			for (const auto &jmesh : jvirtualMeshes)
@@ -305,11 +304,11 @@ continue_virtualmesh_conditions:
 				{
 					const auto shaderId = jmesh["program"].get<mu_utf8string>();
 
-					const auto program = MUResourcesManager::GetProgram(shaderId);
+					const auto program = MUResourcesManager::GetResourcesManager()->GetProgram(shaderId);
 					if (program != NInvalidShader)
 						settings.Program = program;
 
-					const auto shadowProgram = MUResourcesManager::GetProgram(shaderId + "_shadow");
+					const auto shadowProgram = MUResourcesManager::GetResourcesManager()->GetProgram(shaderId + "_shadow");
 					if (shadowProgram != NInvalidShader)
 						settings.ShadowProgram = shadowProgram;
 				}
@@ -321,10 +320,10 @@ continue_virtualmesh_conditions:
 					settings.ShadowProgram = shadowProgram;
 
 				if (jmesh.contains("vertex_texture"))
-					settings.VertexTexture = MUResourcesManager::GetTexture(jmesh["vertex_texture"].get<mu_utf8string>());
+					settings.VertexTexture = MUResourcesManager::GetResourcesManager()->GetTexture(jmesh["vertex_texture"].get<mu_utf8string>());
 
 				if (jmesh.contains("texture"))
-					settings.Texture = MUResourcesManager::GetTexture(jmesh["texture"].get<mu_utf8string>());
+					settings.Texture = MUResourcesManager::GetResourcesManager()->GetTexture(jmesh["texture"].get<mu_utf8string>());
 
 				if (jmesh.contains("classify"))
 				{
@@ -441,20 +440,20 @@ continue_virtualmesh_light_conditions:
 				{
 					const auto shaderId = jmesh["program"].get<mu_utf8string>();
 
-					const auto program = MUResourcesManager::GetProgram(shaderId);
+					const auto program = MUResourcesManager::GetResourcesManager()->GetProgram(shaderId);
 					if (program != NInvalidShader)
 						settings.Program = program;
 
-					const auto shadowProgram = MUResourcesManager::GetProgram(shaderId + "_shadow");
+					const auto shadowProgram = MUResourcesManager::GetResourcesManager()->GetProgram(shaderId + "_shadow");
 					if (shadowProgram != NInvalidShader)
 						settings.ShadowProgram = shadowProgram;
 				}
 
 				if (jmesh.contains("vertex_texture"))
-					settings.VertexTexture = MUResourcesManager::GetTexture(jmesh["vertex_texture"].get<mu_utf8string>());
+					settings.VertexTexture = MUResourcesManager::GetResourcesManager()->GetTexture(jmesh["vertex_texture"].get<mu_utf8string>());
 
 				if (jmesh.contains("texture"))
-					settings.Texture = MUResourcesManager::GetTexture(jmesh["texture"].get<mu_utf8string>());
+					settings.Texture = MUResourcesManager::GetResourcesManager()->GetTexture(jmesh["texture"].get<mu_utf8string>());
 
 				if (jmesh.contains("classify"))
 				{
@@ -655,8 +654,8 @@ const mu_boolean NModel::LoadModel(mu_utf8string path)
 	Animations.resize(numActions);
 	BoundingBoxes.resize(numBones);
 
-	const auto program = MUResourcesManager::GetProgram(ProgramDefault);
-	const auto shadowProgram = MUResourcesManager::GetProgram(ProgramDefault + "_shadow");
+	const auto program = MUResourcesManager::GetResourcesManager()->GetProgram(ProgramDefault);
+	const auto shadowProgram = MUResourcesManager::GetResourcesManager()->GetProgram(ProgramDefault + "_shadow");
 
 	mu_char filename[32 + 1] = {};
 	for (mu_uint32 m = 0; m < numMeshes; ++m)
@@ -931,6 +930,7 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 		}
 	}
 
+	auto *resourcesManager = MUResourcesManager::GetResourcesManager();
 	const mu_uint32 numMeshes = static_cast<mu_uint32>(Meshes.size());
 	Textures.resize(numMeshes);
 	for (mu_uint32 m = 0; m < numMeshes; ++m)
@@ -944,49 +944,49 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 		if (filename.starts_with("ski") || filename.starts_with("level_"))
 		{
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("skin"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("skin")),
 			};
 		}
 		else if (filenameLC.starts_with("hqskin3"))
 		{
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("skin_hq_alt2"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("skin_hq_alt2")),
 			};
 		}
 		else if (filenameLC.starts_with("hqskin2"))
 		{
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("skin_hq_alt"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("skin_hq_alt")),
 			};
 		}
 		else if (filenameLC.starts_with("hqskin") || filenameLC.starts_with("hqlevel_"))
 		{
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("skin_hq"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("skin_hq")),
 			};
 		}
 		else if (filename.starts_with("hid"))
 		{
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("hide"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("hide")),
 			};
 		}
 		else if (filename.starts_with("hair"))
 		{
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("hair"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("hair")),
 			};
 		}
 		else if (filenameLC.starts_with("hqhair_"))
 		{
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("hair_hq"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("hair_hq")),
 			};
 		}
 		else if (filename.starts_with("face_"))
 		{
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("face"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("face")),
 			};
 		}
 		else
@@ -1019,7 +1019,7 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 			}
 
 			filename = path + subPath + filename;
-			std::unique_ptr<NGraphicsTexture> texture = MUTextures::Load(
+			NGraphicsTexturePtr texture = MUTextures::Load(
 				filename,
 				MUTextures::CalculateSamplerFlags(filter, wrap)
 			);
@@ -1030,7 +1030,7 @@ const mu_boolean NModel::LoadTextures(const mu_utf8string path, const nlohmann::
 			}
 
 			Textures[m] = {
-				.Type = MUTextureAttachments::GetAttachmentTypeFromString("normal"),
+				.Type = resourcesManager->GetAttachmentTypeFromCRC32(GenerateAttachmentTypeAtCompileTime("normal")),
 				.Texture = std::move(texture),
 			};
 		}

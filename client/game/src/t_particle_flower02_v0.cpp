@@ -35,7 +35,7 @@ TParticleFlower02V0::TParticleFlower02V0()
 
 void TParticleFlower02V0::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TParticleFlower02V0::Create(entt::registry &registry, const NParticleData &data)

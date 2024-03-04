@@ -7,9 +7,11 @@ namespace MUInput
 	mu_float MouseWheel = 0.0f;
 	mu_uint8 MouseState[MOUSE_BUTTON_MAX] = {};
 	mu_uint8 MouseUsed[MOUSE_BUTTON_MAX] = {};
+	mu_uint8 MouseFastCmp[MOUSE_BUTTON_MAX] = {};
 
 	mu_boolean KeyPressed[KEYBOARD_KEY_SIZE] = {};
-	mu_uint8 KeyState[KEYBOARD_KEY_SIZE] = {};
+	mu_boolean KeyState[KEYBOARD_KEY_SIZE] = {};
+	mu_boolean KeyFastCmp[KEYBOARD_KEY_SIZE] = {};
 
 	void ShowCursor(mu_boolean show)
 	{
@@ -59,6 +61,11 @@ namespace MUInput
 		return MouseState[index] != MOUSE_STATE_NONE;
 	}
 
+	const mu_boolean IsAnyMousePressing()
+	{
+		return mu_memcmp(MouseFastCmp, MouseState, sizeof(MouseFastCmp)) != 0;
+	}
+
 	void AddMouseWheel(mu_int32 wheel)
 	{
 		MouseWheel += static_cast<mu_float>(wheel);
@@ -72,7 +79,7 @@ namespace MUInput
 	void SetKeyDown(mu_uint32 Key)
 	{
 		KeyPressed[Key] = true;
-		KeyState[Key] = 0;
+		KeyState[Key] = false;
 	}
 
 	void SetKeyUp(mu_uint32 Key)
@@ -88,6 +95,11 @@ namespace MUInput
 	const mu_boolean IsKeyPressing(const mu_uint32 key)
 	{
 		return KeyPressed[key] == true;
+	}
+
+	const mu_boolean IsAnyKeyPressing()
+	{
+		return mu_memcmp(KeyFastCmp, KeyPressed, sizeof(KeyFastCmp)) != 0;
 	}
 
 	const mu_boolean IsShiftPressing()

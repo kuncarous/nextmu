@@ -3,6 +3,14 @@
 
 #pragma once
 
+namespace NLogType
+{
+    extern const mu_utf8string Message;
+    extern const mu_utf8string Success;
+    extern const mu_utf8string Warning;
+    extern const mu_utf8string Error;
+};
+
 class NLogMessage
 {
 public:

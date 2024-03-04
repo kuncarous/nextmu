@@ -27,7 +27,13 @@
 #include "shared_standardtypes.h"
 #include "shared_operatingsystem_io.h"
 #include "shared_operatingsystem_backend.h"
+#include "shared_objectid.h"
+#include "shared_uuid.h"
+#include "shared_objectid.h"
 #include "shared_json.h"
+#include "shared_crc32.h"
+#include "shared_memorybuffer.h"
+#include "shared_compression.h"
 
 #include "shared_enums.h"
 

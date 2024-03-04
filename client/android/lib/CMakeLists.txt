@@ -15,17 +15,21 @@ target_link_libraries(
     NextMU
     PRIVATE
         Game
-        Boost::algorithm
+        Boost::headers
+        Boost::filesystem
         Boost::serialization
-        fmt
+        Boost::uuid
+        Boost::regex
+        fmt::fmt
         SDL2
-        nlohmann_json
+        nlohmann_json::nlohmann_json
+        fifo_map::fifo_map
 )
 target_precompile_headers(NextMU PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/stdafx.h)
 target_include_directories(NextMU PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(UI_LIBRARY STREQUAL "NoesisGUI")
-    include(${CMAKE_CURRENT_SOURCE_DIR}/../../../NoesisGUI.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../NoesisGUI.cmake)
     add_custom_command(
         TARGET NextMU POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy

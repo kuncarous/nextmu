@@ -172,7 +172,7 @@ void NCharacters::PreRender(const NRenderSettings &renderSettings)
 					{
 						renderState.ShadowVisible = NInvalidUInt8;
 						mu_uint32 shadowIndex = 0;
-						for (shadowIndex; shadowIndex < renderSettings.ShadowFrustumsNum; ++shadowIndex)
+						for (; shadowIndex < renderSettings.ShadowFrustumsNum; ++shadowIndex)
 						{
 							const auto isVisible = Diligent::GetBoxVisibility(
 								renderSettings.ShadowFrustums[shadowIndex],
@@ -546,7 +546,7 @@ const entt::entity NCharacters::AddOrFind(
 		entity,
 		NEntity::NAttachment{
 			.Character = (character.Type == CharacterType::Character ? MUCharactersManager::GetConfiguration(character.CharacterType.Class, character.CharacterType.SubClass) : nullptr),
-			.Base = MUResourcesManager::GetModel("player_ani"),
+			.Base = MUResourcesManager::GetResourcesManager()->GetModel("player_ani"),
 		}
 	);
 	

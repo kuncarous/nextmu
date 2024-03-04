@@ -1,7 +1,7 @@
 #include "mu_precompiled.h"
 #include "mu_environment_particles.h"
-#include "mu_resourcesmanager.h"
 #include "mu_threadsmanager.h"
+#include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
 #include "mu_renderstate.h"
 #include "t_particle_base.h"
@@ -14,7 +14,7 @@ const mu_boolean NParticles::Initialize()
 {
 	const auto device = MUGraphics::GetDevice();
 
-	RenderBuffer.Program = MUResourcesManager::GetProgram("particle");
+	RenderBuffer.Program = MUResourcesManager::GetResourcesManager()->GetProgram("particle");
 	if (RenderBuffer.Program == NInvalidShader)
 	{
 		return false;
@@ -437,5 +437,5 @@ void NParticles::Render()
 
 mu_size NParticles::GetCount()
 {
-	return Registry.storage<entt::entity>().in_use();
+	return Registry.storage<entt::entity>().free_list();
 }

@@ -67,9 +67,6 @@ class NRootContext : public QObject
     Q_PROPERTY(QQmlListProperty<NConsoleMessage> messages READ getMessages NOTIFY messagesChanged)
 
 public:
-    virtual ~NRootContext() override;
-
-public:
     QString getPerformanceStatistics() const;
     void setPerformanceStatistics(const QString &value);
     QQmlListProperty<NConsoleMessage> getMessages();

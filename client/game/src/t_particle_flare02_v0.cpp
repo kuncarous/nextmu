@@ -35,7 +35,7 @@ TParticleFlare02V0::TParticleFlare02V0()
 
 void TParticleFlare02V0::Initialize()
 {
-	texture = MUResourcesManager::GetTexture(TextureID);
+	texture = MUResourcesManager::GetResourcesManager()->GetTexture(TextureID);
 }
 
 void TParticleFlare02V0::Create(entt::registry &registry, const NParticleData &data)
