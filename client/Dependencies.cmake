@@ -2,6 +2,16 @@
 include(../CPM.cmake)
 include(../SetPlatform.cmake)
 
+set(DEPS_MODULE_PATH
+    "${CMAKE_BINARY_DIR}/DEPS_modules"
+    CACHE INTERNAL ""
+)
+# remove old modules
+file(REMOVE_RECURSE ${DEPS_MODULE_PATH})
+file(MAKE_DIRECTORY ${DEPS_MODULE_PATH})
+# locally added CPM modules should override global packages
+set(CMAKE_MODULE_PATH "${DEPS_MODULE_PATH};${CMAKE_MODULE_PATH}")
+
 set(BUILD_TESTING_BACKUP ${BUILD_TESTING})
 set(BUILD_TESTING OFF)
 
@@ -33,7 +43,7 @@ target_include_directories(zlibstatic PUBLIC ${ZLIB_INCLUDE_DIRS})
 export(TARGETS zlibstatic FILE Findzlibstatic.cmake) 
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 list(APPEND THIRD_PARTY_TARGETS zlibstatic)
-file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/ZLIB-extra.cmake
+file(WRITE ${DEPS_MODULE_PATH}/ZLIB-extra.cmake
         [=[
   get_target_property(ZLIB_INCLUDE_DIRS ZLIB::ZLIB INCLUDE_DIRECTORIES)
   include_directories("${ZLIB_INCLUDE_DIRS}")
@@ -69,7 +79,7 @@ get_target_property(PNG_INCLUDE_DIRS png_static INCLUDE_DIRECTORIES)
 target_include_directories(png_static PUBLIC ${PNG_INCLUDE_DIRS})
 add_library(PNG::PNG ALIAS png_static)
 list(APPEND THIRD_PARTY_TARGETS png_static)
-file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/PNG-extra.cmake
+file(WRITE ${DEPS_MODULE_PATH}/PNG-extra.cmake
         [=[
   get_target_property(PNG_INCLUDE_DIRS PNG::PNG INCLUDE_DIRECTORIES)
   include_directories("${PNG_INCLUDE_DIRS}")
