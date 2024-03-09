@@ -7,9 +7,11 @@ Special thanks to our donators and sponsors, as a way to express our gratitude w
 <a href="https://www.mudevs.com"><img src="https://i.ibb.co/FbPKs0n/logo.png" height="140px" alt="logo" border="0"></a>
 
 # Donations
-If you want to donate, press the button below
+If you want to donate, you can donate through any platform listed below
 
 <a href="https://www.buymeacoffee.com/nextmu" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
+<a href='https://ko-fi.com/X8X2TY8T1' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 # Discord
 If you want to join our discord, press the button below
