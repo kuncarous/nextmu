@@ -12,6 +12,5 @@ void AppleLogToConsole(const mu_char *message)
 
 int main(int argc, char* argv[])
 {
-	Main();
-	return 0;
+	return Main(argc, argv);
 }

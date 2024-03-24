@@ -13,10 +13,10 @@
 
 NController::NController(const NEnvironment *environment) : Environment(environment), Camera(new_nothrow NCamera()), Character(entt::null)
 {
-	auto &camera = *Camera;
+	/*auto &camera = *Camera;
 	camera.SetMode(NCameraMode::Directional);
 	camera.SetEye(glm::vec3(123.0f * TerrainScale, 123.0f * TerrainScale, 1400.0f));
-	camera.SetAngle(glm::vec3(glm::radians(30.0f), glm::radians(107.0f), glm::radians(0.0f)));
+	camera.SetAngle(glm::vec3(glm::radians(30.0f), glm::radians(107.0f), glm::radians(0.0f)));*/
 }
 
 NController::~NController()
@@ -46,7 +46,7 @@ void NController::Update()
 	auto camera = GetCamera();
 	glm::mat4 view = camera->GetView();
 	glm::mat4 shadowView = camera->GetShadowView();
-	constexpr mu_float HomogeneousFar = 5000.0f;
+	constexpr mu_float HomogeneousFar = 15000.0f;
 	constexpr mu_float NonHomogeneousFar = 50000.0f;
 	const mu_float aspect = static_cast<mu_float>(windowWidth) / static_cast<mu_float>(windowHeight);
 	const mu_boolean isGL = (

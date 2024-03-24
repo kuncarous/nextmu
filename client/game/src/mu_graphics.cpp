@@ -394,13 +394,13 @@ namespace MUGraphics
             Diligent::RENDER_DEVICE_TYPE_GLES,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
-			Diligent::RENDER_DEVICE_TYPE_D3D11,
+			Diligent::RENDER_DEVICE_TYPE_D3D12,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_ANDROID || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 			Diligent::RENDER_DEVICE_TYPE_VULKAN,
 #endif
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
-			Diligent::RENDER_DEVICE_TYPE_D3D12,
+			Diligent::RENDER_DEVICE_TYPE_D3D11,
 #endif
 #if (NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS) && 0
             Diligent::RENDER_DEVICE_TYPE_METAL,
@@ -501,21 +501,16 @@ namespace MUGraphics
 
 	void IncreaseTransactions()
 	{
-#if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS && NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
 		++TransactionsCount;
-#endif
 	}
 
     void ClearTransactions()
     {
-#if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS && NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
         TransactionsCount = 0u;
-#endif
     }
 
 	void FlushContext(Diligent::ISwapChain *swapchain)
 	{
-#if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS && NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
 		if (TransactionsCount == 0u) return;
 		if (
             DeviceType == Diligent::RENDER_DEVICE_TYPE_D3D12 ||
@@ -524,15 +519,12 @@ namespace MUGraphics
             )
             swapchain->Present(0);
 		ClearTransactions();
-#endif
 	}
 
 	constexpr mu_uint32 MaxTransactionsBeforeForceFlush = 100u;
 	void CheckIfRequireFlushContext(Diligent::ISwapChain *swapchain)
 	{
-#if NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_MACOS && NEXTMU_OPERATING_SYSTEM != NEXTMU_OS_IOS
 		if (TransactionsCount < MaxTransactionsBeforeForceFlush) return;
 		FlushContext(swapchain);
-#endif
 	}
 };

@@ -56,8 +56,6 @@ if (IS_CLIENT_SHARED GREATER_EQUAL 1)
 
     if (UI_LIBRARY STREQUAL "NoesisGUI")
         target_compile_definitions(Shared PUBLIC -DNEXTMU_USE_NOESISGUI=1)
-    elseif (UI_LIBRARY STREQUAL "RmlUI")
-        target_compile_definitions(Shared PUBLIC -DNEXTMU_USE_RMLUI=1)
     endif()
 endif()
 

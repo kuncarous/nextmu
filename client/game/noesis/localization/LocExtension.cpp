@@ -91,6 +91,11 @@ namespace
 			return Evaluate(targetProperty, resourceKey, resources);
 		}
 
+		void InvalidateResourceByDependencyProperty(const DependencyProperty *targetProperty, const String bindingKey) const
+		{
+			mTargetObject->SetValueObject(targetProperty, Evaluate(targetProperty, bindingKey.Str(), LocExtension::GetResources(mTargetObject)));
+		}
+
 		void InvalidateResources(const ResourceDictionary *resourceDictionary) const
 		{
 			for (const MonitorPair &element : mMonitoredDependencyProperties)
@@ -184,14 +189,43 @@ Ptr<BaseComponent> LocExtension::ProvideValue(const ValueTargetProvider *provide
 	DependencyObject *target = DynamicCast<DependencyObject *>(provider->GetTargetObject());
 
 	Ptr<LocMonitor> monitor = target->GetValue<Ptr<LocMonitor>>(MonitorProperty);
-
 	if (monitor == nullptr)
 	{
 		monitor = MakePtr<LocMonitor>(target);
 		target->SetValue<Ptr<LocMonitor>>(MonitorProperty, monitor);
 	}
 
-	return monitor->AddDependencyProperty(targetProperty, mResourceKey.Str());
+	Ptr<DependencyProperty> targetProp = target->GetValue<Ptr<DependencyProperty>>(TargetProperty);
+	if (targetProp == nullptr)
+	{
+		Ptr<DependencyProperty> newTargetProp(const_cast<DependencyProperty*>(targetProperty));
+		target->SetValue<Ptr<DependencyProperty>>(TargetProperty, newTargetProp);
+	}
+
+	String bindingKey = target->GetValue<String>(BindingKeyProperty);
+	return monitor->AddDependencyProperty(targetProperty, bindingKey.Empty() ? mResourceKey.Str() : bindingKey.Str());
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+static void OnTargetChanged(DependencyObject *d, const DependencyPropertyChangedEventArgs &)
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+static void OnBindingKeyChanged(DependencyObject *d, const DependencyPropertyChangedEventArgs &)
+{
+	const DependencyProperty *targetProperty = d->GetValue<Ptr<const DependencyProperty>>(LocExtension::TargetProperty);
+	String bindingKey = d->GetValue<String>(LocExtension::BindingKeyProperty);
+	Ptr<LocMonitor> monitor = d->GetValue<Ptr<LocMonitor>>(MonitorProperty);
+	if (monitor != nullptr)
+	{
+		if (monitor->GetTargetObject() != d)
+		{
+			monitor.Reset(monitor->Clone(d));
+			d->SetValue<Ptr<LocMonitor>>(MonitorProperty, monitor);
+		}
+		monitor->InvalidateResourceByDependencyProperty(targetProperty, bindingKey);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -231,6 +265,10 @@ NS_IMPLEMENT_REFLECTION(LocExtension, "NoesisGUIExtensions.Loc")
 		&LocExtension::SetResourceKey);
 
 	DependencyData *data = NsMeta<DependencyData>(TypeOf<SelfClass>());
+	data->RegisterProperty<Ptr<DependencyProperty>>(TargetProperty, "Target",
+		PropertyMetadata::Create(Ptr<DependencyProperty>(), OnTargetChanged));
+	data->RegisterProperty<String>(BindingKeyProperty, "BindingKey",
+		PropertyMetadata::Create(String(), OnBindingKeyChanged));
 	data->RegisterProperty<Uri>(SourceProperty, "Source",
 		PropertyMetadata::Create(Uri(), OnSourceChanged));
 	data->RegisterProperty<Ptr<ResourceDictionary>>(ResourcesProperty, ".Resources",
@@ -243,4 +281,6 @@ NS_IMPLEMENT_REFLECTION(LocExtension, "NoesisGUIExtensions.Loc")
 NS_END_COLD_REGION
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+const DependencyProperty *LocExtension::TargetProperty;
+const DependencyProperty *LocExtension::BindingKeyProperty;
 const DependencyProperty *LocExtension::SourceProperty;

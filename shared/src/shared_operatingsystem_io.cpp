@@ -1,10 +1,12 @@
 #include "shared_precompiled.h"
 #include "shared_operatingsystem_io.h"
 
-mu_utf8string SupportPathUTF8 = "./";
-mu_utf8string CachePathUTF8 = "./";
-mu_utf8string UserPathUTF8 = "./";
-mu_utf8string GameDataPathUTF8 = "data/";
+mu_utf8string ExecutablePath = "./NextMUBrowser.exe";
+mu_utf8string GamePath = "./";
+mu_utf8string SupportPath = "./";
+mu_utf8string CachePath = "./";
+mu_utf8string UserPath = "./";
+mu_utf8string GameDataPath = "data/";
 
 mu_boolean ReadFromSupport = false;
 

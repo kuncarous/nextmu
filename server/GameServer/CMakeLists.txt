@@ -5,6 +5,7 @@ option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
 
 set(CMAKE_ANDROID_STL_TYPE c++_static)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(BUILD_SHARED_LIBS OFF)
 list(APPEND CMAKE_PROJECT_TOP_LEVEL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../conan_provider.cmake")
 

@@ -8,6 +8,8 @@ void WEBFileDownloadRequest::OnRequestAdded()
 void WEBFileDownloadRequest::OnRequestResponse(const mu_long responseCode)
 {
 	DestroyHeaders();
+
+	if (!!RequestResponseCallback) RequestResponseCallback(this);
 }
 
 void WEBFileDownloadRequest::OnRequestFailed(const CURLcode errorCode, const mu_utf8string errorMessage)

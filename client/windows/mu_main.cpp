@@ -4,22 +4,22 @@
 #include "stdafx.h"
 #include "mu_root.h"
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
-	_In_ LPWSTR    lpCmdLine,
+	_In_ LPSTR    lpCmdLine,
 	_In_ int       nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hInstance);
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
 
-	if (MURoot::Initialize() == true)
+	mu_int32 result = 0;
+	if (MURoot::Initialize(__argc, __argv, hInstance, result) == true)
 	{
 		MURoot::Run();
 	}
 
 	MURoot::Destroy();
 
-	return 0;
+	return result;
 }

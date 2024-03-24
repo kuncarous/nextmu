@@ -1,7 +1,6 @@
 #include "mu_precompiled.h"
 #include "ui_noesisgui_stream.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	Noesis::Ptr<Stream> Stream::Load(const mu_utf8string filename, const mu_boolean loadMemory)
@@ -77,4 +76,3 @@ namespace UINoesis
 		Memory.reset();
 	}
 };
-#endif

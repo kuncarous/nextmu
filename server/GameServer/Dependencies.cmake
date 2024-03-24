@@ -24,6 +24,7 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME glm
+    VERSION 1.0.0
     GIT_TAG 33b0eb9fa336ffd8551024b1d2690e418014553b
     GITHUB_REPOSITORY g-truc/glm
     OPTIONS
@@ -38,18 +39,20 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME fmt
+    VERSION 10.2.1
     GIT_TAG e69e5f977d458f2650bb346dadf2ad30c5320281
     GITHUB_REPOSITORY fmtlib/fmt
 )
 
 CPMAddPackage(
     NAME nlohmann_json
-    GIT_TAG 9cca280a4d0ccf0c08f47a99aa71d1b0e52f8d03
+    VERSION 3.11.3
     GITHUB_REPOSITORY nlohmann/json
 )
 
 CPMAddPackage(
     NAME nlohmann_fifo_map
+    VERSION 1.0.0
     GIT_TAG d732aaf9a315415ae8fd7eb11e3a4c1f80e42a48
     GITHUB_REPOSITORY nlohmann/fifo_map
 )
@@ -69,6 +72,7 @@ add_library(LibreSSL::TLS ALIAS tls)
 
 CPMAddPackage(
     NAME CryptoPP-CMake
+    VERSION 8.9.0
     GIT_TAG f815f6284684be6ab03af4b6c273359331c61241
     GITHUB_REPOSITORY abdes/cryptopp-cmake
     OPTIONS
@@ -78,7 +82,7 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME jwt-cpp
-    GIT_TAG 08bcf77a687fb06e34138e9e9fa12a4ecbe12332
+    VERSION 0.7.0
     GITHUB_REPOSITORY Thalhammer/jwt-cpp
     OPTIONS
         "JWT_SSL_LIBRARY LibreSSL"

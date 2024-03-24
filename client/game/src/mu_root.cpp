@@ -19,33 +19,42 @@
 #include "mu_skeletoninstance.h"
 #include "mu_skeletonmanager.h"
 #include "mu_charactersmanager.h"
+#include "mu_eventsmanager.h"
 #include "mu_model.h"
 #include "mu_modelrenderer.h"
 #include "mu_bboxrenderer.h"
+#include "mu_browsermanager.h"
 #include "mu_webmanager.h"
+#include "mu_webservermanager.h"
 #include "mu_updatemanager.h"
 #include "res_renders.h"
 #include "res_items.h"
 #include "mu_math.h"
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
+#include "mu_angelscript.h"
 #include "ui_noesisgui.h"
-#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-#include "ui_rmlui.h"
-#endif
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
-
-constexpr mu_double GameCycleTime = 1000.0 / 25.0; // 25 FPS
+#include "shared_binaryreader.h"
+#include "mu_crypt.h"
 
 namespace MURoot
 {
 	mu_boolean Quit = false;
 
-	const bool Initialize()
+	const mu_boolean Initialize(mu_int32 argc, mu_char **argv, void *instance, mu_int32 &exitResult)
 	{
+		boost::filesystem::path executablePath(argv[0]);
+		ExecutablePath = executablePath.parent_path().string() + '/';
+		std::replace(ExecutablePath.begin(), ExecutablePath.end(), '\\', '/');
+		GamePath = boost::filesystem::current_path().string() + '/';
+		std::replace(GamePath.begin(), GamePath.end(), '\\', '/');
+
+		SDL_SetHint(SDL_HINT_VIDEO_EXTERNAL_CONTEXT, "1");
+		SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0");
+		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
+
 		if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS) < 0)
 		{
 			const mu_char* error = SDL_GetError();
@@ -53,12 +62,10 @@ namespace MURoot
 			return false;
 		}
 
-		SDL_SetHint(SDL_HINT_VIDEO_EXTERNAL_CONTEXT, "1");
-
 #if NEXTMU_OPERATING_SYSTEM_TYPE == NEXTMU_OSTYPE_MOBILE || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
-		SupportPathUTF8 = NXOperatingSystem::GetStorageSupportFilesPath();
-		CachePathUTF8 = NXOperatingSystem::GetStorageCacheFilesPath();
-		UserPathUTF8 = NXOperatingSystem::GetStorageUserFilesPath();
+		SupportPath = NXOperatingSystem::GetStorageSupportFilesPath();
+		CachePath = NXOperatingSystem::GetStorageCacheFilesPath();
+		UserPath = NXOperatingSystem::GetStorageUserFilesPath();
 #endif
 
 		if (MUConfig::Initialize() == false)
@@ -105,6 +112,28 @@ namespace MURoot
 			return false;
 		}
 
+		if (MUAngelScript::Initialize() == false)
+		{
+			mu_error("Failed to initialize scripting.");
+			return false;
+		}
+
+#if NEXTMU_EMBEDDED_BROWSER == 1
+		if (MUBrowserManager::Initialize(argc, argv, instance) == false)
+		{
+			mu_error("Failed to initialize embedded browser.");
+			return false;
+		}
+#endif
+
+#if NEXTMU_HTTP_SERVER == 1
+		if (MUWebServerManager::Initialize() == false)
+		{
+			mu_error("Failed to initialize web server.");
+			return false;
+		}
+#endif
+
 		if (MUWebManager::Initialize() == false)
 		{
 			mu_error("Failed to initialize web manager.");
@@ -128,17 +157,20 @@ namespace MURoot
 			SDL_RestoreWindow(window);
 		}
 
+#if NEXTMU_HTTP_SERVER == 1
+		MUWebServerManager::Destroy();
+#endif
+#if NEXTMU_EMBEDDED_BROWSER == 1
+		MUBrowserManager::Destroy();
+#endif
 		MUSceneManager::Destroy();
 		MURendersManager::Destroy();
 		MUBBoxRenderer::Destroy();
 		MUModelRenderer::Destroy();
 		MUItemsManager::Destroy();
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		UINoesis::Destroy();
-#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-		UIRmlUI::Destroy();
-#endif
 		MUWebManager::Destroy();
+		MUAngelScript::Destroy();
 		MUSkeletonManager::Destroy();
 #if PHYSICS_ENABLED == 1
 		MUPhysics::Destroy();
@@ -205,26 +237,26 @@ namespace MURoot
 				scene->Run();
 			}
 
+#if NEXTMU_EMBEDDED_BROWSER == 1
+			MUBrowserManager::Update();
+			MUBrowserManager::Render();
+#endif
 			swapchain->Present(MUConfig::GetVerticalSync() ? 1u : 0u);
 			MUGraphics::ClearTransactions();
 
 			MUInput::ProcessKeys();
+			MUEventsManager::Process();
 
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
 			{
 				MURoot::OnPreEvent(&event);
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
-				if (UINoesis::OnEvent(&event) == true) continue;
-#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-				if (UIRmlUI::OnEvent(&event) == true) continue;
+#if NEXTMU_EMBEDDED_BROWSER == 1
+				if (MUBrowserManager::ProcessEvent(&event) == true) continue;
 #endif
+				if (UINoesis::OnEvent(&event) == true) continue;
 				MURoot::OnEvent(&event);
 			}
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-			UIRmlUI::ReleaseGarbage();
-#endif
 
 			MUGlobalTimer::Wait();
 			elapsedTime = MUGlobalTimer::GetElapsedFrametime();

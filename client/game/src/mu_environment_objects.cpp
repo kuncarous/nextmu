@@ -341,6 +341,7 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 					.BodyScale = 1.0f,
 					.EnableLight = renderState.Flags.LightEnable,
 					.BodyLight = renderState.BodyLight,
+					.BlendMeshLight = 1.0f,
 				};
 				if (renderState.Fading.Group != nullptr) {
 					config.BodyLight.a *= renderState.Fading.Current;
@@ -352,12 +353,13 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 					const auto model = part.Model;
 					auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
 
-					const NRenderConfig config = {
+					NRenderConfig config = {
 						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
 						.BodyOrigin = position.Position,
 						.BodyScale = 1.0f,
 						.EnableLight = renderState.Flags.LightEnable,
 						.BodyLight = renderState.BodyLight,
+						.BlendMeshLight = 1.0f,
 					};
 					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config, &part.Toggles, &part.Lights);
 				}
@@ -388,6 +390,7 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 					.BodyScale = 1.0f,
 					.EnableLight = renderState.Flags.LightEnable,
 					.BodyLight = renderState.BodyLight,
+					.BlendMeshLight = 1.0f,
 				};
 				if (renderState.Fading.Group != nullptr) {
 					config.BodyLight.a *= renderState.Fading.Current;
@@ -399,12 +402,13 @@ void NObjects::Render(const NRenderSettings &renderSettings)
 					const auto model = part.Model;
 					auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
 
-					const NRenderConfig config = {
+					NRenderConfig config = {
 						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
 						.BodyOrigin = position.Position,
 						.BodyScale = 1.0f,
 						.EnableLight = renderState.Flags.LightEnable,
 						.BodyLight = renderState.BodyLight,
+						.BlendMeshLight = 1.0f,
 					};
 					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config, &part.Toggles, &part.Lights);
 				}

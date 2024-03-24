@@ -5,10 +5,7 @@
 
 #include "scn_base.h"
 #include "mu_resourcesmanager.h"
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 #include "ngui_context_update.h"
-#endif
 
 class NIntroScene : public NSceneBase
 {
@@ -22,12 +19,9 @@ public:
 public:
     mu_boolean FinishedUpdate = false;
     mu_boolean CanStartGame = false;
-	std::unique_ptr<NResourcesManager> UpdateResources;
-	std::unique_ptr<NResourcesManager> GameResources;
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
+	NResourcesManagerPtr UpdateResources;
+	NResourcesManagerPtr GameResources;
     Noesis::Ptr<NGUpdateContext> UpdateContext;
-#endif
 };
 
 #endif

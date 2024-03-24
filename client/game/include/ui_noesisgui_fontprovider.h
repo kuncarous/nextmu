@@ -3,7 +3,6 @@
 
 #pragma once
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	class FontProvider : public Noesis::CachedFontProvider
@@ -17,6 +16,5 @@ namespace UINoesis
 		virtual Noesis::Ptr<Noesis::Stream> OpenFont(const Noesis::Uri &folder, const char *filename) const override;
 	};
 };
-#endif
 
 #endif

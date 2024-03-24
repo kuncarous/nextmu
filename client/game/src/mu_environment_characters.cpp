@@ -276,12 +276,13 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 					}
 				}
 
-				const NRenderConfig config = {
+				NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
 					.BodyOrigin = position.Position,
 					.BodyScale = 1.0f,
 					.EnableLight = renderState.Flags.LightEnable,
 					.BodyLight = renderState.BodyLight,
+					.BlendMeshLight = 1.0f,
 				};
 				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
 
@@ -292,12 +293,13 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 					auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
 					hideBody[static_cast<mu_uint32>(type)] = model->ShouldHideBody();
 
-					const NRenderConfig config = {
+					NRenderConfig config = {
 						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
 						.BodyOrigin = position.Position,
 						.BodyScale = 1.0f,
 						.EnableLight = renderState.Flags.LightEnable,
 						.BodyLight = renderState.BodyLight,
+						.BlendMeshLight = 1.0f,
 					};
 					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config, &part.Toggles, &part.Lights);
 				}
@@ -320,12 +322,13 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 						if (model == nullptr) continue;
 
 						auto &skeletonInstance = skeleton.Instance;
-						const NRenderConfig config = {
+						NRenderConfig config = {
 							.BoneOffset = skeleton.SkeletonOffset,
 							.BodyOrigin = position.Position,
 							.BodyScale = 1.0f,
 							.EnableLight = renderState.Flags.LightEnable,
 							.BodyLight = renderState.BodyLight,
+							.BlendMeshLight = 1.0f,
 						};
 						MUModelRenderer::RenderBody(skeletonInstance, model, config);
 					}
@@ -365,12 +368,13 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 					}
 				}
 
-				const NRenderConfig config = {
+				NRenderConfig config = {
 					.BoneOffset = skeleton.SkeletonOffset,
 					.BodyOrigin = position.Position,
 					.BodyScale = 1.0f,
 					.EnableLight = renderState.Flags.LightEnable,
 					.BodyLight = renderState.BodyLight,
+					.BlendMeshLight = 1.0f,
 				};
 				MUModelRenderer::RenderBody(skeleton.Instance, attachment.Base, config);
 
@@ -381,12 +385,13 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 					auto &skeletonInstance = part.IsLinked ? part.Link.Skeleton : skeleton.Instance;
 					hideBody[static_cast<mu_uint32>(type)] = model->ShouldHideBody();
 
-					const NRenderConfig config = {
+					NRenderConfig config = {
 						.BoneOffset = part.IsLinked ? part.Link.SkeletonOffset : skeleton.SkeletonOffset,
 						.BodyOrigin = position.Position,
 						.BodyScale = 1.0f,
 						.EnableLight = renderState.Flags.LightEnable,
 						.BodyLight = renderState.BodyLight,
+						.BlendMeshLight = 1.0f,
 					};
 					MUModelRenderer::RenderBody(skeletonInstance, part.Model, config, &part.Toggles, &part.Lights);
 				}
@@ -409,12 +414,13 @@ void NCharacters::Render(const NRenderSettings &renderSettings)
 						if (model == nullptr) continue;
 
 						auto &skeletonInstance = skeleton.Instance;
-						const NRenderConfig config = {
+						NRenderConfig config = {
 							.BoneOffset = skeleton.SkeletonOffset,
 							.BodyOrigin = position.Position,
 							.BodyScale = 1.0f,
 							.EnableLight = renderState.Flags.LightEnable,
 							.BodyLight = renderState.BodyLight,
+							.BlendMeshLight = 1.0f,
 						};
 						MUModelRenderer::RenderBody(skeletonInstance, model, config);
 					}

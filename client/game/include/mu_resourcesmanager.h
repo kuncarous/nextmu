@@ -42,6 +42,7 @@ public:
 	const mu_boolean Load(const mu_utf8string filename);
 	void Destroy();
 	const mu_boolean Run(const mu_size maxProcessing = MaxResourcesProcessingPerFrame);
+	const mu_boolean RunByTime(const mu_double maxProcessingTime);
 	const mu_boolean RunAndWait()
 	{
 		return Run(BlockingResourcesProcessingPerFrame);
@@ -113,5 +114,7 @@ const mu_uint32 GetAttachmentTypeFromId(const mu_char* id);
 
 #define GenerateAttachmentTypeAtCompileTime_L(id, length) CRC32_DATA_PADDING(id, length, 32u - length)
 #define GenerateAttachmentTypeAtCompileTime(id) GenerateAttachmentTypeAtCompileTime_L(id, GetStringLengthAtCompileTime(id))
+
+typedef std::unique_ptr<NResourcesManager> NResourcesManagerPtr;
 
 #endif

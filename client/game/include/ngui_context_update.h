@@ -7,7 +7,6 @@
 #include "ngui_notifier.h"
 #include "upd_enum.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 class NGUpdateContext : public NoesisGUI::NotifierBase
 {
 public:
@@ -44,8 +43,5 @@ private:
 private:
     NS_DECLARE_REFLECTION(NGUpdateContext, NoesisGUI::NotifierBase)
 };
-
-#undef NG_UPDATE_STATE
-#endif
 
 #endif

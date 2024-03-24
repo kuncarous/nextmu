@@ -1,7 +1,6 @@
 #include "mu_precompiled.h"
 #include "ui_noesisgui_consts.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	const mu_utf8string ResourcesPath = "resources/";
@@ -11,4 +10,3 @@ namespace UINoesis
 		return ResourcesPath;
 	}
 };
-#endif

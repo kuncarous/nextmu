@@ -2,15 +2,18 @@ cmake_minimum_required (VERSION 3.22)
 
 set(NEXTMU_COMPANY_NAME     "NextGames" CACHE STRING "Company Name")
 set(NEXTMU_GAME_NAME        "NextMU" CACHE STRING "Game Name")
+
 set(NEXTMU_VERSION_MAJOR    "0" CACHE STRING "Version Major")
 set(NEXTMU_VERSION_MINOR	"0" CACHE STRING "Version Minor")
 set(NEXTMU_VERSION_REVISION	"1" CACHE STRING "Version Revision")
 set(NEXTMU_VERSION_SERIAL	"UUb335yJPFn7MFfdx6HtTBLrfuAxcDD49nNMQgXZFPbcdHF3sSXrBHqg5stc66bu" CACHE STRING "Version Serial")
 
+set(NEXTMU_AUTH_REALM_URL "http://host.docker.internal:8080/realms/NextMU/" CACHE STRING "Keycloak Game Auth Realm URL")
+set(NEXTMU_AUTH_CLIENT_ID "game" CACHE STRING "Keycloak Game Client ID")
+
 set(NEXTMU_CLIENT_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_ANDROID_STL_TYPE c++_static)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-set(BUILD_SHARED_LIBS OFF)
 
 project(
     NextMU
@@ -18,6 +21,13 @@ project(
 )
 
 include(../SetPlatform.cmake)
+
+if(PLATFORM_MACOS OR PLATFORM_IOS)
+    set(BUILD_SHARED_LIBS OFF)
+else()
+    set(BUILD_SHARED_LIBS ON)
+endif()
+
 include(Dependencies.cmake)
 
 set(CMAKE_C_STANDARD 17)
@@ -31,6 +41,7 @@ if (PLATFORM_MACOS)
     add_subdirectory(macos)
 endif()
 if (PLATFORM_WIN32)
+    add_subdirectory(browser/windows)
     add_subdirectory(windows)
 endif()
 if (PLATFORM_ANDROID)

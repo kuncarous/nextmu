@@ -142,10 +142,17 @@ public:
 	std::vector<NMeshRenderConditions> Conditions;
 };
 
+struct NMeshRenderInheritConfig
+{
+	mu_boolean BlendMeshLight = false;
+};
+
 struct NMeshRenderSettings
 {
 	mu_shader Program = NInvalidShader;
 	mu_shader ShadowProgram = NInvalidShader;
+	ASModuleScript Script;
+	AngelScript::asIScriptFunction *ScriptFunction = nullptr;
 	NGraphicsTexture *Texture = nullptr;
 	NGraphicsTexture *VertexTexture = nullptr;
 	NDynamicPipelineState RenderState[ModelRenderMode::Count] = { DefaultDynamicPipelineState, DefaultAlphaDynamicPipelineState };
@@ -156,6 +163,7 @@ struct NMeshRenderSettings
 	mu_boolean PremultiplyLight = false;
 	mu_boolean PremultiplyAlpha = false;
 	std::vector<NRenderVirtualMeshLight> Lights;
+	NMeshRenderInheritConfig Inherit;
 };
 
 class NMesh

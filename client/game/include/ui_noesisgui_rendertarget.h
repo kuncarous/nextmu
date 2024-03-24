@@ -3,7 +3,6 @@
 
 #pragma once
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	class DETexture;
@@ -28,6 +27,5 @@ namespace UINoesis
 		Diligent::RefCntAutoPtr<Diligent::ITexture> DepthStencilTexture;
 	};
 };
-#endif
 
 #endif

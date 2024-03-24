@@ -10,6 +10,7 @@ struct NRenderConfig
 	mu_float BodyScale;
 	mu_boolean EnableLight;
 	glm::vec4 BodyLight;
+	mu_float BlendMeshLight;
 };
 
 #endif

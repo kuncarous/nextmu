@@ -12,7 +12,7 @@ namespace MUWindow
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_IOS || NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
 		constexpr mu_uint32 extraWindowFlags = SDL_WINDOW_METAL | SDL_WINDOW_ALLOW_HIGHDPI;
 #else
-		constexpr mu_uint32 extraWindowFlags = 0;
+		constexpr mu_uint32 extraWindowFlags = SDL_WINDOW_ALLOW_HIGHDPI;
 #endif
 
 		const mu_int32 windowWidth = static_cast<mu_int32>(MUConfig::GetWindowWidth());

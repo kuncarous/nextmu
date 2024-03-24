@@ -3,7 +3,6 @@
 
 #pragma once
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	class TextureProvider : public Noesis::TextureProvider
@@ -16,6 +15,5 @@ namespace UINoesis
 		virtual Noesis::Ptr<Noesis::Texture> LoadTexture(const Noesis::Uri &uri, Noesis::RenderDevice *device) override;
 	};
 };
-#endif
 
 #endif

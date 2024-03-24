@@ -3,7 +3,6 @@
 
 #pragma once
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 class Noesis::IView;
 class NGApplicationContext;
 
@@ -15,7 +14,10 @@ namespace UINoesis
 	NGApplicationContext *GetContext();
 
 	const mu_boolean CreateView(const mu_utf8string filename);
+	void DeleteView();
 	Noesis::IView *GetView();
+
+	void ResetDeviceShaders();
 
 	void Update();
 	void RenderOffscreen();
@@ -23,6 +25,5 @@ namespace UINoesis
 
 	const mu_boolean OnEvent(const SDL_Event *event);
 };
-#endif
 
 #endif

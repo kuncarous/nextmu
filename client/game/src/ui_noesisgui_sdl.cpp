@@ -1,7 +1,6 @@
 #include "mu_precompiled.h"
 #include "ui_noesisgui_sdl.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 Noesis::Key SDLKeyCodeToNoesisKeyCode(SDL_Keycode key)
 {
 	switch (key) {
@@ -123,4 +122,3 @@ Noesis::Key SDLKeyCodeToNoesisKeyCode(SDL_Keycode key)
 	default: return Noesis::Key_Count;
 	}
 }
-#endif

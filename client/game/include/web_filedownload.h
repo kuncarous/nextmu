@@ -12,8 +12,8 @@ public:
 	typedef std::function<void(const mu_size &)> ReceivedDataCallbackFunc;
 
 public:
-	explicit WEBFileDownloadRequest(const mu_utf8string url, void *userData = nullptr) :
-		WEBRequestBufferBase<>(WEBRequestMethodType::eGET),
+	explicit WEBFileDownloadRequest(const mu_utf8string url, void *userData = nullptr, const WEBRequestMethodType methodType = WEBRequestMethodType::eGET) :
+		WEBRequestBufferBase<>(methodType),
 		Url(url),
 		UserData(userData)
 	{}
@@ -50,6 +50,11 @@ public:
 		RequestAddedCallback = callback;
 	}
 
+	void SetRequestResponseCallback(RequestCallbackFunc callback)
+	{
+		RequestResponseCallback = callback;
+	}
+
 	void SetRequestFailedCallback(RequestCallbackFunc callback)
 	{
 		RequestFailedCallback = callback;
@@ -82,6 +87,7 @@ public:
 
 private:
 	RequestCallbackFunc RequestAddedCallback;
+	RequestCallbackFunc RequestResponseCallback;
 	RequestCallbackFunc RequestFailedCallback;
 	RequestCallbackFunc RequestAbortedCallback;
 	ReceivedDataCallbackFunc ReceivedDataCallback;

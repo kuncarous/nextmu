@@ -3,8 +3,6 @@
 
 #pragma once
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 Noesis::Key SDLKeyCodeToNoesisKeyCode(SDL_Keycode key);
-#endif
 
 #endif

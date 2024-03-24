@@ -5,6 +5,7 @@
 
 enum class NCameraMode
 {
+	DirectionalByAngle, // Target depends on Eye and Direction (except that direction is calculated directly using Angle with InverseUP)
 	Directional, // Target depends on Eye and Direction
 	Positional, // Eye depends on Target and Direction
 };
@@ -32,6 +33,7 @@ public:
 	glm::mat4 GetShadowView() const;
 
 	void SetMode(const NCameraMode mode);
+	void SetFOV(const mu_float fov);
 	void SetEye(const glm::vec3 eye);
 	void SetTarget(const glm::vec3 target);
 	void SetAngle(const glm::vec3 angle);
@@ -78,20 +80,29 @@ public:
 		Distance = Default.Distance;
 	}
 
+public:
+	void SetCanDrag(mu_boolean value)
+	{
+		CanDrag = value;
+	}
+
 private:
 	Diligent::ViewFrustumExt Frustum;
 	Diligent::BoundBox FrustumBBox;
 	NCameraMode Mode = NCameraMode::Directional;
+	mu_float FOV = 35.0f;
 	glm::vec3 Eye;
 	glm::vec3 Target;
 	glm::vec3 Angle;
 	const glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
+	const glm::vec3 InverseUp = -Up;
 	NCameraDistance Distance;
 	NCameraDefault Default;
 
 	glm::ivec2 BackupMousePosition = glm::ivec2();
 	glm::vec2 MouseDelta = glm::vec2();
 
+	mu_boolean CanDrag = true;
 	mu_boolean Dragging = false;
 };
 

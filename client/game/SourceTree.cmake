@@ -2,6 +2,7 @@
 set(
     G_ROOT_INCLUDE
 	include/mu_root.h
+    include/mu_precompiled.h
 )
 
 set(
@@ -36,6 +37,80 @@ set(
 source_group("Window" FILES ${G_WINDOW_SOURCE} ${G_WINDOW_INCLUDE})
 list(APPEND GAME_INCLUDE ${G_WINDOW_INCLUDE})
 list(APPEND GAME_SOURCE ${G_WINDOW_SOURCE})
+
+# Scripting Group
+set(
+    G_SCRIPTING_INCLUDE
+	include/mu_angelscript.h
+)
+
+set(
+    G_SCRIPTING_SOURCE
+	src/mu_angelscript.cpp
+)
+
+source_group("Scripting" FILES ${G_SCRIPTING_SOURCE} ${G_SCRIPTING_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_SCRIPTING_INCLUDE})
+list(APPEND GAME_SOURCE ${G_SCRIPTING_SOURCE})
+
+# Scripting Group
+set(
+    G_SCRIPTING_ADDONS_CUSTOM_INCLUDE
+	include/as_scriptbuilder.h
+)
+
+set(
+    G_SCRIPTING_ADDONS_CUSTOM_SOURCE
+	src/as_scriptbuilder.cpp
+)
+
+source_group("Scripting\\Addons\\Custom" FILES ${G_SCRIPTING_ADDONS_CUSTOM_SOURCE} ${G_SCRIPTING_ADDONS_CUSTOM_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_SCRIPTING_ADDONS_CUSTOM_INCLUDE})
+list(APPEND GAME_SOURCE ${G_SCRIPTING_ADDONS_CUSTOM_SOURCE})
+
+# Scripting Addons Group
+set(
+    G_SCRIPTING_ADDONS_INCLUDE_DIRS
+	${AngelScript_SOURCE_DIR}/add_on/scriptarray
+	${AngelScript_SOURCE_DIR}/add_on/scriptmath
+	${AngelScript_SOURCE_DIR}/add_on/scriptstdstring
+)
+
+set(
+    G_SCRIPTING_ADDONS_INCLUDE
+	${AngelScript_SOURCE_DIR}/add_on/scriptarray/scriptarray.h
+	${AngelScript_SOURCE_DIR}/add_on/scriptmath/scriptmath.h
+	${AngelScript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.h
+)
+
+set(
+    G_SCRIPTING_ADDONS_SOURCE
+	${AngelScript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
+	${AngelScript_SOURCE_DIR}/add_on/scriptmath/scriptmath.cpp
+	${AngelScript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.cpp
+	${AngelScript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring_utils.cpp
+)
+
+source_group("Scripting\\Addons" FILES ${G_SCRIPTING_ADDONS_SOURCE} ${G_SCRIPTING_ADDONS_INCLUDE})
+list(APPEND GAME_PRIVATE_INCLUDES ${G_SCRIPTING_ADDONS_INCLUDE_DIRS})
+list(APPEND GAME_INCLUDE ${G_SCRIPTING_ADDONS_INCLUDE})
+list(APPEND GAME_SOURCE ${G_SCRIPTING_ADDONS_SOURCE})
+list(APPEND GAME_SOURCE_NONPCH ${G_SCRIPTING_ADDONS_SOURCE})
+
+# Events Manager Group
+set(
+    G_EVENTSMANAGER_INCLUDE
+	include/mu_eventsmanager.h
+)
+
+set(
+    G_EVENTSMANAGER_SOURCE
+	src/mu_eventsmanager.cpp
+)
+
+source_group("Events" FILES ${G_EVENTSMANAGER_SOURCE} ${G_EVENTSMANAGER_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_EVENTSMANAGER_INCLUDE})
+list(APPEND GAME_SOURCE ${G_EVENTSMANAGER_SOURCE})
 
 # UI NoesisGUI Group
 set(
@@ -85,6 +160,31 @@ source_group("UI\\NoesisGUI\\Classes" FILES ${G_NOESISGUI_CLASSES_SOURCE} ${G_NO
 list(APPEND GAME_INCLUDE ${G_NOESISGUI_CLASSES_INCLUDE})
 list(APPEND GAME_SOURCE ${G_NOESISGUI_CLASSES_SOURCE})
 
+# NoesisGUI Converters Group
+# Viewport Unit
+set(
+    G_NOESISGUI_CONVERTERS_VIEWPORTUNIT_INCLUDE
+    include/ngui_converter_viewportunit.h
+)
+
+set(
+    G_NOESISGUI_CONVERTERS_VIEWPORTUNIT_SOURCE
+    src/ngui_converter_viewportunit.cpp
+)
+
+source_group("UI\\NoesisGUI\\Converters\\ViewportUnit" FILES ${G_NOESISGUI_CONVERTERS_VIEWPORTUNIT_SOURCE} ${G_NOESISGUI_CONVERTERS_VIEWPORTUNIT_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_NOESISGUI_CONVERTERS_VIEWPORTUNIT_INCLUDE})
+list(APPEND GAME_SOURCE ${G_NOESISGUI_CONVERTERS_VIEWPORTUNIT_SOURCE})
+
+# NoesisGUI Enums Popup Group
+set(
+    G_NG_ENUMS_POPUP_INCLUDE
+	include/ngui_enums_popup.h
+)
+
+source_group("UI\\NoesisGUI\\Enums\\Popup" FILES ${G_NG_ENUMS_POPUP_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_NG_ENUMS_POPUP_INCLUDE})
+
 # NoesisGUI Contexts Group
 set(
     G_NG_CONTEXTS_INCLUDE
@@ -115,57 +215,160 @@ source_group("UI\\NoesisGUI\\Contexts\\Update" FILES ${G_NG_CONTEXTS_UPDATE_SOUR
 list(APPEND GAME_INCLUDE ${G_NG_CONTEXTS_UPDATE_INCLUDE})
 list(APPEND GAME_SOURCE ${G_NG_CONTEXTS_UPDATE_SOURCE})
 
+# NoesisGUI Contexts Login Group
+set(
+    G_NG_CONTEXTS_LOGIN_INCLUDE
+	include/ngui_context_login.h
+)
+
+set(
+    G_NG_CONTEXTS_LOGIN_SOURCE
+	src/ngui_context_login.cpp
+)
+
+source_group("UI\\NoesisGUI\\Contexts\\Login" FILES ${G_NG_CONTEXTS_LOGIN_SOURCE} ${G_NG_CONTEXTS_LOGIN_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_NG_CONTEXTS_LOGIN_INCLUDE})
+list(APPEND GAME_SOURCE ${G_NG_CONTEXTS_LOGIN_SOURCE})
+
+# NoesisGUI Contexts Popup Group
+set(
+    G_NG_CONTEXTS_POPUP_INCLUDE
+	include/ngui_context_popup.h
+)
+
+set(
+    G_NG_CONTEXTS_POPUP_SOURCE
+	src/ngui_context_popup.cpp
+)
+
+source_group("UI\\NoesisGUI\\Contexts\\Popup" FILES ${G_NG_CONTEXTS_POPUP_SOURCE} ${G_NG_CONTEXTS_POPUP_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_NG_CONTEXTS_POPUP_INCLUDE})
+list(APPEND GAME_SOURCE ${G_NG_CONTEXTS_POPUP_SOURCE})
+
+# NoesisGUI Models Popup Group
+set(
+    G_NG_MODELS_POPUP_INCLUDE
+	include/ngui_model_popup.h
+)
+
+set(
+    G_NG_MODELS_POPUP_SOURCE
+	src/ngui_model_popup.cpp
+)
+
+source_group("UI\\NoesisGUI\\Models\\Popup" FILES ${G_NG_MODELS_POPUP_SOURCE} ${G_NG_MODELS_POPUP_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_NG_MODELS_POPUP_INCLUDE})
+list(APPEND GAME_SOURCE ${G_NG_MODELS_POPUP_SOURCE})
+
+# NoesisGUI Classes Group
+# FixedWindow
+set(
+    G_NOESISGUI_CONTROLS_FIXEDWINDOW_INCLUDE
+    noesis/controls/fixedwindow/fixedwindow.xaml.h
+)
+
+set(
+    G_NOESISGUI_CONTROLS_FIXEDWINDOW_SOURCE
+    noesis/controls/fixedwindow/fixedwindow.xaml.cpp
+)
+
+source_group("UI\\NoesisGUI\\Controls\\FixedWindow" FILES ${G_NOESISGUI_CONTROLS_FIXEDWINDOW_SOURCE} ${G_NOESISGUI_CONTROLS_FIXEDWINDOW_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_NOESISGUI_CONTROLS_FIXEDWINDOW_INCLUDE})
+list(APPEND GAME_SOURCE ${G_NOESISGUI_CONTROLS_FIXEDWINDOW_SOURCE})
+
+# Popups
+set(
+    G_NOESISGUI_CONTROLS_POPUPS_INCLUDE
+    noesis/controls/popups/popups.xaml.h
+)
+
+set(
+    G_NOESISGUI_CONTROLS_POPUPS_SOURCE
+    noesis/controls/popups/popups.xaml.cpp
+)
+
+source_group("UI\\NoesisGUI\\Controls\\Popup" FILES ${G_NOESISGUI_CONTROLS_POPUPS_SOURCE} ${G_NOESISGUI_CONTROLS_POPUPS_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_NOESISGUI_CONTROLS_POPUPS_INCLUDE})
+list(APPEND GAME_SOURCE ${G_NOESISGUI_CONTROLS_POPUPS_SOURCE})
+
+# Popup
+set(
+    G_NOESISGUI_CONTROLS_POPUP_INCLUDE
+    noesis/controls/popup/popup.xaml.h
+)
+
+set(
+    G_NOESISGUI_CONTROLS_POPUP_SOURCE
+    noesis/controls/popup/popup.xaml.cpp
+)
+
+source_group("UI\\NoesisGUI\\Controls\\Popup" FILES ${G_NOESISGUI_CONTROLS_POPUP_SOURCE} ${G_NOESISGUI_CONTROLS_POPUP_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_NOESISGUI_CONTROLS_POPUP_INCLUDE})
+list(APPEND GAME_SOURCE ${G_NOESISGUI_CONTROLS_POPUP_SOURCE})
+
 # UI NoesisGUI Extensions Group
-if(UI_LIBRARY STREQUAL "NoesisGUI")
-    # RichText
-    set(
-        G_NG_EXTENSIONS_RICHTEXT_INCLUDE
-        noesis/richtext/RichText.h
-    )
+# Interactivity
+file(GLOB G_NG_EXTENSIONS_INTERACTIVITY_INCLUDE "${NEXTMU_CLIENT_BASE_DIR}/../dependencies/installed/noesisgui/Src/Packages/App/Interactivity/Include/NsApp/*.*")
+file(GLOB G_NG_EXTENSIONS_INTERACTIVITY_SOURCE "${NEXTMU_CLIENT_BASE_DIR}/../dependencies/installed/noesisgui/Src/Packages/App/Interactivity/Src/*.*")
+list(FILTER G_NG_EXTENSIONS_INTERACTIVITY_SOURCE EXCLUDE REGEX "^.*[/\\]App\.Interactivity\.cpp$")
 
-    set(
-        G_NG_EXTENSIONS_RICHTEXT_SOURCE
-        noesis/richtext/RichText.cpp
-    )
+source_group("UI\\NoesisGUI\\Extensions\\Interactivity" FILES ${G_NG_EXTENSIONS_INTERACTIVITY_INCLUDE} ${G_NG_EXTENSIONS_INTERACTIVITY_SOURCE})
+list(APPEND GAME_INCLUDE ${G_NG_EXTENSIONS_INTERACTIVITY_SOURCE})
+list(APPEND GAME_SOURCE ${G_NG_EXTENSIONS_INTERACTIVITY_INCLUDE})
 
-    source_group("UI\\NoesisGUI\\Extensions\\RichText" FILES ${G_NG_EXTENSIONS_RICHTEXT_INCLUDE} ${G_NG_EXTENSIONS_RICHTEXT_SOURCE})
-    list(APPEND GAME_INCLUDE ${G_NG_EXTENSIONS_RICHTEXT_SOURCE})
-    list(APPEND GAME_SOURCE ${G_NG_EXTENSIONS_RICHTEXT_INCLUDE})
+# Media
+file(GLOB G_NG_EXTENSIONS_MEDIAELEMENT_INCLUDE "${NEXTMU_CLIENT_BASE_DIR}/../dependencies/installed/noesisgui/Src/Packages/App/MediaElement/Include/NsApp/*.*")
+file(GLOB G_NG_EXTENSIONS_MEDIAELEMENT_SOURCE "${NEXTMU_CLIENT_BASE_DIR}/../dependencies/installed/noesisgui/Src/Packages/App/MediaElement/Src/*.*")
+list(FILTER G_NG_EXTENSIONS_MEDIAELEMENT_SOURCE EXCLUDE REGEX "^.*[/\\]App\.MediaElement\.cpp$")
 
-    # Localization
-    set(
-        G_NG_EXTENSIONS_LOCALIZATION_INCLUDE
-        noesis/localization/LocExtension.h
-    )
+source_group("UI\\NoesisGUI\\Extensions\\Media" FILES ${G_NG_EXTENSIONS_MEDIAELEMENT_INCLUDE} ${G_NG_EXTENSIONS_MEDIAELEMENT_SOURCE})
+list(APPEND GAME_INCLUDE ${G_NG_EXTENSIONS_MEDIAELEMENT_SOURCE})
+list(APPEND GAME_SOURCE ${G_NG_EXTENSIONS_MEDIAELEMENT_INCLUDE})
 
-    set(
-        G_NG_EXTENSIONS_LOCALIZATION_SOURCE
-        noesis/localization/LocExtension.cpp
-    )
-
-    source_group("UI\\NoesisGUI\\Extensions\\Localization" FILES ${G_NG_EXTENSIONS_LOCALIZATION_INCLUDE} ${G_NG_EXTENSIONS_LOCALIZATION_SOURCE})
-    list(APPEND GAME_INCLUDE ${G_NG_EXTENSIONS_LOCALIZATION_SOURCE})
-    list(APPEND GAME_SOURCE ${G_NG_EXTENSIONS_LOCALIZATION_INCLUDE})
-endif()
-
-# UI RmlUI Group
+# DelegateCommand
 set(
-    G_UI_RMLUI_INCLUDE
-	include/ui_rmlui.h
-    include/ui_rmlui_system.h
-    include/ui_rmlui_renderer.h
+    G_NG_EXTENSIONS_DELEGATECOMMAND_INCLUDE
+    noesis/delegatecommand/DelegateCommand.h
 )
 
 set(
-    G_UI_RMLUI_SOURCE
-	src/ui_rmlui.cpp
-    src/ui_rmlui_system.cpp
-    src/ui_rmlui_renderer.cpp
+    G_NG_EXTENSIONS_DELEGATECOMMAND_SOURCE
+    noesis/delegatecommand/DelegateCommand.cpp
 )
 
-source_group("UI\\RmlUI" FILES ${G_UI_RMLUI_SOURCE} ${G_UI_RMLUI_INCLUDE})
-list(APPEND GAME_INCLUDE ${G_UI_RMLUI_INCLUDE})
-list(APPEND GAME_SOURCE ${G_UI_RMLUI_SOURCE})
+source_group("UI\\NoesisGUI\\Extensions\\DelegateCommand" FILES ${G_NG_EXTENSIONS_DELEGATECOMMAND_INCLUDE} ${G_NG_EXTENSIONS_DELEGATECOMMAND_SOURCE})
+list(APPEND GAME_INCLUDE ${G_NG_EXTENSIONS_DELEGATECOMMAND_SOURCE})
+list(APPEND GAME_SOURCE ${G_NG_EXTENSIONS_DELEGATECOMMAND_INCLUDE})
+
+# RichText
+set(
+    G_NG_EXTENSIONS_RICHTEXT_INCLUDE
+    noesis/richtext/RichText.h
+)
+
+set(
+    G_NG_EXTENSIONS_RICHTEXT_SOURCE
+    noesis/richtext/RichText.cpp
+)
+
+source_group("UI\\NoesisGUI\\Extensions\\RichText" FILES ${G_NG_EXTENSIONS_RICHTEXT_INCLUDE} ${G_NG_EXTENSIONS_RICHTEXT_SOURCE})
+list(APPEND GAME_INCLUDE ${G_NG_EXTENSIONS_RICHTEXT_SOURCE})
+list(APPEND GAME_SOURCE ${G_NG_EXTENSIONS_RICHTEXT_INCLUDE})
+
+# Localization
+set(
+    G_NG_EXTENSIONS_LOCALIZATION_INCLUDE
+    noesis/localization/LocExtension.h
+)
+
+set(
+    G_NG_EXTENSIONS_LOCALIZATION_SOURCE
+    noesis/localization/LocExtension.cpp
+)
+
+source_group("UI\\NoesisGUI\\Extensions\\Localization" FILES ${G_NG_EXTENSIONS_LOCALIZATION_INCLUDE} ${G_NG_EXTENSIONS_LOCALIZATION_SOURCE})
+list(APPEND GAME_INCLUDE ${G_NG_EXTENSIONS_LOCALIZATION_SOURCE})
+list(APPEND GAME_SOURCE ${G_NG_EXTENSIONS_LOCALIZATION_INCLUDE})
 
 # Navigation Group
 set(
@@ -773,6 +976,52 @@ source_group("Scenes\\Game" FILES ${G_SCENES_GAME_SOURCE} ${G_SCENES_GAME_INCLUD
 list(APPEND GAME_INCLUDE ${G_SCENES_GAME_INCLUDE})
 list(APPEND GAME_SOURCE ${G_SCENES_GAME_SOURCE})
 
+# Browser Group
+set(
+    G_BROWSER_INCLUDE
+	include/mu_browsermanager.h
+	include/ncef_keycodes.h
+)
+
+set(
+    G_BROWSER_SOURCE
+	src/mu_browsermanager.cpp
+)
+
+source_group("Browser" FILES ${G_BROWSER_SOURCE} ${G_BROWSER_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_BROWSER_INCLUDE})
+list(APPEND GAME_SOURCE ${G_BROWSER_SOURCE})
+
+# Browser Renderer Group
+set(
+    G_BROWSER_RENDERER_INCLUDE
+	include/ncef_renderer.h
+)
+
+set(
+    G_BROWSER_RENDERER_SOURCE
+	src/ncef_renderer.cpp
+)
+
+source_group("Browser\\Renderer" FILES ${G_BROWSER_RENDERER_SOURCE} ${G_BROWSER_RENDERER_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_BROWSER_RENDERER_INCLUDE})
+list(APPEND GAME_SOURCE ${G_BROWSER_RENDERER_SOURCE})
+
+# Browser Client Group
+set(
+    G_BROWSER_CLIENT_INCLUDE
+	include/ncef_client.h
+)
+
+set(
+    G_BROWSER_CLIENT_SOURCE
+	src/ncef_client.cpp
+)
+
+source_group("Browser\\Client" FILES ${G_BROWSER_CLIENT_SOURCE} ${G_BROWSER_CLIENT_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_BROWSER_CLIENT_INCLUDE})
+list(APPEND GAME_SOURCE ${G_BROWSER_CLIENT_SOURCE})
+
 # Web Group
 set(
     G_WEB_INCLUDE
@@ -811,6 +1060,38 @@ set(
 source_group("Web\\Requests\\File Download" FILES ${G_WEB_REQUESTS_FILEDOWNLOAD_SOURCE} ${G_WEB_REQUESTS_FILEDOWNLOAD_INCLUDE})
 list(APPEND GAME_INCLUDE ${G_WEB_REQUESTS_FILEDOWNLOAD_INCLUDE})
 list(APPEND GAME_SOURCE ${G_WEB_REQUESTS_FILEDOWNLOAD_SOURCE})
+
+if(PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS)
+    # Web Server Group
+    set(
+        G_WEB_SERVER_INCLUDE
+        include/mu_webservermanager.h
+    )
+
+    set(
+        G_WEB_SERVER_SOURCE
+        src/mu_webservermanager.cpp
+    )
+
+    source_group("Web\\Server" FILES ${G_WEB_SERVER_SOURCE} ${G_WEB_SERVER_INCLUDE})
+    list(APPEND GAME_INCLUDE ${G_WEB_SERVER_INCLUDE})
+    list(APPEND GAME_SOURCE ${G_WEB_SERVER_SOURCE})
+endif()
+
+# Session Group
+set(
+    G_SESSION_INCLUDE
+	include/mu_sessionmanager.h
+)
+
+set(
+    G_SESSION_SOURCE
+	src/mu_sessionmanager.cpp
+)
+
+source_group("Session" FILES ${G_SESSION_SOURCE} ${G_SESSION_INCLUDE})
+list(APPEND GAME_INCLUDE ${G_SESSION_INCLUDE})
+list(APPEND GAME_SOURCE ${G_SESSION_SOURCE})
 
 # Update Group
 set(

@@ -8,10 +8,8 @@
 #include <boost/regex.hpp>
 #include <glm/gtc/random.hpp>
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 #include "ui_noesisgui.h"
 #include "ngui_context.h"
-#endif
 
 #ifndef NEXTMU_UPDATE_ENABLED
 #define NEXTMU_UPDATE_ENABLED 1
@@ -136,11 +134,9 @@ namespace MUUpdateManager
 			MaxDownloadFiles = static_cast<mu_size>(MinParallelDownloadFiles);
 		}
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		auto *context = UINoesis::GetContext()->GetUpdate();
 		context->SetProgress(0.0f);
 		context->SetState("Initialize");
-#endif
 
 		return true;
 	}
@@ -360,10 +356,7 @@ namespace MUUpdateManager
 	{
 		if (Paused) return false;
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		auto *context = UINoesis::GetContext()->GetUpdate();
-#endif
-
 		switch (State)
 		{
 		case NUpdateState::Initialize:
@@ -380,9 +373,7 @@ namespace MUUpdateManager
 			{
 				if (Requests.empty() == true)
 				{
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 					context->SetState("WaitingServers");
-#endif
 
 					auto systemTime = std::chrono::system_clock::now();
 					auto request = std::make_shared<WEBFileDownloadRequest>(fmt::format("{}://{}/api/v1/updates/servers/list/{}", NEXTMU_UPDATE_SERVER_PROTOCOL, NEXTMU_UPDATE_SERVER_URL, std::chrono::system_clock::to_time_t(systemTime)));
@@ -450,10 +441,7 @@ namespace MUUpdateManager
 							}
 
 							State = NUpdateState::WaitingFilesList;
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 							context->SetProgress(1.0f);
-#endif
 						}
 						break;
 
@@ -491,10 +479,8 @@ namespace MUUpdateManager
 
 				if (GameVersion.size() == 0)
 				{
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 					context->SetProgress(0.0f);
 					context->SetState("WaitingFilesList");
-#endif
 
 					UpdateServer = ServersList[glm::linearRand(static_cast<mu_int32>(0), glm::max(static_cast<mu_int32>(ServersList.size()) - 1, 0))];
 					GameVersion = "0.0.0";
@@ -624,9 +610,7 @@ namespace MUUpdateManager
 							if (FilesList.size() > 0)
 							{
 								State = NUpdateState::VerifyingFiles;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 								context->SetState("VerifyingFiles");
-#endif
 							}
 							else if (GameVersion.compare(UpdateGameVersion) == 0)
 							{
@@ -635,14 +619,10 @@ namespace MUUpdateManager
 							else
 							{
 								State = NUpdateState::WritingVersion;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 								context->SetState("WritingVersion");
-#endif
 							}
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 							context->SetProgress(1.0f);
-#endif
 						}
 						break;
 
@@ -678,11 +658,9 @@ namespace MUUpdateManager
 				const mu_size filesCount = FilesList.size();
 				if (Threads.empty() == true)
 				{
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 					context->SetState("VerifyingFiles");
 					context->SetVerifyCount(filesCount);
 					context->SetVerifiedCount(0u);
-#endif
 
 					FinishedThreadsCount.store(0, std::memory_order_relaxed);
 					VerifiedCount.store(0, std::memory_order_relaxed);
@@ -726,21 +704,16 @@ namespace MUUpdateManager
 						TotalDownloadCount = downloadCount;
 						TotalCompletedCount = 0;
 						State = NUpdateState::UpdatingFiles;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 						context->SetState("UpdatingFiles");
-#endif
 					}
 					else
 					{
 						State = NUpdateState::WritingVersion;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 						context->SetState("WritingVersion");
-#endif
 					}
 				}
 
 				const mu_uint32 verifiedCount = VerifiedCount;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 				if (State == NUpdateState::VerifyingFiles)
 				{
 					context->SetProgress(static_cast<mu_float>(verifiedCount) / static_cast<mu_float>(filesCount));
@@ -752,7 +725,6 @@ namespace MUUpdateManager
 					context->SetDownloadSizeType(SizeTypes[TotalDownloadSizeType]);
 					context->SetDownloadSize(TotalDownloadSizeFormatted);
 				}
-#endif
 			}
 			break;
 
@@ -926,7 +898,7 @@ namespace MUUpdateManager
 							auto &fileData = *iter;
 							if ((fileData->Bitset & EFileBitset::eDownloading) != 0) continue;
 
-							auto request = std::make_shared<WEBFileDownloadRequest>(fmt::format("{}{}/{}{}", UpdateServer, fileData->UrlPath, fileData->Filename, fileData->Extension), fileData.get());\
+							auto request = std::make_shared<WEBFileDownloadRequest>(fmt::format("{}{}/{}{}", UpdateServer, fileData->UrlPath, fileData->Filename, fileData->Extension), fileData.get());
 							request->SetRequestFailedCallback(RequestFailedCallback);
 							request->SetRequestAbortedCallback(RequestAbortedCallback);
 							request->SetReceivedDataCallback(ReceivedDataCallback);
@@ -968,9 +940,7 @@ namespace MUUpdateManager
 				if (FilesToDownloadList.empty() == true)
 				{
 					State = NUpdateState::WritingVersion;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 					context->SetState("WritingVersion");
-#endif
 				}
 
 				mu_double downloadedSize = static_cast<mu_double>(TotalDownloadedSize.load());
@@ -979,10 +949,8 @@ namespace MUUpdateManager
 					downloadedSize /= 1024.0;
 				}
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 				context->SetProgress(static_cast<mu_float>(TotalDownloadedSize.load()) / static_cast<mu_float>(TotalDownloadSize));
 				context->SetDownloadedSize(downloadedSize);
-#endif
 			}
 			break;
 
@@ -990,17 +958,13 @@ namespace MUUpdateManager
 			{
 				WriteVersion();
 				State = NUpdateState::Finished;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 				context->SetState("StartingGame");
-#endif
 			}
 			break;
 
 		case NUpdateState::Finished:
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 			context->SetState("LoadingGame");
 			context->SetProgress(0.0f);
-#endif
 			return true;
 		}
 

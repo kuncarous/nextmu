@@ -5,6 +5,7 @@
 #include "mu_textures.h"
 #include "mu_resourcesmanager.h"
 #include "mu_graphics.h"
+#include "mu_angelscript.h"
 #include <glm/gtc/type_ptr.hpp>
 
 std::map<mu_utf8string, Diligent::COMPARISON_FUNCTION> DepthTestMap = {
@@ -229,6 +230,24 @@ const mu_boolean NModel::Load(const mu_utf8string id, mu_utf8string path)
 		return false;
 	}
 
+	if (document.contains("scripts"))
+	{
+		const auto &jscripts = document["scripts"];
+
+		if (jscripts.contains("config"))
+		{
+			ConfigScript = MUAngelScript::CompileScript(path + jscripts["config"].get<mu_utf8string>());
+			if (ConfigScript != nullptr)
+			{
+				ConfigScriptFunction = ConfigScript->GetFunctionByName("main");
+				if (ConfigScriptFunction == nullptr)
+				{
+					ConfigScript = nullptr;
+				}
+			}
+		}
+	}
+
 	if (document.contains("hide_body"))
 	{
 		HideBody = document["hide_body"].get<mu_boolean>();
@@ -319,6 +338,33 @@ continue_virtualmesh_conditions:
 				if (settings.ShadowProgram == NInvalidShader)
 					settings.ShadowProgram = shadowProgram;
 
+				if (jmesh.contains("scripts"))
+				{
+					const auto &jscripts = jmesh["scripts"];
+					
+					if (jscripts.contains("settings"))
+					{
+						settings.Script = MUAngelScript::CompileScript(path + jscripts["settings"].get<mu_utf8string>());
+						if (settings.Script != nullptr)
+						{
+							settings.ScriptFunction = settings.Script->GetFunctionByName("main");
+							if (settings.ScriptFunction == nullptr)
+							{
+								settings.Script = nullptr;
+							}
+						}
+					}
+				}
+
+				if (jmesh.contains("inherits"))
+				{
+					const auto &jinherits = jmesh["inherits"];
+					if (jinherits.contains("blend_light"))
+					{
+						settings.Inherit.BlendMeshLight = jinherits["blend_light"].get<mu_boolean>();
+					}
+				}
+
 				if (jmesh.contains("vertex_texture"))
 					settings.VertexTexture = MUResourcesManager::GetResourcesManager()->GetTexture(jmesh["vertex_texture"].get<mu_utf8string>());
 
@@ -334,21 +380,24 @@ continue_virtualmesh_conditions:
 						settings.ClassifyIndex = classify["index"].get<mu_uint32>();
 				}
 
-				if (jmesh.contains("normal")) {
+				if (jmesh.contains("normal"))
+				{
 					auto &renderState = settings.RenderState[ModelRenderMode::Normal];
 					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Normal];
 					renderState = CalculateStateFromObject(jmesh["normal"]);
 					shadowRenderState = NormalizeShadowRenderState(renderState);
 				}
 
-				if (jmesh.contains("alpha")) {
+				if (jmesh.contains("alpha"))
+				{
 					auto &renderState = settings.RenderState[ModelRenderMode::Alpha];
 					auto &shadowRenderState = settings.ShadowRenderState[ModelRenderMode::Alpha];
 					renderState = CalculateStateFromObject(jmesh["alpha"]);
 					shadowRenderState = NormalizeShadowRenderState(renderState);
 				}
 
-				if (jmesh.contains("lights")) {
+				if (jmesh.contains("lights"))
+				{
 					const auto &jlights = jmesh["lights"];
 					for (const auto &jlight : jlights)
 					{
@@ -428,6 +477,9 @@ continue_virtualmesh_light_conditions:
 		}
 		else if (settings.contains("meshes"))
 		{
+			const auto program = MUResourcesManager::GetResourcesManager()->GetProgram(ProgramDefault);
+			const auto shadowProgram = MUResourcesManager::GetResourcesManager()->GetProgram(ProgramDefault + "_shadow");
+
 			const auto &meshes = settings["meshes"];
 			for (const auto &jmesh : meshes)
 			{
@@ -447,6 +499,30 @@ continue_virtualmesh_light_conditions:
 					const auto shadowProgram = MUResourcesManager::GetResourcesManager()->GetProgram(shaderId + "_shadow");
 					if (shadowProgram != NInvalidShader)
 						settings.ShadowProgram = shadowProgram;
+				}
+
+				if (settings.Program == NInvalidShader)
+					settings.Program = program;
+
+				if (settings.ShadowProgram == NInvalidShader)
+					settings.ShadowProgram = shadowProgram;
+
+				if (jmesh.contains("scripts"))
+				{
+					const auto &jscripts = jmesh["scripts"];
+
+					if (jscripts.contains("settings"))
+					{
+						settings.Script = MUAngelScript::CompileScript(path + jscripts["settings"].get<mu_utf8string>());
+						if (settings.Script != nullptr)
+						{
+							settings.ScriptFunction = settings.Script->GetFunctionByName("main");
+							if (settings.ScriptFunction == nullptr)
+							{
+								settings.Script = nullptr;
+							}
+						}
+					}
 				}
 
 				if (jmesh.contains("vertex_texture"))

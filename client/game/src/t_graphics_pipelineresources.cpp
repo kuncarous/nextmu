@@ -376,30 +376,15 @@ void CreatePipelineResources()
 		Resources.insert(std::make_pair("bbox", resource));
 	}
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-	// RmlUI Texture
+#if NEXTMU_EMBEDDED_BROWSER == 1
+	// Browser
 	{
 		NPipelineResource resource;
 
 		resource.Variables.push_back(
 			Diligent::ShaderResourceVariableDesc(
 				Diligent::SHADER_TYPE_VERTEX | Diligent::SHADER_TYPE_PIXEL,
-				"cbRmlAttribs",
-				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
-			)
-		);
-
-		Resources.insert(std::make_pair("rmlui_color", resource));
-	}
-
-	// RmlUI Texture
-	{
-		NPipelineResource resource;
-
-		resource.Variables.push_back(
-			Diligent::ShaderResourceVariableDesc(
-				Diligent::SHADER_TYPE_VERTEX | Diligent::SHADER_TYPE_PIXEL,
-				"cbRmlAttribs",
+				"cbBrowserAttribs",
 				Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC
 			)
 		);
@@ -412,7 +397,7 @@ void CreatePipelineResources()
 			)
 		);
 
-		Resources.insert(std::make_pair("rmlui_texture", resource));
+		Resources.insert(std::make_pair("browser", resource));
 	}
 #endif
 }

@@ -1,13 +1,14 @@
 #include "mu_precompiled.h"
 #include "mu_root.h"
 
-void Main()
+void Main(int argc, char **argv)
 {
-	if (MURoot::Initialize() == true)
+	mu_int32 result = 0;
+	if (MURoot::Initialize(argc, argv, nullptr, result) == true)
 	{
 		MURoot::Run();
 	}
-
 	MURoot::Destroy();
-	return 0;
+
+	return result;
 }

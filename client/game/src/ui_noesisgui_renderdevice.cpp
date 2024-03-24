@@ -8,7 +8,6 @@
 #include "mu_config.h"
 #include <MapHelper.hpp>
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	Diligent::TEXTURE_FORMAT GetTextureFormat(Noesis::TextureFormat::Enum format, const mu_boolean sRGB)
@@ -95,6 +94,7 @@ namespace UINoesis
 		CreateShaderResources();
 		CreateShaders();
 		CreateUniforms();
+		CreateDummyTexture();
 		CreateBuffers();
 		InitializeShaderResources();
 	}
@@ -289,6 +289,57 @@ namespace UINoesis
 			Diligent::StateTransitionDesc(FragmentUniforms[1], Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE),
 		};
 		immediateContext->TransitionResourceStates(mu_countof(barriers), barriers);*/
+	}
+
+	/*
+		Create a dummy texture so we always attach a resource to the fragment shader to avoid false validation issues.
+	*/
+	void DERenderDevice::CreateDummyTexture()
+	{
+		const auto device = MUGraphics::GetDevice();
+		const auto immediateContext = MUGraphics::GetImmediateContext();
+		mu_uint32 dummyPixel = 0xFFFFFFFF;
+
+		std::vector<Diligent::TextureSubResData> subresources;
+		Diligent::TextureSubResData subresource;
+		subresource.pData = &dummyPixel;
+		subresource.Stride = sizeof(dummyPixel);
+		subresources.push_back(subresource);
+
+		Diligent::TextureDesc textureDesc;
+#if NEXTMU_COMPILE_DEBUG == 1
+		textureDesc.Name = "NGUI Dummy Texture";
+#endif
+		textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+		textureDesc.Width = 1;
+		textureDesc.Height = 1;
+		textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM;
+		textureDesc.Usage = Diligent::USAGE_IMMUTABLE;
+		textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+
+		Diligent::TextureData textureData(subresources.data(), static_cast<mu_uint32>(subresources.size()));
+		Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+		device->CreateTexture(textureDesc, &textureData, &texture);
+		if (texture == nullptr)
+		{
+			return;
+		}
+
+		Diligent::StateTransitionDesc barrier(texture, Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_SHADER_RESOURCE, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+		immediateContext->TransitionResourceStates(1, &barrier);
+
+		const auto deviceType = MUGraphics::GetDeviceType();
+		const mu_boolean isGL = deviceType == Diligent::RENDER_DEVICE_TYPE_GL || deviceType == Diligent::RENDER_DEVICE_TYPE_GLES;
+		DummyTexture = Noesis::MakePtr<DETexture>(
+			1,
+			1,
+			1,
+			1,
+			isGL,
+			true,
+			Diligent::TEX_FORMAT_RGBA8_UNORM,
+			texture
+		);
 	}
 
 	void DERenderDevice::CreateBuffers()
@@ -1012,6 +1063,8 @@ namespace UINoesis
 			}
 		}
 
+		Diligent::StateTransitionDesc transition(texture_->GetTexture(), Diligent::RESOURCE_STATE_UNKNOWN, Diligent::RESOURCE_STATE_COPY_DEST, Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE);
+		immediateContext->TransitionResourceStates(1, &transition);
 		immediateContext->UpdateTexture(
 			texture_->Texture,
 			level,
@@ -1149,7 +1202,7 @@ namespace UINoesis
 
 	DETexture *DERenderDevice::GetTexture(Noesis::Texture *texture)
 	{
-		if (texture == nullptr) return nullptr;
+		if (texture == nullptr) return DummyTexture.GetPtr();
 		return static_cast<DETexture *>(texture);
 	}
 
@@ -1469,36 +1522,41 @@ namespace UINoesis
 		auto binding = ResourceBindingsManager.GetShaderBinding(0, ResourceSignature.RawPtr(), mu_countof(resources), resources);
 		if (binding->Initialized == false)
 		{
-			if (batch.pattern != nullptr)
+			//batch.pattern
 			{
 				if (!IsCombinedSampler)
 					binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Pattern_sampler")->Set(samplers[0]->Sampler);
 				binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Pattern")->Set(textureViews[0]);
 			}
-			if (batch.ramps != nullptr)
+
+			//batch.ramps
 			{
 				if (!IsCombinedSampler)
 					binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Ramps_sampler")->Set(samplers[1]->Sampler);
 				binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Ramps")->Set(textureViews[1]);
 			}
-			if (batch.image != nullptr)
+			
+			//batch.image
 			{
 				if (!IsCombinedSampler)
 					binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Image_sampler")->Set(samplers[2]->Sampler);
 				binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Image")->Set(textureViews[2]);
 			}
-			if (batch.glyphs != nullptr)
+			
+			//batch.glyphs
 			{
 				if (!IsCombinedSampler)
 					binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Glyphs_sampler")->Set(samplers[3]->Sampler);
 				binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Glyphs")->Set(textureViews[3]);
 			}
-			if (batch.shadow != nullptr)
+			
+			//batch.shadow
 			{
 				if (!IsCombinedSampler)
 					binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Shadow_sampler")->Set(samplers[4]->Sampler);
 				binding->Binding->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "g_Shadow")->Set(textureViews[4]);
 			}
+
 			binding->Initialized = true;
 		}
 
@@ -1524,4 +1582,3 @@ namespace UINoesis
 		);
 	}
 };
-#endif

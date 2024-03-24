@@ -3,7 +3,6 @@
 
 #pragma once
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	class Stream : public Noesis::Stream
@@ -44,6 +43,5 @@ namespace UINoesis
 		std::unique_ptr<mu_uint8[]> Memory;
 	};
 };
-#endif
 
 #endif

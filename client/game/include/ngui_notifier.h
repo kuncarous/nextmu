@@ -3,7 +3,6 @@
 
 #pragma once
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 #include <NsCore/Noesis.h>
 #include <NsCore/ReflectionImplement.h>
 #include <NsGui/INotifyPropertyChanged.h>
@@ -26,6 +25,5 @@ namespace NoesisGUI
         NS_DECLARE_REFLECTION(NotifierBase, BaseComponent)
     };
 };
-#endif
 
 #endif

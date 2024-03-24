@@ -3,6 +3,9 @@
 
 #pragma once
 
+constexpr mu_double GameCycleTime = 1000.0 / 25.0; // 25 FPS
+constexpr mu_float GameCycleDivisor = static_cast<mu_float>(1.0 / GameCycleTime);
+
 namespace MUState
 {
 	void SetTime(const mu_float worldTime, const mu_float elapsedTime);

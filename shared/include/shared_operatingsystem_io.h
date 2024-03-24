@@ -5,10 +5,12 @@
 
 #include <boost/filesystem.hpp>
 
-extern mu_utf8string SupportPathUTF8;
-extern mu_utf8string CachePathUTF8;
-extern mu_utf8string UserPathUTF8;
-extern mu_utf8string GameDataPathUTF8;
+extern mu_utf8string ExecutablePath;
+extern mu_utf8string GamePath;
+extern mu_utf8string SupportPath;
+extern mu_utf8string CachePath;
+extern mu_utf8string UserPath;
+extern mu_utf8string GameDataPath;
 
 enum class EGameDirectoryType : mu_uint32
 {
@@ -36,15 +38,15 @@ NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFileRef file, const mu_
 {
     if constexpr (dirType == EGameDirectoryType::eSupport)
     {
-        *file = SDL_RWFromFile((SupportPathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((SupportPath + filename).c_str(), mode);
     }
     else if constexpr (dirType == EGameDirectoryType::eCache)
     {
-        *file = SDL_RWFromFile((CachePathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((CachePath + filename).c_str(), mode);
     }
     else if constexpr (dirType == EGameDirectoryType::eUser)
     {
-        *file = SDL_RWFromFile((UserPathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((UserPath + filename).c_str(), mode);
     }
 
     return *file != nullptr;
@@ -56,15 +58,15 @@ NEXTMU_INLINE const mu_boolean mu_rwexists_extstorage(const mu_utf8string filena
     NFile file = nullptr;
     if constexpr (dirType == EGameDirectoryType::eSupport)
     {
-        file = SDL_RWFromFile((SupportPathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((SupportPath + filename).c_str(), "rb");
     }
     else if constexpr (dirType == EGameDirectoryType::eCache)
     {
-        file = SDL_RWFromFile((CachePathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((CachePath + filename).c_str(), "rb");
     }
     else if constexpr (dirType == EGameDirectoryType::eUser)
     {
-        file = SDL_RWFromFile((UserPathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((UserPath + filename).c_str(), "rb");
     }
 
     if (file != nullptr)
@@ -86,30 +88,30 @@ NEXTMU_INLINE const mu_boolean mu_rwfromfile_extstorage(NFileRef file, const mu_
 #if NEXTMU_CLIENT_SHARED == 1
     if constexpr (dirType == EGameDirectoryType::eSupport)
     {
-        *file = SDL_RWFromFile((SupportPathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((SupportPath + filename).c_str(), mode);
     }
     else if constexpr (dirType == EGameDirectoryType::eCache)
     {
-        *file = SDL_RWFromFile((CachePathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((CachePath + filename).c_str(), mode);
     }
     else if constexpr (dirType == EGameDirectoryType::eUser)
     {
-        *file = SDL_RWFromFile((UserPathUTF8 + filename).c_str(), mode);
+        *file = SDL_RWFromFile((UserPath + filename).c_str(), mode);
     }
 
     return *file != nullptr;
 #else
     if constexpr (dirType == EGameDirectoryType::eSupport)
     {
-        file = std::make_unique<QFile>((SupportPathUTF8 + filename).c_str());
+        file = std::make_unique<QFile>((SupportPath + filename).c_str());
     }
     else if constexpr (dirType == EGameDirectoryType::eCache)
     {
-        file = std::make_unique<QFile>((CachePathUTF8 + filename).c_str());
+        file = std::make_unique<QFile>((CachePath + filename).c_str());
     }
     else if constexpr (dirType == EGameDirectoryType::eUser)
     {
-        file = std::make_unique<QFile>((UserPathUTF8 + filename).c_str());
+        file = std::make_unique<QFile>((UserPath + filename).c_str());
     }
 
     return file != nullptr && file->open(mode);
@@ -122,15 +124,15 @@ NEXTMU_INLINE const mu_boolean mu_rwexists_extstorage(const mu_utf8string filena
     NFile file = nullptr;
     if constexpr (dirType == EGameDirectoryType::eSupport)
     {
-        file = SDL_RWFromFile((SupportPathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((SupportPath + filename).c_str(), "rb");
     }
     else if constexpr (dirType == EGameDirectoryType::eCache)
     {
-        file = SDL_RWFromFile((CachePathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((CachePath + filename).c_str(), "rb");
     }
     else if constexpr (dirType == EGameDirectoryType::eUser)
     {
-        file = SDL_RWFromFile((UserPathUTF8 + filename).c_str(), "rb");
+        file = SDL_RWFromFile((UserPath + filename).c_str(), "rb");
     }
 
     if (file != nullptr)
@@ -237,21 +239,58 @@ NEXTMU_INLINE void MakeDirectory(mu_utf8string Path)
 #if ELION_OPERATING_SYSTEM_TYPE == ELION_OSTYPE_MOBILE
 	if constexpr (dirType == EGameDirectoryType::eSupport)
 	{
-		Path = SupportPathUTF8 + Path;
+		Path = SupportPath + Path;
 	}
 	else if constexpr (dirType == EGameDirectoryType::eCache)
 	{
-		Path = CachePathUTF8 + Path;
+		Path = CachePath + Path;
 	}
 	else if constexpr (dirType == EGameDirectoryType::eUser)
 	{
-		Path = UserPathUTF8 + Path;
+		Path = UserPath + Path;
 	}
 #endif
 
 	boost::filesystem::path dirPath(Path);
 	boost::system::error_code ec;
 	boost::filesystem::create_directories(dirPath, ec);
+}
+
+NEXTMU_INLINE void MakeAbsoluteDirectory(mu_utf8string Path)
+{
+	std::replace(Path.begin(), Path.end(), '\\', '/');
+	boost::filesystem::path dirPath(Path);
+	boost::system::error_code ec;
+	boost::filesystem::create_directories(dirPath, ec);
+}
+
+NEXTMU_INLINE std::string ResolveToRelativePath(std::string str)
+{
+	// Replace backslashes for forward slashes
+	size_t pos = 0;
+	while ((pos = str.find("\\", pos)) != std::string::npos)
+		str[pos] = '/';
+
+	// Replace /./ with /
+	pos = 0;
+	while ((pos = str.find("/./", pos)) != std::string::npos)
+		str.erase(pos + 1, 2);
+
+	// For each /../ remove the parent dir and the /../
+	pos = 0;
+	while ((pos = str.find("/../")) != std::string::npos)
+	{
+		size_t pos2 = str.rfind("/", pos - 1);
+		if (pos2 != std::string::npos)
+			str.erase(pos2, pos + 3 - pos2);
+		else
+		{
+			// The path is invalid
+			break;
+		}
+	}
+
+	return str;
 }
 
 #endif

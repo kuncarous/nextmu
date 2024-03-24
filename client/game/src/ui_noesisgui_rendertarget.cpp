@@ -2,7 +2,6 @@
 #include "ui_noesisgui_rendertarget.h"
 #include "ui_noesisgui_texture.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	DERenderTarget::DERenderTarget(
@@ -34,4 +33,3 @@ namespace UINoesis
 		return DepthStencilTexture != nullptr;
 	}
 };
-#endif

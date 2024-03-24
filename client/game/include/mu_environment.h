@@ -100,4 +100,6 @@ private:
 	NJointsPtr Joints;
 };
 
+typedef std::unique_ptr<NEnvironment> NEnvironmentPtr;
+
 #endif

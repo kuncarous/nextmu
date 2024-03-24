@@ -109,13 +109,84 @@ namespace MUWebManager
 		return reinterpret_cast<WEBRequestBase *>(userdata)->OnWrite(ptr, size, nmemb);
 	}
 
+	CURLcode SyncRequest(WEBRequestBasePtr request)
+	{
+		CURL *handle = curl_easy_init();
+		if (handle == nullptr)
+		{
+			mu_debug_error("Curl handle is null");
+			return CURLE_OUT_OF_MEMORY;
+		}
+
+		switch (request->GetRequestHttpType())
+		{
+		case WEBRequestMethodType::ePOST:
+			{
+				curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "POST");
+				curl_easy_setopt(handle, CURLOPT_POSTFIELDS, request->GetBody());
+			}
+			break;
+
+		case WEBRequestMethodType::ePUT:
+			{
+				curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "PUT");
+				curl_easy_setopt(handle, CURLOPT_POSTFIELDS, request->GetBody());
+			}
+			break;
+
+		case WEBRequestMethodType::ePATCH:
+			{
+				curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "PATCH");
+				curl_easy_setopt(handle, CURLOPT_POSTFIELDS, request->GetBody());
+			}
+			break;
+		}
+
+		curl_easy_setopt(handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+		curl_easy_setopt(handle, CURLOPT_CAINFO, GamePath + "cacert.pem");
+		//curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(handle, CURLOPT_URL, request->GetUrl().c_str());
+		curl_easy_setopt(handle, CURLOPT_HTTPHEADER, request->GetHeaders());
+		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, WriteCallback);
+		curl_easy_setopt(handle, CURLOPT_WRITEDATA, request.get());
+
+		request->SetHandle(handle);
+		request->SetRequestState(WEBRequestState::Processing);
+		request->OnRequestAdded();
+
+		CURLcode result = curl_easy_perform(handle);
+		if (result != CURLE_OK)
+		{
+			request->SetRequestState(WEBRequestState::Failed);
+			const char *error = curl_easy_strerror(result);
+			request->OnRequestFailed(result, error);
+			return result;
+		}
+
+		mu_long responseCode = 0;
+		result = curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &responseCode);
+		if (result != CURLE_OK)
+		{
+			request->SetRequestState(WEBRequestState::Failed);
+			const char *error = curl_easy_strerror(result);
+			request->OnRequestFailed(result, error);
+			return result;
+		}
+
+		request->SetRequestState(WEBRequestState::Completed);
+		request->SetResponseCode(responseCode);
+		request->OnRequestResponse(responseCode);
+
+		return result;
+	}
+
 	CURLMcode AddRequest(WEBRequestBasePtr request)
 	{
 		CURL *handle = curl_easy_init();
 		if (handle == nullptr)
 		{
 			mu_debug_error("Curl handle is null");
-			return CURLM_BAD_EASY_HANDLE;
+			return CURLM_OUT_OF_MEMORY;
 		}
 
 		switch (request->GetRequestHttpType())

@@ -97,6 +97,8 @@ public:
 	Noesis::Ptr<BaseComponent> ProvideValue(const Noesis::ValueTargetProvider *provider) override;
 	//@}
 
+	static const Noesis::DependencyProperty *TargetProperty;
+	static const Noesis::DependencyProperty *BindingKeyProperty;
 	static const Noesis::DependencyProperty *SourceProperty;
 
 private:

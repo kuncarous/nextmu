@@ -235,7 +235,7 @@ namespace MUTextures
 
 	const mu_boolean IsValidWrap(const mu_utf8string value)
 	{
-		for (mu_uint32 index = 0; index < filters.size(); ++index)
+		for (mu_uint32 index = 0; index < wraps.size(); ++index)
 		{
 			const auto &f = wraps[index];
 			if (value == f.name) return true;

@@ -33,9 +33,20 @@ target_link_libraries(
         shcore.lib
         dxguid.lib
 )
+add_dependencies(NextMU NextMUBrowser)
 add_custom_command(
     TARGET NextMU POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:NextMU> $<TARGET_FILE_DIR:NextMU>
+    COMMAND_EXPAND_LISTS
+)
+add_custom_command(
+    TARGET NextMU POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_FILE_DIR:NextMUBrowser> $<TARGET_FILE_DIR:NextMU>
+    COMMAND_EXPAND_LISTS
+)
+add_custom_command(
+    TARGET NextMU POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_FILE_DIR:CURL::libcurl> $<TARGET_FILE_DIR:NextMU>
     COMMAND_EXPAND_LISTS
 )
 if(UI_LIBRARY STREQUAL "NoesisGUI")
@@ -47,6 +58,13 @@ if(UI_LIBRARY STREQUAL "NoesisGUI")
                 $<TARGET_FILE_DIR:NextMU>
     )
 endif()
+
+ADD_CUSTOM_COMMAND(
+    TARGET NextMU
+    POST_BUILD
+    COMMAND "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\dpiawareness.manifest\" -inputresource:\"$<TARGET_FILE:NextMU>\"\;\#1 -outputresource:\"$<TARGET_FILE:NextMU>\"\;\#1
+    COMMENT "Adding display aware manifest..." 
+)
 
 source_group("src" FILES ${SOURCE})
 source_group("include" FILES ${INCLUDE})

@@ -4,23 +4,24 @@
 #include "mu_scenemanager.h"
 #include "mu_resourcesmanager.h"
 #include "mu_charactersmanager.h"
+#include "mu_animationsmanager.h"
+#include "mu_browsermanager.h"
 #include "mu_updatemanager.h"
+#include "mu_modelrenderer.h"
+#include "mu_bboxrenderer.h"
+#include "res_renders.h"
+#include "res_items.h"
 #include "mu_renderstate.h"
 #include "mu_graphics.h"
 #include "mu_state.h"
 #include "mu_input.h"
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 #include "ui_noesisgui.h"
 #include "ngui_context.h"
-#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-#include "ui_rmlui.h"
-#endif
 
 mu_boolean NIntroScene::Load()
 {
-	std::unique_ptr<NResourcesManager> manager(new_nothrow NResourcesManager());
-	if (manager->Load(GameDataPathUTF8 + "update_resources.json") == false)
+	NResourcesManagerPtr manager(new_nothrow NResourcesManager());
+	if (manager->Load(GameDataPath + "update_resources.json") == false)
 	{
 		mu_error("Failed to load update resources json.");
 		return false;
@@ -42,7 +43,6 @@ mu_boolean NIntroScene::Load()
 		return false;
 	}
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 	if (UINoesis::Initialize() == false)
 	{
 		mu_error("Failed to initialize noesisgui.");
@@ -57,19 +57,7 @@ mu_boolean NIntroScene::Load()
 
 	UpdateContext = Noesis::MakePtr<NGUpdateContext>();
 	UINoesis::GetContext()->SetUpdate(UpdateContext);
-#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-	if (UIRmlUI::Initialize() == false)
-	{
-		mu_error("Failed to initialize rmlui.");
-		return false;
-	}
-
-	if (UIRmlUI::CreateView("Intro/index.rml") == false)
-	{
-		mu_error("Failed to create rmlui view.");
-		return false;
-	}
-#endif
+	UINoesis::GetContext()->SetPopup(Noesis::MakePtr<NGPopupContext>());
 
 	if (MUUpdateManager::Initialize() == false)
 	{
@@ -77,48 +65,26 @@ mu_boolean NIntroScene::Load()
 		return false;
 	}
 
-	/*if (MUCharactersManager::Load() == false)
+#if NEXTMU_EMBEDDED_BROWSER == 1
+	if (MUBrowserManager::ReloadShaders() == false)
 	{
-		mu_error("Failed to load characters.");
+		mu_error("Failed to reload embedded browser shaders.");
 		return false;
 	}
-
-	if (MUAnimationsManager::Load() == false)
-	{
-		mu_error("Failed to load animations.");
-		return false;
-	}
-
-	if (MUModelRenderer::Initialize() == false)
-	{
-		mu_error("Failed to initialize model renderer.");
-		return false;
-	}
-
-	if (MUBBoxRenderer::Initialize() == false)
-	{
-		mu_error("Failed to initialize model renderer.");
-		return false;
-	}
-
-	if (MURendersManager::Initialize() == false)
-	{
-		return false;
-	}
-
-	if (MUItemsManager::Initialize() == false)
-	{
-		return false;
-	}*/
+#endif
 
 	return true;
 }
 
 void NIntroScene::Unload()
 {
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
-	UINoesis::GetContext()->SetUpdate(nullptr);
+#if NEXTMU_EMBEDDED_BROWSER == 1
+	//MUBrowserManager::DestroyBrowser();
 #endif
+
+	UINoesis::DeleteView();
+	UINoesis::GetContext()->SetUpdate(nullptr);
+	UINoesis::ResetDeviceShaders();
 
     MUUpdateManager::Destroy();
 	if (UpdateResources != nullptr)
@@ -138,23 +104,19 @@ void NIntroScene::Run()
 	auto *pRTV = swapchain->GetCurrentBackBufferRTV();
 	auto *pDSV = swapchain->GetDepthBufferDSV();
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 	auto *context = UINoesis::GetContext()->GetUpdate();
-#endif
 
 	if (FinishedUpdate == false)
 	{
 		FinishedUpdate = MUUpdateManager::Run();
 		if (FinishedUpdate == true)
 		{
-			std::unique_ptr<NResourcesManager> manager(new_nothrow NResourcesManager());
-			if (manager->Load(GameDataPathUTF8 + "resources.json") == false)
+			NResourcesManagerPtr manager(new_nothrow NResourcesManager());
+			if (manager->Load(GameDataPath + "resources.json") == false)
 			{
 				mu_error("Failed to load update resources json.");
 				MUUpdateManager::WriteVersion(true);
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 				context->SetState("UnexpectedError");
-#endif
 			}
 			else
 			{
@@ -165,35 +127,62 @@ void NIntroScene::Run()
 	else if (GameResources != nullptr && GameResources->IsResourcesQueueEmpty() == false)
 	{
 		MUResourcesManager::SetResourcesManager(GameResources.get());
-		GameResources->Run();
+		GameResources->RunByTime(33); // 33ms
 		MUResourcesManager::SetResourcesManager(UpdateResources.get());
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 		context->SetProgress(static_cast<mu_float>(GameResources->GetResourcesLoaded()) / static_cast<mu_float>(GameResources->GetResourcesToLoad()));
-#endif
 
 		if (GameResources->IsResourcesQueueEmpty() == true)
 		{
-			CanStartGame = true;
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
-			context->SetState("Finished");
-#endif
+			mu_boolean failed = false;
+
+			if (MUCharactersManager::Load() == false)
+			{
+				mu_error("Failed to load characters.");
+				failed = true;
+			}
+			else if (MUAnimationsManager::Load() == false)
+			{
+				mu_error("Failed to load animations.");
+				failed = true;
+			}
+			else if (MUModelRenderer::Initialize() == false)
+			{
+				mu_error("Failed to initialize model renderer.");
+				failed = true;
+			}
+			else if (MUBBoxRenderer::Initialize() == false)
+			{
+				mu_error("Failed to initialize model renderer.");
+				failed = true;
+			}
+			else if (MURendersManager::Initialize() == false)
+			{
+				failed = true;
+			}
+			else if (MUItemsManager::Initialize() == false)
+			{
+				failed = true;
+			}
+
+			if (failed == false)
+			{
+				CanStartGame = true;
+				context->SetState("Finished");
+			}
+			else
+			{
+				context->SetState("UnexpectedError");
+			}
 		}
 	}
 	else if (CanStartGame == true && (MUInput::IsAnyMousePressing() || MUInput::IsAnyKeyPressing()))
 	{
-		MUSceneManager::SetQueueScene(std::make_unique<NLoginScene>());
+		MUSceneManager::SetQueueScene(std::make_unique<NLoginScene>(std::move(GameResources)));
 	}
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 	UINoesis::Update();
-#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-	UIRmlUI::Update();
-#endif
-
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 	UINoesis::RenderOffscreen();
-#endif
 
 	MURenderState::SetRenderMode(NRenderMode::Normal);
 	MUGraphics::SetRenderTargetDesc(
@@ -209,9 +198,5 @@ void NIntroScene::Run()
 
 	ShaderResourcesBindingManager.MergeTemporaryShaderBindings();
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 	UINoesis::RenderOnscreen();
-#elif NEXTMU_UI_LIBRARY == NEXTMU_UI_RMLUI
-	UIRmlUI::RenderOnscreen();
-#endif
 }

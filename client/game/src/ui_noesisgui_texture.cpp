@@ -1,7 +1,6 @@
 #include "mu_precompiled.h"
 #include "ui_noesisgui_texture.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	DETexture::DETexture(
@@ -71,4 +70,3 @@ namespace UINoesis
 		return Alpha;
 	}
 };
-#endif

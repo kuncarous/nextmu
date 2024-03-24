@@ -5,7 +5,6 @@
 
 #include <queue>
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	namespace TextureUnit
@@ -39,6 +38,7 @@ namespace UINoesis
 		void InitializeShaderResources();
 		void CreateShaders();
 		void CreateUniforms();
+		void CreateDummyTexture();
 		void CreateBuffers();
 
 		const mu_shader LoadShader(const Noesis::Shader::Enum shader);
@@ -134,6 +134,7 @@ namespace UINoesis
 		std::array<Diligent::InputLayoutDescX, Noesis::Shader::Vertex::Format::Count> InputLayouts;
 		Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> ResourceSignature;
 		NShaderResourcesBindingManager<Diligent::IPipelineResourceSignature> ResourceBindingsManager;
+		Noesis::Ptr<DETexture> DummyTexture;
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> GPUVertexBuffer;
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> GPUIndexBuffer;
 		Diligent::RefCntAutoPtr<Diligent::IBuffer> VertexUniforms[2];
@@ -143,6 +144,5 @@ namespace UINoesis
 		std::array<mu_uint8, DYNAMIC_IB_SIZE> IndexBuffer;
 	};
 };
-#endif
 
 #endif

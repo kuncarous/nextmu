@@ -3,7 +3,6 @@
 
 #pragma once
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	class DETexture : public Noesis::Texture
@@ -82,6 +81,5 @@ namespace UINoesis
 		mu_boolean TransitionRequired;
 	};
 };
-#endif
 
 #endif

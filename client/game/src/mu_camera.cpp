@@ -15,7 +15,8 @@ void NCamera::Update()
 	const mu_float elapsedTime = MUState::GetElapsedTime();
 
 	const mu_boolean shiftPressed = MUInput::IsShiftPressing() == true;
-	if (shiftPressed == true &&
+	if (Mode != NCameraMode::DirectionalByAngle &&
+		shiftPressed == true &&
 		MUInput::IsMousePressing(MOUSE_BUTTON_LEFT) == true)
 	{
 		if (Dragging == false)
@@ -85,16 +86,32 @@ void NCamera::Update()
 		break;
 	}
 
-	const mu_float xSin = glm::sin(Angle[0]);
-	const mu_float xCos = glm::cos(Angle[0]);
-	const mu_float ySin = glm::sin(Angle[1]);
-	const mu_float yCos = glm::cos(Angle[1]);
+	glm::vec3 direction;
 
-	const glm::vec3 direction(
-		xCos * ySin,
-		xSin * ySin,
-		yCos
-	);
+	switch (Mode)
+	{
+	case NCameraMode::DirectionalByAngle:
+		{
+			direction = glm::xzy(glm::quat(Angle) * InverseUp);
+		}
+		break;
+
+	case NCameraMode::Directional:
+	case NCameraMode::Positional:
+		{
+			const mu_float xSin = glm::sin(Angle[0]);
+			const mu_float xCos = glm::cos(Angle[0]);
+			const mu_float ySin = glm::sin(Angle[1]);
+			const mu_float yCos = glm::cos(Angle[1]);
+
+			direction = glm::vec3(
+				xCos * ySin,
+				xSin * ySin,
+				yCos
+			);
+		}
+		break;
+	}
 
 	if (shiftPressed)
 	{
@@ -140,6 +157,7 @@ void NCamera::Update()
 
 	switch (Mode)
 	{
+	case NCameraMode::DirectionalByAngle:
 	case NCameraMode::Directional:
 		{
 			Target = Eye + direction;
@@ -195,6 +213,11 @@ glm::mat4 NCamera::GetShadowView() const
 void NCamera::SetMode(const NCameraMode mode)
 {
 	Mode = mode;
+}
+
+void NCamera::SetFOV(const mu_float fov)
+{
+	FOV = fov;
 }
 
 void NCamera::SetEye(const glm::vec3 eye)

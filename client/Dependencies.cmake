@@ -2,6 +2,13 @@
 include(../CPM.cmake)
 include(../SetPlatform.cmake)
 
+foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER ${CONFIG} CONFIG_UC)
+    message("CMAKE_${CONFIG_UC}_POSTFIX_BACKUP : ${CMAKE_${CONFIG_UC}_POSTFIX}")
+    set("CMAKE_${CONFIG_UC}_POSTFIX_BACKUP" "${CMAKE_${CONFIG_UC}_POSTFIX}")
+    list(APPEND NEXTMU_THIRD_PARTY_OPTIONS "CMAKE_${CONFIG_UC}_POSTFIX_BACKUP ${CMAKE_${CONFIG_UC}_POSTFIX}")
+endforeach()
+
 set(DEPS_MODULE_PATH
     "${CMAKE_BINARY_DIR}/DEPS_modules"
     CACHE INTERNAL ""
@@ -30,9 +37,11 @@ endif()
 
 CPMAddPackage(
     NAME ZLIB
-    GIT_TAG 09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851
+    VERSION 1.3.1
+    GIT_TAG 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
     GITHUB_REPOSITORY madler/zlib
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         "CMAKE_POSITION_INDEPENDENT_CODE TRUE"
 )
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -69,9 +78,10 @@ if (PLATFORM_TVOS)
 endif()
 CPMAddPackage(
     NAME PNG
-    VERSION 1.6.42
+    VERSION 1.6.43
     GITHUB_REPOSITORY pnggroup/libpng
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         ${PNG_OPTIONS}
 )
 set_target_properties(png_static PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -92,15 +102,19 @@ CPMAddPackage(
     URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
     URL_HASH SHA256=2e64e5d79a738d0fa6fb546c6e5c2bd28f88d268a2a080546f74e5ff98f29d0e
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         "BOOST_ENABLE_CMAKE ON"
         "BOOST_INCLUDE_LIBRARIES filesystem\\\;algorithm\\\;serialization\\\;endian\\\;uuid\\\;regex"
 )
 
 CPMAddPackage(
     NAME glm
+    VERSION 1.0.0
     GIT_TAG 33b0eb9fa336ffd8551024b1d2690e418014553b
     GITHUB_REPOSITORY g-truc/glm
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
+        "BUILD_SHARED_LIBS OFF"
         "GLM_ENABLE_CXX_20 ON"
 )
 
@@ -108,24 +122,34 @@ CPMAddPackage(
     NAME EnTT
     VERSION 3.13.1
     GITHUB_REPOSITORY skypjack/entt
+    OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
 )
 
 CPMAddPackage(
     NAME fmt
+    VERSION 10.2.1
     GIT_TAG e69e5f977d458f2650bb346dadf2ad30c5320281
     GITHUB_REPOSITORY fmtlib/fmt
+    OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
 )
 
 CPMAddPackage(
     NAME nlohmann_json
-    GIT_TAG 9cca280a4d0ccf0c08f47a99aa71d1b0e52f8d03
+    VERSION 3.11.3
     GITHUB_REPOSITORY nlohmann/json
+    OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
 )
 
 CPMAddPackage(
     NAME nlohmann_fifo_map
+    VERSION 1.0.0
     GIT_TAG d732aaf9a315415ae8fd7eb11e3a4c1f80e42a48
     GITHUB_REPOSITORY nlohmann/fifo_map
+    OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
 )
 
 CPMAddPackage(
@@ -134,6 +158,7 @@ CPMAddPackage(
     URL https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.8.2.tar.gz
     URL_HASH SHA256=6d4b8d5bbb25a1f8336639e56ec5088052d43a95256697a85c4ce91323c25954
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         "LIBRESSL_APPS OFF"
         "LIBRESSL_TESTS OFF"
 )
@@ -153,9 +178,11 @@ configure_file(
 
 CPMAddPackage(
     NAME CryptoPP-CMake
+    VERSION 8.9.0
     GIT_TAG f815f6284684be6ab03af4b6c273359331c61241
     GITHUB_REPOSITORY abdes/cryptopp-cmake
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         "CRYPTOPP_BUILD_TESTING OFF"
         "CRYPTOPP_INSTALL OFF"
 )
@@ -183,17 +210,21 @@ list(
 )
 CPMAddPackage(
     NAME SDL2
-    GIT_TAG 859844eae358447be8d66e6da59b6fb3df0ed778
+    VERSION 2.30.1
+    GIT_TAG 5adbf3765a57dc5931c2a3137390bfee2370c945
     GITHUB_REPOSITORY libsdl-org/SDL
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         ${SDL_OPTIONS}
 )
 
 CPMAddPackage(
     NAME DiligentEngine
-    GIT_TAG 7d46b75850ca3fe1f7778775ea0fedb28146327e
+    VERSION 2.5.4
     GITHUB_REPOSITORY DiligentGraphics/DiligentEngine
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
+        "BUILD_SHARED_LIBS OFF"
         "DILIGENT_BUILD_SAMPLES OFF"
         "DILIGENT_INSTALL_CORE OFF"
         "DILIGENT_INSTALL_FX OFF"
@@ -202,36 +233,29 @@ CPMAddPackage(
         "DILIGENT_MSVC_RELEASE_COMPILE_OPTIONS \"/arch:SSE2\""
 )
 
-if (UI_LIBRARY STREQUAL "RmlUI")
-    CPMAddPackage(
-        NAME RmlUI
-        GIT_TAG b8f8e2e1237a967ad5b2d2eae9a751aace428a67
-        GITHUB_REPOSITORY mikke89/RmlUi
-    )
-endif()
-
 CPMAddPackage(
     NAME jwt-cpp
-    GIT_TAG 08bcf77a687fb06e34138e9e9fa12a4ecbe12332
+    VERSION 0.7.0
     GITHUB_REPOSITORY Thalhammer/jwt-cpp
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         "JWT_SSL_LIBRARY LibreSSL"
 )
 
 CPMAddPackage(
     NAME nghttp2
-    GIT_TAG 4c250df3187e8b5bb1167cafc4a7a9dcc139eb02
+    VERSION 1.60.0
     GITHUB_REPOSITORY nghttp2/nghttp2
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         "ENABLE_LIB_ONLY ON"
         "ENABLE_DOC OFF"
         "ENABLE_STATIC_CRT ON"
 )
-get_target_property(NGHTTP2_INCLUDE_DIR nghttp2 INCLUDE_DIRECTORIES)
-target_include_directories(nghttp2 PUBLIC ${NGHTTP2_INCLUDE_DIR})
-add_library(NGHTTP2 ALIAS nghttp2)
-set(NGHTTP2_LIBRARY nghttp2)
-export(TARGETS nghttp2 FILE Findnghttp2.cmake) 
+get_target_property(NGHTTP2_INCLUDE_DIR nghttp2_static INCLUDE_DIRECTORIES)
+add_library(NGHTTP2 ALIAS nghttp2_static)
+set(NGHTTP2_LIBRARY nghttp2_static)
+export(TARGETS nghttp2_static FILE Findnghttp2.cmake) 
 
 set(CURL_OPTIONS)
 if(PLATFORM_MACOS OR PLATFORM_IOS)
@@ -251,9 +275,11 @@ else()
 endif()
 CPMAddPackage(
     NAME cURL
+    VERSION 8.6.0
     GIT_TAG 5ce164e0e9290c96eb7d502173426c0a135ec008
     GITHUB_REPOSITORY curl/curl
     OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
         ${CURL_OPTIONS}
         "BUILD_CURL_EXE OFF"
         "CURL_USE_OPENSSL ON"
@@ -282,6 +308,88 @@ CPMAddPackage(
         "USE_NGHTTP2 ON"
         "HAVE_SSL_SET0_WBIO 0"
 )
+
+CPMAddPackage(
+    NAME AngelScript
+    VERSION 2.36.1
+    URL http://angelcode.com/angelscript/sdk/files/angelscript_2.36.1.zip
+    URL_HASH SHA256=58bb749af9c7e386304705f4e6e627ae41dfe03e0b6a73c3d0d2e017c4fc948f
+    SOURCE_SUBDIR angelscript/projects/cmake
+    OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
+)
+
+set(CEF_PACKAGE_PATCH git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/cef-project.patch)
+CPMAddPackage(
+    NAME CEF-Project
+    VERSION 122.1.13+gde5b724+chromium-122.0.6261.130
+    GIT_TAG master
+    GITHUB_REPOSITORY chromiumembedded/cef-project
+    PATCH_COMMAND ${CEF_PACKAGE_PATCH}
+    UPDATE_DISCONNECTED 1
+    OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
+        "BUILD_SHARED_LIBS OFF"
+        "WITH_EXAMPLES OFF"
+)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
+find_package(CEF REQUIRED)
+
+target_compile_definitions(libcef_dll_wrapper PRIVATE $<$<CONFIG:Debug>:_HAS_ITERATOR_DEBUGGING=1>)
+target_link_libraries(
+    libcef_dll_wrapper
+    PUBLIC
+        debug ${CEF_LIB_DEBUG}
+        optimized ${CEF_LIB_RELEASE}
+)
+
+if(PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS)
+    set(POCO_PACKAGE_PATCH git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/poco.patch)
+    CPMAddPackage(
+        NAME POCO
+        VERSION 1.13.2
+        GIT_TAG a8aea338d211d6dbce75f5f07d70c449b94f1605
+        GITHUB_REPOSITORY pocoproject/poco
+        PATCH_COMMAND ${POCO_PACKAGE_PATCH}
+        UPDATE_DISCONNECTED 1
+        OPTIONS
+            ${NEXTMU_THIRD_PARTY_OPTIONS}
+            "BUILD_SHARED_LIBS OFF"
+            "ENABLE_NETSSL OFF"
+            "ENABLE_NETSSL_WIN OFF"
+            "FORCE_OPENSSL ON"
+            "ENABLE_APACHECONNECTOR OFF"
+            "ENABLE_DATA_MYSQL OFF"
+            "ENABLE_DATA_POSTGRESQL OFF"
+            "ENABLE_DATA_ODBC OFF"
+            "ENABLE_ENCODINGS OFF"
+            "ENABLE_ENCODINGS_COMPILER OFF"
+            "ENABLE_XML OFF"
+            "ENABLE_JSON OFF"
+            "ENABLE_MONGODB OFF"
+            "ENABLE_DATA_SQLITE OFF"
+            "ENABLE_REDIS OFF"
+            "ENABLE_PROMETHEUS OFF"
+            "ENABLE_PDF OFF"
+            "ENABLE_SEVENZIP OFF"
+            "ENABLE_ZIP OFF"
+            "ENABLE_CPPPARSER OFF"
+            "ENABLE_POCODOC OFF"
+            "ENABLE_PAGECOMPILER OFF"
+            "ENABLE_PAGECOMPILER_FILE2PAGE OFF"
+            "ENABLE_ACTIVERECORD OFF"
+            "ENABLE_ACTIVERECORD_COMPILER OFF"
+            "ENABLE_TESTS OFF"
+            "ENABLE_SAMPLES OFF"
+    )
+    target_compile_definitions(Foundation PUBLIC POCO_NO_AUTOMATIC_LIBS)
+endif()
+
+foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER ${CONFIG} CONFIG_UC)
+    set("CMAKE_${CONFIG_UC}_POSTFIX" "${CMAKE_${CONFIG_UC}_POSTFIX_BACKUP}")
+endforeach()
 
 add_subdirectory(../dependencies/freeimage ${CMAKE_CURRENT_BINARY_DIR}/dependencies/freeimage)
 

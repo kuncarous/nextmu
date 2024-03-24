@@ -1,7 +1,6 @@
 #include "mu_precompiled.h"
 #include "ngui_context_update.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 mu_float NGUpdateContext::GetProgress() const
 {
 	return Progress;
@@ -101,4 +100,3 @@ NS_IMPLEMENT_REFLECTION(NGUpdateContext)
 }
 
 NS_END_COLD_REGION
-#endif

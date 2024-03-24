@@ -8,6 +8,32 @@
 class NTerrain;
 class NModel;
 
+#pragma pack(4)
+struct NModelViewSettings
+{
+	glm::mat4 Model;
+	glm::mat4 ViewProj;
+};
+
+struct NModelSettings
+{
+	glm::vec4 LightPosition;
+	glm::vec4 BodyLight;
+	glm::vec4 BodyOrigin;
+	mu_float BoneOffset;
+	mu_float NormalScale;
+	mu_float EnableLight;
+	mu_float AlphaTest;
+	mu_float PremultiplyAlpha;
+	mu_float WorldTime;
+	mu_float ZTestRef;
+	mu_float BlendMeshLight;
+	glm::vec2 BlendTexCoord;
+	mu_float Dummy2;
+	mu_float Dummy3;
+};
+#pragma pack()
+
 class MUModelRenderer
 {
 protected:
@@ -29,7 +55,7 @@ public:
 	static void RenderBody(
 		const NSkeletonInstance &skeleton,
 		NModel *model,
-		const NRenderConfig &config,
+		NRenderConfig &config,
 		const NRenderVirtualMeshToggle *virtualMeshToggle = nullptr,
 		const NRenderVirtualMeshLightIndex *virtualMeshLights = nullptr
 	);

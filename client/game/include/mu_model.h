@@ -48,6 +48,16 @@ public:
 	NRenderVirtualMeshLightIndex GenerateVirtualMeshLightIndex(const NMeshRenderConditionInput &input);
 
 public:
+	NEXTMU_INLINE AngelScript::asIScriptModule *GetConfigScript() const
+	{
+		return ConfigScript.get();
+	}
+
+	NEXTMU_INLINE AngelScript::asIScriptFunction *GetConfigScriptFunction() const
+	{
+		return ConfigScriptFunction;
+	}
+
 	NEXTMU_INLINE const mu_boolean HasMeshes() const
 	{
 		return !Meshes.empty();
@@ -119,6 +129,9 @@ public:
 	mu_boolean HideBody = true;
 	mu_int16 BoneHead = NInvalidInt16;
 	mu_float BodyHeight = 0.0f;
+
+	ASModuleScript ConfigScript;
+	AngelScript::asIScriptFunction *ConfigScriptFunction = nullptr;
 };
 
 #endif

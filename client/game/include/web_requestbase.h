@@ -86,9 +86,19 @@ public:
 		return "";
 	}
 
+	void SetHeaders(curl_slist *headers)
+	{
+		Headers = headers;
+	}
+
 	virtual curl_slist *GetHeaders()
 	{
 		return Headers;
+	}
+
+	void SetBody(const mu_utf8string body)
+	{
+		Body = body;
 	}
 
 	virtual const mu_char *GetBody()

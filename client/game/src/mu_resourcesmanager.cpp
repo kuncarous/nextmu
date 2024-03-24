@@ -5,6 +5,7 @@
 #include "mu_graphics.h"
 #include "mu_model.h"
 #include "mu_textures.h"
+#include "mu_timer.h"
 #include "res_renders.h"
 #include "res_items.h"
 #include <boost/algorithm/string/replace.hpp>
@@ -155,6 +156,71 @@ const mu_boolean NResourcesManager::Run(const mu_size maxProcessing)
 	return true;
 }
 
+const mu_boolean NResourcesManager::RunByTime(const mu_double maxProcessingTime)
+{
+	auto startTime = MUGlobalTimer::GetRealtime();
+	auto iter = ResourcesQueue.begin(), end = ResourcesQueue.end();
+	for (; iter != end; ++iter)
+	{
+		auto &baseResource = *iter;
+		switch (baseResource->Type)
+		{
+		case NResourceType::Program:
+			{
+				auto *resource = static_cast<NProgramResourceRequest *>(baseResource.get());
+				if (LoadProgram(resource->ID, resource->Vertex, resource->Fragment, resource->ResourceID, resource->Macros) == false)
+				{
+					return false;
+				}
+			}
+			break;
+
+		case NResourceType::Texture:
+			{
+				auto *resource = static_cast<NTextureResourceRequest *>(baseResource.get());
+				auto texture = MUTextures::Load(resource->Path, MUTextures::CalculateSamplerFlags(resource->Filter, resource->Wrap));
+				if (!texture)
+				{
+					mu_error("failed to load texture ({})", resource->Path);
+					return false;
+				}
+
+				TexturesLookup.insert(std::pair(resource->ID, std::move(texture)));
+			}
+			break;
+
+		case NResourceType::Model:
+			{
+				auto *resource = static_cast<NModelResourceRequest *>(baseResource.get());
+				NModelPtr model(new_nothrow NModel());
+				if (model->Load(resource->ID, resource->Path) == false)
+				{
+					mu_error("failed to load model ({})", resource->Path);
+					return false;
+				}
+
+				ModelsLookup.insert(std::pair(resource->ID, std::move(model)));
+			}
+			break;
+		}
+
+		auto elapsedTime = MUGlobalTimer::GetRealtime() - startTime;
+		if (elapsedTime >= maxProcessingTime) {
+			++iter;
+			break;
+		}
+	}
+
+	end = iter;
+	iter = ResourcesQueue.begin();
+	if (ResourcesQueue.begin() != end)
+	{
+		ResourcesQueue.erase(iter, end);
+	}
+
+	return true;
+}
+
 const mu_utf8string FixShaderSourceByDeviceType(const Diligent::RENDER_DEVICE_TYPE deviceType, mu_utf8string source)
 {
 	switch (deviceType)
@@ -167,9 +233,20 @@ const mu_utf8string FixShaderSourceByDeviceType(const Diligent::RENDER_DEVICE_TY
 			boost::replace_all(source, "half2", "float2");
 			boost::replace_all(source, "half", "float");
 		}
-		[[fallthrough]];
-	default: return source;
+		break;
+
+	default:
+		{
+			source = mu_utf8string(
+" \
+#define equal(x, y) (x == y)\n \
+"
+			) + source;
+		}
+		break;
 	}
+
+	return source;
 }
 
 const mu_boolean NResourcesManager::LoadProgram(const mu_utf8string id, const mu_utf8string vertex, const mu_utf8string fragment, NShaderSettings &settings)
@@ -287,7 +364,7 @@ void NResourcesManager::LoadPrograms(const mu_utf8string basePath, const nlohman
 		const auto &macros = p.contains("macros") ? p["macros"] : dummyArray;
 
 		ResourcesQueue.push_back(
-			std::make_unique<NProgramResourceRequest>(id, GameDataPathUTF8 + vertex, GameDataPathUTF8 + fragment, resourceId, macros)
+			std::make_unique<NProgramResourceRequest>(id, GameDataPath + vertex, GameDataPath + fragment, resourceId, macros)
 		);
 	}
 }
@@ -313,7 +390,7 @@ void NResourcesManager::LoadTextures(const mu_utf8string basePath, const nlohman
 		}
 
 		ResourcesQueue.push_back(
-			std::make_unique<NTextureResourceRequest>(id, GameDataPathUTF8 + path, filter, wrap)
+			std::make_unique<NTextureResourceRequest>(id, GameDataPath + path, filter, wrap)
 		);
 	}
 }
@@ -327,7 +404,7 @@ void NResourcesManager::LoadModels(const mu_utf8string basePath, const nlohmann:
 		const mu_utf8string path = m["path"];
 
 		ResourcesQueue.push_back(
-			std::make_unique<NModelResourceRequest>(id, GameDataPathUTF8 + path)
+			std::make_unique<NModelResourceRequest>(id, GameDataPath + path)
 		);
 	}
 }

@@ -1,7 +1,6 @@
 #include "mu_precompiled.h"
 #include "ngui_notifier.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace NoesisGUI
 {
     Noesis::PropertyChangedEventHandler& NotifierBase::PropertyChanged()
@@ -27,4 +26,3 @@ namespace NoesisGUI
 
 	NS_END_COLD_REGION
 };
-#endif

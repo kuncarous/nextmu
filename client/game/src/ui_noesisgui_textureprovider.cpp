@@ -4,7 +4,6 @@
 #include "ui_noesisgui_consts.h"
 #include "mu_textures.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	template <class T> void SwapValue(T &a, T &b) {
@@ -93,7 +92,7 @@ namespace UINoesis
 	Noesis::TextureInfo TextureProvider::GetTextureInfo(const Noesis::Uri &uri)
 	{
 		Noesis::TextureInfo info;
-		const mu_utf8string filename = SupportPathUTF8 + GetResourcesPath() + uri.Str();
+		const mu_utf8string filename = SupportPath + GetResourcesPath() + uri.Str();
 		Noesis::Ptr<Noesis::Stream> stream = Stream::Load(filename);
 		if (!stream)
 		{
@@ -140,7 +139,7 @@ namespace UINoesis
 	/// Returns a texture compatible with the given device or null if texture is not found
 	Noesis::Ptr<Noesis::Texture> TextureProvider::LoadTexture(const Noesis::Uri &uri, Noesis::RenderDevice *device)
 	{
-		const mu_utf8string filename = SupportPathUTF8 + GetResourcesPath() + uri.Str();
+		const mu_utf8string filename = SupportPath + GetResourcesPath() + uri.Str();
 		Noesis::Ptr<Noesis::Stream> stream = Stream::Load(filename);
 		if (!stream)
 		{
@@ -298,4 +297,3 @@ namespace UINoesis
 		return texture;
 	}
 };
-#endif

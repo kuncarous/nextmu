@@ -6,11 +6,11 @@ namespace MUInput
 	glm::ivec2 MousePosition;
 	mu_float MouseWheel = 0.0f;
 	mu_uint8 MouseState[MOUSE_BUTTON_MAX] = {};
-	mu_uint8 MouseUsed[MOUSE_BUTTON_MAX] = {};
+	mu_uint8 MouseOldState[MOUSE_BUTTON_MAX] = {};
 	mu_uint8 MouseFastCmp[MOUSE_BUTTON_MAX] = {};
 
-	mu_boolean KeyPressed[KEYBOARD_KEY_SIZE] = {};
 	mu_boolean KeyState[KEYBOARD_KEY_SIZE] = {};
+	mu_boolean KeyOldState[KEYBOARD_KEY_SIZE] = {};
 	mu_boolean KeyFastCmp[KEYBOARD_KEY_SIZE] = {};
 
 	void ShowCursor(mu_boolean show)
@@ -21,12 +21,17 @@ namespace MUInput
 	void Reset()
 	{
 		MouseWheel = 0.0f;
+		mu_zeromem(MouseState, sizeof(MouseState));
+		mu_zeromem(MouseOldState, sizeof(MouseOldState));
+		mu_zeromem(KeyState, sizeof(KeyState));
+		mu_zeromem(KeyOldState, sizeof(KeyOldState));
 	}
 
 	void ProcessKeys()
 	{
 		MouseWheel = 0.0f;
-		mu_memcpy(KeyState, KeyPressed, sizeof(KeyState));
+		mu_memcpy(KeyOldState, KeyState, sizeof(KeyState));
+		mu_memcpy(MouseOldState, MouseState, sizeof(MouseState));
 	}
 
 	void SetMousePosition(mu_int32 x, mu_int32 y)
@@ -43,12 +48,11 @@ namespace MUInput
 	void SetMouseButton(mu_uint32 index, mu_uint8 state)
 	{
 		MouseState[index] = state;
-		MouseUsed[index] = MOUSE_USED_NONE;
 	}
 
 	const mu_boolean IsMousePressed(mu_int32 index)
 	{
-		return MouseState[index] == MOUSE_STATE_CLICK;
+		return MouseState[index] == MOUSE_STATE_CLICK && MouseOldState[index] == MOUSE_STATE_NONE;
 	}
 
 	const mu_boolean IsMouseDoublePressed(mu_int32 index)
@@ -78,28 +82,33 @@ namespace MUInput
 
 	void SetKeyDown(mu_uint32 Key)
 	{
-		KeyPressed[Key] = true;
-		KeyState[Key] = false;
+		KeyState[Key] = true;
+		KeyOldState[Key] = false;
 	}
 
 	void SetKeyUp(mu_uint32 Key)
 	{
-		KeyPressed[Key] = false;
+		KeyState[Key] = false;
 	}
 
 	mu_boolean GetKeyState(mu_uint32 Key)
 	{
-		return KeyPressed[Key];
+		return KeyState[Key];
+	}
+
+	const mu_boolean IsKeyPressed(const mu_uint32 key)
+	{
+		return KeyState[key] == true && KeyOldState[key] == true;
 	}
 
 	const mu_boolean IsKeyPressing(const mu_uint32 key)
 	{
-		return KeyPressed[key] == true;
+		return KeyState[key] == true;
 	}
 
 	const mu_boolean IsAnyKeyPressing()
 	{
-		return mu_memcmp(KeyFastCmp, KeyPressed, sizeof(KeyFastCmp)) != 0;
+		return mu_memcmp(KeyFastCmp, KeyState, sizeof(KeyFastCmp)) != 0;
 	}
 
 	const mu_boolean IsShiftPressing()

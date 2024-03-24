@@ -3,12 +3,11 @@
 #include "ui_noesisgui_stream.h"
 #include "ui_noesisgui_consts.h"
 
-#if NEXTMU_UI_LIBRARY == NEXTMU_UI_NOESISGUI
 namespace UINoesis
 {
 	void FontProvider::ScanFolder(const Noesis::Uri &folder)
 	{
-		const mu_utf8string path = SupportPathUTF8 + GetResourcesPath() + folder.Str();
+		const mu_utf8string path = SupportPath + GetResourcesPath() + folder.Str();
 		std::vector<mu_utf8string> fileList;
 		if (NXOperatingSystem::EnumerateFiles(path, fileList) == false)
 		{
@@ -33,8 +32,7 @@ namespace UINoesis
 
 	Noesis::Ptr<Noesis::Stream> FontProvider::OpenFont(const Noesis::Uri &folder, const char *filename) const
 	{
-		const mu_utf8string path = SupportPathUTF8 + GetResourcesPath() + folder.Str() + "/" + filename;
+		const mu_utf8string path = SupportPath + GetResourcesPath() + folder.Str() + "/" + filename;
 		return Stream::Load(path);
 	}
 };
-#endif

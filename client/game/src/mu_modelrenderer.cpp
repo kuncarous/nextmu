@@ -8,34 +8,9 @@
 #include "mu_renderstate.h"
 #include "mu_resourcesmanager.h"
 #include "mu_resizablequeue.h"
+#include "mu_angelscript.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <MapHelper.hpp>
-
-#pragma pack(4)
-struct NModelViewSettings
-{
-	glm::mat4 Model;
-	glm::mat4 ViewProj;
-};
-
-struct NModelSettings
-{
-	glm::vec4 LightPosition;
-	glm::vec4 BodyLight;
-	glm::vec4 BodyOrigin;
-	mu_float BoneOffset;
-	mu_float NormalScale;
-	mu_float EnableLight;
-	mu_float AlphaTest;
-	mu_float PremultiplyAlpha;
-	mu_float WorldTime;
-	mu_float ZTestRef;
-	mu_float Dummy1;
-	glm::vec2 BlendTexCoord;
-	mu_float Dummy2;
-	mu_float Dummy3;
-};
-#pragma pack()
 
 Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelViewUniform;
 Diligent::RefCntAutoPtr<Diligent::IBuffer> ModelSettingsUniform;
@@ -317,8 +292,62 @@ void MUModelRenderer::RenderMesh(
 		);
 		uniform->WorldTime = MUState::GetWorldTime();
 		uniform->ZTestRef = -3000.0f;
-		uniform->Dummy1 = 0.0f;
+		uniform->BlendMeshLight = settings->Inherit.BlendMeshLight ? config.BlendMeshLight : 1.0f;
 		uniform->BlendTexCoord = glm::vec2(0.0f, 0.0f);
+
+		if (settings->Script != nullptr)
+		{
+			AngelScript::asIScriptContext *context = MUAngelScript::GetAvailableContext();
+
+			mu_int32 r = context->Prepare(settings->ScriptFunction);
+			if (r >= 0)
+			{
+				context->SetArgAddress(0, uniform);
+				r = context->Execute();
+				switch (r)
+				{
+				case AngelScript::asEXECUTION_FINISHED: {} break;
+
+#ifndef NDEBUG
+				case AngelScript::asEXECUTION_ABORTED:
+					{
+						mu_info("The script was aborted before it could finish. Probably it timed out.");
+					}
+					break;
+
+				case AngelScript::asEXECUTION_EXCEPTION:
+					{
+						auto *function = context->GetExceptionFunction();
+						mu_info(
+							"The script ended with an exception.\n" \
+							"func: {}\n" \
+							"modl: {}\n" \
+							"sect: {}\n" \
+							"line: {}\n" \
+							"desc: {}",
+							function->GetDeclaration(),
+							function->GetModuleName(),
+							function->GetScriptSectionName(),
+							context->GetExceptionLineNumber(),
+							context->GetExceptionString()
+						);
+					}
+					break;
+
+				default:
+					{
+						mu_info("The script ended for some unforeseen reason ({}).", r);
+					}
+					break;
+#else
+				default: break;
+#endif
+				}
+			}
+			
+			MUAngelScript::ReleaseContext(context);
+		}
+
 		renderManager->UpdateBufferWithMap(
 			RUpdateBufferWithMap{
 				.ShouldReleaseMemory = false,
@@ -363,7 +392,7 @@ void MUModelRenderer::RenderMesh(
 void MUModelRenderer::RenderBody(
 	const NSkeletonInstance &skeleton,
 	NModel *model,
-	const NRenderConfig &config,
+	NRenderConfig &config,
 	const NRenderVirtualMeshToggle *virtualMeshToggle,
 	const NRenderVirtualMeshLightIndex *virtualMeshLights
 )
@@ -372,6 +401,59 @@ void MUModelRenderer::RenderBody(
 
 	auto terrain = MURenderState::GetTerrain();
 	if (terrain == nullptr) return;
+
+	if (model->ConfigScript != nullptr)
+	{
+		AngelScript::asIScriptContext *context = MUAngelScript::GetAvailableContext();
+
+		mu_int32 r = context->Prepare(model->ConfigScriptFunction);
+		if (r >= 0)
+		{
+			context->SetArgAddress(0, &config);
+			r = context->Execute();
+			switch (r)
+			{
+			case AngelScript::asEXECUTION_FINISHED: {} break;
+
+#ifndef NDEBUG
+			case AngelScript::asEXECUTION_ABORTED:
+				{
+					mu_info("The script was aborted before it could finish. Probably it timed out.");
+				}
+				break;
+
+			case AngelScript::asEXECUTION_EXCEPTION:
+				{
+					auto *function = context->GetExceptionFunction();
+					mu_info(
+						"The script ended with an exception.\n" \
+						"func: {}\n" \
+						"modl: {}\n" \
+						"sect: {}\n" \
+						"line: {}\n" \
+						"desc: {}",
+						function->GetDeclaration(),
+						function->GetModuleName(),
+						function->GetScriptSectionName(),
+						context->GetExceptionLineNumber(),
+						context->GetExceptionString()
+					);
+				}
+				break;
+
+			default:
+				{
+					mu_info("The script ended for some unforeseen reason ({}).", r);
+				}
+				break;
+#else
+			default: break;
+#endif
+			}
+		}
+
+		MUAngelScript::ReleaseContext(context);
+	}
 
 	glm::mat4 modelMatrix = glm::transpose(glm::translate(
 		glm::scale(glm::mat4(1.0f), glm::vec3(config.BodyScale)),
