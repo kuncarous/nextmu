@@ -19,12 +19,6 @@ If you want to join our discord, press the button below
 <a href="https://discord.gg/ARafEy92hp"><img src="https://discord.com/api/guilds/1025209137430265996/widget.png?style=banner2" alt="Discord server"></a>
 
 # Dependencies
-## From Repositories
-Some dependencies will be cloned from their repositories as part of NextMU repository, following is the list of dependencies:
- - SDL2 (https://www.libsdl.org/)
- - Diligent Engine (https://diligentgraphics.com/)
- - GLM (https://glm.g-truc.net/)
- 
 ## From External Links
 Some dependencies are required to be downloaded and installed from their websites, follow is the list of dependencies:
  - FMOD (https://www.fmod.com/download#fmodengine)
@@ -41,17 +35,31 @@ Download and install the latest Vulkan SDK from https://vulkan.lunarg.com/sdk/ho
 ### CMake
 Download and install the latest CMake from https://cmake.org/download/.
 
+If you are using linux be sure to install at least CMake 3.22 from the package manager.
+
 ### FMOD
 Instructions soon
 
 ### NoesisGUI
-Instructions soon
+Extract it into ```./dependencies/installed/noesisgui``` (you will need to create installed and noesisgui folder, remember to make it lowercase).
 
 ## Setup
 ### Windows
 Open CMake, choose the repository folder, set ```builds/windows-(x64|x86|arm|arm64|arm64ec)``` as output directory, press configure, choose Visual Studio 2022, select the platform (x64|Win32|ARM|ARM64|ARM64EC), wait until it finish configure everything, change ```NEXTMU_COMPANY_NAME``` and ```NEXTMU_GAME_NAME``` to match your Company (if you don't have one, just use a fantasy name) and your Game name, press generate, go to the ```builds/windows-(x64|x86|arm|arm64|arm64ec)``` folder, open the solution and compile.
 
 After you finish building everything you will be able to find the executable and the DLLs inside of the ```builds/windows-(x64|x86|arm|arm64|arm64ec)/client/windows/(Debug|Release)``` folder.
+
+### Linux
+Ubuntu is the current distro tested, first you need to install CMake, cURL and a few others things, you can follow the next instructions:
+
+```
+sudo apt install -y cmake curl python3 pip libstdc++-12-dev libx11-dev libxext-dev libgl-dev libglx-dev libtinfo5
+bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+```
+
+Install CLion following this page instructions https://www.jetbrains.com/help/clion/installation-guide.html#toolbox, if you want you can use another IDE.
+
+After that you can configure the CMake and compile it, CLion can do it for you.
 
 ### MacOS
 Open CMake, choose the repository folder, set ```builds/macos``` as output directory, press configure, choose Xcode, wait until it finish configure everything, change ```NEXTMU_COMPANY_NAME``` and ```NEXTMU_GAME_NAME``` to match your Company (if you don't have one, just use a fantasy name) and your Game name, press generate, open Xcode, open Xcode project from ```builds/macos``` folder, configure the scheme to use NextMu executable and build.
@@ -62,6 +70,9 @@ Open the repository folder with Android Studio, let it start configuring everyth
 # Licenses
 ## Requirements
 Each license listed below are required to be listed in a user manual as part of your distribution, some licenses might have special requirements which can make this optional or permit you to provide it in a differet way.
+
+## NoesisGUI
+Commercial, please read their pricing page (https://www.noesisengine.com/licensing.php) and follow their instructions, it is a really good commercial UI library and provides lot of features, if you don't want to use it you can modify the code and change to another library but I recommend this library due performance and flexibility beside stability and good price.
 
 ## FreeImage
 ### How to include the license

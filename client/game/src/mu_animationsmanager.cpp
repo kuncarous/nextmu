@@ -26,7 +26,7 @@ namespace MUAnimationsManager
 		return static_cast<mu_uint32>(value.compare("male") == 0 ? NCharacterSex::Male : NCharacterSex::Female);
 	}
 
-	const NCharacterType GetCharacterClassFromString(const mu_utf8string value)
+	const NCharacterTypeInfo GetCharacterClassFromString(const mu_utf8string value)
 	{
 		return MUCharactersManager::GetTypeFromString(value);
 	}

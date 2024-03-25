@@ -4,7 +4,7 @@
 
 namespace MUCharactersManager
 {
-	std::map<mu_utf8string, NCharacterType> TypeMap;
+	std::map<mu_utf8string, NCharacterTypeInfo> TypeMap;
 	std::map<mu_uint32, NCharacterClass> ClassesMap;
 
 	const mu_uint32 GetCharacterSexFromString(const mu_utf8string value)
@@ -78,7 +78,7 @@ namespace MUCharactersManager
 				TypeMap.insert(
 					std::make_pair(
 						jsubClass["id"].get<mu_utf8string>(),
-						NCharacterType{
+						NCharacterTypeInfo{
 							.Class = static_cast<mu_uint16>(character.Id),
 							.SubClass = static_cast<mu_uint16>(n)
 						}
@@ -98,10 +98,10 @@ namespace MUCharactersManager
 		ClassesMap.clear();
 	}
 
-	const NCharacterType GetTypeFromString(const mu_utf8string id)
+	const NCharacterTypeInfo GetTypeFromString(const mu_utf8string id)
 	{
 		auto iter = TypeMap.find(id);
-		if (iter == TypeMap.end()) return NCharacterType();
+		if (iter == TypeMap.end()) return NCharacterTypeInfo();
 		return iter->second;
 	}
 

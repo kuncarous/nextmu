@@ -461,7 +461,7 @@ const entt::entity NCharacters::AddOrFind(
 
 	NEntity::NCharacterInfo info;
 	info.Type = character.Type;
-	if (character.Type == CharacterType::Character)
+	if (character.Type == NCharacterType::Character)
 	{
 		info.CharacterType = character.CharacterType;
 	}
@@ -551,7 +551,7 @@ const entt::entity NCharacters::AddOrFind(
 	registry.emplace<NEntity::NAttachment>(
 		entity,
 		NEntity::NAttachment{
-			.Character = (character.Type == CharacterType::Character ? MUCharactersManager::GetConfiguration(character.CharacterType.Class, character.CharacterType.SubClass) : nullptr),
+			.Character = (character.Type == NCharacterType::Character ? MUCharactersManager::GetConfiguration(character.CharacterType.Class, character.CharacterType.SubClass) : nullptr),
 			.Base = MUResourcesManager::GetResourcesManager()->GetModel("player_ani"),
 		}
 	);

@@ -10,7 +10,7 @@ struct NAnimationInput
 	mu_boolean Swimming = false;
 	mu_boolean HasWings = false;
 	NCharacterSex::Type Sex = NCharacterSex::Male;
-	NCharacterType CharacterType;
+	NCharacterTypeInfo CharacterType;
 	mu_uint16 Mount = NInvalidUInt16;
 	mu_uint16 Pet = NInvalidUInt16;
 	mu_uint16 Wings = NInvalidUInt16;

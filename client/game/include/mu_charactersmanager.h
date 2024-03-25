@@ -11,7 +11,7 @@ namespace MUCharactersManager
 	const mu_boolean Load();
 	void Destroy();
 
-	const NCharacterType GetTypeFromString(const mu_utf8string id);
+	const NCharacterTypeInfo GetTypeFromString(const mu_utf8string id);
 	const NCharacterConfiguration *GetConfiguration(const mu_uint32 classId, const mu_uint32 subClassId);
 }
 

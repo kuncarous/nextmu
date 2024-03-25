@@ -371,8 +371,7 @@ namespace MUGraphics
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS
         Diligent::NativeWindow window(wmi.info.win.window);
 #elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX
-        init.platformData.ndt = wmi.info.x11.display;
-        init.platformData.nwh = (void *)(uintptr_t)wmi.info.x11.window;
+        Diligent::NativeWindow window(wmi.info.x11.window, wmi.info.x11.display);
 #elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_MACOS
         MetalView = SDL_Metal_CreateView(sdlWindow);
         Diligent::NativeWindow window(MetalView);

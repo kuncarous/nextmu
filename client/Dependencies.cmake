@@ -32,7 +32,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(UI_LIBRARY "NoesisGUI")
 if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(-Wno-unsafe-buffer-usage)
-    link_libraries(-Wl,--undefined-version)
+    if (NOT PLATFORM_LINUX)
+        link_libraries(-Wl,--undefined-version)
+    endif()
 endif()
 
 CPMAddPackage(
@@ -217,6 +219,7 @@ CPMAddPackage(
         ${NEXTMU_THIRD_PARTY_OPTIONS}
         ${SDL_OPTIONS}
 )
+target_include_directories(SDL2 PUBLIC "${SDL2_SOURCE_DIR}/include")
 
 CPMAddPackage(
     NAME DiligentEngine
@@ -231,6 +234,7 @@ CPMAddPackage(
         "DILIGENT_INSTALL_SAMPLES OFF"
         "DILIGENT_INSTALL_TOOLS OFF"
         "DILIGENT_MSVC_RELEASE_COMPILE_OPTIONS \"/arch:SSE2\""
+        "DILIGENT_NO_FORMAT_VALIDATION ON"
 )
 
 CPMAddPackage(
@@ -240,6 +244,7 @@ CPMAddPackage(
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
         "JWT_SSL_LIBRARY LibreSSL"
+        "JWT_BUILD_EXAMPLES OFF"
 )
 
 CPMAddPackage(
@@ -252,10 +257,10 @@ CPMAddPackage(
         "ENABLE_DOC OFF"
         "ENABLE_STATIC_CRT ON"
 )
-get_target_property(NGHTTP2_INCLUDE_DIR nghttp2_static INCLUDE_DIRECTORIES)
-add_library(NGHTTP2 ALIAS nghttp2_static)
-set(NGHTTP2_LIBRARY nghttp2_static)
-export(TARGETS nghttp2_static FILE Findnghttp2.cmake) 
+get_target_property(NGHTTP2_INCLUDE_DIR nghttp2 INCLUDE_DIRECTORIES)
+add_library(NGHTTP2 ALIAS nghttp2)
+set(NGHTTP2_LIBRARY nghttp2)
+export(TARGETS nghttp2 FILE Findnghttp2.cmake)
 
 set(CURL_OPTIONS)
 if(PLATFORM_MACOS OR PLATFORM_IOS)
@@ -319,33 +324,34 @@ CPMAddPackage(
         ${NEXTMU_THIRD_PARTY_OPTIONS}
 )
 
-set(CEF_PACKAGE_PATCH git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/cef-project.patch)
-CPMAddPackage(
-    NAME CEF-Project
-    VERSION 122.1.13+gde5b724+chromium-122.0.6261.130
-    GIT_TAG master
-    GITHUB_REPOSITORY chromiumembedded/cef-project
-    PATCH_COMMAND ${CEF_PACKAGE_PATCH}
-    UPDATE_DISCONNECTED 1
-    OPTIONS
-        ${NEXTMU_THIRD_PARTY_OPTIONS}
-        "BUILD_SHARED_LIBS OFF"
-        "WITH_EXAMPLES OFF"
-)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
-find_package(CEF REQUIRED)
-
-target_compile_definitions(libcef_dll_wrapper PRIVATE $<$<CONFIG:Debug>:_HAS_ITERATOR_DEBUGGING=1>)
-target_link_libraries(
-    libcef_dll_wrapper
-    PUBLIC
-        debug ${CEF_LIB_DEBUG}
-        optimized ${CEF_LIB_RELEASE}
-)
-
 if(PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS)
-    set(POCO_PACKAGE_PATCH git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/poco.patch)
+    set(CEF_PACKAGE_PATCH git apply --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patches/cef-project.patch)
+    CPMAddPackage(
+            NAME CEF-Project
+            VERSION 122.1.13+gde5b724+chromium-122.0.6261.130
+            GIT_TAG master
+            GITHUB_REPOSITORY chromiumembedded/cef-project
+            PATCH_COMMAND ${CEF_PACKAGE_PATCH}
+            UPDATE_DISCONNECTED 1
+            OPTIONS
+            ${NEXTMU_THIRD_PARTY_OPTIONS}
+            "BUILD_SHARED_LIBS OFF"
+            "WITH_EXAMPLES OFF"
+    )
+
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
+    find_package(CEF REQUIRED)
+    set_target_properties(cefclient cefsimple ceftests cef_gtest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+
+    target_compile_definitions(libcef_dll_wrapper PRIVATE $<$<CONFIG:Debug>:_HAS_ITERATOR_DEBUGGING=1>)
+    target_link_libraries(
+            libcef_dll_wrapper
+            PUBLIC
+            debug ${CEF_LIB_DEBUG}
+            optimized ${CEF_LIB_RELEASE}
+    )
+
+    set(POCO_PACKAGE_PATCH git apply --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patches/poco.patch)
     CPMAddPackage(
         NAME POCO
         VERSION 1.13.2

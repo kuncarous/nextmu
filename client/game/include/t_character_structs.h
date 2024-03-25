@@ -3,13 +3,13 @@
 
 #pragma once
 
-enum class CharacterType
+enum class NCharacterType
 {
 	Character,
 	Monster,
 };
 
-struct NCharacterType
+struct NCharacterTypeInfo
 {
 	mu_uint16 Class = NInvalidUInt16;
 	mu_uint16 SubClass = NInvalidUInt16;
@@ -21,11 +21,11 @@ namespace TCharacter
 	struct Settings
 	{
 		mu_key Key;
-		CharacterType Type;
+		NCharacterType Type;
 		union
 		{
 			mu_uint32 MonsterType;
-			NCharacterType CharacterType;
+			NCharacterTypeInfo CharacterType;
 		};
 		mu_utf8string AnimationsId;
 		mu_uint16 X, Y;

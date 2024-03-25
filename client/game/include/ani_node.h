@@ -77,7 +77,7 @@ struct NAnimationValue
 		String = AllocateString(value);
 	}
 
-	void SetCharacterType(const NCharacterType characterType)
+	void SetCharacterType(const NCharacterTypeInfo characterType)
 	{
 		Type = NAnimationRouteType::CharacterType;
 		CharacterType = characterType;
@@ -89,7 +89,7 @@ struct NAnimationValue
 		mu_boolean Bool;
 		mu_uint32 UInteger;
 		NAnimationString String;
-		NCharacterType CharacterType;
+		NCharacterTypeInfo CharacterType;
 	};
 };
 

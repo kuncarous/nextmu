@@ -52,13 +52,13 @@ namespace NEntity
 
 	struct NCharacterInfo
 	{
-		NCharacterInfo() : Type(CharacterType::Character), MonsterType(0) {}
+		NCharacterInfo() : Type(NCharacterType::Character), MonsterType(0) {}
 
-		CharacterType Type;
+		NCharacterType Type;
 		union
 		{
 			mu_uint32 MonsterType;
-			NCharacterType CharacterType;
+			NCharacterTypeInfo CharacterType;
 		};
 	};
 

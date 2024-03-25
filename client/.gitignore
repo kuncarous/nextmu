@@ -41,6 +41,7 @@ __pycache__
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+/cmake-build-*
 /captures
 .externalNativeBuild
 .cxx

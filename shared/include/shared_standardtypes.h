@@ -634,9 +634,56 @@ void mu_trace_info(fmt::format_string<T...> x, T&&... args)
 #else
 #define mu_assert(x) (void)(x)
 #endif
+#elif NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_LINUX
+template<typename... T>
+void LinuxAssert(const mu_char* asserttype, fmt::format_string<T...> text, T&&... args)
+{
+    const mu_utf8string srcmessage = fmt::format(text, std::forward<T>(args)...);
+    const mu_utf8string message = fmt::format("[NextMU][{0}] {1}\n", asserttype, srcmessage);
+    std::clog << message.c_str();
+}
+
+template<typename... T>
+void mu_error(fmt::format_string<T...> x, T&&... args)
+{
+    LinuxAssert("Error", x, std::forward<T>(args)...);
+}
+template<typename... T>
+void mu_info(fmt::format_string<T...> x, T&&... args)
+{
+    LinuxAssert("Info", x, std::forward<T>(args)...);
+}
+
+template<typename... T>
+void mu_debug_error(fmt::format_string<T...> x, T&&... args)
+{
+#ifndef NDEBUG
+    LinuxAssert("Error", x, std::forward<T>(args)...);
+#endif
+}
+template<typename... T>
+void mu_debug_info(fmt::format_string<T...> x, T&&... args)
+{
+#ifndef NDEBUG
+    LinuxAssert("Info", x, std::forward<T>(args)...);
+#endif
+}
+template<typename... T>
+void mu_trace_info(fmt::format_string<T...> x, T&&... args)
+{
+#if !defined(NDEBUG) && defined(NEXTMU_ENABLE_TRACE_INFO)
+    LinuxAssert("Info", x, std::forward<T>(args)...);
+#endif
+}
+
+#ifndef NDEBUG
+#define mu_assert(x) if (!(x)) { LinuxAssert("Assert", #x); }
+#else
+#define mu_assert(x) (void)(x)
+#endif
 #else
 #include <assert.h>
-#define mu_error(x) mu_assert(!x)
+#define mu_error(x, ...) mu_assert(!x)
 #define mu_info
 #ifndef NDEBUG
 #define mu_assert assert
