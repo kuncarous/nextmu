@@ -377,7 +377,7 @@ namespace MUSessionManager
     const mu_utf8string GenerateAuthUrl()
 	{
 		Poco::URI authUri(Configuration->authorization_endpoint);
-		authUri.addQueryParameter("client_id", NEXTMU_AUTH_CLIENT_ID);
+		authUri.addQueryParameter("client_id", NEXTMU_OPENID_CLIENT_ID);
 		authUri.addQueryParameter("redirect_uri", MUWebServerManager::GetBaseURL() + "auth/callback");
 		authUri.addQueryParameter("response_type", "code");
 		authUri.addQueryParameter("scope", "openid profile email");
@@ -491,10 +491,10 @@ namespace MUSessionManager
 
 		request.Headers = curl_slist_append(request.Headers, "Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
 		request.Headers = curl_slist_append(request.Headers, "Accept: application/json");
-		//request.Headers = curl_slist_append(request.Headers, fmt::format("Authorization: Basic {}", Base64UrlEncode(NEXTMU_AUTH_CLIENT_ID)).c_str());
+		//request.Headers = curl_slist_append(request.Headers, fmt::format("Authorization: Basic {}", Base64UrlEncode(NEXTMU_OPENID_CLIENT_ID)).c_str());
 
         Poco::Net::HTMLForm form;
-        form.add("client_id", NEXTMU_AUTH_CLIENT_ID);
+        form.add("client_id", NEXTMU_OPENID_CLIENT_ID);
 		form.add("grant_type", "authorization_code");
 		form.add("redirect_uri", RedirectURI);
         if (AuthRequestConfig->CodeChallengeMethod.compare("S256") == 0)

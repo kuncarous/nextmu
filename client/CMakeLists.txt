@@ -8,8 +8,8 @@ set(NEXTMU_VERSION_MINOR	"0" CACHE STRING "Version Minor")
 set(NEXTMU_VERSION_REVISION	"1" CACHE STRING "Version Revision")
 set(NEXTMU_VERSION_SERIAL	"UUb335yJPFn7MFfdx6HtTBLrfuAxcDD49nNMQgXZFPbcdHF3sSXrBHqg5stc66bu" CACHE STRING "Version Serial")
 
-set(NEXTMU_AUTH_REALM_URL "http://host.docker.internal:8080/realms/NextMU/" CACHE STRING "Keycloak Game Auth Realm URL")
-set(NEXTMU_AUTH_CLIENT_ID "game" CACHE STRING "Keycloak Game Client ID")
+set(NEXTMU_OPENID_URL "http://localhost:8080/" CACHE STRING "OpenID Connect Base URL")
+set(NEXTMU_OPENID_CLIENT_ID "111111111111111@nextmu" CACHE STRING "Game Project Client ID")
 
 set(NEXTMU_CLIENT_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_ANDROID_STL_TYPE c++_static)

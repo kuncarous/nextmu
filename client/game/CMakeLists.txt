@@ -12,8 +12,8 @@ target_compile_definitions(
     Game
     PUBLIC
         -DAS_USE_NAMESPACE=1
-        -DNEXTMU_AUTH_REALM_URL="${NEXTMU_AUTH_REALM_URL}"
-        -DNEXTMU_AUTH_CLIENT_ID="${NEXTMU_AUTH_CLIENT_ID}"
+        -DNEXTMU_OPENID_URL="${NEXTMU_OPENID_URL}"
+        -DNEXTMU_OPENID_CLIENT_ID="${NEXTMU_OPENID_CLIENT_ID}"
 )
 
 target_link_libraries(

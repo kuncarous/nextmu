@@ -50,7 +50,7 @@ mu_boolean NLoginScene::Load()
 		return false;
 	}
 
-	if (MUSessionManager::Initialize(NEXTMU_AUTH_REALM_URL) == false)
+	if (MUSessionManager::Initialize(NEXTMU_OPENID_URL) == false)
 	{
 		mu_error("Failed to initialize session manager.");
 		return false;
