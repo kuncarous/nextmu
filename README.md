@@ -21,7 +21,6 @@ If you want to join our discord, press the button below
 # Dependencies
 ## From External Links
 Some dependencies are required to be downloaded and installed from their websites, follow is the list of dependencies:
- - FMOD (https://www.fmod.com/download#fmodengine)
  - NoesisGUI (https://www.noesisengine.com/licensing.php)
 
 ## Already included in this repository
@@ -36,9 +35,6 @@ Download and install the latest Vulkan SDK from https://vulkan.lunarg.com/sdk/ho
 Download and install the latest CMake from https://cmake.org/download/.
 
 If you are using linux be sure to install at least CMake 3.22 from the package manager.
-
-### FMOD
-Instructions soon
 
 ### NoesisGUI
 Extract it into ```./dependencies/installed/noesisgui``` (you will need to create installed and noesisgui folder, remember to make it lowercase).
