@@ -59,6 +59,16 @@ if(UI_LIBRARY STREQUAL "NoesisGUI")
     )
 endif()
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/../SteamAudio.cmake)
+file(GLOB STEAMAUDIO_BINARY_FILES "${STEAMAUDIO_LIBRARY_DIR}/*.dll")
+foreach(STEAMAUDIO_DLL ${STEAMAUDIO_BINARY_FILES})
+    add_custom_command(
+        TARGET NextMU POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${STEAMAUDIO_DLL} $<TARGET_FILE_DIR:NextMU>
+        COMMAND_EXPAND_LISTS
+    )
+endforeach()
+
 ADD_CUSTOM_COMMAND(
     TARGET NextMU
     POST_BUILD

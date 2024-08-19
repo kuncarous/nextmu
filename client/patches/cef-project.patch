@@ -1,16 +1,7 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5e7783a..0418ed5 100644
+index 5000091..05affa2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -22,7 +22,7 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
- #
- 
- # Specify the CEF distribution version.
--set(CEF_VERSION "120.2.5+g618ea46+chromium-120.0.6099.216")
-+set(CEF_VERSION "122.1.13+gde5b724+chromium-122.0.6261.130")
- 
- # Determine the platform.
- if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
 @@ -62,7 +62,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
  
  # Download and extract the CEF binary distribution (executes DownloadCEF.cmake).

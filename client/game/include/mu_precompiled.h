@@ -34,6 +34,9 @@ typedef std::shared_ptr<AngelScript::asIScriptModule> ASModuleScript;
 #include <AdvancedMath.hpp>
 #include <ShadowMapManager.hpp>
 
+/* SteamAudio */
+#include <phonon.h>
+
 #define NEXTMU_TITLE "NextMU Project"
 
 #if NEXTMU_OPERATING_SYSTEM == NEXTMU_OS_WINDOWS || \

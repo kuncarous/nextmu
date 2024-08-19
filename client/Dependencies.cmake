@@ -313,6 +313,19 @@ CPMAddPackage(
         "USE_NGHTTP2 ON"
         "HAVE_SSL_SET0_WBIO 0"
 )
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(
+        libcurl_object
+        PUBLIC
+            -DBUILDING_NGHTTP2=1
+    )
+else()
+    target_compile_definitions(
+        libcurl_object
+        PUBLIC
+            -DNGHTTP2_STATICLIB=1
+    )
+endif()
 
 CPMAddPackage(
     NAME AngelScript
@@ -324,16 +337,83 @@ CPMAddPackage(
         ${NEXTMU_THIRD_PARTY_OPTIONS}
 )
 
+# SteamAudio related
+if (WIN32)
+    set(IPL_OS_WINDOWS TRUE)
+elseif (UNIX AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(IPL_OS_LINUX TRUE)
+elseif (APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(IPL_OS_MACOS TRUE)
+elseif (ANDROID)
+    set(IPL_OS_ANDROID TRUE)
+elseif (APPLE AND CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(IPL_OS_IOS TRUE)
+    if (CMAKE_XCODE_ATTRIBUTE_SDKROOT STREQUAL "iphonesimulator")
+        set(IPL_IOS_SIMULATOR TRUE)
+    endif()
+endif()
+
+# CPU architecture detection
+if (IPL_OS_WINDOWS)
+    if (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+        set(IPL_CPU_ARMV8 TRUE)
+    elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(IPL_CPU_X64 TRUE)
+    else()
+        set(IPL_CPU_X86 TRUE)
+    endif()
+elseif (IPL_OS_LINUX)
+    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+        set(IPL_CPU_ARMV8 TRUE)
+    elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(IPL_CPU_X64 TRUE)
+    else()
+        set(IPL_CPU_X86 TRUE)
+    endif()
+elseif (IPL_OS_MACOS)
+elseif (IPL_OS_ANDROID)
+    if (CMAKE_ANDROID_ARCH STREQUAL "arm")
+        set(IPL_CPU_ARMV7 TRUE)
+    elseif (CMAKE_ANDROID_ARCH STREQUAL "arm64")
+        set(IPL_CPU_ARMV8 TRUE)
+    elseif (CMAKE_ANDROID_ARCH STREQUAL "x86")
+        set(IPL_CPU_X86 TRUE)
+    elseif (CMAKE_ANDROID_ARCH STREQUAL "x86_64")
+        set(IPL_CPU_X64 TRUE)
+    endif()
+elseif (IPL_OS_IOS)
+    set(IPL_CPU_ARMV8 TRUE)
+endif()
+
+CPMAddPackage(
+    NAME Boost
+    VERSION 1.84.0
+    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
+    URL_HASH SHA256=8a2648679324c38c36fa3938f3b577044b21f5a099cc582ef6bfcdb2e853e32e
+    OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
+        "BOOST_ENABLE_CMAKE ON"
+        "BOOST_INCLUDE_LIBRARIES filesystem\\\;algorithm\\\;serialization\\\;endian\\\;uuid\\\;regex"
+)
+
+CPMAddPackage(
+    NAME SteamAudio
+    VERSION 4.5.3
+    URL https://github.com/ValveSoftware/steam-audio/releases/download/v4.5.3/steamaudio_4.5.3.zip
+    URL_HASH SHA256=8a2648679324c38c36fa3938f3b577044b21f5a099cc582ef6bfcdb2e853e32e
+    DOWNLOAD_ONLY
+)
+
 if(PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS)
     set(CEF_PACKAGE_PATCH git apply --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patches/cef-project.patch)
     CPMAddPackage(
-            NAME CEF-Project
-            VERSION 122.1.13+gde5b724+chromium-122.0.6261.130
-            GIT_TAG master
-            GITHUB_REPOSITORY chromiumembedded/cef-project
-            PATCH_COMMAND ${CEF_PACKAGE_PATCH}
-            UPDATE_DISCONNECTED 1
-            OPTIONS
+        NAME CEF-Project
+        VERSION 127.3.1+g6cbb30e+chromium-127.0.6533.100
+        GIT_TAG aaccb78661c390a5ce6650df8db54ea5424d431c
+        GITHUB_REPOSITORY chromiumembedded/cef-project
+        PATCH_COMMAND ${CEF_PACKAGE_PATCH}
+        UPDATE_DISCONNECTED 1
+        OPTIONS
             ${NEXTMU_THIRD_PARTY_OPTIONS}
             "BUILD_SHARED_LIBS OFF"
             "WITH_EXAMPLES OFF"

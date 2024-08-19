@@ -1,0 +1,51 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 0de9632..52d2c9b 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -13,22 +13,12 @@ use_c99()
+ configure_file(config.h.in config.h)
+ include_directories(${CMAKE_CURRENT_BINARY_DIR})
+ 
+-if(NOT MSVC)
+   if(NOT WIN32)
+     find_library(MATH m)
+   else()
+     set(MATH "")
+   endif()
+   include(FindZLIB)
+-else()
+-  set(MATH "")
+-  find_program(NUGET nuget)
+-  if(NUGET)
+-    execute_process(COMMAND ${NUGET} install zlib)
+-  endif()
+-  include_directories(
+-    ${PROJECT_SOURCE_DIR}/windows/third-party/zlib-1.2.11/include/)
+-endif()
+ 
+ if(NOT MSVC)
+   if(NOT WIN32)
+@@ -41,18 +31,13 @@ if(NOT MSVC)
+   set(PKG_CONFIG_PRIVATELIBS "-lm ${PKG_CONFIG_PRIVATELIBS}")
+   set(PKG_CONFIG_PRIVATELIBS "-lz ${PKG_CONFIG_PRIVATELIBS}")
+ else()
+-  set(MATH "")
+-  find_program(NUGET nuget)
+-  if(NOT NUGET)
+-    message(
+-      FATAL
+-      "Cannot find nuget command line tool.\nInstall it with e.g. choco install nuget.commandline"
+-    )
++  if(NOT WIN32)
++    find_library(MATH m)
+   else()
+-    execute_process(COMMAND ${NUGET} install zlib)
++    set(MATH "")
+   endif()
+-  include_directories(
+-    ${PROJECT_SOURCE_DIR}/windows/third-party/zlib-1.2.11/include/)
++  include(FindZLIB)
++  include_directories(${ZLIB_INCLUDE_DIRS})
+ endif()
+ 
+ set(libsrc

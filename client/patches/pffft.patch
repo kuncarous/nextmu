@@ -1,0 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c159a91..27e4b7c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -281,9 +281,11 @@ endif()
+ install( TARGETS ${INSTALL_TARGETS}  DESTINATION lib)
+ install( FILES  ${INSTALL_HEADERS}  DESTINATION include)
+ 
+-add_custom_target(uninstall
+-    "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/uninstall.cmake"
+-)
++if(NOT TARGET uninstall)
++	add_custom_target(uninstall
++		"${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/uninstall.cmake"
++	)
++endif()
+ 
+ #######################################################
+ 

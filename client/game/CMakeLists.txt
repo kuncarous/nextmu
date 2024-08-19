@@ -37,7 +37,6 @@ target_link_libraries(
 )
 
 list(APPEND GAME_PUBLIC_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include ${CEF_INCLUDE_PATH})
-list(APPEND GAME_PUBLIC_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/popups)
 list(APPEND GAME_PRIVATE_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include)
 
 if(UI_LIBRARY STREQUAL "NoesisGUI")
@@ -75,6 +74,15 @@ if(PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS)
             Poco::Net
     )
 endif()
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/../SteamAudio.cmake)
+target_link_libraries(
+    Game
+    PUBLIC
+        phonon
+)
+target_link_directories(Game PUBLIC ${STEAMAUDIO_LIBRARY_DIR})
+list(APPEND GAME_PUBLIC_INCLUDES ${STEAMAUDIO_INCLUDE_DIR})
 
 target_precompile_headers(Game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/mu_precompiled.h)
 target_include_directories(Game PUBLIC ${GAME_PUBLIC_INCLUDES} PRIVATE ${GAME_PRIVATE_INCLUDES})

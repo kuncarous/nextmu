@@ -1,0 +1,13 @@
+diff --git a/core/CMakeLists.txt b/core/CMakeLists.txt
+index 8b091cf..1e4de62 100644
+--- a/core/CMakeLists.txt
++++ b/core/CMakeLists.txt
+@@ -17,7 +17,7 @@ cmake_minimum_required(VERSION 3.17)
+ project(Phonon VERSION 4.5.3)
+ 
+ set(CMAKE_CXX_STANDARD 14)
+-set(CMAKE_MODULE_PATH "${CMAKE_HOME_DIRECTORY}/build")
++set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/build")
+ 
+ #
+ # SYSTEM INTROSPECTION
