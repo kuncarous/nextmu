@@ -63,6 +63,10 @@ Open CMake, choose the repository folder, set ```builds/macos``` as output direc
 ### Android
 Open the repository folder with Android Studio, let it start configuring everything, build and that is all. Remember to always use the latest NDK, also install the latest CMake and configure it inside local.properties file inside the root repository directory (if you don't have one just create it), configure it using cmake.dir, you can search in deep instructions in Google, you will find an official instruction from Android Studio.
 
+## Troubleshooting
+### six-moves python issue
+If configuring CMake throws an error related to `six-moves` like `No module named 'six.moves'` try installing/upgrading the package using `pip install --upgrade six`
+
 # Licenses
 ## Requirements
 Each license listed below are required to be listed in a user manual as part of your distribution, some licenses might have special requirements which can make this optional or permit you to provide it in a differet way.
