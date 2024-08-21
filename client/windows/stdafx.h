@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include <windows.h>
 #include "mu_precompiled.h"
 
 // Windows Header

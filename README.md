@@ -71,9 +71,6 @@ If you have some issues when trying to configure and generate the solution remem
 If you installed Python 3 through Windows Store you will need to uninstall it and install from Python website, Python 3 from Windows Store can cause issues.
 Remember to install it with Administrator Privileges and make it available to all users so it will be installed on the root of the drive, this to avoid some issues related to Windows Path Limit.
 
-### six-moves python issue
-If configuring CMake throws an error related to `six-moves` like `No module named 'six.moves'` try installing/upgrading the package using `pip install --upgrade six`
-
 # Licenses
 ## Requirements
 Each license listed below are required to be listed in a user manual as part of your distribution, some licenses might have special requirements which can make this optional or permit you to provide it in a differet way.

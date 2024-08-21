@@ -37,10 +37,15 @@ if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     endif()
 endif()
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+if(NOT Python3_FOUND)
+    message(FATAL_ERROR "Python 3 not found, please install it from Python website.")
+endif()
+
 CPMAddPackage(
     NAME ZLIB
     VERSION 1.3.1
-    GIT_TAG 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
     GITHUB_REPOSITORY madler/zlib
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -100,9 +105,9 @@ file(WRITE ${DEPS_MODULE_PATH}/PNG-extra.cmake
 
 CPMAddPackage(
     NAME Boost
-    VERSION 1.84.0
-    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
-    URL_HASH SHA256=2e64e5d79a738d0fa6fb546c6e5c2bd28f88d268a2a080546f74e5ff98f29d0e
+    VERSION 1.86.0
+    GIT_TAG tags/boost-1.86.0
+    GITHUB_REPOSITORY boostorg/boost
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
         "BOOST_ENABLE_CMAKE ON"
@@ -111,8 +116,8 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME glm
-    VERSION 1.0.0
-    GIT_TAG 33b0eb9fa336ffd8551024b1d2690e418014553b
+    VERSION 1.0.1
+    GIT_TAG tags/1.0.1
     GITHUB_REPOSITORY g-truc/glm
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -122,7 +127,7 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME EnTT
-    VERSION 3.13.1
+    VERSION 3.13.2
     GITHUB_REPOSITORY skypjack/entt
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -130,8 +135,8 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME fmt
-    VERSION 10.2.1
-    GIT_TAG e69e5f977d458f2650bb346dadf2ad30c5320281
+    VERSION 11.0.2
+    GIT_TAG tags/11.0.2
     GITHUB_REPOSITORY fmtlib/fmt
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -156,9 +161,9 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME OpenSSL
-    VERSION 3.8.2
-    URL https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.8.2.tar.gz
-    URL_HASH SHA256=6d4b8d5bbb25a1f8336639e56ec5088052d43a95256697a85c4ce91323c25954
+    VERSION 3.9.2
+    URL https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.9.2.tar.gz
+    URL_HASH SHA256=7b031dac64a59eb6ee3304f7ffb75dad33ab8c9d279c847f92c89fb846068f97
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
         "LIBRESSL_APPS OFF"
@@ -181,7 +186,7 @@ configure_file(
 CPMAddPackage(
     NAME CryptoPP-CMake
     VERSION 8.9.0
-    GIT_TAG f815f6284684be6ab03af4b6c273359331c61241
+    GIT_TAG tags/CRYPTOPP_8_9_0
     GITHUB_REPOSITORY abdes/cryptopp-cmake
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -212,8 +217,8 @@ list(
 )
 CPMAddPackage(
     NAME SDL2
-    VERSION 2.30.1
-    GIT_TAG 5adbf3765a57dc5931c2a3137390bfee2370c945
+    VERSION 2.30.6
+    GIT_TAG tags/release-2.30.6
     GITHUB_REPOSITORY libsdl-org/SDL
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -223,7 +228,7 @@ target_include_directories(SDL2 PUBLIC "${SDL2_SOURCE_DIR}/include")
 
 CPMAddPackage(
     NAME DiligentEngine
-    VERSION 2.5.4
+    VERSION 2.5.5
     GITHUB_REPOSITORY DiligentGraphics/DiligentEngine
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -249,7 +254,7 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME nghttp2
-    VERSION 1.60.0
+    VERSION 1.62.1
     GITHUB_REPOSITORY nghttp2/nghttp2
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -280,8 +285,8 @@ else()
 endif()
 CPMAddPackage(
     NAME cURL
-    VERSION 8.6.0
-    GIT_TAG 5ce164e0e9290c96eb7d502173426c0a135ec008
+    VERSION 8.9.1
+    GIT_TAG tags/curl-8_9_1
     GITHUB_REPOSITORY curl/curl
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -329,9 +334,9 @@ endif()
 
 CPMAddPackage(
     NAME AngelScript
-    VERSION 2.36.1
-    URL http://angelcode.com/angelscript/sdk/files/angelscript_2.36.1.zip
-    URL_HASH SHA256=58bb749af9c7e386304705f4e6e627ae41dfe03e0b6a73c3d0d2e017c4fc948f
+    VERSION 2.37.0
+    URL https://www.angelcode.com/angelscript/sdk/files/angelscript_2.37.0.zip
+    URL_HASH SHA256=0c52d1688016a0b2484e9ca549471c4e295df060770c57840144c64815f54f10
     SOURCE_SUBDIR angelscript/projects/cmake
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
@@ -386,17 +391,6 @@ elseif (IPL_OS_IOS)
 endif()
 
 CPMAddPackage(
-    NAME Boost
-    VERSION 1.84.0
-    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
-    URL_HASH SHA256=8a2648679324c38c36fa3938f3b577044b21f5a099cc582ef6bfcdb2e853e32e
-    OPTIONS
-        ${NEXTMU_THIRD_PARTY_OPTIONS}
-        "BOOST_ENABLE_CMAKE ON"
-        "BOOST_INCLUDE_LIBRARIES filesystem\\\;algorithm\\\;serialization\\\;endian\\\;uuid\\\;regex"
-)
-
-CPMAddPackage(
     NAME SteamAudio
     VERSION 4.5.3
     URL https://github.com/ValveSoftware/steam-audio/releases/download/v4.5.3/steamaudio_4.5.3.zip
@@ -408,7 +402,7 @@ if(PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS)
     set(CEF_PACKAGE_PATCH git apply --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patches/cef-project.patch)
     CPMAddPackage(
         NAME CEF-Project
-        VERSION 127.3.1+g6cbb30e+chromium-127.0.6533.100
+        VERSION 127.3.5+g114ea2a+chromium-127.0.6533.120
         GIT_TAG aaccb78661c390a5ce6650df8db54ea5424d431c
         GITHUB_REPOSITORY chromiumembedded/cef-project
         PATCH_COMMAND ${CEF_PACKAGE_PATCH}
@@ -434,8 +428,8 @@ if(PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS)
     set(POCO_PACKAGE_PATCH git apply --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patches/poco.patch)
     CPMAddPackage(
         NAME POCO
-        VERSION 1.13.2
-        GIT_TAG a8aea338d211d6dbce75f5f07d70c449b94f1605
+        VERSION 1.13.3
+        GIT_TAG tags/poco-1.13.3-release
         GITHUB_REPOSITORY pocoproject/poco
         PATCH_COMMAND ${POCO_PACKAGE_PATCH}
         UPDATE_DISCONNECTED 1
