@@ -150,11 +150,14 @@ CPMAddPackage(
         ${NEXTMU_THIRD_PARTY_OPTIONS}
 )
 
+set(NLOHMANN_FIFO_MAP_PACKAGE_PATCH git apply --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patches/nlohmann-fifo-map.patch)
 CPMAddPackage(
     NAME nlohmann_fifo_map
     VERSION 1.0.0
     GIT_TAG d732aaf9a315415ae8fd7eb11e3a4c1f80e42a48
     GITHUB_REPOSITORY nlohmann/fifo_map
+	PATCH_COMMAND ${NLOHMANN_FIFO_MAP_PACKAGE_PATCH}
+	UPDATE_DISCONNECTED 1
     OPTIONS
         ${NEXTMU_THIRD_PARTY_OPTIONS}
 )

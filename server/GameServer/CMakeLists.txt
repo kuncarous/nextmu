@@ -3,11 +3,9 @@ cmake_minimum_required(VERSION 3.21.1)
 option(LINK_INSIGHT "Link Qt Insight Tracker library" ON)
 option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
 
-set(CMAKE_ANDROID_STL_TYPE c++_static)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(BUILD_SHARED_LIBS OFF)
-list(APPEND CMAKE_PROJECT_TOP_LEVEL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../conan_provider.cmake")
 
 project(GameServerApp LANGUAGES CXX)
 if (MSVC)
@@ -69,7 +67,7 @@ target_link_libraries(GameServerApp PRIVATE
     glm::glm
     EnTT
     cryptopp
-    gRPC::grpc++
+    grpc++
     Qt6::Core
     Qt6::Gui
     Qt6::Qml

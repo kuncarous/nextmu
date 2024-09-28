@@ -1,0 +1,23 @@
+diff --git a/cmake/ssl.cmake b/cmake/ssl.cmake
+index bf43e47588..a71ea37cd3 100644
+--- a/cmake/ssl.cmake
++++ b/cmake/ssl.cmake
+@@ -63,14 +63,14 @@ elseif(gRPC_SSL_PROVIDER STREQUAL "package")
+   # We expect to locate OpenSSL using the built-in cmake module as the openssl
+   # project itself does not provide installation support in its CMakeLists.txt
+   # See https://cmake.org/cmake/help/v3.6/module/FindOpenSSL.html
+-  find_package(OpenSSL REQUIRED)
++  find_package(LibreSSL REQUIRED)
+   
+-  if(TARGET OpenSSL::SSL)
+-    set(_gRPC_SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
++  if(TARGET LibreSSL::SSL)
++    set(_gRPC_SSL_LIBRARIES LibreSSL::SSL LibreSSL::Crypto)
+   else()
+     set(_gRPC_SSL_LIBRARIES ${OPENSSL_LIBRARIES})
+   endif()
+   set(_gRPC_SSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
+   
+-  set(_gRPC_FIND_SSL "if(NOT OPENSSL_FOUND)\n  find_package(OpenSSL)\nendif()")
++  set(_gRPC_FIND_SSL "if(NOT LIBRESSL_FOUND)\n  find_package(LibreSSL)\nendif()")
+ endif()

@@ -67,6 +67,9 @@ Open the repository folder with Android Studio, let it start configuring everyth
 ### CMake
 If you have some issues when trying to configure and generate the solution remember to open CMake as Administrator since it might be required by some packages.
 
+### Qt Long Path issues
+If you have issues related to filename being too long in Qt you have to run `git config --system core.longpaths true` as Administrator in Command Line or PowerShell.
+
 ### Python
 If you installed Python 3 through Windows Store you will need to uninstall it and install from Python website, Python 3 from Windows Store can cause issues.
 Remember to install it with Administrator Privileges and make it available to all users so it will be installed on the root of the drive, this to avoid some issues related to Windows Path Limit.

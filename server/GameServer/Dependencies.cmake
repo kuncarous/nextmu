@@ -5,12 +5,10 @@ include(../../SetPlatform.cmake)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-unsafe-buffer-usage)
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-unsafe-buffer-usage)
+    add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-unsafe-buffer-usage>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-unsafe-buffer-usage>)
     link_libraries(-Wl,--undefined-version)
 endif()
-
-find_package(gRPC CONFIG REQUIRED)
 
 CPMAddPackage(
     NAME Boost
@@ -50,11 +48,14 @@ CPMAddPackage(
     GITHUB_REPOSITORY nlohmann/json
 )
 
+set(NLOHMANN_FIFO_MAP_PACKAGE_PATCH git apply --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patches/nlohmann-fifo-map.patch)
 CPMAddPackage(
     NAME nlohmann_fifo_map
     VERSION 1.0.0
     GIT_TAG d732aaf9a315415ae8fd7eb11e3a4c1f80e42a48
     GITHUB_REPOSITORY nlohmann/fifo_map
+    PATCH_COMMAND ${NLOHMANN_FIFO_MAP_PACKAGE_PATCH}
+    UPDATE_DISCONNECTED 1
 )
 
 CPMAddPackage(
@@ -86,4 +87,40 @@ CPMAddPackage(
     GITHUB_REPOSITORY Thalhammer/jwt-cpp
     OPTIONS
         "JWT_SSL_LIBRARY LibreSSL"
+)
+
+CPMAddPackage(
+    NAME ZLIB
+    VERSION 1.3.1
+    GITHUB_REPOSITORY madler/zlib
+    OPTIONS
+        ${NEXTMU_THIRD_PARTY_OPTIONS}
+        "CMAKE_POSITION_INDEPENDENT_CODE TRUE"
+)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(zlibstatic PRIVATE -Wno-shorten-64-to-32)
+endif()
+get_target_property(ZLIB_INCLUDE_DIRS zlibstatic INCLUDE_DIRECTORIES)
+target_include_directories(zlibstatic PUBLIC ${ZLIB_INCLUDE_DIRS})
+export(TARGETS zlibstatic FILE Findzlibstatic.cmake)
+add_library(ZLIB::ZLIB ALIAS zlibstatic)
+list(APPEND THIRD_PARTY_TARGETS zlibstatic)
+file(WRITE ${DEPS_MODULE_PATH}/ZLIB-extra.cmake
+        [=[
+  get_target_property(ZLIB_INCLUDE_DIRS ZLIB::ZLIB INCLUDE_DIRECTORIES)
+  include_directories("${ZLIB_INCLUDE_DIRS}")
+  set(ZLIB_LIBRARIES ZLIB::ZLIB)
+]=])
+
+set(gRPC_SSL_PROVIDER "package")
+set(gRPC_ZLIB_PROVIDER "package")
+set(protobuf_INSTALL OFF)
+set(utf8_range_ENABLE_INSTALL OFF)
+set(GRPC_PACKAGE_PATCH git apply --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patches/grpc-ssl.patch)
+CPMAddPackage(
+    NAME gRPC
+    VERSION 1.66.1
+    GITHUB_REPOSITORY grpc/grpc
+    PATCH_COMMAND ${GRPC_PACKAGE_PATCH}
+    UPDATE_DISCONNECTED 1
 )
